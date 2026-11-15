@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "它的环境变量，以此窗口的权限读取",
   "Reading environment variables…": "正在读取环境变量…",
   "{0} variables": "{0} 个变量",
-  "Copy all": "全部复制"
+  "Copy all": "全部复制",
+  "The files, registry keys and other objects it has open": "它打开的文件、注册表项和其他对象",
+  "Reading handles…": "正在读取句柄…",
+  "{0} handles": "{0} 个句柄",
+  "It holds {0} handles, too many to list.": "它持有 {0} 个句柄，太多无法列出。",
+  "Names need administrator rights for this process.": "读取此进程的名称需要管理员权限。",
+  "Some names were not read: too many handles, or a file did not answer in time.": "部分名称未读取：句柄太多，或某个文件未及时响应。",
+  "Filter by type or name": "按类型或名称筛选",
+  "Show unnamed handles": "显示未命名句柄",
+  "Showing the first {0} of {1}.": "显示 {1} 个中的前 {0} 个。",
+  "Access: {0}": "访问权限: {0}"
 }

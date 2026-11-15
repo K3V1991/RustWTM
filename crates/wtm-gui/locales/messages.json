@@ -10690,5 +10690,65 @@
     "de": "Alle kopieren",
     "fr": "Tout copier",
     "es": "Copiar todo"
+  },
+  "The files, registry keys and other objects it has open": {
+    "tr": "Açık tuttuğu dosyalar, kayıt defteri anahtarları ve diğer nesneler",
+    "de": "Die Dateien, Registrierungsschlüssel und anderen Objekte, die er geöffnet hat",
+    "fr": "Les fichiers, clés de registre et autres objets qu'il a ouverts",
+    "es": "Los archivos, claves del Registro y otros objetos que tiene abiertos"
+  },
+  "Reading handles…": {
+    "tr": "Tanıtıcılar okunuyor…",
+    "de": "Handles werden gelesen…",
+    "fr": "Lecture des handles…",
+    "es": "Leyendo identificadores…"
+  },
+  "{0} handles": {
+    "tr": "{0} tanıtıcı",
+    "de": "{0} Handles",
+    "fr": "{0} handles",
+    "es": "{0} identificadores"
+  },
+  "It holds {0} handles, too many to list.": {
+    "tr": "{0} tanıtıcı tutuyor; listelenemeyecek kadar çok.",
+    "de": "Er hält {0} Handles, zu viele zum Auflisten.",
+    "fr": "Il détient {0} handles, trop pour les lister.",
+    "es": "Tiene {0} identificadores, demasiados para listarlos."
+  },
+  "Names need administrator rights for this process.": {
+    "tr": "Bu işlemde adlar için yönetici yetkisi gerekir.",
+    "de": "Für Namen sind bei diesem Prozess Administratorrechte nötig.",
+    "fr": "Les noms nécessitent des droits d'administrateur pour ce processus.",
+    "es": "Los nombres requieren derechos de administrador para este proceso."
+  },
+  "Some names were not read: too many handles, or a file did not answer in time.": {
+    "tr": "Bazı adlar okunamadı: tanıtıcı çok fazla ya da bir dosya zamanında yanıt vermedi.",
+    "de": "Einige Namen wurden nicht gelesen: zu viele Handles, oder eine Datei hat nicht rechtzeitig geantwortet.",
+    "fr": "Certains noms n'ont pas été lus : trop de handles, ou un fichier n'a pas répondu à temps.",
+    "es": "Algunos nombres no se leyeron: demasiados identificadores, o un archivo no respondió a tiempo."
+  },
+  "Filter by type or name": {
+    "tr": "Türe veya ada göre süz",
+    "de": "Nach Typ oder Name filtern",
+    "fr": "Filtrer par type ou nom",
+    "es": "Filtrar por tipo o nombre"
+  },
+  "Show unnamed handles": {
+    "tr": "Adsız tanıtıcıları göster",
+    "de": "Unbenannte Handles anzeigen",
+    "fr": "Afficher les handles sans nom",
+    "es": "Mostrar identificadores sin nombre"
+  },
+  "Showing the first {0} of {1}.": {
+    "tr": "{1} kaydın ilk {0} tanesi gösteriliyor.",
+    "de": "Die ersten {0} von {1} werden angezeigt.",
+    "fr": "Affichage des {0} premiers sur {1}.",
+    "es": "Se muestran los primeros {0} de {1}."
+  },
+  "Access: {0}": {
+    "tr": "Erişim: {0}",
+    "de": "Zugriff: {0}",
+    "fr": "Accès : {0}",
+    "es": "Acceso: {0}"
   }
 }

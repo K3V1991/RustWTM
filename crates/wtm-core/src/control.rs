@@ -14,6 +14,7 @@ pub use wtm_sys::control::{
     Architecture, EcoQos, Integrity, IoPriority, PriorityClass, enter_background_mode,
     raise_current_thread,
 };
+pub use wtm_sys::handles::{HandleInfo, HandleReport, MOST_HANDLES};
 use wtm_sys::job::Job;
 pub use wtm_sys::mitigation::{StackProtection, UacVirtualization};
 pub use wtm_sys::token::{Account, TokenGroup, TokenPrivilege, TokenReport};
@@ -425,6 +426,37 @@ pub fn environment(target: &ProcessRef) -> ControlResult<Vec<(String, String)>> 
     }
 }
 
+/// The handles `target` holds, named when this program may copy them.
+///
+/// Read with this program's own rights only, never through the service:
+/// handle names show which files, keys and objects another user's
+/// processes have open.
+pub fn handles(target: &ProcessRef) -> ControlResult<HandleReport> {
+    // Opening these with the right to copy their handles is what credential
+    // theft does.
+    let secrets = ControlError::Protected {
+        pid: target.pid,
+        reason: "holds this PC's sign-in secrets",
+    };
+    if holds_secrets(&target.name) {
+        return Err(secrets);
+    }
+    let (h, can_name) = match open_verified(target, Access::QUERY_INFORMATION | Access::DUP_HANDLE)
+    {
+        Ok(h) => (h, true),
+        // Without the right to copy them: types and values, no names.
+        Err(ControlError::AccessDenied { .. }) => {
+            (open_verified(target, Access::QUERY_INFORMATION)?, false)
+        }
+        Err(e) => return Err(e),
+    };
+    match image_name(&h) {
+        Some(name) if holds_secrets(&name) => Err(secrets),
+        Some(_) => sys(target.pid, h.handles(can_name)),
+        None => Err(ControlError::AccessDenied { pid: target.pid }),
+    }
+}
+
 /// The command line a process was started with.
 pub fn command_line(target: &ProcessRef) -> ControlResult<String> {
     let h = open_verified(target, Access::QUERY)?;
@@ -815,6 +847,35 @@ mod tests {
             environment(&reused),
             Err(ControlError::Stale { .. })
         ));
+    }
+
+    #[test]
+    fn lists_its_own_handles_but_never_those_of_the_sign_in_secrets_holders() {
+        let created = ProcessHandle::open(std::process::id(), Access::QUERY)
+            .unwrap()
+            .create_time()
+            .unwrap();
+        let me = ProcessRef {
+            pid: std::process::id(),
+            create_time: created,
+            name: "me.exe".into(),
+        };
+        let report = handles(&me).unwrap();
+        assert!(report.can_name && !report.handles.is_empty());
+        assert!(report.handles.iter().any(|h| h.kind == "File"));
+        let lsass = ProcessRef {
+            name: "lsaiso.exe".into(),
+            ..me.clone()
+        };
+        assert!(matches!(
+            handles(&lsass),
+            Err(ControlError::Protected { .. })
+        ));
+        let reused = ProcessRef {
+            create_time: created + 1,
+            ..me
+        };
+        assert!(matches!(handles(&reused), Err(ControlError::Stale { .. })));
     }
 
     #[test]

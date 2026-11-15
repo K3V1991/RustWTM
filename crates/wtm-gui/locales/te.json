@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "ఈ విండో హక్కులతో చదివిన దాని ఎన్విరాన్‌మెంట్ వేరియబుల్‌లు",
   "Reading environment variables…": "ఎన్విరాన్‌మెంట్ వేరియబుల్‌లు చదవబడుతున్నాయి…",
   "{0} variables": "{0} వేరియబుల్‌లు",
-  "Copy all": "అన్నీ కాపీ చేయి"
+  "Copy all": "అన్నీ కాపీ చేయి",
+  "The files, registry keys and other objects it has open": "ఇది తెరిచి ఉంచిన ఫైల్‌లు, రిజిస్ట్రీ కీలు మరియు ఇతర ఆబ్జెక్ట్‌లు",
+  "Reading handles…": "హ్యాండిల్‌లు చదవబడుతున్నాయి…",
+  "{0} handles": "{0} హ్యాండిల్‌లు",
+  "It holds {0} handles, too many to list.": "దీని వద్ద {0} హ్యాండిల్‌లు ఉన్నాయి, జాబితాకు చాలా ఎక్కువ.",
+  "Names need administrator rights for this process.": "ఈ ప్రాసెస్ పేర్లకు నిర్వాహక హక్కులు అవసరం.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "కొన్ని పేర్లు చదవబడలేదు: చాలా ఎక్కువ హ్యాండిల్‌లు, లేదా ఒక ఫైల్ సమయానికి స్పందించలేదు.",
+  "Filter by type or name": "రకం లేదా పేరుతో ఫిల్టర్ చేయి",
+  "Show unnamed handles": "పేరులేని హ్యాండిల్‌లను చూపు",
+  "Showing the first {0} of {1}.": "{1}లో మొదటి {0} చూపబడుతున్నాయి.",
+  "Access: {0}": "యాక్సెస్: {0}"
 }

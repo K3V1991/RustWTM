@@ -333,7 +333,7 @@ fn helper(session_name: String, ledger: Arc<Mutex<Ledger>>, stop: mpsc::Receiver
 }
 
 /// (NT device, drive) pairs such as (`\Device\HarddiskVolume3`, `C:`).
-fn dos_devices() -> Vec<(String, String)> {
+pub(crate) fn dos_devices() -> Vec<(String, String)> {
     let mut out = Vec::new();
     let mut target = vec![0u16; 1024];
     for letter in b'A'..=b'Z' {
@@ -355,7 +355,7 @@ fn dos_devices() -> Vec<(String, String)> {
 }
 
 /// `\Device\HarddiskVolume3\x` -> `C:\x` given `devices`; other paths as is.
-fn dos_path(nt: &str, devices: &[(String, String)]) -> String {
+pub(crate) fn dos_path(nt: &str, devices: &[(String, String)]) -> String {
     if let Some(rest) = nt.strip_prefix(r"\??\") {
         return rest.to_string();
     }

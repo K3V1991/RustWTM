@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "このウィンドウの権限で読み取った環境変数",
   "Reading environment variables…": "環境変数を読み取っています…",
   "{0} variables": "{0} 個の変数",
-  "Copy all": "すべてコピー"
+  "Copy all": "すべてコピー",
+  "The files, registry keys and other objects it has open": "開いているファイル、レジストリ キー、その他のオブジェクト",
+  "Reading handles…": "ハンドルを読み取っています…",
+  "{0} handles": "{0} 個のハンドル",
+  "It holds {0} handles, too many to list.": "ハンドルが {0} 個あり、多すぎて一覧にできません。",
+  "Names need administrator rights for this process.": "このプロセスの名前を読むには管理者権限が必要です。",
+  "Some names were not read: too many handles, or a file did not answer in time.": "一部の名前は読み取れませんでした: ハンドルが多すぎるか、ファイルが時間内に応答しませんでした。",
+  "Filter by type or name": "種類または名前で絞り込む",
+  "Show unnamed handles": "名前のないハンドルを表示",
+  "Showing the first {0} of {1}.": "{1} 件中、最初の {0} 件を表示しています。",
+  "Access: {0}": "アクセス: {0}"
 }

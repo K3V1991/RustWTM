@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "ಈ ವಿಂಡೋದ ಹಕ್ಕುಗಳೊಂದಿಗೆ ಓದಿದ ಅದರ ಪರಿಸರ ವೇರಿಯಬಲ್‌ಗಳು",
   "Reading environment variables…": "ಪರಿಸರ ವೇರಿಯಬಲ್‌ಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ…",
   "{0} variables": "{0} ವೇರಿಯಬಲ್‌ಗಳು",
-  "Copy all": "ಎಲ್ಲವನ್ನೂ ನಕಲಿಸಿ"
+  "Copy all": "ಎಲ್ಲವನ್ನೂ ನಕಲಿಸಿ",
+  "The files, registry keys and other objects it has open": "ಇದು ತೆರೆದಿರುವ ಫೈಲ್‌ಗಳು, ರಿಜಿಸ್ಟ್ರಿ ಕೀಗಳು ಮತ್ತು ಇತರ ವಸ್ತುಗಳು",
+  "Reading handles…": "ಹ್ಯಾಂಡಲ್‌ಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ…",
+  "{0} handles": "{0} ಹ್ಯಾಂಡಲ್‌ಗಳು",
+  "It holds {0} handles, too many to list.": "ಇದು {0} ಹ್ಯಾಂಡಲ್‌ಗಳನ್ನು ಹೊಂದಿದೆ, ಪಟ್ಟಿಗೆ ತುಂಬಾ ಹೆಚ್ಚು.",
+  "Names need administrator rights for this process.": "ಈ ಪ್ರಕ್ರಿಯೆಯ ಹೆಸರುಗಳಿಗೆ ನಿರ್ವಾಹಕ ಹಕ್ಕುಗಳು ಬೇಕು.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "ಕೆಲವು ಹೆಸರುಗಳನ್ನು ಓದಲಾಗಲಿಲ್ಲ: ತುಂಬಾ ಹೆಚ್ಚು ಹ್ಯಾಂಡಲ್‌ಗಳು, ಅಥವಾ ಒಂದು ಫೈಲ್ ಸಮಯಕ್ಕೆ ಉತ್ತರಿಸಲಿಲ್ಲ.",
+  "Filter by type or name": "ಪ್ರಕಾರ ಅಥವಾ ಹೆಸರಿನಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಿ",
+  "Show unnamed handles": "ಹೆಸರಿಲ್ಲದ ಹ್ಯಾಂಡಲ್‌ಗಳನ್ನು ತೋರಿಸಿ",
+  "Showing the first {0} of {1}.": "{1} ರಲ್ಲಿ ಮೊದಲ {0} ತೋರಿಸಲಾಗುತ್ತಿದೆ.",
+  "Access: {0}": "ಪ್ರವೇಶ: {0}"
 }

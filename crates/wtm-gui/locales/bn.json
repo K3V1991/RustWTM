@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "এর পরিবেশ ভেরিয়েবল, এই উইন্ডোর অধিকারে পড়া",
   "Reading environment variables…": "পরিবেশ ভেরিয়েবল পড়া হচ্ছে…",
   "{0} variables": "{0}টি ভেরিয়েবল",
-  "Copy all": "সব কপি করুন"
+  "Copy all": "সব কপি করুন",
+  "The files, registry keys and other objects it has open": "এটি যে ফাইল, রেজিস্ট্রি কী ও অন্যান্য অবজেক্ট খুলে রেখেছে",
+  "Reading handles…": "হ্যান্ডেল পড়া হচ্ছে…",
+  "{0} handles": "{0}টি হ্যান্ডেল",
+  "It holds {0} handles, too many to list.": "এটির {0}টি হ্যান্ডেল আছে, তালিকার জন্য অনেক বেশি।",
+  "Names need administrator rights for this process.": "এই প্রক্রিয়ার নামের জন্য প্রশাসক অধিকার লাগে।",
+  "Some names were not read: too many handles, or a file did not answer in time.": "কিছু নাম পড়া যায়নি: অনেক বেশি হ্যান্ডেল, অথবা কোনো ফাইল সময়মতো সাড়া দেয়নি।",
+  "Filter by type or name": "ধরন বা নাম দিয়ে ফিল্টার করুন",
+  "Show unnamed handles": "নামহীন হ্যান্ডেল দেখান",
+  "Showing the first {0} of {1}.": "{1}টির মধ্যে প্রথম {0}টি দেখানো হচ্ছে।",
+  "Access: {0}": "অ্যাক্সেস: {0}"
 }

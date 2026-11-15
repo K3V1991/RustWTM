@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "ਇਸਦੇ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ, ਇਸ ਵਿੰਡੋ ਦੇ ਅਧਿਕਾਰਾਂ ਨਾਲ ਪੜ੍ਹੇ ਗਏ",
   "Reading environment variables…": "ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਪੜ੍ਹੇ ਜਾ ਰਹੇ ਹਨ…",
   "{0} variables": "{0} ਵੇਰੀਏਬਲ",
-  "Copy all": "ਸਭ ਕਾਪੀ ਕਰੋ"
+  "Copy all": "ਸਭ ਕਾਪੀ ਕਰੋ",
+  "The files, registry keys and other objects it has open": "ਇਸ ਵੱਲੋਂ ਖੋਲ੍ਹੀਆਂ ਫ਼ਾਈਲਾਂ, ਰਜਿਸਟਰੀ ਕੁੰਜੀਆਂ ਅਤੇ ਹੋਰ ਆਬਜੈਕਟ",
+  "Reading handles…": "ਹੈਂਡਲ ਪੜ੍ਹੇ ਜਾ ਰਹੇ ਹਨ…",
+  "{0} handles": "{0} ਹੈਂਡਲ",
+  "It holds {0} handles, too many to list.": "ਇਸ ਕੋਲ {0} ਹੈਂਡਲ ਹਨ, ਸੂਚੀ ਲਈ ਬਹੁਤ ਜ਼ਿਆਦਾ।",
+  "Names need administrator rights for this process.": "ਇਸ ਪ੍ਰਕਿਰਿਆ ਦੇ ਨਾਵਾਂ ਲਈ ਪ੍ਰਸ਼ਾਸਕ ਅਧਿਕਾਰ ਚਾਹੀਦੇ ਹਨ।",
+  "Some names were not read: too many handles, or a file did not answer in time.": "ਕੁਝ ਨਾਂ ਨਹੀਂ ਪੜ੍ਹੇ ਗਏ: ਬਹੁਤ ਜ਼ਿਆਦਾ ਹੈਂਡਲ, ਜਾਂ ਕਿਸੇ ਫ਼ਾਈਲ ਨੇ ਸਮੇਂ ਸਿਰ ਜਵਾਬ ਨਹੀਂ ਦਿੱਤਾ।",
+  "Filter by type or name": "ਕਿਸਮ ਜਾਂ ਨਾਂ ਨਾਲ ਫਿਲਟਰ ਕਰੋ",
+  "Show unnamed handles": "ਬਿਨਾਂ ਨਾਂ ਵਾਲੇ ਹੈਂਡਲ ਦਿਖਾਓ",
+  "Showing the first {0} of {1}.": "{1} ਵਿੱਚੋਂ ਪਹਿਲੇ {0} ਦਿਖਾਏ ਜਾ ਰਹੇ ਹਨ।",
+  "Access: {0}": "ਪਹੁੰਚ: {0}"
 }

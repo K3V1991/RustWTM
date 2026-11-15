@@ -105,6 +105,8 @@ impl Access {
     /// Required (with TERMINATE) to assign the process to a job object.
     pub const SET_QUOTA: Self = Self(PROCESS_SET_QUOTA);
     pub const SYNCHRONIZE: Self = Self(PROCESS_SYNCHRONIZE);
+    /// Enough to copy the process's handles, to name them.
+    pub const DUP_HANDLE: Self = Self(PROCESS_DUP_HANDLE);
     /// Enough to read the working directory from the process's memory.
     pub const READ_PARAMETERS: Self = Self(PROCESS_ACCESS_RIGHTS(
         PROCESS_QUERY_LIMITED_INFORMATION.0 | PROCESS_VM_READ.0,

@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "它的環境變數，以此視窗的權限讀取",
   "Reading environment variables…": "正在讀取環境變數…",
   "{0} variables": "{0} 個變數",
-  "Copy all": "全部複製"
+  "Copy all": "全部複製",
+  "The files, registry keys and other objects it has open": "它開啟的檔案、登錄機碼和其他物件",
+  "Reading handles…": "正在讀取控制代碼…",
+  "{0} handles": "{0} 個控制代碼",
+  "It holds {0} handles, too many to list.": "它持有 {0} 個控制代碼，太多無法列出。",
+  "Names need administrator rights for this process.": "讀取此處理程序的名稱需要系統管理員權限。",
+  "Some names were not read: too many handles, or a file did not answer in time.": "部分名稱未讀取：控制代碼太多，或某個檔案未及時回應。",
+  "Filter by type or name": "依類型或名稱篩選",
+  "Show unnamed handles": "顯示未命名的控制代碼",
+  "Showing the first {0} of {1}.": "顯示 {1} 個中的前 {0} 個。",
+  "Access: {0}": "存取權限: {0}"
 }

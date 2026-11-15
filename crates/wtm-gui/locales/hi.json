@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "इसके परिवेश चर, इस विंडो के अधिकारों से पढ़े गए",
   "Reading environment variables…": "परिवेश चर पढ़े जा रहे हैं…",
   "{0} variables": "{0} चर",
-  "Copy all": "सभी कॉपी करें"
+  "Copy all": "सभी कॉपी करें",
+  "The files, registry keys and other objects it has open": "इसकी खोली हुई फ़ाइलें, रजिस्ट्री कुंजियाँ और अन्य ऑब्जेक्ट",
+  "Reading handles…": "हैंडल पढ़े जा रहे हैं…",
+  "{0} handles": "{0} हैंडल",
+  "It holds {0} handles, too many to list.": "इसके पास {0} हैंडल हैं, सूची के लिए बहुत अधिक।",
+  "Names need administrator rights for this process.": "इस प्रक्रिया के नामों के लिए व्यवस्थापक अधिकार चाहिए।",
+  "Some names were not read: too many handles, or a file did not answer in time.": "कुछ नाम नहीं पढ़े गए: बहुत अधिक हैंडल, या किसी फ़ाइल ने समय पर उत्तर नहीं दिया।",
+  "Filter by type or name": "प्रकार या नाम से फ़िल्टर करें",
+  "Show unnamed handles": "बिना नाम वाले हैंडल दिखाएँ",
+  "Showing the first {0} of {1}.": "{1} में से पहले {0} दिखाए जा रहे हैं।",
+  "Access: {0}": "पहुँच: {0}"
 }

@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Його змінні середовища, прочитані з правами цього вікна",
   "Reading environment variables…": "Читання змінних середовища…",
   "{0} variables": "Змінних: {0}",
-  "Copy all": "Копіювати все"
+  "Copy all": "Копіювати все",
+  "The files, registry keys and other objects it has open": "Файли, розділи реєстру та інші об'єкти, які він відкрив",
+  "Reading handles…": "Читання дескрипторів…",
+  "{0} handles": "Дескрипторів: {0}",
+  "It holds {0} handles, too many to list.": "Він має {0} дескрипторів — забагато для списку.",
+  "Names need administrator rights for this process.": "Для імен потрібні права адміністратора для цього процесу.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Деякі імена не прочитано: забагато дескрипторів або файл не відповів вчасно.",
+  "Filter by type or name": "Фільтр за типом або іменем",
+  "Show unnamed handles": "Показувати безіменні дескриптори",
+  "Showing the first {0} of {1}.": "Показано перші {0} з {1}.",
+  "Access: {0}": "Доступ: {0}"
 }

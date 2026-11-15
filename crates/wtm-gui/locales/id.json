@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Variabel lingkungannya, dibaca dengan hak jendela ini",
   "Reading environment variables…": "Membaca variabel lingkungan…",
   "{0} variables": "{0} variabel",
-  "Copy all": "Salin semua"
+  "Copy all": "Salin semua",
+  "The files, registry keys and other objects it has open": "File, kunci registri, dan objek lain yang dibukanya",
+  "Reading handles…": "Membaca handle…",
+  "{0} handles": "{0} handle",
+  "It holds {0} handles, too many to list.": "Memegang {0} handle, terlalu banyak untuk dicantumkan.",
+  "Names need administrator rights for this process.": "Nama memerlukan hak administrator untuk proses ini.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Beberapa nama tidak terbaca: terlalu banyak handle, atau sebuah file tidak menjawab tepat waktu.",
+  "Filter by type or name": "Filter menurut jenis atau nama",
+  "Show unnamed handles": "Tampilkan handle tanpa nama",
+  "Showing the first {0} of {1}.": "Menampilkan {0} pertama dari {1}.",
+  "Access: {0}": "Akses: {0}"
 }

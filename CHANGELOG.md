@@ -23,6 +23,19 @@ All notable changes to this project are documented here. The format follows
   only shown, never logged or saved, since variables often hold secrets;
   Hide lets go of them. As with memory dumps, lsass.exe and lsaiso.exe are
   refused.
+- The process inspector's Handles button lists the files, registry keys and
+  other objects the process has open, as Process Explorer's handle view does:
+  the type, value (with the granted access on hover) and name, with files as
+  drive paths, keys as HKLM or HKU paths and processes and threads by name
+  and ID. Named handles are shown unless unnamed ones are asked for (all of
+  them when names cannot be read), a filter matches types and names, and the
+  most common types are counted. Names need the right to copy the process's
+  handles; each is copied with no access, its type confirmed on the copy,
+  named and closed at once. Only disk files are named, on a helper thread
+  given half a second per file, since naming a pipe can block. At most
+  200,000 handles are listed and 5,000 named per read; lsass.exe and
+  lsaiso.exe are refused. It is read on request, by this window with its
+  own rights.
 
 ## [0.32.0] - 2026-11-14
 

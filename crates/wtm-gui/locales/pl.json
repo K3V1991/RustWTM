@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Jego zmienne środowiskowe, odczytane z uprawnieniami tego okna",
   "Reading environment variables…": "Odczytywanie zmiennych środowiskowych…",
   "{0} variables": "Zmienne: {0}",
-  "Copy all": "Kopiuj wszystko"
+  "Copy all": "Kopiuj wszystko",
+  "The files, registry keys and other objects it has open": "Pliki, klucze rejestru i inne obiekty, które ma otwarte",
+  "Reading handles…": "Odczytywanie dojść…",
+  "{0} handles": "Dojścia: {0}",
+  "It holds {0} handles, too many to list.": "Ma {0} dojść, zbyt wiele, by je wyświetlić.",
+  "Names need administrator rights for this process.": "Nazwy wymagają uprawnień administratora dla tego procesu.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Niektórych nazw nie odczytano: za dużo dojść lub plik nie odpowiedział na czas.",
+  "Filter by type or name": "Filtruj według typu lub nazwy",
+  "Show unnamed handles": "Pokaż dojścia bez nazwy",
+  "Showing the first {0} of {1}.": "Wyświetlono pierwsze {0} z {1}.",
+  "Access: {0}": "Dostęp: {0}"
 }

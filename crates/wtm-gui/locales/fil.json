@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Ang mga environment variable nito, binasa gamit ang mga karapatan ng window na ito",
   "Reading environment variables…": "Binabasa ang mga environment variable…",
   "{0} variables": "{0} variable",
-  "Copy all": "Kopyahin lahat"
+  "Copy all": "Kopyahin lahat",
+  "The files, registry keys and other objects it has open": "Ang mga file, registry key at iba pang object na bukas dito",
+  "Reading handles…": "Binabasa ang mga handle…",
+  "{0} handles": "{0} handle",
+  "It holds {0} handles, too many to list.": "May hawak itong {0} handle, masyadong marami para ilista.",
+  "Names need administrator rights for this process.": "Kailangan ng karapatan ng administrator para sa mga pangalan ng prosesong ito.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "May mga pangalang hindi nabasa: masyadong maraming handle, o may file na hindi sumagot sa oras.",
+  "Filter by type or name": "I-filter ayon sa uri o pangalan",
+  "Show unnamed handles": "Ipakita ang mga handle na walang pangalan",
+  "Showing the first {0} of {1}.": "Ipinapakita ang unang {0} sa {1}.",
+  "Access: {0}": "Access: {0}"
 }

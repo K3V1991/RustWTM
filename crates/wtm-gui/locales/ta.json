@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "இந்தச் சாளரத்தின் உரிமைகளுடன் படிக்கப்பட்ட அதன் சூழல் மாறிகள்",
   "Reading environment variables…": "சூழல் மாறிகள் படிக்கப்படுகின்றன…",
   "{0} variables": "{0} மாறிகள்",
-  "Copy all": "அனைத்தையும் நகலெடு"
+  "Copy all": "அனைத்தையும் நகலெடு",
+  "The files, registry keys and other objects it has open": "இது திறந்து வைத்துள்ள கோப்புகள், பதிவக விசைகள் மற்றும் பிற பொருள்கள்",
+  "Reading handles…": "கைப்பிடிகள் படிக்கப்படுகின்றன…",
+  "{0} handles": "{0} கைப்பிடிகள்",
+  "It holds {0} handles, too many to list.": "இது {0} கைப்பிடிகளை வைத்துள்ளது, பட்டியலிட மிக அதிகம்.",
+  "Names need administrator rights for this process.": "இந்தச் செயல்முறையின் பெயர்களுக்கு நிர்வாகி உரிமைகள் தேவை.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "சில பெயர்கள் படிக்கப்படவில்லை: மிக அதிகமான கைப்பிடிகள், அல்லது ஒரு கோப்பு நேரத்தில் பதிலளிக்கவில்லை.",
+  "Filter by type or name": "வகை அல்லது பெயரால் வடிகட்டு",
+  "Show unnamed handles": "பெயரில்லாத கைப்பிடிகளைக் காட்டு",
+  "Showing the first {0} of {1}.": "{1} இல் முதல் {0} காட்டப்படுகின்றன.",
+  "Access: {0}": "அணுகல்: {0}"
 }

@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Zijn omgevingsvariabelen, gelezen met de rechten van dit venster",
   "Reading environment variables…": "Omgevingsvariabelen worden gelezen…",
   "{0} variables": "{0} variabelen",
-  "Copy all": "Alles kopiëren"
+  "Copy all": "Alles kopiëren",
+  "The files, registry keys and other objects it has open": "De bestanden, registersleutels en andere objecten die het geopend heeft",
+  "Reading handles…": "Handles worden gelezen…",
+  "{0} handles": "{0} handles",
+  "It holds {0} handles, too many to list.": "Het heeft {0} handles, te veel om te tonen.",
+  "Names need administrator rights for this process.": "Namen vereisen beheerdersrechten voor dit proces.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Sommige namen zijn niet gelezen: te veel handles, of een bestand reageerde niet op tijd.",
+  "Filter by type or name": "Filteren op type of naam",
+  "Show unnamed handles": "Naamloze handles tonen",
+  "Showing the first {0} of {1}.": "De eerste {0} van {1} worden getoond.",
+  "Access: {0}": "Toegang: {0}"
 }

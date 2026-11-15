@@ -2104,6 +2104,7 @@ impl eframe::App for App {
                 Intent::Modules(target) => backend.send(UiCommand::Modules(target)),
                 Intent::Security(target) => backend.send(UiCommand::Security(target)),
                 Intent::Environment(target) => backend.send(UiCommand::Environment(target)),
+                Intent::Handles(target) => backend.send(UiCommand::Handles(target)),
                 Intent::Threads(target) => backend.send(UiCommand::Threads(target)),
                 Intent::AskAi(target) => state.ai.open_process(target),
                 Intent::Network(target, block) => {
@@ -2800,6 +2801,19 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
         {
             intents.push(Intent::Environment(Some(sel.clone())));
         }
+        let handles = data.handles.as_ref().filter(|(r, _)| r == sel);
+        if ui
+            .add_enabled(
+                !handles.is_some_and(|(_, h)| h.is_none()),
+                egui::Button::new(crate::i18n::tr("Handles")),
+            )
+            .on_hover_text(crate::i18n::tr(
+                "The files, registry keys and other objects it has open",
+            ))
+            .clicked()
+        {
+            intents.push(Intent::Handles(Some(sel.clone())));
+        }
         let threads_open = data.threads.as_ref().is_some_and(|p| p.target == *sel);
         if ui
             .add_enabled(!threads_open, egui::Button::new(crate::i18n::tr("Threads")))
@@ -2840,6 +2854,7 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
     }
     crate::security_view::show(ui, data, sel, intents);
     crate::environment_view::show(ui, data, sel, intents);
+    crate::handles_view::show(ui, data, sel, intents);
     match ending.map(|(_, r)| r) {
         Some(None) => {
             ui.horizontal(|ui| {
@@ -7363,6 +7378,7 @@ mod tests {
             UiCommand::Modules(t) => format!("modules {}", t.pid),
             UiCommand::Security(t) => format!("security {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Environment(t) => format!("environment {:?}", t.as_ref().map(|t| t.pid)),
+            UiCommand::Handles(t) => format!("handles {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Threads(t) => format!("threads {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::CloseConnection { local, remote } => format!("close {local} {remote}"),
             UiCommand::Firewall { path, block } => format!("firewall {path} {block}"),
@@ -8226,7 +8242,7 @@ mod tests {
         let (backend, rx) = Backend::offline(d);
         let mut h = Harness::builder()
             .allow_missing_glyphs()
-            .with_size([1400.0, 900.0])
+            .with_size([1400.0, 1400.0])
             .build_eframe(|_| App {
                 backend,
                 state: UiState {
@@ -8374,6 +8390,132 @@ mod tests {
         h.run_steps(2);
         assert!(h.query_by_label_contains("sign-in secrets").is_some());
         assert!(h.query_by_label("windir").is_none());
+    }
+
+    #[test]
+    fn handles_panel_lists_named_handles_and_filters_them() {
+        use wtm_core::control::{HandleInfo, HandleReport};
+        let handle = |kind: &str, name: Option<&str>, value: u64| HandleInfo {
+            value,
+            kind: kind.into(),
+            name: name.map(Into::into),
+            access: 0x0012_0089,
+        };
+        let mut d = data();
+        let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
+        d.handles = Some((
+            alpha.clone(),
+            Some(Ok(crate::handles_view::HandleList::from(HandleReport {
+                total: 4,
+                handles: vec![
+                    handle("File", Some(r"C:\Users\ada\notes.txt"), 0x1A4),
+                    handle("Key", Some(r"HKLM\SOFTWARE\Contoso"), 0x2B0),
+                    handle("Event", None, 0x10),
+                    handle("Process", Some("beta.exe (200)"), 0x3C),
+                ],
+                can_name: true,
+                names_incomplete: true,
+            }))),
+        ));
+        let (backend, rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.state_mut().state.processes.selected = Some(alpha.clone());
+        h.run_steps(2);
+        for text in [
+            "4 handles",
+            r"C:\Users\ada\notes.txt",
+            r"HKLM\SOFTWARE\Contoso",
+            "beta.exe (200)",
+            "0x1A4",
+            "Some names were not read",
+        ] {
+            assert!(
+                h.query_all_by_label_contains(text).next().is_some(),
+                "{text}"
+            );
+        }
+        // Unnamed handles only on request.
+        assert!(h.query_by_label("0x10").is_none());
+        h.get_by_label("Show unnamed handles").click();
+        h.run_steps(2);
+        assert!(h.query_by_label("0x10").is_some());
+        // The access mask is on the value's hover.
+        h.get_by_label("0x1A4").hover();
+        h.run();
+        assert!(h.query_by_label("Access: 0x00120089").is_some());
+
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Handles")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "handles Some(100)")
+        );
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Hide")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "handles None")
+        );
+
+        // Without the right to name them, every handle is listed.
+        h.state().backend.data().handles = Some((
+            alpha.clone(),
+            Some(Ok(crate::handles_view::HandleList::from(HandleReport {
+                total: 2,
+                handles: vec![handle("Event", None, 0x18), handle("File", None, 0x1C)],
+                can_name: false,
+                names_incomplete: false,
+            }))),
+        ));
+        h.run_steps(2);
+        assert!(h.query_by_label("0x18").is_some() && h.query_by_label("0x1C").is_some());
+        assert!(h.query_by_label("Show unnamed handles").is_none());
+        assert!(
+            h.query_by_label("Names need administrator rights for this process.")
+                .is_some()
+        );
+        // The filter matches types as well as names.
+        h.get_by_label("Filter by type or name").click();
+        h.run_steps(2);
+        h.get_by_label("Filter by type or name").type_text("event");
+        h.run_steps(2);
+        assert!(h.query_by_label("0x18").is_some() && h.query_by_label("0x1C").is_none());
+
+        // Too many to list: only the count.
+        h.state().backend.data().handles = Some((
+            alpha,
+            Some(Ok(crate::handles_view::HandleList::from(HandleReport {
+                total: 250_000,
+                handles: Vec::new(),
+                can_name: false,
+                names_incomplete: false,
+            }))),
+        ));
+        h.run_steps(2);
+        assert!(
+            h.query_by_label_contains("250000 handles, too many")
+                .is_some()
+        );
     }
 
     #[test]

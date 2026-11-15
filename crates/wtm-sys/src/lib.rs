@@ -22,6 +22,7 @@ pub mod firewall;
 pub mod gpu;
 pub mod gpu_perf;
 mod handle;
+pub mod handles;
 pub mod hotkey;
 pub mod http;
 pub mod icon;

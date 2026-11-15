@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Các biến môi trường của nó, được đọc bằng quyền của cửa sổ này",
   "Reading environment variables…": "Đang đọc các biến môi trường…",
   "{0} variables": "{0} biến",
-  "Copy all": "Sao chép tất cả"
+  "Copy all": "Sao chép tất cả",
+  "The files, registry keys and other objects it has open": "Các tệp, khóa sổ đăng ký và đối tượng khác mà nó đang mở",
+  "Reading handles…": "Đang đọc các handle…",
+  "{0} handles": "{0} handle",
+  "It holds {0} handles, too many to list.": "Nó giữ {0} handle, quá nhiều để liệt kê.",
+  "Names need administrator rights for this process.": "Cần quyền quản trị viên để đọc tên của tiến trình này.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Một số tên chưa được đọc: quá nhiều handle, hoặc một tệp không phản hồi kịp.",
+  "Filter by type or name": "Lọc theo loại hoặc tên",
+  "Show unnamed handles": "Hiện handle không tên",
+  "Showing the first {0} of {1}.": "Đang hiển thị {0} mục đầu tiên trong {1}.",
+  "Access: {0}": "Quyền truy cập: {0}"
 }

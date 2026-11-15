@@ -21,6 +21,7 @@ mod environment_view;
 mod experience;
 mod file_locks;
 mod frames;
+mod handles_view;
 mod hold;
 mod i18n;
 mod incidents;

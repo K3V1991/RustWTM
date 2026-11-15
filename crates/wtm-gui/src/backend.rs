@@ -306,6 +306,12 @@ pub struct Data {
     /// The environment variables of a process; `None` inside while they
     /// are read. Only shown, never logged or saved: they often hold secrets.
     pub environment: Option<(ProcessRef, Option<Result<Variables, String>>)>,
+    /// The handles of a process, sorted and counted; `None` inside while
+    /// they are read.
+    pub handles: Option<(
+        ProcessRef,
+        Option<Result<crate::handles_view::HandleList, String>>,
+    )>,
     /// The threads of a process, read each tick while the panel is drawn
     /// (`threads_wanted_ms`, Unix ms).
     pub threads: Option<crate::threads_view::ThreadsPanel>,
@@ -428,6 +434,8 @@ pub enum UiCommand {
     /// The environment variables of a process; with `None`, hides them and
     /// lets go of them.
     Environment(Option<ProcessRef>),
+    /// The handles of a process; with `None`, hides them.
+    Handles(Option<ProcessRef>),
     /// Shows (or with `None` hides) the threads of a process.
     Threads(Option<ProcessRef>),
     /// Blocks (`true`) or unblocks a program's network access.
@@ -1752,6 +1760,25 @@ impl Worker {
                 });
             }
             UiCommand::Environment(None) => self.data().environment = None,
+            UiCommand::Handles(None) => self.data().handles = None,
+            UiCommand::Handles(Some(target)) => {
+                self.data().handles = Some((target.clone(), None));
+                let (data, ctx) = (self.data.clone(), self.ctx.clone());
+                std::thread::spawn(move || {
+                    // Off the critical path: naming files and keys.
+                    let _ = wtm_core::control::enter_background_mode();
+                    // With this window's rights only, never the service's.
+                    let result = wtm_core::control::handles(&target)
+                        .map(crate::handles_view::HandleList::from)
+                        .map_err(|e| e.to_string());
+                    let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
+                    if d.handles.as_ref().is_some_and(|(t, _)| *t == target) {
+                        d.handles = Some((target, Some(result)));
+                    }
+                    drop(d);
+                    ctx.request_repaint();
+                });
+            }
             UiCommand::Environment(Some(target)) => {
                 self.data().environment = Some((target.clone(), None));
                 let (data, ctx) = (self.data.clone(), self.ctx.clone());

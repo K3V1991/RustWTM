@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Его переменные среды, прочитанные с правами этого окна",
   "Reading environment variables…": "Чтение переменных среды…",
   "{0} variables": "Переменных: {0}",
-  "Copy all": "Копировать всё"
+  "Copy all": "Копировать всё",
+  "The files, registry keys and other objects it has open": "Файлы, разделы реестра и другие объекты, которые он открыл",
+  "Reading handles…": "Чтение дескрипторов…",
+  "{0} handles": "Дескрипторов: {0}",
+  "It holds {0} handles, too many to list.": "У него {0} дескрипторов — слишком много для списка.",
+  "Names need administrator rights for this process.": "Для имён нужны права администратора для этого процесса.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Некоторые имена не прочитаны: слишком много дескрипторов или файл не ответил вовремя.",
+  "Filter by type or name": "Фильтр по типу или имени",
+  "Show unnamed handles": "Показывать безымянные дескрипторы",
+  "Showing the first {0} of {1}.": "Показаны первые {0} из {1}.",
+  "Access: {0}": "Доступ: {0}"
 }

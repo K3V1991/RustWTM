@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Vigezo vyake vya mazingira, vilivyosomwa kwa haki za dirisha hili",
   "Reading environment variables…": "Inasoma vigezo vya mazingira…",
   "{0} variables": "Vigezo {0}",
-  "Copy all": "Nakili vyote"
+  "Copy all": "Nakili vyote",
+  "The files, registry keys and other objects it has open": "Faili, funguo za usajili na vitu vingine ilivyofungua",
+  "Reading handles…": "Inasoma vishikio…",
+  "{0} handles": "Vishikio {0}",
+  "It holds {0} handles, too many to list.": "Inashikilia vishikio {0}, vingi mno kuorodheshwa.",
+  "Names need administrator rights for this process.": "Majina yanahitaji haki za msimamizi kwa mchakato huu.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Baadhi ya majina hayakusomwa: vishikio vingi mno, au faili haikujibu kwa wakati.",
+  "Filter by type or name": "Chuja kwa aina au jina",
+  "Show unnamed handles": "Onyesha vishikio visivyo na jina",
+  "Showing the first {0} of {1}.": "Inaonyesha {0} vya kwanza kati ya {1}.",
+  "Access: {0}": "Ufikiaji: {0}"
 }

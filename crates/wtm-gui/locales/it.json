@@ -1780,5 +1780,15 @@
   "Its environment variables, read with this window's rights": "Le sue variabili d'ambiente, lette con i diritti di questa finestra",
   "Reading environment variables…": "Lettura delle variabili d'ambiente…",
   "{0} variables": "{0} variabili",
-  "Copy all": "Copia tutto"
+  "Copy all": "Copia tutto",
+  "The files, registry keys and other objects it has open": "I file, le chiavi del Registro e gli altri oggetti che ha aperti",
+  "Reading handles…": "Lettura degli handle…",
+  "{0} handles": "{0} handle",
+  "It holds {0} handles, too many to list.": "Ha {0} handle, troppi da elencare.",
+  "Names need administrator rights for this process.": "Per i nomi servono i diritti di amministratore per questo processo.",
+  "Some names were not read: too many handles, or a file did not answer in time.": "Alcuni nomi non sono stati letti: troppi handle, oppure un file non ha risposto in tempo.",
+  "Filter by type or name": "Filtra per tipo o nome",
+  "Show unnamed handles": "Mostra handle senza nome",
+  "Showing the first {0} of {1}.": "Vengono mostrati i primi {0} di {1}.",
+  "Access: {0}": "Accesso: {0}"
 }
