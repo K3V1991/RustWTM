@@ -1,11 +1,12 @@
 //! The process inspector's Memory map panel: a process's address space by
-//! allocation, as VMMap and System Informer's Memory tab show it. Only the
-//! layout is read, never the memory, once on request and off the UI
-//! thread, where the totals, order and filter keys are also made.
+//! allocation, as VMMap and System Informer's Memory tab show it, with its
+//! heaps, thread stacks, PEB and TEBs named. Read once on request and off
+//! the UI thread, where the totals, order and filter keys are also made;
+//! of the memory itself only pointers and heap signatures are read.
 
 use eframe::egui::{self, RichText, Ui};
 use wtm_core::control::{
-    Allocation, MemoryKind, MemoryMap, ProcessRef, is_executable, protection_code,
+    Allocation, MemoryKind, MemoryMap, ProcessRef, Usage, is_executable, protection_code,
 };
 use wtm_core::format_bytes;
 
@@ -30,12 +31,17 @@ pub struct MemoryList {
     pub kinds: Vec<KindTotal>,
     /// Most committed first.
     pub rows: Vec<Allocation>,
-    /// Each row's kind, address and name in lower case, for the filter.
+    /// Each row's kind, address, name and usage in lower case, for the
+    /// filter.
     pub keys: Vec<String>,
     /// Private allocations with executable committed memory, and their
     /// committed bytes.
     pub private_executable: (usize, u64),
+    /// Committed bytes of the allocations named as heaps and as stacks.
+    pub heaps: u64,
+    pub stacks: u64,
     pub incomplete: bool,
+    pub usage_unread: bool,
 }
 
 impl From<MemoryMap> for MemoryList {
@@ -53,7 +59,14 @@ impl From<MemoryMap> for MemoryList {
         })
         .collect();
         let mut private_executable = (0, 0);
+        let (mut heaps, mut stacks) = (0, 0);
         for a in &map.allocations {
+            if a.usage.iter().any(|u| matches!(u, Usage::Heap { .. })) {
+                heaps += a.committed;
+            }
+            if a.usage.iter().any(|u| matches!(u, Usage::Stack { .. })) {
+                stacks += a.committed;
+            }
             if let Some(t) = kinds.iter_mut().find(|t| t.kind == a.kind) {
                 t.committed += a.committed;
                 t.reserved += a.reserved;
@@ -76,10 +89,11 @@ impl From<MemoryMap> for MemoryList {
             .iter()
             .map(|a| {
                 format!(
-                    "{}\n0x{:x}\n{}",
+                    "{}\n0x{:x}\n{}\n{}",
                     kind_label(a.kind),
                     a.base,
-                    a.name.as_deref().unwrap_or_default()
+                    a.name.as_deref().unwrap_or_default(),
+                    usage_text(a).unwrap_or_default()
                 )
                 .to_lowercase()
             })
@@ -89,9 +103,64 @@ impl From<MemoryMap> for MemoryList {
             rows,
             keys,
             private_executable,
+            heaps,
+            stacks,
             incomplete: map.incomplete,
+            usage_unread: map.usage_unread,
         }
     }
+}
+
+/// What the process keeps in `a`, in words: "Default heap", "Stack of
+/// thread 5120", "PEB, 12 TEBs"; `None` when nothing is known.
+pub fn usage_text(a: &Allocation) -> Option<String> {
+    if a.usage.is_empty() {
+        return None;
+    }
+    let bits = |wow64: bool, text: String| {
+        if wow64 {
+            crate::i18n::format("{0} (32-bit)", &[text])
+        } else {
+            text
+        }
+    };
+    let mut parts = Vec::new();
+    for u in &a.usage {
+        if let Usage::Peb { wow64 } = *u {
+            parts.push(bits(wow64, crate::i18n::tr("PEB").to_owned()));
+        }
+    }
+    // One allocation holds the TEBs of many threads.
+    let tebs: Vec<(u32, bool)> = a
+        .usage
+        .iter()
+        .filter_map(|u| match *u {
+            Usage::Teb { tid, wow64 } => Some((tid, wow64)),
+            _ => None,
+        })
+        .collect();
+    match tebs.as_slice() {
+        [] => {}
+        [(tid, wow64)] => parts.push(bits(
+            *wow64,
+            crate::i18n::format("TEB of thread {0}", &[tid.to_string()]),
+        )),
+        many => parts.push(crate::i18n::format("{0} TEBs", &[many.len().to_string()])),
+    }
+    for u in &a.usage {
+        match *u {
+            Usage::Stack { tid, wow64 } => parts.push(bits(
+                wow64,
+                crate::i18n::format("Stack of thread {0}", &[tid.to_string()]),
+            )),
+            Usage::Heap { default, wow64 } => parts.push(bits(
+                wow64,
+                crate::i18n::tr(if default { "Default heap" } else { "Heap" }).to_owned(),
+            )),
+            Usage::Peb { .. } | Usage::Teb { .. } => {}
+        }
+    }
+    Some(parts.join(", "))
 }
 
 /// Rows drawn at most; a large process has tens of thousands.
@@ -168,6 +237,20 @@ fn list_view(ui: &mut Ui, list: &MemoryList) {
             "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.",
         ));
     }
+    if list.heaps > 0 || list.stacks > 0 {
+        ui.label(crate::i18n::format(
+            "Heaps: {0} · Thread stacks: {1}",
+            &[bytes(list.heaps), bytes(list.stacks)],
+        ))
+        .on_hover_text(crate::i18n::tr(
+            "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.",
+        ));
+    }
+    if list.usage_unread {
+        ui.weak(crate::i18n::tr(
+            "Heaps and stacks are not named: the process does not allow reading its memory.",
+        ));
+    }
 
     let filter_id = egui::Id::unique("memory_map_filter");
     let mut filter: String = ui.data(|d| d.get_temp(filter_id)).unwrap_or_default();
@@ -241,9 +324,16 @@ fn list_view(ui: &mut Ui, list: &MemoryList) {
                                     name,
                                 );
                             }
-                            None => {
-                                ui.weak(RichText::new(kind_label(a.kind)).small());
-                            }
+                            None => match usage_text(a) {
+                                Some(text) => {
+                                    ui.label(RichText::new(&text).small()).on_hover_text(
+                                        format!("{}: {text}", kind_label(a.kind)),
+                                    );
+                                }
+                                None => {
+                                    ui.weak(RichText::new(kind_label(a.kind)).small());
+                                }
+                            },
                         }
                         ui.end_row();
                     }
@@ -289,6 +379,7 @@ mod tests {
             protection: 0x04,
             executable,
             name: None,
+            usage: Vec::new(),
         }
     }
 
@@ -300,7 +391,7 @@ mod tests {
                 allocation(MemoryKind::Image, 0x2000, 30, true),
                 allocation(MemoryKind::Private, 0x3000, 20, false),
             ],
-            incomplete: false,
+            ..MemoryMap::default()
         });
         let order: Vec<u64> = list.rows.iter().map(|a| a.base).collect();
         assert_eq!(order, [0x2000, 0x3000, 0x1000]);
@@ -319,5 +410,82 @@ mod tests {
         // An executable image is ordinary; only private memory counts.
         assert_eq!(list.private_executable, (1, 10));
         assert!(list.keys[0].contains("0x2000"));
+        assert_eq!((list.heaps, list.stacks), (0, 0));
+    }
+
+    fn used(committed: u64, usage: Vec<Usage>) -> Allocation {
+        Allocation {
+            usage,
+            ..allocation(MemoryKind::Private, committed, committed, false)
+        }
+    }
+
+    #[test]
+    fn usage_reads_as_words_with_tebs_grouped() {
+        let teb = |tid| Usage::Teb { tid, wow64: false };
+        let text = |usage| usage_text(&used(1, usage));
+        assert_eq!(text(vec![]), None);
+        assert_eq!(
+            text(vec![Usage::Peb { wow64: false }, teb(4), teb(8), teb(12)]).as_deref(),
+            Some("PEB, 3 TEBs")
+        );
+        assert_eq!(
+            text(vec![Usage::Teb {
+                tid: 4,
+                wow64: true
+            }])
+            .as_deref(),
+            Some("TEB of thread 4 (32-bit)")
+        );
+        assert_eq!(
+            text(vec![Usage::Stack {
+                tid: 5120,
+                wow64: false
+            }])
+            .as_deref(),
+            Some("Stack of thread 5120")
+        );
+        assert_eq!(
+            text(vec![
+                Usage::Heap {
+                    default: true,
+                    wow64: false
+                },
+                Usage::Heap {
+                    default: false,
+                    wow64: true
+                }
+            ])
+            .as_deref(),
+            Some("Default heap, Heap (32-bit)")
+        );
+    }
+
+    #[test]
+    fn heaps_and_stacks_are_totalled_and_filterable() {
+        let stack = Usage::Stack {
+            tid: 9,
+            wow64: false,
+        };
+        let heap = Usage::Heap {
+            default: false,
+            wow64: false,
+        };
+        let list = MemoryList::from(MemoryMap {
+            allocations: vec![
+                used(0x100, vec![stack]),
+                used(0x200, vec![heap]),
+                used(0x400, vec![]),
+            ],
+            usage_unread: false,
+            ..MemoryMap::default()
+        });
+        assert_eq!((list.heaps, list.stacks), (0x200, 0x100));
+        assert!(list.keys.iter().any(|k| k.contains("stack of thread 9")));
+        let unread = MemoryList::from(MemoryMap {
+            usage_unread: true,
+            ..MemoryMap::default()
+        });
+        assert!(unread.usage_unread);
     }
 }

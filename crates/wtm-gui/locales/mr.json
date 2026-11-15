@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0} कोर, {1} थ्रेड",
   "Firmware {0}": "फर्मवेअर {0}",
   "Driver {0}": "ड्रायव्हर {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32-बिट)",
+  "TEB of thread {0}": "थ्रेड {0} चा TEB",
+  "{0} TEBs": "{0} TEB",
+  "Stack of thread {0}": "थ्रेड {0} चा स्टॅक",
+  "Default heap": "डीफॉल्ट हीप",
+  "Heap": "हीप",
+  "Heaps: {0} · Thread stacks: {1}": "हीप: {0} · थ्रेड स्टॅक: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "खाली नाव दिलेल्या वाटपांमधील कमिट केलेली मेमरी. हीप स्वतंत्रपणे वाटप करत असलेले मोठे ब्लॉक मोजले जात नाहीत.",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "हीप आणि स्टॅकना नाव दिलेले नाही: प्रोसेस तिची मेमरी वाचू देत नाही."
 }

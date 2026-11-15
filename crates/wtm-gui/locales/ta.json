@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0} கோர்கள், {1} த்ரெட்கள்",
   "Firmware {0}": "ஃபர்ம்வேர் {0}",
   "Driver {0}": "இயக்கி {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32-பிட்)",
+  "TEB of thread {0}": "த்ரெட் {0} இன் TEB",
+  "{0} TEBs": "{0} TEB-கள்",
+  "Stack of thread {0}": "த்ரெட் {0} இன் ஸ்டாக்",
+  "Default heap": "இயல்புநிலை ஹீப்",
+  "Heap": "ஹீப்",
+  "Heaps: {0} · Thread stacks: {1}": "ஹீப்கள்: {0} · த்ரெட் ஸ்டாக்குகள்: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "கீழே பெயரிடப்பட்ட ஒதுக்கீடுகளில் கமிட் செய்யப்பட்ட நினைவகம். ஹீப் தனியாக ஒதுக்கும் பெரிய தொகுதிகள் கணக்கிடப்படாது.",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "ஹீப்களும் ஸ்டாக்குகளும் பெயரிடப்படவில்லை: செயல்முறை அதன் நினைவகத்தைப் படிக்க அனுமதிக்கவில்லை."
 }

@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0} core, {1} thread",
   "Firmware {0}": "Firmware {0}",
   "Driver {0}": "Driver {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32 bit)",
+  "TEB of thread {0}": "TEB del thread {0}",
+  "{0} TEBs": "{0} TEB",
+  "Stack of thread {0}": "Stack del thread {0}",
+  "Default heap": "Heap predefinito",
+  "Heap": "Heap",
+  "Heaps: {0} · Thread stacks: {1}": "Heap: {0} · Stack dei thread: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Memoria impegnata nelle allocazioni indicate sotto. I blocchi grandi che un heap alloca a parte non sono contati.",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heap e stack non hanno nome: il processo non consente di leggere la sua memoria."
 }

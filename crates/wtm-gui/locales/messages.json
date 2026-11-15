@@ -10984,5 +10984,65 @@
     "de": "BIOS {0}",
     "fr": "BIOS {0}",
     "es": "BIOS {0}"
+  },
+  "PEB": {
+    "tr": "PEB",
+    "de": "PEB",
+    "fr": "PEB",
+    "es": "PEB"
+  },
+  "{0} (32-bit)": {
+    "tr": "{0} (32 bit)",
+    "de": "{0} (32 Bit)",
+    "fr": "{0} (32 bits)",
+    "es": "{0} (32 bits)"
+  },
+  "TEB of thread {0}": {
+    "tr": "TEB (iş parçacığı {0})",
+    "de": "TEB von Thread {0}",
+    "fr": "TEB du thread {0}",
+    "es": "TEB del subproceso {0}"
+  },
+  "{0} TEBs": {
+    "tr": "{0} TEB",
+    "de": "{0} TEBs",
+    "fr": "{0} TEB",
+    "es": "{0} TEB"
+  },
+  "Stack of thread {0}": {
+    "tr": "Stack (iş parçacığı {0})",
+    "de": "Stack von Thread {0}",
+    "fr": "Pile du thread {0}",
+    "es": "Pila del subproceso {0}"
+  },
+  "Default heap": {
+    "tr": "Varsayılan heap",
+    "de": "Standardheap",
+    "fr": "Tas par défaut",
+    "es": "Montón predeterminado"
+  },
+  "Heap": {
+    "tr": "Heap",
+    "de": "Heap",
+    "fr": "Tas",
+    "es": "Montón"
+  },
+  "Heaps: {0} · Thread stacks: {1}": {
+    "tr": "Heap'ler: {0} · İş parçacığı stack'leri: {1}",
+    "de": "Heaps: {0} · Thread-Stacks: {1}",
+    "fr": "Tas : {0} · Piles de threads : {1}",
+    "es": "Montones: {0} · Pilas de subprocesos: {1}"
+  },
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": {
+    "tr": "Aşağıda adı verilen ayırmalarda kullanılan bellek. Bir heap'in ayrıca ayırdığı büyük bloklar sayılmaz.",
+    "de": "Zugesichert in den unten benannten Zuordnungen. Große Blöcke, die ein Heap eigenständig zuordnet, sind nicht enthalten.",
+    "fr": "Mémoire validée dans les allocations nommées ci-dessous. Les grands blocs qu'un tas alloue à part ne sont pas comptés.",
+    "es": "Memoria confirmada en las asignaciones nombradas abajo. No se cuentan los bloques grandes que un montón asigna por separado."
+  },
+  "Heaps and stacks are not named: the process does not allow reading its memory.": {
+    "tr": "Heap ve stack'ler adlandırılamadı: işlem belleğinin okunmasına izin vermiyor.",
+    "de": "Heaps und Stacks sind nicht benannt: Der Prozess erlaubt nicht, seinen Speicher zu lesen.",
+    "fr": "Tas et piles non nommés : le processus ne permet pas de lire sa mémoire.",
+    "es": "Los montones y las pilas no tienen nombre: el proceso no permite leer su memoria."
   }
 }

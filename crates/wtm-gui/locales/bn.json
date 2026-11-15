@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0}টি কোর, {1}টি থ্রেড",
   "Firmware {0}": "ফার্মওয়্যার {0}",
   "Driver {0}": "ড্রাইভার {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32-বিট)",
+  "TEB of thread {0}": "থ্রেড {0}-এর TEB",
+  "{0} TEBs": "{0}টি TEB",
+  "Stack of thread {0}": "থ্রেড {0}-এর স্ট্যাক",
+  "Default heap": "ডিফল্ট হিপ",
+  "Heap": "হিপ",
+  "Heaps: {0} · Thread stacks: {1}": "হিপ: {0} · থ্রেড স্ট্যাক: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "নিচে নাম দেওয়া বরাদ্দগুলোতে কমিট করা মেমরি। হিপ আলাদাভাবে যে বড় ব্লক বরাদ্দ করে, সেগুলো গোনা হয় না।",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "হিপ ও স্ট্যাকের নাম দেওয়া যায়নি: প্রসেসটি তার মেমরি পড়ার অনুমতি দেয় না।"
 }

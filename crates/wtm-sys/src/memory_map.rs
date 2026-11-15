@@ -2,9 +2,13 @@
 //! show it: each allocation with its kind, reserved and committed size,
 //! protection and, for images and mapped files, the file.
 //!
-//! Only the layout is read (`VirtualQueryEx`), never the memory itself.
-//! Needs only [`Access::QUERY`](crate::control::Access::QUERY) on Windows
-//! 8.1 and later.
+//! The layout is read with `VirtualQueryEx`, which needs only
+//! [`Access::QUERY`](crate::control::Access::QUERY) on Windows 8.1 and
+//! later. Naming heaps, stacks, the PEB and TEBs
+//! ([`name_usage`](ProcessHandle::name_usage)) also reads the pointers the
+//! process keeps to them and the signature word of each private
+//! allocation's header, which needs the right to read its memory; nothing
+//! else in that memory is read.
 //! Naming a mapped file asks the file system, which can stall on a network
 //! share that stopped answering; names are budgeted, and callers read the
 //! map off the UI thread.
@@ -44,6 +48,23 @@ pub enum MemoryKind {
     Private,
 }
 
+/// What the process itself keeps in a private allocation, from the
+/// pointers in its PEB and its threads' TEBs and from heap headers. `wow64` marks the 32-bit
+/// copies a 32-bit process on 64-bit Windows has besides the native ones.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+pub enum Usage {
+    /// The process environment block.
+    Peb { wow64: bool },
+    /// A thread's environment block.
+    Teb { tid: u32, wow64: bool },
+    /// A thread's stack.
+    Stack { tid: u32, wow64: bool },
+    /// A heap, or a segment a heap grew by, known by the signature in its
+    /// header; `default` is the process's default heap. Low-fragmentation
+    /// and large blocks a heap allocates on its own are not named.
+    Heap { default: bool, wow64: bool },
+}
+
 /// One allocation: the regions reserved together at one base address.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Allocation {
@@ -62,6 +83,8 @@ pub struct Allocation {
     pub executable: bool,
     /// The file of an image or mapped view, as a drive path.
     pub name: Option<String>,
+    /// What the process keeps in it, in order; empty when unknown.
+    pub usage: Vec<Usage>,
 }
 
 /// The allocations of a process, in address order.
@@ -70,7 +93,52 @@ pub struct MemoryMap {
     pub allocations: Vec<Allocation>,
     /// The walk or the names stopped at a cap or the time budget.
     pub incomplete: bool,
+    /// Heaps, stacks, the PEB and TEBs could not be named: the process
+    /// refused this program the right to read its memory.
+    pub usage_unread: bool,
 }
+
+impl MemoryMap {
+    /// Labels each allocation that contains one of `marks`' addresses.
+    pub(crate) fn label(&mut self, marks: &[(u64, Usage)]) {
+        for &(address, usage) in marks {
+            // Allocations are in address order and never overlap.
+            let i = self.allocations.partition_point(|a| a.base <= address);
+            let Some(a) = i.checked_sub(1).map(|i| &mut self.allocations[i]) else {
+                continue;
+            };
+            if address - a.base < a.reserved && !a.usage.contains(&usage) {
+                a.usage.push(usage);
+                a.usage.sort_unstable();
+            }
+        }
+    }
+}
+
+/// Threads named at most.
+const MOST_THREADS: usize = 4096;
+
+// Offsets in the native (64-bit) and WOW64 (32-bit) PEB and TEB. The PEB's
+// heap list starts with the default heap but is not complete on every
+// build (on 26300 it held 1 of a test process's 4 heaps), so only that
+// entry is read.
+const PEB_PROCESS_HEAPS: usize = 0xF0;
+const PEB32_PROCESS_HEAPS: usize = 0x90;
+/// Where a heap's header holds its signature: `SegmentSignature` of an NT
+/// heap segment, `Signature` of a segment heap. In a 32-bit process only
+/// NT heaps were found (no segment heap to measure), so only they are
+/// recognized there.
+const HEAP_SIGNATURE: usize = 0x10;
+const HEAP32_SIGNATURE: usize = 0x8;
+const NT_HEAP_SEGMENT: u32 = 0xFFEE_FFEE;
+const SEGMENT_HEAP: u32 = 0xDDEE_DDEE;
+/// `NT_TIB.StackBase` and `NT_TIB.Self`.
+const TEB_STACK_BASE: usize = 0x8;
+const TEB_SELF: usize = 0x30;
+const TEB32_STACK_BASE: usize = 0x4;
+const TEB32_SELF: usize = 0x18;
+/// A WOW64 thread's 32-bit TEB follows its native one.
+const TEB32_AFTER_TEB: usize = 0x2000;
 
 /// How far a walk may go; tests make it short.
 #[derive(Debug, Clone, Copy)]
@@ -171,6 +239,128 @@ impl ProcessHandle {
         Ok(map)
     }
 
+    /// Names `map`'s heaps (by the signature in each private allocation's
+    /// header, the default heap by the PEB), the PEB and, for each of
+    /// `threads` (thread IDs; at most 4,096), its TEB and stack. Needs the
+    /// right to read the process's memory: without it this fails and
+    /// names nothing. A thread that exits or refuses to be opened meanwhile
+    /// is left out; at `deadline` naming stops and the map is marked
+    /// incomplete.
+    pub fn name_usage(
+        &self,
+        map: &mut MemoryMap,
+        threads: &[u32],
+        deadline: Instant,
+    ) -> Result<()> {
+        let mut marks = Vec::new();
+        let peb = self.peb_address()?;
+        marks.push((peb as u64, Usage::Peb { wow64: false }));
+        let default = self.remote_word(self.remote_word(peb + PEB_PROCESS_HEAPS)?)? as u64;
+        marks.push((
+            default,
+            Usage::Heap {
+                default: true,
+                wow64: false,
+            },
+        ));
+        let peb32 = self.peb32_address().ok().flatten();
+        let mut default32 = None;
+        if let Some(peb32) = peb32 {
+            marks.push((peb32 as u64, Usage::Peb { wow64: true }));
+            // A 32-bit process still starting may not have its heap yet.
+            default32 = self
+                .remote_u32(peb32 + PEB32_PROCESS_HEAPS)
+                .and_then(|list| self.remote_u32(list as usize))
+                .ok()
+                .filter(|&heap| heap != 0)
+                .map(u64::from);
+            if let Some(heap) = default32 {
+                marks.push((
+                    heap,
+                    Usage::Heap {
+                        default: true,
+                        wow64: true,
+                    },
+                ));
+            }
+        }
+
+        let mut late = false;
+        for a in &map.allocations {
+            // Heaps Windows shares between processes (such as the one for
+            // talking to csrss) live in shared memory without a file.
+            let heap_kind = matches!(a.kind, MemoryKind::Private | MemoryKind::Shareable);
+            if !heap_kind || a.committed == 0 || a.base == default {
+                continue;
+            }
+            if Instant::now() > deadline {
+                late = true;
+                break;
+            }
+            let base = a.base as usize;
+            let signature = |at: usize| self.remote_u32(base + at).ok();
+            let wow64 = if matches!(
+                signature(HEAP_SIGNATURE),
+                Some(NT_HEAP_SEGMENT | SEGMENT_HEAP)
+            ) {
+                false
+            } else if peb32.is_some()
+                && Some(a.base) != default32
+                && signature(HEAP32_SIGNATURE) == Some(NT_HEAP_SEGMENT)
+            {
+                true
+            } else {
+                continue;
+            };
+            marks.push((
+                a.base,
+                Usage::Heap {
+                    default: false,
+                    wow64,
+                },
+            ));
+        }
+
+        let pid = self.pid();
+        late |= threads.len() > MOST_THREADS;
+        for &tid in threads.iter().take(MOST_THREADS) {
+            if late || Instant::now() > deadline {
+                late = true;
+                break;
+            }
+            let Some(teb) = crate::threads::teb_address(tid, pid) else {
+                continue;
+            };
+            let teb = teb as usize;
+            // The TEB names itself; anything else is not one (the thread
+            // exited and its memory was reused).
+            if self.remote_word(teb + TEB_SELF).ok() != Some(teb) {
+                continue;
+            }
+            marks.push((teb as u64, Usage::Teb { tid, wow64: false }));
+            // The stack grows down from its base: the byte below is in it.
+            if let Ok(base) = self.remote_word(teb + TEB_STACK_BASE)
+                && base != 0
+            {
+                marks.push((base as u64 - 1, Usage::Stack { tid, wow64: false }));
+            }
+            if peb32.is_some() {
+                let teb32 = teb + TEB32_AFTER_TEB;
+                if self.remote_u32(teb32 + TEB32_SELF).ok() == Some(teb32 as u32) {
+                    marks.push((teb32 as u64, Usage::Teb { tid, wow64: true }));
+                    if let Ok(base) = self.remote_u32(teb32 + TEB32_STACK_BASE)
+                        && base != 0
+                    {
+                        marks.push((u64::from(base) - 1, Usage::Stack { tid, wow64: true }));
+                    }
+                }
+            }
+        }
+        map.label(&marks);
+        map.incomplete |= late;
+        Ok(())
+    }
+
     /// The NT path of the file mapped at `base`, if any.
     fn mapped_file(&self, base: u64) -> Option<String> {
         let mut name = vec![0u16; 1024];
@@ -202,6 +392,7 @@ fn add_region(allocations: &mut Vec<Allocation>, mbi: &MEMORY_BASIC_INFORMATION)
             base,
             kind: kind_of(mbi.Type.0),
             reserved: size,
+            regions: 1,
             protection: mbi.AllocationProtect.0,
             ..Allocation::default()
         }),
@@ -304,7 +495,7 @@ mod tests {
         let c = at(code);
         assert_eq!((c.kind, c.executable), (MemoryKind::Private, true));
         let r = at(held);
-        assert_eq!((r.reserved, r.committed), (256 * 1024, 0));
+        assert_eq!((r.reserved, r.committed, r.regions), (256 * 1024, 0, 1));
         let v = at(view.Value);
         assert_eq!(v.kind, MemoryKind::Mapped);
         let name = v.name.clone().unwrap().to_lowercase();
@@ -368,6 +559,284 @@ mod tests {
         let h = ProcessHandle::open(std::process::id(), Access::QUERY).unwrap();
         let map = h.memory_map().unwrap();
         assert!(map.allocations.iter().any(|a| a.name.is_some()));
+    }
+
+    fn thread_ids(pid: u32) -> Vec<u32> {
+        crate::process::ProcessSnapshotter::new()
+            .threads(pid)
+            .unwrap()
+            .iter()
+            .map(|t| t.tid)
+            .collect()
+    }
+
+    fn containing(map: &MemoryMap, address: u64) -> &Allocation {
+        map.allocations
+            .iter()
+            .find(|a| a.base <= address && address - a.base < a.reserved)
+            .unwrap()
+    }
+
+    fn named(h: &ProcessHandle, pid: u32) -> MemoryMap {
+        let mut map = h.memory_map().unwrap();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        h.name_usage(&mut map, &thread_ids(pid), deadline).unwrap();
+        map
+    }
+
+    fn all_usage(map: &MemoryMap) -> impl Iterator<Item = (&Allocation, Usage)> {
+        map.allocations
+            .iter()
+            .flat_map(|a| a.usage.iter().map(move |&u| (a, u)))
+    }
+
+    #[test]
+    fn names_its_own_heaps_stacks_peb_and_tebs() {
+        // A second thread, parked until the map is read; normal stack size.
+        let (stop, parked) = std::sync::mpsc::channel::<()>();
+        let (ready, started) = std::sync::mpsc::channel();
+        let worker = std::thread::spawn(move || {
+            let local = 7u64;
+            ready
+                .send((crate::threads::current_thread_id(), &raw const local as u64))
+                .unwrap();
+            let _ = parked.recv();
+            std::hint::black_box(local);
+        });
+        let (worker_tid, worker_local) = started.recv().unwrap();
+
+        // Other tests in this process create and destroy heaps meanwhile:
+        // only those there before and after the map was read are checked.
+        let process_heaps = || {
+            let mut heaps = vec![windows::Win32::Foundation::HANDLE::default(); 1024];
+            // SAFETY: `heaps` is writable for its length.
+            let count = unsafe { windows::Win32::System::Memory::GetProcessHeaps(&mut heaps) };
+            heaps.truncate(count as usize);
+            heaps
+        };
+        let before = process_heaps();
+        let pid = std::process::id();
+        let h = ProcessHandle::open(pid, Access::READ_PARAMETERS).unwrap();
+        let map = named(&h, pid);
+        assert!(!map.incomplete);
+        let after = process_heaps();
+        let heaps: Vec<_> = before.iter().filter(|h| after.contains(h)).collect();
+        assert!(!heaps.is_empty());
+
+        // Every heap Windows reports is named, the default one as such.
+        // SAFETY: plain call.
+        let default = unsafe { windows::Win32::System::Memory::GetProcessHeap() }.unwrap();
+        for heap in heaps {
+            let a = containing(&map, heap.0 as usize as u64);
+            let usage = Usage::Heap {
+                default: *heap == default,
+                wow64: false,
+            };
+            assert_eq!(a.usage, vec![usage], "{a:?}");
+        }
+        assert_eq!(
+            all_usage(&map)
+                .filter(|(_, u)| matches!(u, Usage::Heap { default: true, .. }))
+                .count(),
+            1
+        );
+
+        let me = crate::threads::current_thread_id();
+        let local = 7u64;
+        for (address, tid) in [(&raw const local as u64, me), (worker_local, worker_tid)] {
+            let a = containing(&map, address);
+            assert!(
+                a.usage.contains(&Usage::Stack { tid, wow64: false }),
+                "{a:?}"
+            );
+        }
+        for usage in [
+            Usage::Peb { wow64: false },
+            Usage::Teb {
+                tid: me,
+                wow64: false,
+            },
+        ] {
+            assert!(all_usage(&map).any(|(_, u)| u == usage), "{usage:?}");
+        }
+        // Only private memory is named, besides heaps Windows shares, and a
+        // native process has no 32-bit copies.
+        for (a, u) in all_usage(&map) {
+            let heap = matches!(u, Usage::Heap { .. }) && a.kind == MemoryKind::Shareable;
+            assert!(a.kind == MemoryKind::Private || heap, "{u:?} {a:?}");
+            assert!(
+                !matches!(
+                    u,
+                    Usage::Peb { wow64: true }
+                        | Usage::Teb { wow64: true, .. }
+                        | Usage::Stack { wow64: true, .. }
+                        | Usage::Heap { wow64: true, .. }
+                ),
+                "{u:?}"
+            );
+        }
+
+        stop.send(()).unwrap();
+        worker.join().unwrap();
+    }
+
+    #[test]
+    fn query_rights_alone_name_nothing() {
+        let pid = std::process::id();
+        let h = ProcessHandle::open(pid, Access::QUERY).unwrap();
+        let mut map = h.memory_map().unwrap();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        assert!(h.name_usage(&mut map, &thread_ids(pid), deadline).is_err());
+        assert!(map.allocations.iter().all(|a| a.usage.is_empty()));
+    }
+
+    #[test]
+    fn a_passed_deadline_names_only_the_peb_and_default_heap() {
+        let pid = std::process::id();
+        let h = ProcessHandle::open(pid, Access::READ_PARAMETERS).unwrap();
+        let mut map = h.memory_map().unwrap();
+        h.name_usage(&mut map, &thread_ids(pid), Instant::now())
+            .unwrap();
+        assert!(map.incomplete);
+        let mut usage: Vec<Usage> = all_usage(&map).map(|(_, u)| u).collect();
+        usage.sort_unstable();
+        assert_eq!(
+            usage,
+            vec![
+                Usage::Peb { wow64: false },
+                Usage::Heap {
+                    default: true,
+                    wow64: false
+                }
+            ]
+        );
+    }
+
+    #[test]
+    fn names_a_32_bit_childs_own_heaps_and_stacks() {
+        let program = r"C:\Windows\SysWOW64\cmd.exe";
+        if !std::path::Path::new(program).exists() {
+            return;
+        }
+        // `pause` waits on the open pipe until the child is ended.
+        let mut child = std::process::Command::new(program)
+            .args(["/d", "/c", "pause"])
+            .stdin(std::process::Stdio::piped())
+            .stdout(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        let pid = child.id();
+        let h = ProcessHandle::open(pid, Access::READ_PARAMETERS).unwrap();
+        // The child sets up its 32-bit side as it starts.
+        let until = Instant::now() + Duration::from_secs(10);
+        let map = loop {
+            let map = named(&h, pid);
+            let has = |f: fn(&Usage) -> bool| all_usage(&map).any(|(_, u)| f(&u));
+            if has(|u| matches!(u, Usage::Stack { wow64: true, .. }))
+                && has(|u| {
+                    matches!(
+                        u,
+                        Usage::Heap {
+                            default: true,
+                            wow64: true
+                        }
+                    )
+                })
+            {
+                break map;
+            }
+            assert!(Instant::now() < until, "{map:?}");
+            std::thread::sleep(Duration::from_millis(20));
+        };
+        let _ = child.kill();
+        let _ = child.wait();
+        assert!(all_usage(&map).any(|(_, u)| u == Usage::Peb { wow64: true }));
+        assert!(all_usage(&map).any(|(_, u)| u
+            == Usage::Heap {
+                default: true,
+                wow64: false
+            }));
+        // 32-bit stacks and heaps lie below 4 GiB, a thread's two stacks
+        // are separate allocations, and only private memory is named
+        // besides shared heaps.
+        for (a, u) in all_usage(&map) {
+            let heap = matches!(u, Usage::Heap { .. }) && a.kind == MemoryKind::Shareable;
+            assert!(a.kind == MemoryKind::Private || heap, "{u:?} {a:?}");
+            if let Usage::Stack { wow64: true, .. } | Usage::Heap { wow64: true, .. } = u {
+                assert!(a.base < 1 << 32, "{u:?}");
+            }
+            if let Usage::Stack { tid, wow64: true } = u {
+                assert!(!a.usage.contains(&Usage::Stack { tid, wow64: false }));
+            }
+        }
+    }
+
+    #[test]
+    fn reading_heap_signatures_leaves_guard_pages_armed() {
+        use windows::Win32::System::Memory::{PAGE_GUARD, VirtualQuery};
+        // A committed guard page at an allocation's base, where heap
+        // signatures are looked for: the read is refused and the guard,
+        // which the process may rely on, stays.
+        // SAFETY: one small allocation, freed below.
+        let guarded = unsafe {
+            VirtualAlloc(
+                None,
+                4096,
+                MEM_RESERVE | COMMIT,
+                PAGE_READWRITE | PAGE_GUARD,
+            )
+        };
+        assert!(!guarded.is_null());
+        let protect = || {
+            let mut mbi = MEMORY_BASIC_INFORMATION::default();
+            // SAFETY: `mbi` is writable for its full size.
+            unsafe {
+                VirtualQuery(
+                    Some(guarded),
+                    &mut mbi,
+                    size_of::<MEMORY_BASIC_INFORMATION>(),
+                )
+            };
+            mbi.Protect.0
+        };
+        assert_eq!(protect(), 0x104);
+        let pid = std::process::id();
+        let h = ProcessHandle::open(pid, Access::READ_PARAMETERS).unwrap();
+        let map = named(&h, pid);
+        let a = containing(&map, guarded as usize as u64);
+        assert!(a.usage.is_empty(), "{a:?}");
+        assert_eq!(protect(), 0x104);
+        // SAFETY: allocated above and released once.
+        unsafe { VirtualFree(guarded, 0, MEM_RELEASE).unwrap() };
+    }
+
+    #[test]
+    fn labels_go_to_the_allocation_holding_the_address() {
+        let alloc = |base: u64, reserved: u64| Allocation {
+            base,
+            reserved,
+            ..Allocation::default()
+        };
+        let mut map = MemoryMap {
+            allocations: vec![alloc(0x1000, 0x1000), alloc(0x4000, 0x2000)],
+            ..MemoryMap::default()
+        };
+        let stack = Usage::Stack {
+            tid: 4,
+            wow64: false,
+        };
+        let peb = Usage::Peb { wow64: false };
+        map.label(&[
+            (0x5fff, stack),
+            (0x4000, peb),
+            (0x5000, stack),
+            // Below, between and above the allocations: nothing to label.
+            (0x10, peb),
+            (0x2000, peb),
+            (0x9000, peb),
+        ]);
+        assert!(map.allocations[0].usage.is_empty());
+        assert_eq!(map.allocations[1].usage, vec![peb, stack]);
     }
 
     #[test]

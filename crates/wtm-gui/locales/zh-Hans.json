@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0} 个核心，{1} 个线程",
   "Firmware {0}": "固件 {0}",
   "Driver {0}": "驱动程序 {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0}（32 位）",
+  "TEB of thread {0}": "线程 {0} 的 TEB",
+  "{0} TEBs": "{0} 个 TEB",
+  "Stack of thread {0}": "线程 {0} 的栈",
+  "Default heap": "默认堆",
+  "Heap": "堆",
+  "Heaps: {0} · Thread stacks: {1}": "堆：{0} · 线程栈：{1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "下方已命名分配中的已提交内存。堆单独分配的大块不计入。",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "堆和栈未命名：该进程不允许读取其内存。"
 }

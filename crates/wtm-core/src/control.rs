@@ -16,7 +16,9 @@ pub use wtm_sys::control::{
 };
 pub use wtm_sys::handles::{HandleInfo, HandleReport, MOST_HANDLES};
 use wtm_sys::job::Job;
-pub use wtm_sys::memory_map::{Allocation, MemoryKind, MemoryMap, is_executable, protection_code};
+pub use wtm_sys::memory_map::{
+    Allocation, MemoryKind, MemoryMap, Usage, is_executable, protection_code,
+};
 pub use wtm_sys::mitigation::{StackProtection, UacVirtualization};
 pub use wtm_sys::token::{Account, TokenGroup, TokenPrivilege, TokenReport};
 
@@ -458,8 +460,11 @@ pub fn handles(target: &ProcessRef) -> ControlResult<HandleReport> {
     }
 }
 
-/// The allocations of `target`'s address space: only its layout, never
-/// its contents.
+/// The allocations of `target`'s address space, with its heaps, stacks,
+/// PEB and TEBs named where it lets this program read its memory (only the
+/// pointers to them and heap headers' signatures are read; with query
+/// rights alone the layout comes back with
+/// [`usage_unread`](MemoryMap::usage_unread) set).
 ///
 /// Read with this program's own rights, like the other inspector views;
 /// the sign-in secrets holders are refused as they are everywhere else.
@@ -471,13 +476,30 @@ pub fn memory_map(target: &ProcessRef) -> ControlResult<MemoryMap> {
     if holds_secrets(&target.name) {
         return Err(secrets);
     }
-    let h = open_verified(target, Access::QUERY)?;
+    let (h, can_read) = match open_verified(target, Access::READ_PARAMETERS) {
+        Ok(h) => (h, true),
+        // Without the right to read its memory: the layout alone.
+        Err(ControlError::AccessDenied { .. }) => (open_verified(target, Access::QUERY)?, false),
+        Err(e) => return Err(e),
+    };
     match image_name(&h) {
         Some(name) if holds_secrets(&name) => Err(secrets),
-        Some(_) => sys(target.pid, h.memory_map()),
+        Some(_) => {
+            let mut map = sys(target.pid, h.memory_map())?;
+            let threads: Vec<u32> = wtm_sys::process::ProcessSnapshotter::new()
+                .threads_of(target.pid, target.create_time)
+                .map(|t| t.iter().map(|t| t.tid).collect())
+                .unwrap_or_default();
+            let deadline = std::time::Instant::now() + MEMORY_USAGE_BUDGET;
+            map.usage_unread = !can_read || h.name_usage(&mut map, &threads, deadline).is_err();
+            Ok(map)
+        }
         None => Err(ControlError::AccessDenied { pid: target.pid }),
     }
 }
+
+/// Time spent naming heaps and stacks, after the layout's own budget.
+const MEMORY_USAGE_BUDGET: std::time::Duration = std::time::Duration::from_secs(3);
 
 /// The modules `target` has loaded, for a search across processes: unlike
 /// the Modules view, the sign-in secrets holders are refused (by the name
@@ -936,6 +958,23 @@ mod tests {
         };
         let map = memory_map(&me).unwrap();
         assert!(map.allocations.iter().any(|a| a.kind == MemoryKind::Image));
+        // Its own memory is readable, so heaps and this thread's stack are
+        // named.
+        assert!(!map.usage_unread);
+        let me_tid = wtm_sys::threads::current_thread_id();
+        let usage: Vec<Usage> = map
+            .allocations
+            .iter()
+            .flat_map(|a| a.usage.iter().copied())
+            .collect();
+        assert!(usage.contains(&Usage::Heap {
+            default: true,
+            wow64: false
+        }));
+        assert!(usage.contains(&Usage::Stack {
+            tid: me_tid,
+            wow64: false
+        }));
         let lsass = ProcessRef {
             name: "lsass.exe".into(),
             ..me.clone()

@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0} ਕੋਰ, {1} ਥ੍ਰੈੱਡ",
   "Firmware {0}": "ਫ਼ਰਮਵੇਅਰ {0}",
   "Driver {0}": "ਡਰਾਈਵਰ {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32-ਬਿੱਟ)",
+  "TEB of thread {0}": "ਥ੍ਰੈੱਡ {0} ਦਾ TEB",
+  "{0} TEBs": "{0} TEB",
+  "Stack of thread {0}": "ਥ੍ਰੈੱਡ {0} ਦਾ ਸਟੈਕ",
+  "Default heap": "ਡਿਫ਼ੌਲਟ ਹੀਪ",
+  "Heap": "ਹੀਪ",
+  "Heaps: {0} · Thread stacks: {1}": "ਹੀਪ: {0} · ਥ੍ਰੈੱਡ ਸਟੈਕ: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "ਹੇਠਾਂ ਨਾਮ ਦਿੱਤੀਆਂ ਵੰਡਾਂ ਵਿੱਚ ਕਮਿਟ ਕੀਤੀ ਮੈਮਰੀ। ਹੀਪ ਵੱਲੋਂ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਵੰਡੇ ਵੱਡੇ ਬਲਾਕ ਨਹੀਂ ਗਿਣੇ ਜਾਂਦੇ।",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "ਹੀਪ ਅਤੇ ਸਟੈਕ ਨੂੰ ਨਾਮ ਨਹੀਂ ਦਿੱਤਾ ਗਿਆ: ਪ੍ਰੋਸੈਸ ਆਪਣੀ ਮੈਮਰੀ ਪੜ੍ਹਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੀ।"
 }

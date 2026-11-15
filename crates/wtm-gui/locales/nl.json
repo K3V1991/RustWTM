@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0} kernen, {1} threads",
   "Firmware {0}": "Firmware {0}",
   "Driver {0}": "Stuurprogramma {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32-bits)",
+  "TEB of thread {0}": "TEB van thread {0}",
+  "{0} TEBs": "{0} TEB's",
+  "Stack of thread {0}": "Stack van thread {0}",
+  "Default heap": "Standaardheap",
+  "Heap": "Heap",
+  "Heaps: {0} · Thread stacks: {1}": "Heaps: {0} · Threadstacks: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Vastgelegd in de toewijzingen die hieronder worden genoemd. Grote blokken die een heap apart toewijst, worden niet meegeteld.",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heaps en stacks hebben geen naam: het proces staat niet toe dat zijn geheugen wordt gelezen."
 }

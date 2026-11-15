@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "{0} కోర్‌లు, {1} థ్రెడ్‌లు",
   "Firmware {0}": "ఫర్మ్‌వేర్ {0}",
   "Driver {0}": "డ్రైవర్ {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32-బిట్)",
+  "TEB of thread {0}": "థ్రెడ్ {0} యొక్క TEB",
+  "{0} TEBs": "{0} TEBలు",
+  "Stack of thread {0}": "థ్రెడ్ {0} యొక్క స్టాక్",
+  "Default heap": "డిఫాల్ట్ హీప్",
+  "Heap": "హీప్",
+  "Heaps: {0} · Thread stacks: {1}": "హీప్‌లు: {0} · థ్రెడ్ స్టాక్‌లు: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "కింద పేరు ఇచ్చిన కేటాయింపులలో కమిట్ చేసిన మెమరీ. హీప్ విడిగా కేటాయించే పెద్ద బ్లాక్‌లు లెక్కించబడవు.",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "హీప్‌లు మరియు స్టాక్‌లకు పేరు ఇవ్వలేదు: ప్రాసెస్ తన మెమరీని చదవడానికి అనుమతించదు."
 }

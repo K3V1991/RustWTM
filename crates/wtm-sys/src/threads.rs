@@ -41,6 +41,38 @@ pub fn win32_start_address(tid: u32) -> Result<u64> {
     Ok(address as u64)
 }
 
+/// `THREADINFOCLASS::ThreadBasicInformation`.
+const THREAD_BASIC_INFORMATION: u32 = 0;
+
+/// The address of thread `tid`'s TEB, when the thread (still) belongs to
+/// process `pid`. Tries limited query rights first, which more threads
+/// grant, then full ones.
+pub(crate) fn teb_address(tid: u32, pid: u32) -> Option<u64> {
+    use windows::Win32::System::Threading::THREAD_QUERY_LIMITED_INFORMATION;
+    [THREAD_QUERY_LIMITED_INFORMATION, THREAD_QUERY_INFORMATION]
+        .into_iter()
+        .find_map(|access| {
+            // SAFETY: plain call; the handle is owned by the wrapper.
+            let thread = OwnedHandle::new(unsafe { OpenThread(access, false, tid) }.ok()?);
+            // THREAD_BASIC_INFORMATION: ExitStatus, TebBaseAddress,
+            // ClientId (process, thread), AffinityMask, priorities.
+            let mut basic = [0u64; 6];
+            let mut len = 0u32;
+            // SAFETY: `basic` is writable for its full size.
+            let status = unsafe {
+                NtQueryInformationThread(
+                    thread.raw(),
+                    THREAD_BASIC_INFORMATION,
+                    basic.as_mut_ptr().cast(),
+                    size_of_val(&basic) as u32,
+                    &mut len,
+                )
+            };
+            // A thread ID can be reused by another process's thread.
+            (status.is_ok() && basic[2] == u64::from(pid) && basic[1] != 0).then_some(basic[1])
+        })
+}
+
 /// The calling thread's ID.
 pub fn current_thread_id() -> u32 {
     // SAFETY: plain call without arguments.

@@ -19,6 +19,16 @@ All notable changes to this project are documented here. The format follows
   so that no hits never claims more than was searched. Clicking a hit shows
   the process in the inspector, unless it has exited since. lsass.exe and
   lsaiso.exe are never opened.
+- The Memory map names what a process keeps in its private memory: its
+  heaps (the default one marked), each thread's stack and TEB, and its PEB,
+  with the 32-bit copies of a 32-bit process marked as such, and totals the
+  memory of its heaps and stacks. Stacks and TEBs come from the threads'
+  own records and the default heap from the PEB; other heaps, which the
+  PEB does not list completely on every Windows build, are known by the
+  signature in their header. Only those pointers and signatures are read, never other memory,
+  and only from processes that allow reading their memory; the others
+  still get the full map, with a note that these names are missing. Large
+  blocks a heap allocates on their own are not named.
 
 ### Changed
 

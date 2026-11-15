@@ -1829,5 +1829,15 @@
   "{0} cores, {1} threads": "Ядер: {0}, потоков: {1}",
   "Firmware {0}": "Прошивка {0}",
   "Driver {0}": "Драйвер {0}",
-  "BIOS {0}": "BIOS {0}"
+  "BIOS {0}": "BIOS {0}",
+  "PEB": "PEB",
+  "{0} (32-bit)": "{0} (32-разрядный)",
+  "TEB of thread {0}": "TEB потока {0}",
+  "{0} TEBs": "TEB: {0}",
+  "Stack of thread {0}": "Стек потока {0}",
+  "Default heap": "Куча по умолчанию",
+  "Heap": "Куча",
+  "Heaps: {0} · Thread stacks: {1}": "Кучи: {0} · Стеки потоков: {1}",
+  "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Выделенная память в названных ниже блоках. Крупные блоки, которые куча выделяет отдельно, не учитываются.",
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Кучи и стеки не названы: процесс не разрешает читать свою память."
 }

@@ -8556,7 +8556,7 @@ mod tests {
 
     #[test]
     fn memory_map_panel_totals_kinds_and_lists_allocations() {
-        use wtm_core::control::{Allocation, MemoryKind, MemoryMap};
+        use wtm_core::control::{Allocation, MemoryKind, MemoryMap, Usage};
         let allocation = |kind, base, committed, executable, name: Option<&str>| Allocation {
             base,
             kind,
@@ -8566,6 +8566,7 @@ mod tests {
             protection: if executable { 0x20 } else { 0x04 },
             executable,
             name: name.map(Into::into),
+            usage: Vec::new(),
         };
         let mut d = data();
         let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
@@ -8580,10 +8581,23 @@ mod tests {
                         true,
                         Some(r"C:\Apps\alphacore.dll"),
                     ),
-                    allocation(MemoryKind::Private, 0x1_0000, 8 << 20, false, None),
+                    Allocation {
+                        usage: vec![Usage::Heap {
+                            default: true,
+                            wow64: false,
+                        }],
+                        ..allocation(MemoryKind::Private, 0x1_0000, 8 << 20, false, None)
+                    },
                     allocation(MemoryKind::Private, 0x2_0000, 1 << 20, true, None),
+                    Allocation {
+                        usage: vec![Usage::Stack {
+                            tid: 5120,
+                            wow64: false,
+                        }],
+                        ..allocation(MemoryKind::Private, 0x3_0000, 64 << 10, false, None)
+                    },
                 ],
-                incomplete: false,
+                ..MemoryMap::default()
             }))),
         ));
         let (backend, rx) = Backend::offline(d);
@@ -8606,9 +8620,13 @@ mod tests {
             // The file name; the path is on hover.
             "alphacore.dll",
             "0x7FF600000000",
-            "9.0 MiB",
+            "9.1 MiB",
             "Private executable memory: 1.0 MiB in 1 allocations",
             "RX",
+            // Heaps and stacks by name, and their totals.
+            "Default heap",
+            "Stack of thread 5120",
+            "Heaps: 8.0 MiB · Thread stacks: 64.0 KiB",
         ] {
             assert!(
                 h.query_all_by_label_contains(text).next().is_some(),
