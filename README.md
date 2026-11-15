@@ -43,7 +43,29 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.33.0
+## New in 0.34.0
+
+[Release scope and validation](docs/0.34.0-review.md)
+
+- **Find handle or DLL:** every process with a file, key or other object
+  open, or a DLL loaded, whose name contains the text; hits arrive as each
+  process is searched.
+- **Find Window's Process:** drag the crosshair at the end of the Processes
+  toolbar onto any window to select the process that owns it.
+- **Windows:** a process's top-level windows on this desktop, with Switch
+  to and the hung ones marked; titles are shown, never logged.
+- **Memory map:** heaps, thread stacks, the PEB and TEBs named, with heap
+  and stack totals.
+- **Inspector graphs:** reads and writes, network and GPU over the last two
+  minutes beside CPU and memory, each once the process has used it.
+- **Hardware specifications:** a spec sheet with the PC's headline figures
+  and an illustrated card per part; every field stays under All details.
+
+The views read with the window's own rights, never through the service,
+and the ones that open a process refuse lsass.exe and lsaiso.exe. IPC
+stays at protocol 17, so a 0.33.0 service keeps working with this GUI.
+
+## Included since 0.33.0
 
 [Release scope and validation](docs/0.33.0-review.md)
 
@@ -304,8 +326,12 @@ stable identity. [Transfer verification](docs/repository-migration.md).
   Authenticode and catalog check); unsigned and invalid ones first.
 - **Security, Environment, Handles and Memory map**: a process's token
   groups and privileges, its environment variables, the objects it has open
-  and its address space, as Process Explorer and VMMap show them; read with
-  the window's own rights only.
+  and its address space with heaps and stacks named, as Process Explorer,
+  System Informer and VMMap show them; read with the window's own rights
+  only.
+- **Windows and finding things**: a process's windows with Switch to; Find
+  handle or DLL across every process; and Find Window's Process, a
+  crosshair to drag onto any window.
 - **Network per program**: bytes received and sent per process (ETW, through
   the service or as administrator), a *Network* column and the busiest
   programs in the Network tab; *Close* resets an IPv4 TCP connection, and
@@ -474,8 +500,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.33.0-x64.msi            # interactive
-msiexec /i RustWTM-0.33.0-x64.msi /qn        # silent
+msiexec /i RustWTM-0.34.0-x64.msi            # interactive
+msiexec /i RustWTM-0.34.0-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc

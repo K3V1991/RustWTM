@@ -6,12 +6,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.34.0] - 2026-11-15
+
+More of Process Explorer and System Informer: a system-wide Find handle or
+DLL, Find Window's Process, a Windows list, heaps and stacks named in the
+memory map, and I/O, network and GPU graphs in the process inspector; and
+Hardware specifications becomes a spec sheet. IPC stays at protocol 17,
+so the GUI and the service of 0.33.0 and 0.34.0 work together.
+
 ### Added
 
 - Processes has Process Explorer's Find handle or DLL, the magnifier at the
-  end of its toolbar: every process with a
-  file, registry key or other object open, or a DLL loaded, whose name
-  contains the text (three characters or more). Processes are searched one
+  end of its toolbar: every process with a file, registry key or other
+  object open, or a DLL loaded, whose name contains the text (three
+  characters or more). Processes are searched one
   at a time with this window's own rights and the Handles view's limits,
   and hits arrive as each is done; Stop ends the search, and it stops by
   itself at 1,000 hits or after a minute. The window says how many
@@ -25,10 +33,10 @@ All notable changes to this project are documented here. The format follows
   memory of its heaps and stacks. Stacks and TEBs come from the threads'
   own records and the default heap from the PEB; other heaps, which the
   PEB does not list completely on every Windows build, are known by the
-  signature in their header. Only those pointers and signatures are read, never other memory,
-  and only from processes that allow reading their memory; the others
-  still get the full map, with a note that these names are missing. Large
-  blocks a heap allocates on their own are not named.
+  signature in their header. Only those pointers and signatures are read,
+  never other memory, and only from processes that allow reading their
+  memory; the others still get the full map, with a note that these names
+  are missing. Large blocks a heap allocates on their own are not named.
 - The process inspector has System Informer's Windows list: the process's
   top-level windows on this desktop with their title and class, visible
   ones first, hidden ones on request, and "Not responding" on a visible
@@ -41,8 +49,9 @@ All notable changes to this project are documented here. The format follows
   documents, mails or web pages: they are shown, never logged.
 - The process inspector graphs its reads and writes (all its I/O, as in
   its Disk read and Disk write rows), network traffic and GPU use over the
-  last two minutes beside CPU and memory, as System Informer does. Each appears once the process has used it in that time,
-  so an idle process keeps a short panel. The graphs share one axis width,
+  last two minutes beside CPU and memory, as System Informer does. Each
+  appears once the process has used it in that time, so an idle process
+  keeps a short panel. The graphs share one axis width,
   so their time axes line up, and their scales step in round numbers
   ("20%", "4.0 MiB/s", "1.0 GiB") so each keeps a labelled mark.
 - Processes has Process Explorer's Find Window's Process: drag the
@@ -1747,7 +1756,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.33.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.34.0...HEAD
+[0.34.0]: https://github.com/rustwtm/rustwtm/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/rustwtm/rustwtm/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/rustwtm/rustwtm/compare/v0.31.0...v0.32.0
 [0.31.0]: https://github.com/rustwtm/rustwtm/compare/v0.30.4...v0.31.0
