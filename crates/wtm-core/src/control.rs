@@ -16,6 +16,7 @@ pub use wtm_sys::control::{
 };
 use wtm_sys::job::Job;
 pub use wtm_sys::mitigation::{StackProtection, UacVirtualization};
+pub use wtm_sys::token::{Account, TokenGroup, TokenPrivilege, TokenReport};
 
 use crate::ProcessInfo;
 use crate::protection::protection_reason;
@@ -393,6 +394,13 @@ pub fn image_path(target: &ProcessRef) -> ControlResult<String> {
     sys(target.pid, h.image_path())
 }
 
+/// The account, groups and privileges `target` runs with (Process
+/// Explorer's Security tab).
+pub fn token(target: &ProcessRef) -> ControlResult<TokenReport> {
+    let h = open_verified(target, Access::QUERY)?;
+    sys(target.pid, h.token_report())
+}
+
 /// The command line a process was started with.
 pub fn command_line(target: &ProcessRef) -> ControlResult<String> {
     let h = open_verified(target, Access::QUERY)?;
@@ -730,6 +738,27 @@ mod tests {
                 Err(ControlError::Protected { .. })
             ));
         }
+    }
+
+    #[test]
+    fn reads_the_token_of_the_process_it_was_asked_about() {
+        let created = ProcessHandle::open(std::process::id(), Access::QUERY)
+            .unwrap()
+            .create_time()
+            .unwrap();
+        let me = ProcessRef {
+            pid: std::process::id(),
+            create_time: created,
+            name: "me.exe".into(),
+        };
+        let t = token(&me).unwrap();
+        assert!(!t.groups.is_empty() && !t.privileges.is_empty());
+        // The same ID, now another process: refused, not read.
+        let reused = ProcessRef {
+            create_time: created + 1,
+            ..me
+        };
+        assert!(matches!(token(&reused), Err(ControlError::Stale { .. })));
     }
 
     #[test]

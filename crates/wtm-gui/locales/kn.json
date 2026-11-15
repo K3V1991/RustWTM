@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "ಕೊನೆಯ ಓದಿನಿಂದ ಸಂದರ್ಭ ಬದಲಾವಣೆಗಳು",
   "Processor time: {0}": "ಪ್ರೊಸೆಸರ್ ಸಮಯ: {0}",
   "Wait reason: {0}": "ಕಾಯುವಿಕೆಯ ಕಾರಣ: {0}",
-  "Total: {0}": "ಒಟ್ಟು: {0}"
+  "Total: {0}": "ಒಟ್ಟು: {0}",
+  "The account, groups and privileges it runs with": "ಇದು ಚಲಿಸುವ ಖಾತೆ, ಗುಂಪುಗಳು ಮತ್ತು ವಿಶೇಷಾಧಿಕಾರಗಳು",
+  "Reading the security token…": "ಭದ್ರತಾ ಟೋಕನ್ ಓದಲಾಗುತ್ತಿದೆ…",
+  "Copy SID": "SID ನಕಲಿಸಿ",
+  "Session {0}": "ಸೆಷನ್ {0}",
+  "Runs in an app container": "ಅಪ್ಲಿಕೇಶನ್ ಕಂಟೇನರ್‌ನಲ್ಲಿ ಚಲಿಸುತ್ತದೆ",
+  "Groups ({0})": "ಗುಂಪುಗಳು ({0})",
+  "Privileges ({0})": "ವಿಶೇಷಾಧಿಕಾರಗಳು ({0})",
+  "Deny only": "ನಿರಾಕರಣೆ ಮಾತ್ರ",
+  "Logon session": "ಲಾಗಾನ್ ಸೆಷನ್",
+  "Owner": "ಮಾಲೀಕ",
+  "Domain-local": "ಡೊಮೇನ್-ಸ್ಥಳೀಯ",
+  "Mandatory": "ಕಡ್ಡಾಯ"
 }

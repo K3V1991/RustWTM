@@ -287,6 +287,12 @@ pub struct Data {
     /// The loaded modules of a process with their signatures; `None`
     /// inside while they are read.
     pub modules: Option<(ProcessRef, Option<Result<ModuleList, String>>)>,
+    /// The account, groups and privileges of a process's token; `None`
+    /// inside while it is read.
+    pub security: Option<(
+        ProcessRef,
+        Option<Result<wtm_core::control::TokenReport, String>>,
+    )>,
     /// The threads of a process, read each tick while the panel is drawn
     /// (`threads_wanted_ms`, Unix ms).
     pub threads: Option<crate::threads_view::ThreadsPanel>,
@@ -403,6 +409,8 @@ pub enum UiCommand {
     WhyAlive(ProcessRef),
     /// The modules a process has loaded, with their signatures.
     Modules(ProcessRef),
+    /// The account, groups and privileges of a process's token.
+    Security(ProcessRef),
     /// Shows (or with `None` hides) the threads of a process.
     Threads(Option<ProcessRef>),
     /// Blocks (`true`) or unblocks a program's network access.
@@ -1706,6 +1714,20 @@ impl Worker {
                     let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
                     if d.modules.as_ref().is_some_and(|(t, _)| *t == target) {
                         d.modules = Some((target, Some(result)));
+                    }
+                    drop(d);
+                    ctx.request_repaint();
+                });
+            }
+            UiCommand::Security(target) => {
+                self.data().security = Some((target.clone(), None));
+                let (data, ctx) = (self.data.clone(), self.ctx.clone());
+                std::thread::spawn(move || {
+                    // Naming a domain group may wait on the network.
+                    let result = wtm_core::control::token(&target).map_err(|e| e.to_string());
+                    let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
+                    if d.security.as_ref().is_some_and(|(t, _)| *t == target) {
+                        d.security = Some((target, Some(result)));
                     }
                     drop(d);
                     ctx.request_repaint();

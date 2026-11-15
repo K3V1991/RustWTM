@@ -45,6 +45,7 @@ mod processes;
 mod release_notes;
 mod resource_strip;
 mod rules;
+mod security_view;
 mod sensors;
 mod settings;
 mod sort;

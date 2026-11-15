@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "கடைசி வாசிப்பிலிருந்து சூழல் மாற்றங்கள்",
   "Processor time: {0}": "செயலி நேரம்: {0}",
   "Wait reason: {0}": "காத்திருப்புக் காரணம்: {0}",
-  "Total: {0}": "மொத்தம்: {0}"
+  "Total: {0}": "மொத்தம்: {0}",
+  "The account, groups and privileges it runs with": "இது இயங்கும் கணக்கு, குழுக்கள் மற்றும் சிறப்புரிமைகள்",
+  "Reading the security token…": "பாதுகாப்பு டோக்கன் படிக்கப்படுகிறது…",
+  "Copy SID": "SID-ஐ நகலெடு",
+  "Session {0}": "அமர்வு {0}",
+  "Runs in an app container": "பயன்பாட்டுக் கொள்கலனில் இயங்குகிறது",
+  "Groups ({0})": "குழுக்கள் ({0})",
+  "Privileges ({0})": "சிறப்புரிமைகள் ({0})",
+  "Deny only": "மறுப்பு மட்டும்",
+  "Logon session": "உள்நுழைவு அமர்வு",
+  "Owner": "உரிமையாளர்",
+  "Domain-local": "டொமைன்-உள்ளூர்",
+  "Mandatory": "கட்டாயம்"
 }

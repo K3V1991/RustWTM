@@ -2102,6 +2102,7 @@ impl eframe::App for App {
                 Intent::WaitChain(target) => backend.send(UiCommand::WaitChain(target)),
                 Intent::WhyAlive(target) => backend.send(UiCommand::WhyAlive(target)),
                 Intent::Modules(target) => backend.send(UiCommand::Modules(target)),
+                Intent::Security(target) => backend.send(UiCommand::Security(target)),
                 Intent::Threads(target) => backend.send(UiCommand::Threads(target)),
                 Intent::AskAi(target) => state.ai.open_process(target),
                 Intent::Network(target, block) => {
@@ -2772,6 +2773,19 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
         {
             intents.push(Intent::Modules(sel.clone()));
         }
+        let security = data.security.as_ref().filter(|(r, _)| r == sel);
+        if ui
+            .add_enabled(
+                !security.is_some_and(|(_, t)| t.is_none()),
+                egui::Button::new(crate::i18n::tr("Security")),
+            )
+            .on_hover_text(crate::i18n::tr(
+                "The account, groups and privileges it runs with",
+            ))
+            .clicked()
+        {
+            intents.push(Intent::Security(sel.clone()));
+        }
         let threads_open = data.threads.as_ref().is_some_and(|p| p.target == *sel);
         if ui
             .add_enabled(!threads_open, egui::Button::new(crate::i18n::tr("Threads")))
@@ -2810,6 +2824,7 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
         Some(Some(Ok(list))) => modules_list(ui, list),
         None => {}
     }
+    crate::security_view::show(ui, data, sel);
     match ending.map(|(_, r)| r) {
         Some(None) => {
             ui.horizontal(|ui| {
@@ -7331,6 +7346,7 @@ mod tests {
             UiCommand::WaitChain(t) => format!("wait chain {}", t.pid),
             UiCommand::WhyAlive(t) => format!("why alive {}", t.pid),
             UiCommand::Modules(t) => format!("modules {}", t.pid),
+            UiCommand::Security(t) => format!("security {}", t.pid),
             UiCommand::Threads(t) => format!("threads {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::CloseConnection { local, remote } => format!("close {local} {remote}"),
             UiCommand::Firewall { path, block } => format!("firewall {path} {block}"),
@@ -8145,6 +8161,109 @@ mod tests {
             rx.try_iter()
                 .map(describe_command)
                 .any(|c| c == "modules 100")
+        );
+    }
+
+    #[test]
+    fn security_panel_lists_groups_and_privileges() {
+        use wtm_core::control::{Account, TokenGroup, TokenPrivilege, TokenReport};
+        let account = |sid: &str, name: Option<&str>| Account {
+            sid: sid.into(),
+            name: name.map(Into::into),
+        };
+        let mut d = data();
+        let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
+        d.security = Some((
+            alpha.clone(),
+            Some(Ok(TokenReport {
+                user: account("S-1-5-21-1-2-3-1001", Some(r"PC\ada")),
+                session: 3,
+                app_container: true,
+                groups: vec![
+                    TokenGroup {
+                        account: account("S-1-5-32-544", Some(r"BUILTIN\Administrators")),
+                        attributes: 0x10,
+                    },
+                    TokenGroup {
+                        account: account("S-1-5-5-0-1234", None),
+                        attributes: 0xC000_0007,
+                    },
+                    TokenGroup {
+                        account: account("S-1-16-8192", Some("Mandatory Label\\Medium")),
+                        attributes: 0x60,
+                    },
+                ],
+                privileges: vec![
+                    TokenPrivilege {
+                        name: "SeShutdownPrivilege".into(),
+                        description: Some("Shut down the system".into()),
+                        attributes: 0,
+                    },
+                    TokenPrivilege {
+                        name: "SeChangeNotifyPrivilege".into(),
+                        description: None,
+                        attributes: 3,
+                    },
+                ],
+            })),
+        ));
+        let (backend, rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.state_mut().state.processes.selected = Some(alpha);
+        h.run_steps(2);
+        for text in [
+            "S-1-5-21-1-2-3-1001",
+            "Session 3",
+            "Runs in an app container",
+            "Groups (3)",
+            "Privileges (2)",
+            "Deny only",
+            "Logon session, Mandatory",
+            // A SID Windows cannot name is shown as the SID.
+            "S-1-5-5-0-1234",
+        ] {
+            assert!(
+                h.query_all_by_label_contains(text).next().is_some(),
+                "{text}"
+            );
+        }
+        // The integrity label is not reported as a disabled group.
+        assert!(
+            h.query_all_by_label_contains("Disabled, Integrity")
+                .next()
+                .is_none()
+        );
+        // Enabled privileges first.
+        let y = |n: &str| h.get_by_label(n).rect().min.y;
+        assert!(y("SeChangeNotifyPrivilege") < y("SeShutdownPrivilege"));
+        h.get_by_label("SeShutdownPrivilege").hover();
+        h.run();
+        assert!(h.query_by_label("Shut down the system").is_some());
+        h.get_by_label("S-1-5-21-1-2-3-1001").hover();
+        h.run();
+        assert!(h.query_by_label(r"PC\ada").is_some());
+
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Security")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "security 100")
         );
     }
 

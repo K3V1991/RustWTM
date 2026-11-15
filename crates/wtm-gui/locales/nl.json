@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "Contextwisselingen sinds de laatste lezing",
   "Processor time: {0}": "Processortijd: {0}",
   "Wait reason: {0}": "Wachtreden: {0}",
-  "Total: {0}": "Totaal: {0}"
+  "Total: {0}": "Totaal: {0}",
+  "The account, groups and privileges it runs with": "Het account, de groepen en de bevoegdheden waarmee het draait",
+  "Reading the security token…": "Beveiligingstoken wordt gelezen…",
+  "Copy SID": "SID kopiëren",
+  "Session {0}": "Sessie {0}",
+  "Runs in an app container": "Draait in een app-container",
+  "Groups ({0})": "Groepen ({0})",
+  "Privileges ({0})": "Bevoegdheden ({0})",
+  "Deny only": "Alleen weigeren",
+  "Logon session": "Aanmeldingssessie",
+  "Owner": "Eigenaar",
+  "Domain-local": "Domeinlokaal",
+  "Mandatory": "Verplicht"
 }

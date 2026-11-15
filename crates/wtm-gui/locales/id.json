@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "Peralihan konteks sejak pembacaan terakhir",
   "Processor time: {0}": "Waktu prosesor: {0}",
   "Wait reason: {0}": "Alasan menunggu: {0}",
-  "Total: {0}": "Total: {0}"
+  "Total: {0}": "Total: {0}",
+  "The account, groups and privileges it runs with": "Akun, grup, dan hak istimewa yang digunakannya",
+  "Reading the security token…": "Membaca token keamanan…",
+  "Copy SID": "Salin SID",
+  "Session {0}": "Sesi {0}",
+  "Runs in an app container": "Berjalan di kontainer aplikasi",
+  "Groups ({0})": "Grup ({0})",
+  "Privileges ({0})": "Hak istimewa ({0})",
+  "Deny only": "Hanya tolak",
+  "Logon session": "Sesi masuk",
+  "Owner": "Pemilik",
+  "Domain-local": "Lokal domain",
+  "Mandatory": "Wajib"
 }

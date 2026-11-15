@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "Trocas de contexto desde a última leitura",
   "Processor time: {0}": "Tempo de processador: {0}",
   "Wait reason: {0}": "Motivo da espera: {0}",
-  "Total: {0}": "Total: {0}"
+  "Total: {0}": "Total: {0}",
+  "The account, groups and privileges it runs with": "A conta, os grupos e os privilégios com que é executado",
+  "Reading the security token…": "Lendo o token de segurança…",
+  "Copy SID": "Copiar SID",
+  "Session {0}": "Sessão {0}",
+  "Runs in an app container": "É executado em um contêiner de aplicativo",
+  "Groups ({0})": "Grupos ({0})",
+  "Privileges ({0})": "Privilégios ({0})",
+  "Deny only": "Somente negação",
+  "Logon session": "Sessão de logon",
+  "Owner": "Proprietário",
+  "Domain-local": "Local do domínio",
+  "Mandatory": "Obrigatório"
 }

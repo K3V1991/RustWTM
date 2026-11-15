@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "చివరి రీడ్ నుండి సందర్భ మార్పులు",
   "Processor time: {0}": "ప్రాసెసర్ సమయం: {0}",
   "Wait reason: {0}": "నిరీక్షణ కారణం: {0}",
-  "Total: {0}": "మొత్తం: {0}"
+  "Total: {0}": "మొత్తం: {0}",
+  "The account, groups and privileges it runs with": "ఇది నడిచే ఖాతా, సమూహాలు మరియు ప్రత్యేకాధికారాలు",
+  "Reading the security token…": "భద్రతా టోకెన్ చదవబడుతోంది…",
+  "Copy SID": "SIDని కాపీ చేయి",
+  "Session {0}": "సెషన్ {0}",
+  "Runs in an app container": "యాప్ కంటైనర్‌లో నడుస్తుంది",
+  "Groups ({0})": "సమూహాలు ({0})",
+  "Privileges ({0})": "ప్రత్యేకాధికారాలు ({0})",
+  "Deny only": "తిరస్కరణ మాత్రమే",
+  "Logon session": "లాగాన్ సెషన్",
+  "Owner": "యజమాని",
+  "Domain-local": "డొమైన్-స్థానిక",
+  "Mandatory": "తప్పనిసరి"
 }

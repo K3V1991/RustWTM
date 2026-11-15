@@ -10588,5 +10588,77 @@
     "de": "Gesamt: {0}",
     "fr": "Total : {0}",
     "es": "Total: {0}"
+  },
+  "The account, groups and privileges it runs with": {
+    "tr": "Çalıştığı hesap, gruplar ve ayrıcalıklar",
+    "de": "Konto, Gruppen und Berechtigungen, mit denen er läuft",
+    "fr": "Le compte, les groupes et les privilèges avec lesquels il s'exécute",
+    "es": "La cuenta, los grupos y los privilegios con los que se ejecuta"
+  },
+  "Reading the security token…": {
+    "tr": "Güvenlik belirteci okunuyor…",
+    "de": "Sicherheitstoken wird gelesen…",
+    "fr": "Lecture du jeton de sécurité…",
+    "es": "Leyendo el token de seguridad…"
+  },
+  "Copy SID": {
+    "tr": "SID'yi kopyala",
+    "de": "SID kopieren",
+    "fr": "Copier le SID",
+    "es": "Copiar SID"
+  },
+  "Session {0}": {
+    "tr": "Oturum {0}",
+    "de": "Sitzung {0}",
+    "fr": "Session {0}",
+    "es": "Sesión {0}"
+  },
+  "Runs in an app container": {
+    "tr": "Uygulama kapsayıcısında çalışıyor",
+    "de": "Läuft in einem App-Container",
+    "fr": "S'exécute dans un conteneur d'application",
+    "es": "Se ejecuta en un contenedor de aplicaciones"
+  },
+  "Groups ({0})": {
+    "tr": "Gruplar ({0})",
+    "de": "Gruppen ({0})",
+    "fr": "Groupes ({0})",
+    "es": "Grupos ({0})"
+  },
+  "Privileges ({0})": {
+    "tr": "Ayrıcalıklar ({0})",
+    "de": "Berechtigungen ({0})",
+    "fr": "Privilèges ({0})",
+    "es": "Privilegios ({0})"
+  },
+  "Deny only": {
+    "tr": "Yalnızca reddetme",
+    "de": "Nur verweigern",
+    "fr": "Refus uniquement",
+    "es": "Solo denegar"
+  },
+  "Logon session": {
+    "tr": "Oturum açma oturumu",
+    "de": "Anmeldesitzung",
+    "fr": "Session d'ouverture",
+    "es": "Sesión de inicio"
+  },
+  "Owner": {
+    "tr": "Sahip",
+    "de": "Besitzer",
+    "fr": "Propriétaire",
+    "es": "Propietario"
+  },
+  "Domain-local": {
+    "tr": "Etki alanı yerel",
+    "de": "Domänenlokal",
+    "fr": "Local au domaine",
+    "es": "Local de dominio"
+  },
+  "Mandatory": {
+    "tr": "Zorunlu",
+    "de": "Erforderlich",
+    "fr": "Obligatoire",
+    "es": "Obligatorio"
   }
 }

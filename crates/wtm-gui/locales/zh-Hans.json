@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "自上次读取以来的上下文切换",
   "Processor time: {0}": "处理器时间: {0}",
   "Wait reason: {0}": "等待原因: {0}",
-  "Total: {0}": "合计: {0}"
+  "Total: {0}": "合计: {0}",
+  "The account, groups and privileges it runs with": "它运行时使用的帐户、组和特权",
+  "Reading the security token…": "正在读取安全令牌…",
+  "Copy SID": "复制 SID",
+  "Session {0}": "会话 {0}",
+  "Runs in an app container": "在应用容器中运行",
+  "Groups ({0})": "组 ({0})",
+  "Privileges ({0})": "特权 ({0})",
+  "Deny only": "仅拒绝",
+  "Logon session": "登录会话",
+  "Owner": "所有者",
+  "Domain-local": "域本地",
+  "Mandatory": "强制"
 }

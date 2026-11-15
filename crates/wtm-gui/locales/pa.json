@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "ਪਿਛਲੀ ਵਾਰ ਪੜ੍ਹਨ ਤੋਂ ਬਾਅਦ ਸੰਦਰਭ ਸਵਿੱਚ",
   "Processor time: {0}": "ਪ੍ਰੋਸੈਸਰ ਸਮਾਂ: {0}",
   "Wait reason: {0}": "ਉਡੀਕ ਦਾ ਕਾਰਨ: {0}",
-  "Total: {0}": "ਕੁੱਲ: {0}"
+  "Total: {0}": "ਕੁੱਲ: {0}",
+  "The account, groups and privileges it runs with": "ਉਹ ਖਾਤਾ, ਸਮੂਹ ਅਤੇ ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰ ਜਿਨ੍ਹਾਂ ਨਾਲ ਇਹ ਚੱਲਦਾ ਹੈ",
+  "Reading the security token…": "ਸੁਰੱਖਿਆ ਟੋਕਨ ਪੜ੍ਹਿਆ ਜਾ ਰਿਹਾ ਹੈ…",
+  "Copy SID": "SID ਕਾਪੀ ਕਰੋ",
+  "Session {0}": "ਸੈਸ਼ਨ {0}",
+  "Runs in an app container": "ਐਪ ਕੰਟੇਨਰ ਵਿੱਚ ਚੱਲਦਾ ਹੈ",
+  "Groups ({0})": "ਸਮੂਹ ({0})",
+  "Privileges ({0})": "ਵਿਸ਼ੇਸ਼ ਅਧਿਕਾਰ ({0})",
+  "Deny only": "ਸਿਰਫ਼ ਇਨਕਾਰ",
+  "Logon session": "ਲੌਗਆਨ ਸੈਸ਼ਨ",
+  "Owner": "ਮਾਲਕ",
+  "Domain-local": "ਡੋਮੇਨ-ਸਥਾਨਕ",
+  "Mandatory": "ਲਾਜ਼ਮੀ"
 }

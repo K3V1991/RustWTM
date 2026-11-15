@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The process inspector's Security button lists what the process's token
+  holds, as Process Explorer's Security tab does: the account's SID (with a
+  copy button), the session, whether it runs in an app container, each group
+  with how the token uses it (deny only, disabled, integrity, logon session,
+  owner, domain-local, mandatory) and each privilege with whether it is
+  enabled and Windows' own description on hover. It is read once on request,
+  by this window with its own rights.
+
 ## [0.32.0] - 2026-11-14
 
 Performance reaches Windows Task Manager parity: every disk, network adapter

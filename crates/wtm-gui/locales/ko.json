@@ -1763,5 +1763,17 @@
   "Context switches since the last read": "마지막 읽기 이후 컨텍스트 전환",
   "Processor time: {0}": "프로세서 시간: {0}",
   "Wait reason: {0}": "대기 이유: {0}",
-  "Total: {0}": "합계: {0}"
+  "Total: {0}": "합계: {0}",
+  "The account, groups and privileges it runs with": "실행에 사용되는 계정, 그룹 및 권한",
+  "Reading the security token…": "보안 토큰을 읽는 중…",
+  "Copy SID": "SID 복사",
+  "Session {0}": "세션 {0}",
+  "Runs in an app container": "앱 컨테이너에서 실행됨",
+  "Groups ({0})": "그룹({0})",
+  "Privileges ({0})": "권한({0})",
+  "Deny only": "거부 전용",
+  "Logon session": "로그온 세션",
+  "Owner": "소유자",
+  "Domain-local": "도메인 로컬",
+  "Mandatory": "필수"
 }
