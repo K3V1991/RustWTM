@@ -11,9 +11,9 @@ All notable changes to this project are documented here. The format follows
 The process inspector gains Process Explorer's and System Informer's
 process views: Security (the token's groups and privileges), Environment,
 Handles and a Memory map. Each is read on request, with this window's own
-rights only and never through the service, and refuses lsass.exe and
-lsaiso.exe. IPC stays at protocol 17, so the GUI and the service of 0.32.0
-and 0.33.0 work together.
+rights only and never through the service; Environment, Handles and Memory
+map refuse lsass.exe and lsaiso.exe. IPC stays at protocol 17, so the GUI
+and the service of 0.32.0 and 0.33.0 work together.
 
 ### Added
 

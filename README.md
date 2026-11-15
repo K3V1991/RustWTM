@@ -60,8 +60,9 @@ usage history.
   become executable marked.
 
 Each is read on request with the window's own rights, never through the
-service, and lsass.exe and lsaiso.exe are refused. IPC stays at protocol
-17, so a 0.32.0 service keeps working with this GUI.
+service; Environment, Handles and Memory map refuse lsass.exe and
+lsaiso.exe. IPC stays at protocol 17, so a 0.32.0 service keeps working
+with this GUI.
 
 ## Included since 0.32.0
 
