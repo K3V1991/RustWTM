@@ -43,7 +43,27 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.32.0
+## New in 0.33.0
+
+[Release scope and validation](docs/0.33.0-review.md)
+
+- **Security:** the account's SID, session and app container, each group
+  with how the token uses it, and each privilege with whether it is on and
+  Windows' own description.
+- **Environment:** the process's environment variables, 32-bit processes
+  included; only shown, never logged or saved.
+- **Handles:** the files, registry keys and other objects it has open, as
+  drive and HKLM paths, with a filter; pipes are never asked their name,
+  since that can hang.
+- **Memory map:** committed and reserved memory by kind, then each
+  allocation with its protection and file, and private memory that has
+  become executable marked.
+
+Each is read on request with the window's own rights, never through the
+service, and lsass.exe and lsaiso.exe are refused. IPC stays at protocol
+17, so a 0.32.0 service keeps working with this GUI.
+
+## Included since 0.32.0
 
 [Release scope and validation](docs/0.32.0-review.md)
 
@@ -281,6 +301,10 @@ stable identity. [Transfer verification](docs/repository-migration.md).
   withholds the right, or other programs still holding it open.
 - **Modules**: the DLLs a process loaded and who signed each (offline
   Authenticode and catalog check); unsigned and invalid ones first.
+- **Security, Environment, Handles and Memory map**: a process's token
+  groups and privileges, its environment variables, the objects it has open
+  and its address space, as Process Explorer and VMMap show them; read with
+  the window's own rights only.
 - **Network per program**: bytes received and sent per process (ETW, through
   the service or as administrator), a *Network* column and the busiest
   programs in the Network tab; *Close* resets an IPv4 TCP connection, and
@@ -449,8 +473,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.32.0-x64.msi            # interactive
-msiexec /i RustWTM-0.32.0-x64.msi /qn        # silent
+msiexec /i RustWTM-0.33.0-x64.msi            # interactive
+msiexec /i RustWTM-0.33.0-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc

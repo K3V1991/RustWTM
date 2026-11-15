@@ -6,6 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.33.0] - 2026-11-15
+
+The process inspector gains Process Explorer's and System Informer's
+process views: Security (the token's groups and privileges), Environment,
+Handles and a Memory map. Each is read on request, with this window's own
+rights only and never through the service, and refuses lsass.exe and
+lsaiso.exe. IPC stays at protocol 17, so the GUI and the service of 0.32.0
+and 0.33.0 work together.
+
 ### Added
 
 - The process inspector's Security button lists what the process's token
@@ -1680,7 +1689,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.32.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.33.0...HEAD
+[0.33.0]: https://github.com/rustwtm/rustwtm/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/rustwtm/rustwtm/compare/v0.31.0...v0.32.0
 [0.31.0]: https://github.com/rustwtm/rustwtm/compare/v0.30.4...v0.31.0
 [0.30.4]: https://github.com/rustwtm/rustwtm/compare/v0.30.3...v0.30.4
