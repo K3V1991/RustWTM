@@ -1839,5 +1839,21 @@
   "Heap": "ヒープ",
   "Heaps: {0} · Thread stacks: {1}": "ヒープ: {0} · スレッド スタック: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "以下で名前が付いた割り当てのコミット済みメモリです。ヒープが個別に割り当てる大きなブロックは含まれません。",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "ヒープとスタックの名前は表示されません: プロセスがメモリの読み取りを許可していません。"
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "ヒープとスタックの名前は表示されません: プロセスがメモリの読み取りを許可していません。",
+  "Windows": "ウィンドウ",
+  "Its top-level windows on this desktop, and switching to one": "このデスクトップ上のトップレベル ウィンドウと、そのウィンドウへの切り替え",
+  "Reading windows…": "ウィンドウを読み取っています…",
+  "{0} windows, {1} visible": "ウィンドウ {0} 個、表示 {1} 個",
+  "Windows kept the focus on another window.": "Windows は別のウィンドウにフォーカスを残しました。",
+  "That window has closed.": "そのウィンドウは閉じられました。",
+  "No windows on this desktop. A service or another user's program has none here.": "このデスクトップにウィンドウはありません。サービスや別のユーザーのプログラムのウィンドウはここにはありません。",
+  "Filter by title or class": "タイトルまたはクラスで絞り込み",
+  "Show hidden windows": "非表示のウィンドウを表示",
+  "No visible windows.": "表示されているウィンドウはありません。",
+  "Switch to": "切り替え",
+  "Restore it if minimized and bring it to the front": "最小化されていれば元に戻して前面に表示",
+  "Hidden": "非表示",
+  "(no title)": "(タイトルなし)",
+  "Title": "タイトル",
+  "Thread {0}": "スレッド {0}"
 }

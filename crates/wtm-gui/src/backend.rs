@@ -312,6 +312,12 @@ pub struct Data {
         ProcessRef,
         Option<Result<crate::handles_view::HandleList, String>>,
     )>,
+    /// The top-level windows of a process; `None` inside while they are
+    /// read. Titles are only shown, never logged.
+    pub windows: Option<(
+        ProcessRef,
+        Option<Result<crate::windows_view::WindowList, String>>,
+    )>,
     /// The memory map of a process, totalled and sorted; `None` inside
     /// while it is read.
     pub memory_map: Option<(
@@ -444,6 +450,8 @@ pub enum UiCommand {
     Environment(Option<ProcessRef>),
     /// The handles of a process; with `None`, hides them.
     Handles(Option<ProcessRef>),
+    Windows(Option<ProcessRef>),
+    SwitchToWindow(ProcessRef, isize),
     /// The memory map of a process; with `None`, hides it.
     MemoryMap(Option<ProcessRef>),
     /// Searches every process's handles and DLLs for the text; with `None`,
@@ -1774,6 +1782,44 @@ impl Worker {
             }
             UiCommand::Environment(None) => self.data().environment = None,
             UiCommand::Handles(None) => self.data().handles = None,
+            UiCommand::Windows(None) => self.data().windows = None,
+            UiCommand::Windows(Some(target)) => {
+                self.data().windows = Some((target.clone(), None));
+                let (data, ctx) = (self.data.clone(), self.ctx.clone());
+                std::thread::spawn(move || {
+                    let result = wtm_core::control::windows(&target)
+                        .map(crate::windows_view::WindowList::from)
+                        .map_err(|e| e.to_string());
+                    let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
+                    if d.windows.as_ref().is_some_and(|(t, _)| *t == target) {
+                        d.windows = Some((target, Some(result)));
+                    }
+                    drop(d);
+                    ctx.request_repaint();
+                });
+            }
+            UiCommand::SwitchToWindow(target, handle) => {
+                let (data, ctx) = (self.data.clone(), self.ctx.clone());
+                std::thread::spawn(move || {
+                    let switched = wtm_core::control::switch_to_window(&target, handle);
+                    // Read again: the window may be restored, or gone.
+                    let result = switched
+                        .and_then(|outcome| {
+                            wtm_core::control::windows(&target).map(|w| {
+                                let mut list = crate::windows_view::WindowList::from(w);
+                                list.switched = Some(outcome);
+                                list
+                            })
+                        })
+                        .map_err(|e| e.to_string());
+                    let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
+                    if d.windows.as_ref().is_some_and(|(t, _)| *t == target) {
+                        d.windows = Some((target, Some(result)));
+                    }
+                    drop(d);
+                    ctx.request_repaint();
+                });
+            }
             UiCommand::MemoryMap(None) => self.data().memory_map = None,
             UiCommand::Find(None) => {
                 if let Some(f) = &self.data().find {

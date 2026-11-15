@@ -1839,5 +1839,21 @@
   "Heap": "Heap",
   "Heaps: {0} · Thread stacks: {1}": "Heap: {0} · Stack thread: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Memori yang di-commit dalam alokasi yang dinamai di bawah. Blok besar yang dialokasikan heap secara terpisah tidak dihitung.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heap dan stack tidak dinamai: proses tidak mengizinkan memorinya dibaca."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heap dan stack tidak dinamai: proses tidak mengizinkan memorinya dibaca.",
+  "Windows": "Jendela",
+  "Its top-level windows on this desktop, and switching to one": "Jendela tingkat atasnya di desktop ini, dan beralih ke salah satunya",
+  "Reading windows…": "Membaca jendela…",
+  "{0} windows, {1} visible": "{0} jendela, {1} terlihat",
+  "Windows kept the focus on another window.": "Windows mempertahankan fokus di jendela lain.",
+  "That window has closed.": "Jendela itu telah ditutup.",
+  "No windows on this desktop. A service or another user's program has none here.": "Tidak ada jendela di desktop ini. Layanan atau program pengguna lain tidak punya jendela di sini.",
+  "Filter by title or class": "Filter menurut judul atau kelas",
+  "Show hidden windows": "Tampilkan jendela tersembunyi",
+  "No visible windows.": "Tidak ada jendela yang terlihat.",
+  "Switch to": "Beralih ke",
+  "Restore it if minimized and bring it to the front": "Pulihkan jika diminimalkan dan bawa ke depan",
+  "Hidden": "Tersembunyi",
+  "(no title)": "(tanpa judul)",
+  "Title": "Judul",
+  "Thread {0}": "Thread {0}"
 }

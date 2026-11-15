@@ -1839,5 +1839,21 @@
   "Heap": "Heap",
   "Heaps: {0} · Thread stacks: {1}": "Heap: {0} · Stack dei thread: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Memoria impegnata nelle allocazioni indicate sotto. I blocchi grandi che un heap alloca a parte non sono contati.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heap e stack non hanno nome: il processo non consente di leggere la sua memoria."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heap e stack non hanno nome: il processo non consente di leggere la sua memoria.",
+  "Windows": "Finestre",
+  "Its top-level windows on this desktop, and switching to one": "Le sue finestre di primo livello su questo desktop e il passaggio a una di esse",
+  "Reading windows…": "Lettura delle finestre…",
+  "{0} windows, {1} visible": "{0} finestre, {1} visibili",
+  "Windows kept the focus on another window.": "Windows ha lasciato lo stato attivo su un'altra finestra.",
+  "That window has closed.": "Quella finestra è stata chiusa.",
+  "No windows on this desktop. A service or another user's program has none here.": "Nessuna finestra su questo desktop. Un servizio o il programma di un altro utente non ne ha qui.",
+  "Filter by title or class": "Filtra per titolo o classe",
+  "Show hidden windows": "Mostra finestre nascoste",
+  "No visible windows.": "Nessuna finestra visibile.",
+  "Switch to": "Passa a",
+  "Restore it if minimized and bring it to the front": "Ripristinala se ridotta a icona e portala in primo piano",
+  "Hidden": "Nascosta",
+  "(no title)": "(senza titolo)",
+  "Title": "Titolo",
+  "Thread {0}": "Thread {0}"
 }

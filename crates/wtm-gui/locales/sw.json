@@ -1839,5 +1839,21 @@
   "Heap": "Hipu",
   "Heaps: {0} · Thread stacks: {1}": "Hipu: {0} · Mirundikano ya nyuzi: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Kumbukumbu iliyotengwa katika mgao uliotajwa hapa chini. Vitalu vikubwa ambavyo hipu inatenga yenyewe havihesabiwi.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Hipu na mirundikano hazijatajwa: mchakato hauruhusu kusoma kumbukumbu yake."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Hipu na mirundikano hazijatajwa: mchakato hauruhusu kusoma kumbukumbu yake.",
+  "Windows": "Madirisha",
+  "Its top-level windows on this desktop, and switching to one": "Madirisha yake ya ngazi ya juu kwenye eneo-kazi hili, na kubadili kwenda moja",
+  "Reading windows…": "Inasoma madirisha…",
+  "{0} windows, {1} visible": "Madirisha {0}, yanayoonekana {1}",
+  "Windows kept the focus on another window.": "Windows imebakiza mwelekeo kwenye dirisha jingine.",
+  "That window has closed.": "Dirisha hilo limefungwa.",
+  "No windows on this desktop. A service or another user's program has none here.": "Hakuna madirisha kwenye eneo-kazi hili. Huduma au programu ya mtumiaji mwingine haina madirisha hapa.",
+  "Filter by title or class": "Chuja kwa kichwa au darasa",
+  "Show hidden windows": "Onyesha madirisha yaliyofichwa",
+  "No visible windows.": "Hakuna madirisha yanayoonekana.",
+  "Switch to": "Badili kwenda",
+  "Restore it if minimized and bring it to the front": "Lirejeshe ikiwa limepunguzwa na ulilete mbele",
+  "Hidden": "Limefichwa",
+  "(no title)": "(hakuna kichwa)",
+  "Title": "Kichwa",
+  "Thread {0}": "Uzi {0}"
 }

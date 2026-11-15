@@ -29,6 +29,16 @@ All notable changes to this project are documented here. The format follows
   and only from processes that allow reading their memory; the others
   still get the full map, with a note that these names are missing. Large
   blocks a heap allocates on their own are not named.
+- The process inspector has System Informer's Windows list: the process's
+  top-level windows on this desktop with their title and class, visible
+  ones first, hidden ones on request, and "Not responding" on a visible
+  window that has stopped answering. Switch to restores a minimized window
+  and brings it to the front without keeping it on top, and says when
+  Windows keeps the focus elsewhere or the window has closed. Each window
+  must belong to one of the process's threads, so a newer process with the
+  same PID never inherits the list, and nothing is sent to the windows
+  while they are listed, so a hung one cannot stall it. Titles often name
+  documents, mails or web pages: they are shown, never logged.
 
 ### Changed
 

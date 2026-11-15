@@ -1839,5 +1839,21 @@
   "Heap": "Купа",
   "Heaps: {0} · Thread stacks: {1}": "Купи: {0} · Стеки потоків: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Виділена пам'ять у названих нижче блоках. Великі блоки, які купа виділяє окремо, не враховуються.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Купи та стеки не названо: процес не дозволяє читати свою пам'ять."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Купи та стеки не названо: процес не дозволяє читати свою пам'ять.",
+  "Windows": "Вікна",
+  "Its top-level windows on this desktop, and switching to one": "Його вікна верхнього рівня на цьому робочому столі та перемикання на одне з них",
+  "Reading windows…": "Читання вікон…",
+  "{0} windows, {1} visible": "Вікон: {0}, видимих: {1}",
+  "Windows kept the focus on another window.": "Windows залишила фокус на іншому вікні.",
+  "That window has closed.": "Це вікно закрито.",
+  "No windows on this desktop. A service or another user's program has none here.": "На цьому робочому столі немає вікон. У служби чи програми іншого користувача їх тут немає.",
+  "Filter by title or class": "Фільтр за заголовком або класом",
+  "Show hidden windows": "Показати приховані вікна",
+  "No visible windows.": "Немає видимих вікон.",
+  "Switch to": "Перейти",
+  "Restore it if minimized and bring it to the front": "Відновити, якщо згорнуто, і вивести на передній план",
+  "Hidden": "Приховано",
+  "(no title)": "(без заголовка)",
+  "Title": "Заголовок",
+  "Thread {0}": "Потік {0}"
 }

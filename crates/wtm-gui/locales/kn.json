@@ -1839,5 +1839,21 @@
   "Heap": "ಹೀಪ್",
   "Heaps: {0} · Thread stacks: {1}": "ಹೀಪ್‌ಗಳು: {0} · ಥ್ರೆಡ್ ಸ್ಟ್ಯಾಕ್‌ಗಳು: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "ಕೆಳಗೆ ಹೆಸರಿಸಿದ ಹಂಚಿಕೆಗಳಲ್ಲಿ ಕಮಿಟ್ ಮಾಡಿದ ಮೆಮೊರಿ. ಹೀಪ್ ಪ್ರತ್ಯೇಕವಾಗಿ ಹಂಚುವ ದೊಡ್ಡ ಬ್ಲಾಕ್‌ಗಳನ್ನು ಎಣಿಸಲಾಗುವುದಿಲ್ಲ.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "ಹೀಪ್‌ಗಳು ಮತ್ತು ಸ್ಟ್ಯಾಕ್‌ಗಳಿಗೆ ಹೆಸರಿಲ್ಲ: ಪ್ರಕ್ರಿಯೆ ತನ್ನ ಮೆಮೊರಿಯನ್ನು ಓದಲು ಅನುಮತಿಸುವುದಿಲ್ಲ."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "ಹೀಪ್‌ಗಳು ಮತ್ತು ಸ್ಟ್ಯಾಕ್‌ಗಳಿಗೆ ಹೆಸರಿಲ್ಲ: ಪ್ರಕ್ರಿಯೆ ತನ್ನ ಮೆಮೊರಿಯನ್ನು ಓದಲು ಅನುಮತಿಸುವುದಿಲ್ಲ.",
+  "Windows": "ವಿಂಡೋಗಳು",
+  "Its top-level windows on this desktop, and switching to one": "ಈ ಡೆಸ್ಕ್‌ಟಾಪ್‌ನಲ್ಲಿ ಅದರ ಉನ್ನತ-ಮಟ್ಟದ ವಿಂಡೋಗಳು, ಮತ್ತು ಒಂದಕ್ಕೆ ಬದಲಾಯಿಸುವುದು",
+  "Reading windows…": "ವಿಂಡೋಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ…",
+  "{0} windows, {1} visible": "{0} ವಿಂಡೋಗಳು, {1} ಗೋಚರಿಸುತ್ತಿವೆ",
+  "Windows kept the focus on another window.": "Windows ಫೋಕಸ್ ಅನ್ನು ಮತ್ತೊಂದು ವಿಂಡೋದಲ್ಲಿ ಇರಿಸಿತು.",
+  "That window has closed.": "ಆ ವಿಂಡೋ ಮುಚ್ಚಿದೆ.",
+  "No windows on this desktop. A service or another user's program has none here.": "ಈ ಡೆಸ್ಕ್‌ಟಾಪ್‌ನಲ್ಲಿ ವಿಂಡೋಗಳಿಲ್ಲ. ಸೇವೆಗೆ ಅಥವಾ ಬೇರೆ ಬಳಕೆದಾರರ ಪ್ರೋಗ್ರಾಂಗೆ ಇಲ್ಲಿ ವಿಂಡೋಗಳಿರುವುದಿಲ್ಲ.",
+  "Filter by title or class": "ಶೀರ್ಷಿಕೆ ಅಥವಾ ಕ್ಲಾಸ್ ಮೂಲಕ ಫಿಲ್ಟರ್ ಮಾಡಿ",
+  "Show hidden windows": "ಮರೆಮಾಡಿದ ವಿಂಡೋಗಳನ್ನು ತೋರಿಸಿ",
+  "No visible windows.": "ಗೋಚರಿಸುವ ವಿಂಡೋಗಳಿಲ್ಲ.",
+  "Switch to": "ಇದಕ್ಕೆ ಬದಲಾಯಿಸಿ",
+  "Restore it if minimized and bring it to the front": "ಕಿರಿದುಗೊಳಿಸಿದ್ದರೆ ಮರುಸ್ಥಾಪಿಸಿ ಮುಂದೆ ತನ್ನಿ",
+  "Hidden": "ಮರೆಮಾಡಲಾಗಿದೆ",
+  "(no title)": "(ಶೀರ್ಷಿಕೆ ಇಲ್ಲ)",
+  "Title": "ಶೀರ್ಷಿಕೆ",
+  "Thread {0}": "ಥ್ರೆಡ್ {0}"
 }

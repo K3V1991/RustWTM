@@ -1839,5 +1839,21 @@
   "Heap": "Heap",
   "Heaps: {0} · Thread stacks: {1}": "Heaps: {0} · Pilhas de threads: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Memória confirmada nas alocações nomeadas abaixo. Blocos grandes que um heap aloca à parte não são contados.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heaps e pilhas não estão nomeados: o processo não permite ler sua memória."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heaps e pilhas não estão nomeados: o processo não permite ler sua memória.",
+  "Windows": "Janelas",
+  "Its top-level windows on this desktop, and switching to one": "Suas janelas de nível superior nesta área de trabalho e a troca para uma delas",
+  "Reading windows…": "Lendo janelas…",
+  "{0} windows, {1} visible": "{0} janelas, {1} visíveis",
+  "Windows kept the focus on another window.": "O Windows manteve o foco em outra janela.",
+  "That window has closed.": "Essa janela foi fechada.",
+  "No windows on this desktop. A service or another user's program has none here.": "Nenhuma janela nesta área de trabalho. Um serviço ou o programa de outro usuário não tem nenhuma aqui.",
+  "Filter by title or class": "Filtrar por título ou classe",
+  "Show hidden windows": "Mostrar janelas ocultas",
+  "No visible windows.": "Nenhuma janela visível.",
+  "Switch to": "Alternar para",
+  "Restore it if minimized and bring it to the front": "Restaurá-la se estiver minimizada e trazê-la para a frente",
+  "Hidden": "Oculta",
+  "(no title)": "(sem título)",
+  "Title": "Título",
+  "Thread {0}": "Thread {0}"
 }

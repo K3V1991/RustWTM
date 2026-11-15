@@ -1839,5 +1839,21 @@
   "Heap": "힙",
   "Heaps: {0} · Thread stacks: {1}": "힙: {0} · 스레드 스택: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "아래에 이름이 표시된 할당의 커밋된 메모리입니다. 힙이 따로 할당하는 큰 블록은 포함되지 않습니다.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "힙과 스택의 이름을 표시할 수 없습니다. 프로세스가 메모리 읽기를 허용하지 않습니다."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "힙과 스택의 이름을 표시할 수 없습니다. 프로세스가 메모리 읽기를 허용하지 않습니다.",
+  "Windows": "창",
+  "Its top-level windows on this desktop, and switching to one": "이 데스크톱의 최상위 창과 창 전환",
+  "Reading windows…": "창을 읽는 중…",
+  "{0} windows, {1} visible": "창 {0}개, 표시 {1}개",
+  "Windows kept the focus on another window.": "Windows가 다른 창에 포커스를 유지했습니다.",
+  "That window has closed.": "해당 창이 닫혔습니다.",
+  "No windows on this desktop. A service or another user's program has none here.": "이 데스크톱에 창이 없습니다. 서비스나 다른 사용자의 프로그램은 여기에 창이 없습니다.",
+  "Filter by title or class": "제목 또는 클래스로 필터링",
+  "Show hidden windows": "숨겨진 창 표시",
+  "No visible windows.": "표시된 창이 없습니다.",
+  "Switch to": "전환",
+  "Restore it if minimized and bring it to the front": "최소화되어 있으면 복원하고 앞으로 가져오기",
+  "Hidden": "숨김",
+  "(no title)": "(제목 없음)",
+  "Title": "제목",
+  "Thread {0}": "스레드 {0}"
 }

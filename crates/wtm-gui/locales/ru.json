@@ -1839,5 +1839,21 @@
   "Heap": "Куча",
   "Heaps: {0} · Thread stacks: {1}": "Кучи: {0} · Стеки потоков: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Выделенная память в названных ниже блоках. Крупные блоки, которые куча выделяет отдельно, не учитываются.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Кучи и стеки не названы: процесс не разрешает читать свою память."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Кучи и стеки не названы: процесс не разрешает читать свою память.",
+  "Windows": "Окна",
+  "Its top-level windows on this desktop, and switching to one": "Его окна верхнего уровня на этом рабочем столе и переключение на одно из них",
+  "Reading windows…": "Чтение окон…",
+  "{0} windows, {1} visible": "Окон: {0}, видимых: {1}",
+  "Windows kept the focus on another window.": "Windows оставила фокус на другом окне.",
+  "That window has closed.": "Это окно закрыто.",
+  "No windows on this desktop. A service or another user's program has none here.": "На этом рабочем столе нет окон. У службы или программы другого пользователя их здесь нет.",
+  "Filter by title or class": "Фильтр по заголовку или классу",
+  "Show hidden windows": "Показать скрытые окна",
+  "No visible windows.": "Нет видимых окон.",
+  "Switch to": "Переключиться",
+  "Restore it if minimized and bring it to the front": "Восстановить, если свёрнуто, и вывести на передний план",
+  "Hidden": "Скрыто",
+  "(no title)": "(без заголовка)",
+  "Title": "Заголовок",
+  "Thread {0}": "Поток {0}"
 }

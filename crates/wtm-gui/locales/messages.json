@@ -11044,5 +11044,101 @@
     "de": "Heaps und Stacks sind nicht benannt: Der Prozess erlaubt nicht, seinen Speicher zu lesen.",
     "fr": "Tas et piles non nommés : le processus ne permet pas de lire sa mémoire.",
     "es": "Los montones y las pilas no tienen nombre: el proceso no permite leer su memoria."
+  },
+  "Windows": {
+    "tr": "Pencereler",
+    "de": "Fenster",
+    "fr": "Fenêtres",
+    "es": "Ventanas"
+  },
+  "Its top-level windows on this desktop, and switching to one": {
+    "tr": "Bu masaüstündeki üst düzey pencereleri ve birine geçiş",
+    "de": "Seine Fenster der obersten Ebene auf diesem Desktop und der Wechsel zu einem davon",
+    "fr": "Ses fenêtres de premier niveau sur ce bureau, et le passage à l'une d'elles",
+    "es": "Sus ventanas de nivel superior en este escritorio y el cambio a una de ellas"
+  },
+  "Reading windows…": {
+    "tr": "Pencereler okunuyor…",
+    "de": "Fenster werden gelesen…",
+    "fr": "Lecture des fenêtres…",
+    "es": "Leyendo ventanas…"
+  },
+  "{0} windows, {1} visible": {
+    "tr": "{0} pencere, {1} görünür",
+    "de": "{0} Fenster, {1} sichtbar",
+    "fr": "{0} fenêtres, {1} visibles",
+    "es": "{0} ventanas, {1} visibles"
+  },
+  "Windows kept the focus on another window.": {
+    "tr": "Windows odağı başka bir pencerede tuttu.",
+    "de": "Windows hat den Fokus bei einem anderen Fenster belassen.",
+    "fr": "Windows a laissé le focus sur une autre fenêtre.",
+    "es": "Windows mantuvo el foco en otra ventana."
+  },
+  "That window has closed.": {
+    "tr": "O pencere kapandı.",
+    "de": "Dieses Fenster wurde geschlossen.",
+    "fr": "Cette fenêtre a été fermée.",
+    "es": "Esa ventana se ha cerrado."
+  },
+  "No windows on this desktop. A service or another user's program has none here.": {
+    "tr": "Bu masaüstünde pencere yok. Bir hizmetin ya da başka bir kullanıcının programının burada penceresi olmaz.",
+    "de": "Keine Fenster auf diesem Desktop. Ein Dienst oder das Programm eines anderen Benutzers hat hier keine.",
+    "fr": "Aucune fenêtre sur ce bureau. Un service ou le programme d'un autre utilisateur n'en a pas ici.",
+    "es": "No hay ventanas en este escritorio. Un servicio o el programa de otro usuario no tiene ninguna aquí."
+  },
+  "Filter by title or class": {
+    "tr": "Başlığa veya sınıfa göre süz",
+    "de": "Nach Titel oder Klasse filtern",
+    "fr": "Filtrer par titre ou classe",
+    "es": "Filtrar por título o clase"
+  },
+  "Show hidden windows": {
+    "tr": "Gizli pencereleri göster",
+    "de": "Ausgeblendete Fenster anzeigen",
+    "fr": "Afficher les fenêtres masquées",
+    "es": "Mostrar ventanas ocultas"
+  },
+  "No visible windows.": {
+    "tr": "Görünür pencere yok.",
+    "de": "Keine sichtbaren Fenster.",
+    "fr": "Aucune fenêtre visible.",
+    "es": "No hay ventanas visibles."
+  },
+  "Switch to": {
+    "tr": "Geçiş yap",
+    "de": "Wechseln zu",
+    "fr": "Basculer vers",
+    "es": "Cambiar a"
+  },
+  "Restore it if minimized and bring it to the front": {
+    "tr": "Simge durumundaysa geri yükle ve öne getir",
+    "de": "Wiederherstellen, falls minimiert, und in den Vordergrund holen",
+    "fr": "La restaurer si elle est réduite et l'amener au premier plan",
+    "es": "Restaurarla si está minimizada y traerla al frente"
+  },
+  "Hidden": {
+    "tr": "Gizli",
+    "de": "Ausgeblendet",
+    "fr": "Masquée",
+    "es": "Oculta"
+  },
+  "(no title)": {
+    "tr": "(başlıksız)",
+    "de": "(kein Titel)",
+    "fr": "(sans titre)",
+    "es": "(sin título)"
+  },
+  "Title": {
+    "tr": "Başlık",
+    "de": "Titel",
+    "fr": "Titre",
+    "es": "Título"
+  },
+  "Thread {0}": {
+    "tr": "İş parçacığı {0}",
+    "de": "Thread {0}",
+    "fr": "Thread {0}",
+    "es": "Subproceso {0}"
   }
 }

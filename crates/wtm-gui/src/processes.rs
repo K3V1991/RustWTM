@@ -563,6 +563,10 @@ pub enum Intent {
     Environment(Option<ProcessRef>),
     /// Read (or with `None` hide) the process's handles.
     Handles(Option<ProcessRef>),
+    /// Reads (or, with `None`, hides) a process's windows.
+    Windows(Option<ProcessRef>),
+    /// Restores and focuses window `.1` of process `.0`.
+    SwitchToWindow(ProcessRef, isize),
     /// Read (or with `None` hide) the process's memory map.
     MemoryMap(Option<ProcessRef>),
     /// Show (or with `None` hide) the process's threads.

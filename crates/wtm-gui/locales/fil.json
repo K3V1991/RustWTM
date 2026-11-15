@@ -1839,5 +1839,21 @@
   "Heap": "Heap",
   "Heaps: {0} · Thread stacks: {1}": "Mga heap: {0} · Mga stack ng thread: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Naka-commit sa mga allocation na pinangalanan sa ibaba. Hindi binibilang ang malalaking block na hiwalay na inilalaan ng heap.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Hindi napangalanan ang mga heap at stack: hindi pinapayagan ng process na basahin ang memory nito."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Hindi napangalanan ang mga heap at stack: hindi pinapayagan ng process na basahin ang memory nito.",
+  "Windows": "Mga window",
+  "Its top-level windows on this desktop, and switching to one": "Ang mga top-level window nito sa desktop na ito, at paglipat sa isa",
+  "Reading windows…": "Binabasa ang mga window…",
+  "{0} windows, {1} visible": "{0} window, {1} nakikita",
+  "Windows kept the focus on another window.": "Pinanatili ng Windows ang focus sa ibang window.",
+  "That window has closed.": "Nagsara na ang window na iyon.",
+  "No windows on this desktop. A service or another user's program has none here.": "Walang window sa desktop na ito. Walang window rito ang isang serbisyo o ang program ng ibang user.",
+  "Filter by title or class": "I-filter ayon sa pamagat o class",
+  "Show hidden windows": "Ipakita ang mga nakatagong window",
+  "No visible windows.": "Walang nakikitang window.",
+  "Switch to": "Lumipat sa",
+  "Restore it if minimized and bring it to the front": "I-restore kung naka-minimize at dalhin sa harap",
+  "Hidden": "Nakatago",
+  "(no title)": "(walang pamagat)",
+  "Title": "Pamagat",
+  "Thread {0}": "Thread {0}"
 }

@@ -501,6 +501,61 @@ pub fn memory_map(target: &ProcessRef) -> ControlResult<MemoryMap> {
 /// Time spent naming heaps and stacks, after the layout's own budget.
 const MEMORY_USAGE_BUDGET: std::time::Duration = std::time::Duration::from_secs(3);
 
+pub use wtm_sys::window::WindowInfo;
+
+/// The threads of `target`, which exist only while it does; an ID reused
+/// by a newer process does not match its creation time.
+fn live_threads(target: &ProcessRef) -> ControlResult<std::collections::HashSet<u32>> {
+    let threads = sys(
+        target.pid,
+        wtm_sys::process::ProcessSnapshotter::new().threads_of(target.pid, target.create_time),
+    )?;
+    if threads.is_empty() {
+        return Err(ControlError::NotFound { pid: target.pid });
+    }
+    Ok(threads.iter().map(|t| t.tid).collect())
+}
+
+/// The top-level windows `target` has on this program's desktop, in Z
+/// order. The process is not opened, so this works for one running as
+/// administrator too; each window must belong to one of its threads, which
+/// ties it to this process rather than a later one with its PID.
+pub fn windows(target: &ProcessRef) -> ControlResult<Vec<WindowInfo>> {
+    let threads = live_threads(target)?;
+    Ok(wtm_sys::window::windows_of(target.pid)
+        .into_iter()
+        .filter(|w| threads.contains(&w.tid))
+        .collect())
+}
+
+/// What became of a request to switch to a window.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SwitchOutcome {
+    Focused,
+    /// Windows kept the focus elsewhere (it refuses it to a window of a
+    /// program running as administrator, among others).
+    Refused,
+    /// The window closed, or no longer belongs to the process.
+    Gone,
+}
+
+/// Task Manager's "Switch to" for window `handle` of `target`: restores it
+/// if minimized and focuses it, after checking it still belongs to one of
+/// `target`'s threads. Never makes it stay on top.
+pub fn switch_to_window(target: &ProcessRef, handle: isize) -> ControlResult<SwitchOutcome> {
+    let threads = live_threads(target)?;
+    match wtm_sys::window::window_owner(handle) {
+        Some((pid, tid)) if pid == target.pid && threads.contains(&tid) => {
+            Ok(if wtm_sys::window::switch_to(handle) {
+                SwitchOutcome::Focused
+            } else {
+                SwitchOutcome::Refused
+            })
+        }
+        _ => Ok(SwitchOutcome::Gone),
+    }
+}
+
 /// The modules `target` has loaded, for a search across processes: unlike
 /// the Modules view, the sign-in secrets holders are refused (by the name
 /// given and by the image opened), since reading modules needs the right
@@ -943,6 +998,42 @@ mod tests {
             ..me
         };
         assert!(matches!(handles(&reused), Err(ControlError::Stale { .. })));
+    }
+
+    #[test]
+    fn windows_belong_to_the_process_instance_and_switching_checks_the_owner() {
+        let me = ProcessRef {
+            pid: std::process::id(),
+            create_time: ProcessHandle::open(std::process::id(), Access::QUERY)
+                .unwrap()
+                .create_time()
+                .unwrap(),
+            name: "me.exe".into(),
+        };
+        assert!(windows(&me).is_ok());
+        // A later process with this PID is not this one.
+        let reused = ProcessRef {
+            create_time: me.create_time + 1,
+            ..me.clone()
+        };
+        assert!(matches!(
+            windows(&reused),
+            Err(ControlError::NotFound { .. })
+        ));
+        // A handle that is no window of ours is refused without acting on
+        // it (switching itself takes the focus, so it is not exercised).
+        assert_eq!(switch_to_window(&me, 0).unwrap(), SwitchOutcome::Gone);
+        let foreign = wtm_sys::window::windows_of(4);
+        assert!(foreign.is_empty());
+        if let Some(pid) = wtm_sys::window::foreground_pid().filter(|&p| p != me.pid) {
+            let theirs = wtm_sys::window::windows_of(pid);
+            if let Some(w) = theirs.first() {
+                assert_eq!(
+                    switch_to_window(&me, w.handle).unwrap(),
+                    SwitchOutcome::Gone
+                );
+            }
+        }
     }
 
     #[test]

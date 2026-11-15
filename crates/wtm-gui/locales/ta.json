@@ -1839,5 +1839,21 @@
   "Heap": "ஹீப்",
   "Heaps: {0} · Thread stacks: {1}": "ஹீப்கள்: {0} · த்ரெட் ஸ்டாக்குகள்: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "கீழே பெயரிடப்பட்ட ஒதுக்கீடுகளில் கமிட் செய்யப்பட்ட நினைவகம். ஹீப் தனியாக ஒதுக்கும் பெரிய தொகுதிகள் கணக்கிடப்படாது.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "ஹீப்களும் ஸ்டாக்குகளும் பெயரிடப்படவில்லை: செயல்முறை அதன் நினைவகத்தைப் படிக்க அனுமதிக்கவில்லை."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "ஹீப்களும் ஸ்டாக்குகளும் பெயரிடப்படவில்லை: செயல்முறை அதன் நினைவகத்தைப் படிக்க அனுமதிக்கவில்லை.",
+  "Windows": "சாளரங்கள்",
+  "Its top-level windows on this desktop, and switching to one": "இந்த டெஸ்க்டாப்பில் அதன் உயர்நிலைச் சாளரங்கள், மற்றும் ஒன்றுக்கு மாறுதல்",
+  "Reading windows…": "சாளரங்கள் படிக்கப்படுகின்றன…",
+  "{0} windows, {1} visible": "{0} சாளரங்கள், {1} தெரிகின்றன",
+  "Windows kept the focus on another window.": "Windows கவனத்தை வேறொரு சாளரத்தில் வைத்திருந்தது.",
+  "That window has closed.": "அந்தச் சாளரம் மூடப்பட்டது.",
+  "No windows on this desktop. A service or another user's program has none here.": "இந்த டெஸ்க்டாப்பில் சாளரங்கள் இல்லை. ஒரு சேவைக்கோ வேறொரு பயனரின் நிரலுக்கோ இங்கு சாளரங்கள் இருக்காது.",
+  "Filter by title or class": "தலைப்பு அல்லது கிளாஸ் மூலம் வடிகட்டு",
+  "Show hidden windows": "மறைக்கப்பட்ட சாளரங்களைக் காட்டு",
+  "No visible windows.": "தெரியும் சாளரங்கள் இல்லை.",
+  "Switch to": "இதற்கு மாறு",
+  "Restore it if minimized and bring it to the front": "சிறிதாக்கப்பட்டிருந்தால் மீட்டமைத்து முன்னே கொண்டுவா",
+  "Hidden": "மறைக்கப்பட்டது",
+  "(no title)": "(தலைப்பு இல்லை)",
+  "Title": "தலைப்பு",
+  "Thread {0}": "த்ரெட் {0}"
 }

@@ -1839,5 +1839,21 @@
   "Heap": "堆",
   "Heaps: {0} · Thread stacks: {1}": "堆：{0} · 线程栈：{1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "下方已命名分配中的已提交内存。堆单独分配的大块不计入。",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "堆和栈未命名：该进程不允许读取其内存。"
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "堆和栈未命名：该进程不允许读取其内存。",
+  "Windows": "窗口",
+  "Its top-level windows on this desktop, and switching to one": "它在此桌面上的顶级窗口，以及切换到其中之一",
+  "Reading windows…": "正在读取窗口…",
+  "{0} windows, {1} visible": "{0} 个窗口，{1} 个可见",
+  "Windows kept the focus on another window.": "Windows 将焦点保留在另一个窗口上。",
+  "That window has closed.": "该窗口已关闭。",
+  "No windows on this desktop. A service or another user's program has none here.": "此桌面上没有窗口。服务或其他用户的程序在这里没有窗口。",
+  "Filter by title or class": "按标题或类筛选",
+  "Show hidden windows": "显示隐藏的窗口",
+  "No visible windows.": "没有可见的窗口。",
+  "Switch to": "切换到",
+  "Restore it if minimized and bring it to the front": "如果已最小化则还原，并置于前台",
+  "Hidden": "隐藏",
+  "(no title)": "(无标题)",
+  "Title": "标题",
+  "Thread {0}": "线程 {0}"
 }

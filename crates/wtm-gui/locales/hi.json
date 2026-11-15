@@ -1839,5 +1839,21 @@
   "Heap": "हीप",
   "Heaps: {0} · Thread stacks: {1}": "हीप: {0} · थ्रेड स्टैक: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "नीचे नामित आवंटनों में कमिट की गई मेमोरी। हीप जो बड़े ब्लॉक अलग से आवंटित करता है, वे नहीं गिने जाते।",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "हीप और स्टैक को नाम नहीं दिया गया: प्रोसेस अपनी मेमोरी पढ़ने की अनुमति नहीं देती।"
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "हीप और स्टैक को नाम नहीं दिया गया: प्रोसेस अपनी मेमोरी पढ़ने की अनुमति नहीं देती।",
+  "Windows": "विंडो",
+  "Its top-level windows on this desktop, and switching to one": "इस डेस्कटॉप पर इसकी शीर्ष-स्तरीय विंडो, और किसी एक पर स्विच करना",
+  "Reading windows…": "विंडो पढ़ी जा रही हैं…",
+  "{0} windows, {1} visible": "{0} विंडो, {1} दिखाई दे रही",
+  "Windows kept the focus on another window.": "Windows ने फ़ोकस किसी दूसरी विंडो पर रखा।",
+  "That window has closed.": "वह विंडो बंद हो गई है।",
+  "No windows on this desktop. A service or another user's program has none here.": "इस डेस्कटॉप पर कोई विंडो नहीं है। किसी सेवा या दूसरे उपयोगकर्ता के प्रोग्राम की यहाँ कोई विंडो नहीं होती।",
+  "Filter by title or class": "शीर्षक या क्लास से फ़िल्टर करें",
+  "Show hidden windows": "छिपी विंडो दिखाएँ",
+  "No visible windows.": "कोई दिखाई देने वाली विंडो नहीं।",
+  "Switch to": "स्विच करें",
+  "Restore it if minimized and bring it to the front": "छोटी की गई हो तो पुनर्स्थापित करें और सामने लाएँ",
+  "Hidden": "छिपी",
+  "(no title)": "(कोई शीर्षक नहीं)",
+  "Title": "शीर्षक",
+  "Thread {0}": "थ्रेड {0}"
 }

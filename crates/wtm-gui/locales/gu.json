@@ -1839,5 +1839,21 @@
   "Heap": "હીપ",
   "Heaps: {0} · Thread stacks: {1}": "હીપ: {0} · થ્રેડ સ્ટૅક: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "નીચે નામ આપેલી ફાળવણીઓમાં કમિટ થયેલી મેમરી. હીપ અલગથી ફાળવે તે મોટા બ્લૉક ગણાતા નથી.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "હીપ અને સ્ટૅકને નામ અપાયું નથી: પ્રોસેસ તેની મેમરી વાંચવાની મંજૂરી આપતી નથી."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "હીપ અને સ્ટૅકને નામ અપાયું નથી: પ્રોસેસ તેની મેમરી વાંચવાની મંજૂરી આપતી નથી.",
+  "Windows": "વિન્ડો",
+  "Its top-level windows on this desktop, and switching to one": "આ ડેસ્કટૉપ પર તેની ટોચ-સ્તરની વિન્ડો, અને તેમાંથી એક પર સ્વિચ કરવું",
+  "Reading windows…": "વિન્ડો વાંચી રહ્યા છીએ…",
+  "{0} windows, {1} visible": "{0} વિન્ડો, {1} દૃશ્યમાન",
+  "Windows kept the focus on another window.": "Windows એ ફોકસ બીજી વિન્ડો પર રાખ્યું.",
+  "That window has closed.": "તે વિન્ડો બંધ થઈ ગઈ છે.",
+  "No windows on this desktop. A service or another user's program has none here.": "આ ડેસ્કટૉપ પર કોઈ વિન્ડો નથી. સેવા કે અન્ય વપરાશકર્તાના પ્રોગ્રામની અહીં કોઈ વિન્ડો હોતી નથી.",
+  "Filter by title or class": "શીર્ષક અથવા ક્લાસ દ્વારા ફિલ્ટર કરો",
+  "Show hidden windows": "છુપાયેલી વિન્ડો બતાવો",
+  "No visible windows.": "કોઈ દૃશ્યમાન વિન્ડો નથી.",
+  "Switch to": "પર સ્વિચ કરો",
+  "Restore it if minimized and bring it to the front": "નાની કરેલી હોય તો પુનઃસ્થાપિત કરો અને આગળ લાવો",
+  "Hidden": "છુપાયેલી",
+  "(no title)": "(કોઈ શીર્ષક નથી)",
+  "Title": "શીર્ષક",
+  "Thread {0}": "થ્રેડ {0}"
 }

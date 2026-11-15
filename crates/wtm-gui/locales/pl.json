@@ -1839,5 +1839,21 @@
   "Heap": "Sterta",
   "Heaps: {0} · Thread stacks: {1}": "Sterty: {0} · Stosy wątków: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Pamięć zatwierdzona w alokacjach wymienionych poniżej. Duże bloki, które sterta alokuje osobno, nie są liczone.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Sterty i stosy nie mają nazw: proces nie pozwala odczytać swojej pamięci."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Sterty i stosy nie mają nazw: proces nie pozwala odczytać swojej pamięci.",
+  "Windows": "Okna",
+  "Its top-level windows on this desktop, and switching to one": "Jego okna najwyższego poziomu na tym pulpicie i przełączanie do jednego z nich",
+  "Reading windows…": "Odczytywanie okien…",
+  "{0} windows, {1} visible": "Okna: {0}, widoczne: {1}",
+  "Windows kept the focus on another window.": "System Windows pozostawił fokus w innym oknie.",
+  "That window has closed.": "To okno zostało zamknięte.",
+  "No windows on this desktop. A service or another user's program has none here.": "Brak okien na tym pulpicie. Usługa lub program innego użytkownika nie ma tu okien.",
+  "Filter by title or class": "Filtruj według tytułu lub klasy",
+  "Show hidden windows": "Pokaż ukryte okna",
+  "No visible windows.": "Brak widocznych okien.",
+  "Switch to": "Przełącz do",
+  "Restore it if minimized and bring it to the front": "Przywróć, jeśli jest zminimalizowane, i przenieś na wierzch",
+  "Hidden": "Ukryte",
+  "(no title)": "(bez tytułu)",
+  "Title": "Tytuł",
+  "Thread {0}": "Wątek {0}"
 }

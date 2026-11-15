@@ -1839,5 +1839,21 @@
   "Heap": "Heap",
   "Heaps: {0} · Thread stacks: {1}": "Heaps: {0} · Threadstacks: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Vastgelegd in de toewijzingen die hieronder worden genoemd. Grote blokken die een heap apart toewijst, worden niet meegeteld.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heaps en stacks hebben geen naam: het proces staat niet toe dat zijn geheugen wordt gelezen."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heaps en stacks hebben geen naam: het proces staat niet toe dat zijn geheugen wordt gelezen.",
+  "Windows": "Vensters",
+  "Its top-level windows on this desktop, and switching to one": "De vensters op het hoogste niveau op dit bureaublad, en ernaar overschakelen",
+  "Reading windows…": "Vensters lezen…",
+  "{0} windows, {1} visible": "{0} vensters, {1} zichtbaar",
+  "Windows kept the focus on another window.": "Windows hield de focus bij een ander venster.",
+  "That window has closed.": "Dat venster is gesloten.",
+  "No windows on this desktop. A service or another user's program has none here.": "Geen vensters op dit bureaublad. Een service of het programma van een andere gebruiker heeft er hier geen.",
+  "Filter by title or class": "Filteren op titel of klasse",
+  "Show hidden windows": "Verborgen vensters weergeven",
+  "No visible windows.": "Geen zichtbare vensters.",
+  "Switch to": "Overschakelen naar",
+  "Restore it if minimized and bring it to the front": "Herstellen als het geminimaliseerd is en naar voren halen",
+  "Hidden": "Verborgen",
+  "(no title)": "(geen titel)",
+  "Title": "Titel",
+  "Thread {0}": "Thread {0}"
 }

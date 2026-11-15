@@ -1839,5 +1839,21 @@
   "Heap": "ਹੀਪ",
   "Heaps: {0} · Thread stacks: {1}": "ਹੀਪ: {0} · ਥ੍ਰੈੱਡ ਸਟੈਕ: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "ਹੇਠਾਂ ਨਾਮ ਦਿੱਤੀਆਂ ਵੰਡਾਂ ਵਿੱਚ ਕਮਿਟ ਕੀਤੀ ਮੈਮਰੀ। ਹੀਪ ਵੱਲੋਂ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਵੰਡੇ ਵੱਡੇ ਬਲਾਕ ਨਹੀਂ ਗਿਣੇ ਜਾਂਦੇ।",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "ਹੀਪ ਅਤੇ ਸਟੈਕ ਨੂੰ ਨਾਮ ਨਹੀਂ ਦਿੱਤਾ ਗਿਆ: ਪ੍ਰੋਸੈਸ ਆਪਣੀ ਮੈਮਰੀ ਪੜ੍ਹਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੀ।"
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "ਹੀਪ ਅਤੇ ਸਟੈਕ ਨੂੰ ਨਾਮ ਨਹੀਂ ਦਿੱਤਾ ਗਿਆ: ਪ੍ਰੋਸੈਸ ਆਪਣੀ ਮੈਮਰੀ ਪੜ੍ਹਨ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੰਦੀ।",
+  "Windows": "ਵਿੰਡੋਆਂ",
+  "Its top-level windows on this desktop, and switching to one": "ਇਸ ਡੈਸਕਟਾਪ 'ਤੇ ਇਸ ਦੀਆਂ ਸਿਖਰਲੇ ਪੱਧਰ ਦੀਆਂ ਵਿੰਡੋਆਂ, ਅਤੇ ਕਿਸੇ ਇੱਕ 'ਤੇ ਜਾਣਾ",
+  "Reading windows…": "ਵਿੰਡੋਆਂ ਪੜ੍ਹੀਆਂ ਜਾ ਰਹੀਆਂ ਹਨ…",
+  "{0} windows, {1} visible": "{0} ਵਿੰਡੋਆਂ, {1} ਦਿਖਾਈ ਦਿੰਦੀਆਂ",
+  "Windows kept the focus on another window.": "Windows ਨੇ ਫੋਕਸ ਕਿਸੇ ਹੋਰ ਵਿੰਡੋ 'ਤੇ ਰੱਖਿਆ।",
+  "That window has closed.": "ਉਹ ਵਿੰਡੋ ਬੰਦ ਹੋ ਗਈ ਹੈ।",
+  "No windows on this desktop. A service or another user's program has none here.": "ਇਸ ਡੈਸਕਟਾਪ 'ਤੇ ਕੋਈ ਵਿੰਡੋ ਨਹੀਂ ਹੈ। ਕਿਸੇ ਸੇਵਾ ਜਾਂ ਹੋਰ ਵਰਤੋਂਕਾਰ ਦੇ ਪ੍ਰੋਗਰਾਮ ਦੀ ਇੱਥੇ ਕੋਈ ਵਿੰਡੋ ਨਹੀਂ ਹੁੰਦੀ।",
+  "Filter by title or class": "ਸਿਰਲੇਖ ਜਾਂ ਕਲਾਸ ਅਨੁਸਾਰ ਫਿਲਟਰ ਕਰੋ",
+  "Show hidden windows": "ਲੁਕੀਆਂ ਵਿੰਡੋਆਂ ਦਿਖਾਓ",
+  "No visible windows.": "ਕੋਈ ਦਿਖਾਈ ਦੇਣ ਵਾਲੀ ਵਿੰਡੋ ਨਹੀਂ।",
+  "Switch to": "ਸਵਿੱਚ ਕਰੋ",
+  "Restore it if minimized and bring it to the front": "ਛੋਟੀ ਕੀਤੀ ਹੋਵੇ ਤਾਂ ਬਹਾਲ ਕਰੋ ਅਤੇ ਅੱਗੇ ਲਿਆਓ",
+  "Hidden": "ਲੁਕੀ ਹੋਈ",
+  "(no title)": "(ਕੋਈ ਸਿਰਲੇਖ ਨਹੀਂ)",
+  "Title": "ਸਿਰਲੇਖ",
+  "Thread {0}": "ਥ੍ਰੈੱਡ {0}"
 }

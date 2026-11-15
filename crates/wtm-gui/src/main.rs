@@ -61,6 +61,7 @@ mod tray;
 #[cfg(test)]
 mod ui_tests;
 mod views;
+mod windows_view;
 mod workspace_inspector;
 
 use eframe::egui;

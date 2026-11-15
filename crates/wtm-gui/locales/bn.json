@@ -1839,5 +1839,21 @@
   "Heap": "হিপ",
   "Heaps: {0} · Thread stacks: {1}": "হিপ: {0} · থ্রেড স্ট্যাক: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "নিচে নাম দেওয়া বরাদ্দগুলোতে কমিট করা মেমরি। হিপ আলাদাভাবে যে বড় ব্লক বরাদ্দ করে, সেগুলো গোনা হয় না।",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "হিপ ও স্ট্যাকের নাম দেওয়া যায়নি: প্রসেসটি তার মেমরি পড়ার অনুমতি দেয় না।"
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "হিপ ও স্ট্যাকের নাম দেওয়া যায়নি: প্রসেসটি তার মেমরি পড়ার অনুমতি দেয় না।",
+  "Windows": "উইন্ডো",
+  "Its top-level windows on this desktop, and switching to one": "এই ডেস্কটপে এর শীর্ষ-স্তরের উইন্ডো, এবং একটিতে সুইচ করা",
+  "Reading windows…": "উইন্ডো পড়া হচ্ছে…",
+  "{0} windows, {1} visible": "{0}টি উইন্ডো, {1}টি দৃশ্যমান",
+  "Windows kept the focus on another window.": "Windows ফোকাস অন্য উইন্ডোতে রেখেছে।",
+  "That window has closed.": "উইন্ডোটি বন্ধ হয়ে গেছে।",
+  "No windows on this desktop. A service or another user's program has none here.": "এই ডেস্কটপে কোনো উইন্ডো নেই। কোনো সার্ভিস বা অন্য ব্যবহারকারীর প্রোগ্রামের এখানে উইন্ডো থাকে না।",
+  "Filter by title or class": "শিরোনাম বা ক্লাস অনুযায়ী ফিল্টার করুন",
+  "Show hidden windows": "লুকানো উইন্ডো দেখান",
+  "No visible windows.": "কোনো দৃশ্যমান উইন্ডো নেই।",
+  "Switch to": "এতে সুইচ করুন",
+  "Restore it if minimized and bring it to the front": "ছোট করা থাকলে পুনরুদ্ধার করে সামনে আনুন",
+  "Hidden": "লুকানো",
+  "(no title)": "(শিরোনাম নেই)",
+  "Title": "শিরোনাম",
+  "Thread {0}": "থ্রেড {0}"
 }

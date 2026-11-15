@@ -1839,5 +1839,21 @@
   "Heap": "堆積",
   "Heaps: {0} · Thread stacks: {1}": "堆積：{0} · 執行緒堆疊：{1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "下方已命名配置中的已認可記憶體。堆積另外配置的大型區塊不計入。",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "堆積與堆疊未命名：此處理程序不允許讀取其記憶體。"
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "堆積與堆疊未命名：此處理程序不允許讀取其記憶體。",
+  "Windows": "視窗",
+  "Its top-level windows on this desktop, and switching to one": "它在此桌面上的最上層視窗，以及切換到其中之一",
+  "Reading windows…": "正在讀取視窗…",
+  "{0} windows, {1} visible": "{0} 個視窗，{1} 個可見",
+  "Windows kept the focus on another window.": "Windows 將焦點保留在另一個視窗上。",
+  "That window has closed.": "該視窗已關閉。",
+  "No windows on this desktop. A service or another user's program has none here.": "此桌面上沒有視窗。服務或其他使用者的程式在這裡沒有視窗。",
+  "Filter by title or class": "依標題或類別篩選",
+  "Show hidden windows": "顯示隱藏的視窗",
+  "No visible windows.": "沒有可見的視窗。",
+  "Switch to": "切換至",
+  "Restore it if minimized and bring it to the front": "如果已最小化則還原，並移到最前面",
+  "Hidden": "隱藏",
+  "(no title)": "(無標題)",
+  "Title": "標題",
+  "Thread {0}": "執行緒 {0}"
 }

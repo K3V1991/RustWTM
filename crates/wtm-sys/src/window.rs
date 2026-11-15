@@ -1,4 +1,5 @@
-//! The desktop's foreground window, and bringing our own window forward.
+//! The desktop's foreground window, bringing our own window forward, and
+//! the top-level windows of another process.
 
 use std::sync::{Mutex, OnceLock, PoisonError};
 
@@ -309,6 +310,125 @@ unsafe extern "system" fn session_proc(
     }
 }
 
+/// A top-level window of a process, as System Informer's Windows tab shows
+/// it. The title often names a document, a mail or a web page, so `Debug`
+/// leaves it out.
+#[derive(Clone, PartialEq, Eq, Default)]
+pub struct WindowInfo {
+    pub handle: isize,
+    /// The thread that created it and runs its messages.
+    pub tid: u32,
+    pub title: String,
+    /// The window class, such as "Chrome_WidgetWin_1" or "Notepad".
+    pub class: String,
+    pub visible: bool,
+    pub minimized: bool,
+    /// Its thread has not handled messages for several seconds.
+    pub hung: bool,
+}
+
+impl std::fmt::Debug for WindowInfo {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("WindowInfo")
+            .field("handle", &self.handle)
+            .field("tid", &self.tid)
+            .field(
+                "title",
+                &format_args!("({} characters)", self.title.chars().count()),
+            )
+            .field("class", &self.class)
+            .field("visible", &self.visible)
+            .field("minimized", &self.minimized)
+            .field("hung", &self.hung)
+            .finish()
+    }
+}
+
+/// The top-level windows process `pid` has on the calling thread's desktop
+/// (windows in other sessions or on other desktops are not seen), in
+/// Z order. Nothing is sent to the windows, so a hung one cannot stall
+/// this.
+pub fn windows_of(pid: u32) -> Vec<WindowInfo> {
+    let mut found = Owned {
+        pid,
+        windows: Vec::new(),
+    };
+    // SAFETY: `collect_owned` only borrows `found` behind the pointer and
+    // runs synchronously for the duration of the call.
+    unsafe {
+        let _ = EnumWindows(
+            Some(collect_owned),
+            LPARAM(&mut found as *mut Owned as isize),
+        );
+    }
+    found.windows
+}
+
+/// Windows at most per process; Explorer has hundreds of hidden ones.
+const MOST_WINDOWS: usize = 5_000;
+
+struct Owned {
+    pid: u32,
+    windows: Vec<WindowInfo>,
+}
+
+/// The window enumeration callback of `windows_of`.
+unsafe extern "system" fn collect_owned(hwnd: HWND, lparam: LPARAM) -> BOOL {
+    use windows::Win32::UI::WindowsAndMessaging::{
+        GetClassNameW, InternalGetWindowText, IsHungAppWindow,
+    };
+    // SAFETY: `lparam` carries the `&mut Owned` set up by `windows_of`,
+    // which outlives the enumeration; the window handle is valid for query
+    // here, and none of these calls sends the window a message.
+    unsafe {
+        let found = &mut *(lparam.0 as *mut Owned);
+        let mut pid = 0u32;
+        let tid = GetWindowThreadProcessId(hwnd, Some(&mut pid));
+        if pid == found.pid && tid != 0 {
+            let mut text = vec![0u16; 512];
+            let len = InternalGetWindowText(hwnd, &mut text).max(0) as usize;
+            let mut class = vec![0u16; 256];
+            let class_len = GetClassNameW(hwnd, &mut class).max(0) as usize;
+            found.windows.push(WindowInfo {
+                handle: hwnd.0 as isize,
+                tid,
+                title: String::from_utf16_lossy(&text[..len.min(text.len())]),
+                class: String::from_utf16_lossy(&class[..class_len.min(class.len())]),
+                visible: IsWindowVisible(hwnd).as_bool(),
+                minimized: IsIconic(hwnd).as_bool(),
+                hung: IsHungAppWindow(hwnd).as_bool(),
+            });
+        }
+        (found.windows.len() < MOST_WINDOWS).into()
+    }
+}
+
+/// The process and thread that own window `raw`; `None` once it is gone.
+pub fn window_owner(raw: isize) -> Option<(u32, u32)> {
+    let mut pid = 0u32;
+    // SAFETY: fails harmlessly (returns 0) on a destroyed window.
+    let tid = unsafe { GetWindowThreadProcessId(hwnd(raw), Some(&mut pid)) };
+    (tid != 0).then_some((pid, tid))
+}
+
+/// Task Manager's "Switch to": restores the window if it is minimized and
+/// gives it the focus, without making it stay on top. The restore is
+/// asynchronous, so a hung window cannot stall the caller. Returns whether
+/// Windows gave it the focus; it may refuse, for instance for a window of
+/// a program running as administrator.
+pub fn switch_to(raw: isize) -> bool {
+    use windows::Win32::UI::WindowsAndMessaging::ShowWindowAsync;
+    let h = hwnd(raw);
+    // SAFETY: these calls validate the handle and fail harmlessly on a
+    // destroyed window.
+    unsafe {
+        if IsIconic(h).as_bool() {
+            let _ = ShowWindowAsync(h, SW_RESTORE);
+        }
+        SetForegroundWindow(h).as_bool()
+    }
+}
+
 fn hwnd(raw: isize) -> HWND {
     HWND(raw as *mut core::ffi::c_void)
 }
@@ -454,6 +574,126 @@ pub fn is_minimized(raw: isize) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    #[test]
+    fn lists_a_hidden_window_whose_thread_does_not_answer() {
+        // A window on a thread that then waits without handling messages:
+        // reading it must not wait on that thread. It is never shown.
+        let (made, created) = std::sync::mpsc::channel();
+        let (stop, stopped) = std::sync::mpsc::channel::<()>();
+        let owner = std::thread::spawn(move || {
+            // SAFETY: a plain hidden STATIC window, destroyed below by the
+            // thread that created it.
+            let window = unsafe {
+                CreateWindowExW(
+                    WINDOW_EX_STYLE(0),
+                    w!("STATIC"),
+                    w!("RustWTM window list test"),
+                    WS_OVERLAPPED,
+                    0,
+                    0,
+                    100,
+                    100,
+                    None,
+                    None,
+                    None,
+                    None,
+                )
+            }
+            .unwrap();
+            made.send((window.0 as isize, crate::threads::current_thread_id()))
+                .unwrap();
+            let _ = stopped.recv();
+            // SAFETY: created above on this thread.
+            unsafe { DestroyWindow(window).unwrap() };
+        });
+        let (handle, tid) = created.recv().unwrap();
+
+        let start = std::time::Instant::now();
+        let windows = windows_of(std::process::id());
+        assert!(start.elapsed() < std::time::Duration::from_secs(2));
+        let w = windows.iter().find(|w| w.handle == handle).unwrap();
+        assert_eq!(w.title, "RustWTM window list test");
+        assert!(w.class.eq_ignore_ascii_case("static"), "{}", w.class);
+        assert_eq!(w.tid, tid);
+        assert!(!w.visible && !w.minimized && !w.hung);
+        assert_eq!(window_owner(handle), Some((std::process::id(), tid)));
+        // Titles stay out of logs.
+        let debug = format!("{w:?}");
+        assert!(!debug.contains("RustWTM window list test") && debug.contains("24 characters"));
+
+        stop.send(()).unwrap();
+        owner.join().unwrap();
+        assert_eq!(window_owner(handle), None);
+        assert!(
+            windows_of(std::process::id())
+                .iter()
+                .all(|w| w.handle != handle)
+        );
+    }
+
+    #[test]
+    fn switching_restores_a_minimized_window_without_pinning_it() {
+        use windows::Win32::UI::WindowsAndMessaging::{PostThreadMessageW, SW_MINIMIZE, WM_QUIT};
+        // Restoring is posted to the window's thread, so this one handles
+        // messages. Tiny and far off-screen, like the test above.
+        let (made, created) = std::sync::mpsc::channel();
+        let owner = std::thread::spawn(move || {
+            // SAFETY: a predefined class; destroyed below by this thread,
+            // after its message loop ends.
+            unsafe {
+                let h = CreateWindowExW(
+                    WINDOW_EX_STYLE(0),
+                    w!("STATIC"),
+                    w!("wtm-switch-test"),
+                    WS_OVERLAPPEDWINDOW,
+                    -32000,
+                    -32000,
+                    10,
+                    10,
+                    None,
+                    None,
+                    None,
+                    None,
+                )
+                .unwrap();
+                made.send((h.0 as isize, crate::threads::current_thread_id()))
+                    .unwrap();
+                let mut msg = MSG::default();
+                while GetMessageW(&mut msg, None, 0, 0).as_bool() {
+                    let _ = TranslateMessage(&msg);
+                    DispatchMessageW(&msg);
+                }
+                let _ = DestroyWindow(h);
+            }
+        });
+        let (raw, tid) = created.recv().unwrap();
+        // SAFETY: the window is live until its thread is told to quit.
+        unsafe {
+            let _ = ShowWindow(hwnd(raw), SW_MINIMIZE);
+        }
+        assert!(is_minimized(raw));
+        // The focus may be refused (no interactive desktop on CI); the
+        // restore may not.
+        let _ = switch_to(raw);
+        let until = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        while is_minimized(raw) {
+            assert!(std::time::Instant::now() < until, "never restored");
+            std::thread::sleep(std::time::Duration::from_millis(10));
+        }
+        assert!(is_visible(raw) && !is_topmost(raw));
+        // SAFETY: plain call; the thread's loop ends on WM_QUIT.
+        unsafe { PostThreadMessageW(tid, WM_QUIT, WPARAM(0), LPARAM(0)).unwrap() };
+        owner.join().unwrap();
+        assert_eq!(window_owner(raw), None);
+    }
+
+    #[test]
+    fn another_process_s_list_holds_only_its_windows() {
+        // PID 4 (System) has no windows on any desktop.
+        assert!(windows_of(4).is_empty());
+    }
 
     #[test]
     fn full_screen_means_reaching_every_edge() {
@@ -498,7 +738,6 @@ mod tests {
         let _ = foreground_fullscreen();
     }
 
-    use super::*;
     use windows::Win32::UI::WindowsAndMessaging::{
         DestroyWindow, ENDSESSION_CLOSEAPP, WS_OVERLAPPEDWINDOW,
     };

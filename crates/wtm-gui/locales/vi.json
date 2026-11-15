@@ -1839,5 +1839,21 @@
   "Heap": "Heap",
   "Heaps: {0} · Thread stacks: {1}": "Heap: {0} · Ngăn xếp luồng: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "Bộ nhớ đã cam kết trong các vùng cấp phát được đặt tên bên dưới. Không tính các khối lớn mà heap cấp phát riêng.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heap và ngăn xếp chưa được đặt tên: tiến trình không cho phép đọc bộ nhớ của nó."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "Heap và ngăn xếp chưa được đặt tên: tiến trình không cho phép đọc bộ nhớ của nó.",
+  "Windows": "Cửa sổ",
+  "Its top-level windows on this desktop, and switching to one": "Các cửa sổ cấp cao nhất của nó trên màn hình này và chuyển sang một cửa sổ",
+  "Reading windows…": "Đang đọc cửa sổ…",
+  "{0} windows, {1} visible": "{0} cửa sổ, {1} đang hiển thị",
+  "Windows kept the focus on another window.": "Windows giữ tiêu điểm ở một cửa sổ khác.",
+  "That window has closed.": "Cửa sổ đó đã đóng.",
+  "No windows on this desktop. A service or another user's program has none here.": "Không có cửa sổ nào trên màn hình này. Dịch vụ hoặc chương trình của người dùng khác không có cửa sổ ở đây.",
+  "Filter by title or class": "Lọc theo tiêu đề hoặc lớp",
+  "Show hidden windows": "Hiện cửa sổ ẩn",
+  "No visible windows.": "Không có cửa sổ hiển thị.",
+  "Switch to": "Chuyển sang",
+  "Restore it if minimized and bring it to the front": "Khôi phục nếu đang thu nhỏ và đưa lên trước",
+  "Hidden": "Ẩn",
+  "(no title)": "(không có tiêu đề)",
+  "Title": "Tiêu đề",
+  "Thread {0}": "Luồng {0}"
 }

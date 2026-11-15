@@ -1839,5 +1839,21 @@
   "Heap": "హీప్",
   "Heaps: {0} · Thread stacks: {1}": "హీప్‌లు: {0} · థ్రెడ్ స్టాక్‌లు: {1}",
   "Committed in the allocations named below. Large blocks a heap allocates on their own are not counted.": "కింద పేరు ఇచ్చిన కేటాయింపులలో కమిట్ చేసిన మెమరీ. హీప్ విడిగా కేటాయించే పెద్ద బ్లాక్‌లు లెక్కించబడవు.",
-  "Heaps and stacks are not named: the process does not allow reading its memory.": "హీప్‌లు మరియు స్టాక్‌లకు పేరు ఇవ్వలేదు: ప్రాసెస్ తన మెమరీని చదవడానికి అనుమతించదు."
+  "Heaps and stacks are not named: the process does not allow reading its memory.": "హీప్‌లు మరియు స్టాక్‌లకు పేరు ఇవ్వలేదు: ప్రాసెస్ తన మెమరీని చదవడానికి అనుమతించదు.",
+  "Windows": "విండోలు",
+  "Its top-level windows on this desktop, and switching to one": "ఈ డెస్క్‌టాప్‌లో దాని అగ్ర-స్థాయి విండోలు, మరియు ఒకదానికి మారడం",
+  "Reading windows…": "విండోలను చదువుతోంది…",
+  "{0} windows, {1} visible": "{0} విండోలు, {1} కనిపిస్తున్నాయి",
+  "Windows kept the focus on another window.": "Windows ఫోకస్‌ను మరో విండోలో ఉంచింది.",
+  "That window has closed.": "ఆ విండో మూసివేయబడింది.",
+  "No windows on this desktop. A service or another user's program has none here.": "ఈ డెస్క్‌టాప్‌లో విండోలు లేవు. ఒక సేవకు లేదా మరో వినియోగదారు ప్రోగ్రామ్‌కు ఇక్కడ విండోలు ఉండవు.",
+  "Filter by title or class": "శీర్షిక లేదా క్లాస్ ద్వారా ఫిల్టర్ చేయండి",
+  "Show hidden windows": "దాచిన విండోలను చూపు",
+  "No visible windows.": "కనిపించే విండోలు లేవు.",
+  "Switch to": "దీనికి మారు",
+  "Restore it if minimized and bring it to the front": "కనిష్ఠీకరించి ఉంటే పునరుద్ధరించి ముందుకు తీసుకురా",
+  "Hidden": "దాచబడింది",
+  "(no title)": "(శీర్షిక లేదు)",
+  "Title": "శీర్షిక",
+  "Thread {0}": "థ్రెడ్ {0}"
 }

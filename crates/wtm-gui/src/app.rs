@@ -2124,6 +2124,10 @@ impl eframe::App for App {
                 Intent::Security(target) => backend.send(UiCommand::Security(target)),
                 Intent::Environment(target) => backend.send(UiCommand::Environment(target)),
                 Intent::Handles(target) => backend.send(UiCommand::Handles(target)),
+                Intent::Windows(target) => backend.send(UiCommand::Windows(target)),
+                Intent::SwitchToWindow(target, handle) => {
+                    backend.send(UiCommand::SwitchToWindow(target, handle))
+                }
                 Intent::MemoryMap(target) => backend.send(UiCommand::MemoryMap(target)),
                 Intent::Threads(target) => backend.send(UiCommand::Threads(target)),
                 Intent::AskAi(target) => state.ai.open_process(target),
@@ -2834,6 +2838,19 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
         {
             intents.push(Intent::Handles(Some(sel.clone())));
         }
+        let windows = data.windows.as_ref().filter(|(r, _)| r == sel);
+        if ui
+            .add_enabled(
+                !windows.is_some_and(|(_, w)| w.is_none()),
+                egui::Button::new(crate::i18n::tr("Windows")),
+            )
+            .on_hover_text(crate::i18n::tr(
+                "Its top-level windows on this desktop, and switching to one",
+            ))
+            .clicked()
+        {
+            intents.push(Intent::Windows(Some(sel.clone())));
+        }
         let memory_map = data.memory_map.as_ref().filter(|(r, _)| r == sel);
         if ui
             .add_enabled(
@@ -2888,6 +2905,7 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
     crate::security_view::show(ui, data, sel, intents);
     crate::environment_view::show(ui, data, sel, intents);
     crate::handles_view::show(ui, data, sel, intents);
+    crate::windows_view::show(ui, data, sel, intents);
     crate::memory_map_view::show(ui, data, sel, intents);
     match ending.map(|(_, r)| r) {
         Some(None) => {
@@ -7413,6 +7431,10 @@ mod tests {
             UiCommand::Security(t) => format!("security {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Environment(t) => format!("environment {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Handles(t) => format!("handles {:?}", t.as_ref().map(|t| t.pid)),
+            UiCommand::Windows(t) => format!("windows {:?}", t.as_ref().map(|t| t.pid)),
+            UiCommand::SwitchToWindow(t, handle) => {
+                format!("switch to window {handle:#x} of {}", t.pid)
+            }
             UiCommand::MemoryMap(t) => format!("memory map {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Find(q) => format!("find {q:?}"),
             UiCommand::Threads(t) => format!("threads {:?}", t.as_ref().map(|t| t.pid)),
@@ -8552,6 +8574,120 @@ mod tests {
             h.query_by_label_contains("250000 handles, too many")
                 .is_some()
         );
+    }
+
+    #[test]
+    fn windows_panel_lists_visible_windows_and_switches_to_one() {
+        use wtm_core::control::WindowInfo;
+        let window = |handle, title: &str, class: &str, visible, hung| WindowInfo {
+            handle,
+            tid: 900,
+            title: title.into(),
+            class: class.into(),
+            visible,
+            minimized: false,
+            hung,
+        };
+        let mut d = data();
+        let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
+        d.windows = Some((
+            alpha.clone(),
+            Some(Ok(crate::windows_view::WindowList::from(vec![
+                // Hidden and hung, as a suspended app's windows are.
+                window(0x10, "Helper sink", "AlphaSink", false, true),
+                window(0x20, "Quarterly report", "AlphaMain", true, false),
+                window(0x30, "Export options", "AlphaDialog", true, true),
+            ]))),
+        ));
+        let (backend, rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 1600.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.state_mut().state.processes.selected = Some(alpha.clone());
+        h.run_steps(2);
+        for text in [
+            "3 windows, 2 visible",
+            "Quarterly report",
+            "Export options",
+            "AlphaMain",
+        ] {
+            assert!(
+                h.query_all_by_label_contains(text).next().is_some(),
+                "{text}"
+            );
+        }
+        // The toolbar's filter chip and the one visible hung window.
+        assert_eq!(h.query_all_by_label("Not responding").count(), 2);
+        // Hidden windows only when asked for.
+        assert!(h.query_by_label("Helper sink").is_none());
+        h.get_by_label("Show hidden windows").click();
+        h.run_steps(2);
+        assert!(h.query_by_label("Helper sink").is_some());
+        assert!(h.query_by_label("Hidden").is_some());
+        assert_eq!(h.query_all_by_label("Not responding").count(), 2);
+
+        // The topmost visible window is first.
+        h.get_all_by_label("Switch to").next().unwrap().click();
+        h.run_steps(2);
+        let sent: Vec<String> = rx.try_iter().map(describe_command).collect();
+        assert!(
+            sent.iter().any(|c| c == "switch to window 0x20 of 100"),
+            "{sent:?}"
+        );
+        // Titles never reach the command log.
+        assert!(sent.iter().all(|c| !c.contains("Quarterly")));
+
+        h.get_by_label("Filter by title or class").click();
+        h.run_steps(2);
+        h.get_by_label("Filter by title or class")
+            .type_text("dialog");
+        h.run_steps(2);
+        assert!(h.query_by_label("Quarterly report").is_none());
+        assert!(h.query_by_label("Export options").is_some());
+    }
+
+    #[test]
+    fn windows_panel_says_what_an_empty_list_means() {
+        let mut d = data();
+        let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
+        d.windows = Some((
+            alpha.clone(),
+            Some(Ok(crate::windows_view::WindowList {
+                switched: Some(wtm_core::control::SwitchOutcome::Gone),
+                ..Default::default()
+            })),
+        ));
+        let (backend, _rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 1600.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.state_mut().state.processes.selected = Some(alpha);
+        h.run_steps(2);
+        assert!(
+            h.query_by_label_contains("No windows on this desktop")
+                .is_some()
+        );
+        assert!(h.query_by_label("That window has closed.").is_some());
     }
 
     #[test]
