@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "Zatrzymano po minucie.",
   "No process has a matching handle or DLL.": "Żaden proces nie ma pasującego dojścia ani biblioteki DLL.",
   "Show in the inspector": "Pokaż w inspektorze",
-  "That process has exited.": "Ten proces zakończył działanie."
+  "That process has exited.": "Ten proces zakończył działanie.",
+  "This PC": "Ten komputer",
+  "Storage": "Pamięć masowa",
+  "Graphics": "Grafika",
+  "Processor": "Procesor",
+  "Max clock": "Maks. taktowanie",
+  "Motherboard and firmware": "Płyta główna i oprogramowanie układowe",
+  "All details": "Wszystkie szczegóły",
+  "{0} cores, {1} threads": "Rdzenie: {0}, wątki: {1}",
+  "Firmware {0}": "Oprogramowanie układowe {0}",
+  "Driver {0}": "Sterownik {0}",
+  "BIOS {0}": "BIOS {0}"
 }

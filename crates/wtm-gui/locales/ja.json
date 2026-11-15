@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "1 分後に停止しました。",
   "No process has a matching handle or DLL.": "一致するハンドルまたは DLL を持つプロセスはありません。",
   "Show in the inspector": "インスペクターに表示",
-  "That process has exited.": "そのプロセスは終了しました。"
+  "That process has exited.": "そのプロセスは終了しました。",
+  "This PC": "この PC",
+  "Storage": "ストレージ",
+  "Graphics": "グラフィックス",
+  "Processor": "プロセッサ",
+  "Max clock": "最大クロック",
+  "Motherboard and firmware": "マザーボードとファームウェア",
+  "All details": "すべての詳細",
+  "{0} cores, {1} threads": "{0} コア、{1} スレッド",
+  "Firmware {0}": "ファームウェア {0}",
+  "Driver {0}": "ドライバー {0}",
+  "BIOS {0}": "BIOS {0}"
 }

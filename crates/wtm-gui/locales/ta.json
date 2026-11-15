@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "ஒரு நிமிடத்திற்குப் பிறகு நிறுத்தப்பட்டது.",
   "No process has a matching handle or DLL.": "பொருந்தும் கைப்பிடி அல்லது DLL உள்ள செயல்முறை இல்லை.",
   "Show in the inspector": "ஆய்வாளரில் காட்டு",
-  "That process has exited.": "அந்தச் செயல்முறை முடிந்துவிட்டது."
+  "That process has exited.": "அந்தச் செயல்முறை முடிந்துவிட்டது.",
+  "This PC": "இந்த PC",
+  "Storage": "சேமிப்பகம்",
+  "Graphics": "வரைகலை",
+  "Processor": "செயலி",
+  "Max clock": "அதிகபட்ச கடிகாரம்",
+  "Motherboard and firmware": "மதர்போர்டு மற்றும் ஃபர்ம்வேர்",
+  "All details": "அனைத்து விவரங்களும்",
+  "{0} cores, {1} threads": "{0} கோர்கள், {1} த்ரெட்கள்",
+  "Firmware {0}": "ஃபர்ம்வேர் {0}",
+  "Driver {0}": "இயக்கி {0}",
+  "BIOS {0}": "BIOS {0}"
 }

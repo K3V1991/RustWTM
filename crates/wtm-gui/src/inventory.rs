@@ -37,14 +37,14 @@ ConvertTo-Json -InputObject @($items) -Depth 4 -Compress
 "#;
 
 #[derive(Clone, Debug, serde::Deserialize)]
-struct Item {
-    kind: String,
+pub(crate) struct Item {
+    pub(crate) kind: String,
     fields: Vec<String>,
 }
 type Inventory = Result<Vec<Item>, String>;
 type Shared = Arc<Mutex<Option<Inventory>>>;
 
-fn parse(bytes: &[u8]) -> Result<Vec<Item>, String> {
+pub(crate) fn parse(bytes: &[u8]) -> Result<Vec<Item>, String> {
     if bytes.len() >= MAX_REPLY {
         return Err("Inventory response exceeds its limit".into());
     }
@@ -170,7 +170,7 @@ pub struct Identities {
     pub disks: std::collections::BTreeMap<u32, String>,
 }
 
-fn field<'a>(item: &'a Item, key: &str) -> Option<&'a str> {
+pub(crate) fn field<'a>(item: &'a Item, key: &str) -> Option<&'a str> {
     item.fields
         .iter()
         .filter_map(|f| f.split_once(": "))
@@ -185,6 +185,7 @@ fn field<'a>(item: &'a Item, key: &str) -> Option<&'a str> {
                     "system manufacturer",
                     "system product name",
                     "(Standard disk drives)",
+                    "(Standard display types)",
                 ]
                 .iter()
                 .any(|p| v.eq_ignore_ascii_case(p))
@@ -295,7 +296,7 @@ pub fn resource_identities(ui: &Ui) -> Identities {
 
 /// SMBIOSMemoryType uses raw SMBIOS codes; FormFactor uses WMI's CIM enum.
 /// These are distinct namespaces, even for the same DIMM.
-fn memory_metadata(key: &str, value: &str) -> Option<&'static str> {
+pub(crate) fn memory_metadata(key: &str, value: &str) -> Option<&'static str> {
     let code = value.parse::<u16>().ok()?;
     match (key, code) {
         ("SMBIOSMemoryType", 18) => Some("DDR"),
@@ -470,7 +471,25 @@ pub fn specifications(ui: &mut Ui) {
         }
     });
     ui.weak(crate::i18n::tr("Read-only specifications reported by Windows. This is an inventory snapshot, not live sensor data."));
-    show_cards(ui, true);
+    let items = match shared
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner)
+        .as_ref()
+    {
+        Some(Ok(items)) if !items.is_empty() => Some(items.clone()),
+        _ => None,
+    };
+    match items {
+        // The spec sheet, with every field still a click away for copying.
+        Some(items) => {
+            crate::hardware_showcase::show(ui, &items);
+            egui::CollapsingHeader::new(crate::i18n::tr("All details"))
+                .id_salt("hardware_all_details")
+                .default_open(false)
+                .show(ui, |ui| show_cards(ui, true));
+        }
+        None => show_cards(ui, true),
+    }
 }
 
 pub fn show(ui: &mut Ui) {

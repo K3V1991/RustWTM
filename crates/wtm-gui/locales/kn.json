@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "ಒಂದು ನಿಮಿಷದ ನಂತರ ನಿಲ್ಲಿಸಲಾಗಿದೆ.",
   "No process has a matching handle or DLL.": "ಯಾವುದೇ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ ಹೊಂದುವ ಹ್ಯಾಂಡಲ್ ಅಥವಾ DLL ಇಲ್ಲ.",
   "Show in the inspector": "ಪರಿಶೀಲಕದಲ್ಲಿ ತೋರಿಸಿ",
-  "That process has exited.": "ಆ ಪ್ರಕ್ರಿಯೆ ಕೊನೆಗೊಂಡಿದೆ."
+  "That process has exited.": "ಆ ಪ್ರಕ್ರಿಯೆ ಕೊನೆಗೊಂಡಿದೆ.",
+  "This PC": "ಈ PC",
+  "Storage": "ಸಂಗ್ರಹಣೆ",
+  "Graphics": "ಗ್ರಾಫಿಕ್ಸ್",
+  "Processor": "ಪ್ರೊಸೆಸರ್",
+  "Max clock": "ಗರಿಷ್ಠ ಕ್ಲಾಕ್",
+  "Motherboard and firmware": "ಮದರ್‌ಬೋರ್ಡ್ ಮತ್ತು ಫರ್ಮ್‌ವೇರ್",
+  "All details": "ಎಲ್ಲಾ ವಿವರಗಳು",
+  "{0} cores, {1} threads": "{0} ಕೋರ್‌ಗಳು, {1} ಥ್ರೆಡ್‌ಗಳು",
+  "Firmware {0}": "ಫರ್ಮ್‌ವೇರ್ {0}",
+  "Driver {0}": "ಡ್ರೈವರ್ {0}",
+  "BIOS {0}": "BIOS {0}"
 }

@@ -19,6 +19,18 @@ All notable changes to this project are documented here. The format follows
   the process in the inspector, unless it has exited since. lsass.exe and
   lsaiso.exe are never opened.
 
+### Changed
+
+- Hardware specifications is a spec sheet instead of a list of tables: a
+  banner with the PC's name and its cores, threads, memory, storage and
+  graphics in large type, then an illustrated card per part: the processor
+  with a map of its cores and threads, its clock and its caches; memory as
+  one drawn stick per slot with its size; drives scaled by capacity with
+  their interface and firmware; graphics adapters with their driver; and
+  the board with its BIOS. Every field is still under "All details" for
+  copying, and parts Windows does not describe are left out rather than
+  drawn empty.
+
 ## [0.33.0] - 2026-11-15
 
 The process inspector gains Process Explorer's and System Informer's

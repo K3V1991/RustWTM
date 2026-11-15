@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "Imesimama baada ya dakika moja.",
   "No process has a matching handle or DLL.": "Hakuna mchakato wenye kishikio au DLL inayolingana.",
   "Show in the inspector": "Onyesha kwenye kikaguzi",
-  "That process has exited.": "Mchakato huo umeisha."
+  "That process has exited.": "Mchakato huo umeisha.",
+  "This PC": "Kompyuta hii",
+  "Storage": "Hifadhi",
+  "Graphics": "Michoro",
+  "Processor": "Prosesa",
+  "Max clock": "Kasi ya juu",
+  "Motherboard and firmware": "Ubao mama na programu dhibiti",
+  "All details": "Maelezo yote",
+  "{0} cores, {1} threads": "Kore {0}, nyuzi {1}",
+  "Firmware {0}": "Programu dhibiti {0}",
+  "Driver {0}": "Kiendeshi {0}",
+  "BIOS {0}": "BIOS {0}"
 }

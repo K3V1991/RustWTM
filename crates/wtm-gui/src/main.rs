@@ -23,6 +23,7 @@ mod file_locks;
 mod find_view;
 mod frames;
 mod handles_view;
+mod hardware_showcase;
 mod hold;
 mod i18n;
 mod incidents;

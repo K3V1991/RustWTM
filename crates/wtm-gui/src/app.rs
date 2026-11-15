@@ -10955,7 +10955,9 @@ mod tests {
                                 {"kind":"CPU","fields":["Name: Example 16-core processor","Manufacturer: Example CPU","NumberOfCores: 16","NumberOfLogicalProcessors: 32","MaxClockSpeed: 5200","L2CacheSize: 16384","L3CacheSize: 131072"]},
                                 {"kind":"Motherboard","fields":["Manufacturer: Example Boards","Product: Pro Mainboard","Version: Rev 2"]},
                                 {"kind":"RAM","fields":["Manufacturer: Example Memory","PartNumber: DDR5-32","Capacity: 34359738368","SMBIOSMemoryType: 34","FormFactor: 8","ConfiguredClockSpeed: 5600","DeviceLocator: DIMM A1"]},
+                                {"kind":"RAM","fields":["Manufacturer: Example Memory","PartNumber: DDR5-32","Capacity: 34359738368","SMBIOSMemoryType: 34","FormFactor: 8","ConfiguredClockSpeed: 5600","DeviceLocator: DIMM B1"]},
                                 {"kind":"Disk","fields":["Index: 0","Model: Example NVMe SSD","Size: 2199023255552","InterfaceType: SCSI","FirmwareRevision: 2.0"]},
+                                {"kind":"Disk","fields":["Index: 1","Model: Example archive HDD","Size: 4398046511104","InterfaceType: IDE","FirmwareRevision: CC43"]},
                                 {"kind":"GPU","fields":["Name: Example graphics adapter","AdapterCompatibility: Example GPU","DriverVersion: 32.1"]}
                             ]"#)));
                         }

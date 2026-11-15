@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "ఒక నిమిషం తర్వాత ఆపబడింది.",
   "No process has a matching handle or DLL.": "ఏ ప్రాసెస్‌కూ సరిపోలే హ్యాండిల్ లేదా DLL లేదు.",
   "Show in the inspector": "ఇన్‌స్పెక్టర్‌లో చూపు",
-  "That process has exited.": "ఆ ప్రాసెస్ ముగిసింది."
+  "That process has exited.": "ఆ ప్రాసెస్ ముగిసింది.",
+  "This PC": "ఈ PC",
+  "Storage": "నిల్వ",
+  "Graphics": "గ్రాఫిక్స్",
+  "Processor": "ప్రాసెసర్",
+  "Max clock": "గరిష్ట క్లాక్",
+  "Motherboard and firmware": "మదర్‌బోర్డ్ మరియు ఫర్మ్‌వేర్",
+  "All details": "అన్ని వివరాలు",
+  "{0} cores, {1} threads": "{0} కోర్‌లు, {1} థ్రెడ్‌లు",
+  "Firmware {0}": "ఫర్మ్‌వేర్ {0}",
+  "Driver {0}": "డ్రైవర్ {0}",
+  "BIOS {0}": "BIOS {0}"
 }

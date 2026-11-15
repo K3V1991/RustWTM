@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "এক মিনিট পরে থামানো হয়েছে।",
   "No process has a matching handle or DLL.": "কোনো প্রক্রিয়ায় মিলে যাওয়া হ্যান্ডেল বা DLL নেই।",
   "Show in the inspector": "পরিদর্শকে দেখান",
-  "That process has exited.": "সেই প্রক্রিয়াটি শেষ হয়েছে।"
+  "That process has exited.": "সেই প্রক্রিয়াটি শেষ হয়েছে।",
+  "This PC": "এই PC",
+  "Storage": "স্টোরেজ",
+  "Graphics": "গ্রাফিক্স",
+  "Processor": "প্রসেসর",
+  "Max clock": "সর্বোচ্চ ক্লক",
+  "Motherboard and firmware": "মাদারবোর্ড ও ফার্মওয়্যার",
+  "All details": "সব বিবরণ",
+  "{0} cores, {1} threads": "{0}টি কোর, {1}টি থ্রেড",
+  "Firmware {0}": "ফার্মওয়্যার {0}",
+  "Driver {0}": "ড্রাইভার {0}",
+  "BIOS {0}": "BIOS {0}"
 }

@@ -1818,5 +1818,16 @@
   "Stopped after a minute.": "Зупинено через хвилину.",
   "No process has a matching handle or DLL.": "Жоден процес не має відповідного дескриптора або DLL.",
   "Show in the inspector": "Показати в інспекторі",
-  "That process has exited.": "Цей процес завершився."
+  "That process has exited.": "Цей процес завершився.",
+  "This PC": "Цей комп'ютер",
+  "Storage": "Накопичувачі",
+  "Graphics": "Графіка",
+  "Processor": "Процесор",
+  "Max clock": "Макс. частота",
+  "Motherboard and firmware": "Материнська плата й мікропрограма",
+  "All details": "Усі відомості",
+  "{0} cores, {1} threads": "Ядер: {0}, потоків: {1}",
+  "Firmware {0}": "Мікропрограма {0}",
+  "Driver {0}": "Драйвер {0}",
+  "BIOS {0}": "BIOS {0}"
 }
