@@ -479,6 +479,29 @@ pub fn memory_map(target: &ProcessRef) -> ControlResult<MemoryMap> {
     }
 }
 
+/// The modules `target` has loaded, for a search across processes: unlike
+/// the Modules view, the sign-in secrets holders are refused (by the name
+/// given and by the image opened), since reading modules needs the right
+/// to read process memory.
+pub fn modules_checked(target: &ProcessRef) -> ControlResult<Vec<wtm_sys::modules::Module>> {
+    let secrets = ControlError::Protected {
+        pid: target.pid,
+        reason: "holds this PC's sign-in secrets",
+    };
+    if holds_secrets(&target.name) {
+        return Err(secrets);
+    }
+    let h = open_verified(target, Access::QUERY)?;
+    match image_name(&h) {
+        Some(name) if holds_secrets(&name) => Err(secrets),
+        Some(_) => sys(
+            target.pid,
+            wtm_sys::modules::process_modules(target.pid, target.create_time),
+        ),
+        None => Err(ControlError::AccessDenied { pid: target.pid }),
+    }
+}
+
 /// The command line a process was started with.
 pub fn command_line(target: &ProcessRef) -> ControlResult<String> {
     let h = open_verified(target, Access::QUERY)?;

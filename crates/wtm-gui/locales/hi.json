@@ -1802,5 +1802,21 @@
   "Private": "निजी",
   "Private executable memory: {0} in {1} allocations": "निजी निष्पादन योग्य मेमोरी: {1} आवंटनों में {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "फ़ाइल पर आधारित न होने वाली निष्पादन योग्य मेमोरी। JIT कंपाइलर (.NET, ब्राउज़र, Java) इसे बनाते हैं, और प्रक्रिया में डाला गया कोड भी।",
-  "Protection": "सुरक्षा"
+  "Protection": "सुरक्षा",
+  "Find handle or DLL": "हैंडल या DLL खोजें",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "हर प्रक्रिया में खुली फ़ाइल, कुंजी या अन्य ऑब्जेक्ट, या लोड की गई DLL खोजें",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "वे प्रक्रियाएँ जिन्होंने ऐसी फ़ाइल, कुंजी या अन्य ऑब्जेक्ट खोला है, या ऐसी DLL लोड की है, जिसके नाम में यह टेक्स्ट है।",
+  "Text in a file, key, object or DLL name": "फ़ाइल, कुंजी, ऑब्जेक्ट या DLL के नाम में टेक्स्ट",
+  "Search": "खोजें",
+  "Type 3 or more characters.": "3 या अधिक वर्ण लिखें।",
+  "Results for \"{0}\"": "\"{0}\" के परिणाम",
+  "Searched {0} of {1} processes": "{1} में से {0} प्रक्रियाएँ खोजी गईं",
+  "{0} hits": "{0} परिणाम",
+  "{0} could not be opened; run as administrator to search them too.": "{0} को खोला नहीं जा सका; उन्हें भी खोजने के लिए व्यवस्थापक के रूप में चलाएँ।",
+  "Names were not fully read in {0} processes.": "{0} प्रक्रियाओं में नाम पूरी तरह नहीं पढ़े गए।",
+  "Stopped at {0} hits.": "{0} परिणामों पर रोका गया।",
+  "Stopped after a minute.": "एक मिनट बाद रोका गया।",
+  "No process has a matching handle or DLL.": "किसी प्रक्रिया में मेल खाता हैंडल या DLL नहीं है।",
+  "Show in the inspector": "निरीक्षक में दिखाएँ",
+  "That process has exited.": "वह प्रक्रिया समाप्त हो गई है।"
 }

@@ -1802,5 +1802,21 @@
   "Private": "खाजगी",
   "Private executable memory: {0} in {1} allocations": "खाजगी कार्यान्वित करण्यायोग्य मेमरी: {1} वाटपांमध्ये {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "फाइलवर आधारित नसलेली कार्यान्वित करण्यायोग्य मेमरी. JIT कंपायलर (.NET, ब्राउझर, Java) ती तयार करतात, तसेच प्रक्रियेत घुसवलेला कोडही.",
-  "Protection": "संरक्षण"
+  "Protection": "संरक्षण",
+  "Find handle or DLL": "हँडल किंवा DLL शोधा",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "प्रत्येक प्रक्रियेत उघडलेली फाइल, की किंवा इतर ऑब्जेक्ट, किंवा लोड केलेली DLL शोधा",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "ज्यांच्या नावात हा मजकूर आहे अशी फाइल, की किंवा इतर ऑब्जेक्ट उघडलेल्या किंवा DLL लोड केलेल्या प्रक्रिया.",
+  "Text in a file, key, object or DLL name": "फाइल, की, ऑब्जेक्ट किंवा DLL च्या नावातील मजकूर",
+  "Search": "शोधा",
+  "Type 3 or more characters.": "3 किंवा अधिक अक्षरे लिहा.",
+  "Results for \"{0}\"": "\"{0}\" साठी परिणाम",
+  "Searched {0} of {1} processes": "{1} पैकी {0} प्रक्रिया शोधल्या",
+  "{0} hits": "{0} परिणाम",
+  "{0} could not be opened; run as administrator to search them too.": "{0} उघडता आल्या नाहीत; त्याही शोधण्यासाठी प्रशासक म्हणून चालवा.",
+  "Names were not fully read in {0} processes.": "{0} प्रक्रियांमध्ये नावे पूर्ण वाचली गेली नाहीत.",
+  "Stopped at {0} hits.": "{0} परिणामांवर थांबवले.",
+  "Stopped after a minute.": "एका मिनिटानंतर थांबवले.",
+  "No process has a matching handle or DLL.": "कोणत्याही प्रक्रियेत जुळणारे हँडल किंवा DLL नाही.",
+  "Show in the inspector": "निरीक्षकात दाखवा",
+  "That process has exited.": "ती प्रक्रिया संपली आहे."
 }

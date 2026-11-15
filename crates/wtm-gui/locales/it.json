@@ -1802,5 +1802,21 @@
   "Private": "Privata",
   "Private executable memory: {0} in {1} allocations": "Memoria eseguibile privata: {0} in {1} allocazioni",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Memoria eseguibile non associata a un file. La creano i compilatori JIT (.NET, browser, Java) e anche il codice iniettato nel processo.",
-  "Protection": "Protezione"
+  "Protection": "Protezione",
+  "Find handle or DLL": "Trova handle o DLL",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "Cerca in tutti i processi un file, una chiave o un altro oggetto aperto, o una DLL caricata",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "Processi con un file, una chiave o un altro oggetto aperto, o una DLL caricata, il cui nome contiene il testo.",
+  "Text in a file, key, object or DLL name": "Testo in un nome di file, chiave, oggetto o DLL",
+  "Search": "Cerca",
+  "Type 3 or more characters.": "Digita almeno 3 caratteri.",
+  "Results for \"{0}\"": "Risultati per \"{0}\"",
+  "Searched {0} of {1} processes": "Cercati {0} processi su {1}",
+  "{0} hits": "{0} risultati",
+  "{0} could not be opened; run as administrator to search them too.": "Impossibile aprirne {0}; esegui come amministratore per cercare anche in quelli.",
+  "Names were not fully read in {0} processes.": "Nomi non letti completamente in {0} processi.",
+  "Stopped at {0} hits.": "Fermato a {0} risultati.",
+  "Stopped after a minute.": "Fermato dopo un minuto.",
+  "No process has a matching handle or DLL.": "Nessun processo ha un handle o una DLL corrispondente.",
+  "Show in the inspector": "Mostra nell'ispettore",
+  "That process has exited.": "Quel processo è terminato."
 }

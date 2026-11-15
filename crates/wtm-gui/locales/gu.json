@@ -1802,5 +1802,21 @@
   "Private": "ખાનગી",
   "Private executable memory: {0} in {1} allocations": "ખાનગી ચલાવી શકાય તેવી મેમરી: {1} ફાળવણીમાં {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ફાઇલ પર આધારિત ન હોય તેવી ચલાવી શકાય તેવી મેમરી. JIT કમ્પાઇલર (.NET, બ્રાઉઝર, Java) તેને બનાવે છે, અને પ્રક્રિયામાં દાખલ કરેલો કોડ પણ.",
-  "Protection": "સુરક્ષા"
+  "Protection": "સુરક્ષા",
+  "Find handle or DLL": "હૅન્ડલ અથવા DLL શોધો",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "દરેક પ્રક્રિયામાં ખુલ્લી ફાઇલ, કી અથવા અન્ય ઑબ્જેક્ટ, અથવા લોડ કરેલી DLL શોધો",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "જેમના નામમાં આ લખાણ હોય તેવી ફાઇલ, કી કે અન્ય ઑબ્જેક્ટ ખોલેલી અથવા DLL લોડ કરેલી પ્રક્રિયાઓ.",
+  "Text in a file, key, object or DLL name": "ફાઇલ, કી, ઑબ્જેક્ટ અથવા DLL નામમાંનું લખાણ",
+  "Search": "શોધો",
+  "Type 3 or more characters.": "3 કે વધુ અક્ષરો લખો.",
+  "Results for \"{0}\"": "\"{0}\" માટે પરિણામો",
+  "Searched {0} of {1} processes": "{1}માંથી {0} પ્રક્રિયાઓ શોધી",
+  "{0} hits": "{0} પરિણામો",
+  "{0} could not be opened; run as administrator to search them too.": "{0} ખોલી શકાઈ નહીં; તેમને પણ શોધવા વ્યવસ્થાપક તરીકે ચલાવો.",
+  "Names were not fully read in {0} processes.": "{0} પ્રક્રિયાઓમાં નામો પૂરાં વાંચી શકાયાં નહીં.",
+  "Stopped at {0} hits.": "{0} પરિણામો પર અટકાવ્યું.",
+  "Stopped after a minute.": "એક મિનિટ પછી અટકાવ્યું.",
+  "No process has a matching handle or DLL.": "કોઈ પ્રક્રિયામાં મેળ ખાતું હૅન્ડલ અથવા DLL નથી.",
+  "Show in the inspector": "નિરીક્ષકમાં બતાવો",
+  "That process has exited.": "તે પ્રક્રિયા સમાપ્ત થઈ ગઈ છે."
 }

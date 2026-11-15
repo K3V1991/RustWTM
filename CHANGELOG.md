@@ -6,6 +6,19 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Processes has Process Explorer's Find handle or DLL: every process with a
+  file, registry key or other object open, or a DLL loaded, whose name
+  contains the text (three characters or more). Processes are searched one
+  at a time with this window's own rights and the Handles view's limits,
+  and hits arrive as each is done; Stop ends the search, and it stops by
+  itself at 1,000 hits or after a minute. The window says how many
+  processes could not be opened and in how many names were not all read,
+  so that no hits never claims more than was searched. Clicking a hit shows
+  the process in the inspector, unless it has exited since. lsass.exe and
+  lsaiso.exe are never opened.
+
 ## [0.33.0] - 2026-11-15
 
 The process inspector gains Process Explorer's and System Informer's

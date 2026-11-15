@@ -1802,5 +1802,21 @@
   "Private": "私人",
   "Private executable memory: {0} in {1} allocations": "私人可執行記憶體：{1} 個配置中共 {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "不由檔案支援的可執行記憶體。JIT 編譯器（.NET、瀏覽器、Java）會建立它，插入處理程序的程式碼也會。",
-  "Protection": "保護"
+  "Protection": "保護",
+  "Find handle or DLL": "尋找控制代碼或 DLL",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "在所有處理程序中搜尋其開啟的檔案、登錄機碼或其他物件，或其載入的 DLL",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "開啟了名稱包含該文字的檔案、登錄機碼或其他物件，或載入了此類 DLL 的處理程序。",
+  "Text in a file, key, object or DLL name": "檔案、登錄機碼、物件或 DLL 名稱中的文字",
+  "Search": "搜尋",
+  "Type 3 or more characters.": "請輸入至少 3 個字元。",
+  "Results for \"{0}\"": "\"{0}\" 的結果",
+  "Searched {0} of {1} processes": "已搜尋 {0} / {1} 個處理程序",
+  "{0} hits": "{0} 個結果",
+  "{0} could not be opened; run as administrator to search them too.": "{0} 個無法開啟；以系統管理員身分執行以一併搜尋。",
+  "Names were not fully read in {0} processes.": "{0} 個處理程序的名稱未完整讀取。",
+  "Stopped at {0} hits.": "已在 {0} 個結果時停止。",
+  "Stopped after a minute.": "已在一分鐘後停止。",
+  "No process has a matching handle or DLL.": "沒有處理程序具有相符的控制代碼或 DLL。",
+  "Show in the inspector": "在檢查器中顯示",
+  "That process has exited.": "該處理程序已結束。"
 }

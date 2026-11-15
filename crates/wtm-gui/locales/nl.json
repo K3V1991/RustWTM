@@ -1802,5 +1802,21 @@
   "Private": "Privé",
   "Private executable memory: {0} in {1} allocations": "Uitvoerbaar privégeheugen: {0} in {1} toewijzingen",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Uitvoerbaar geheugen zonder onderliggend bestand. JIT-compilers (.NET, browsers, Java) maken het aan, en ook code die in het proces is geïnjecteerd.",
-  "Protection": "Beveiliging"
+  "Protection": "Beveiliging",
+  "Find handle or DLL": "Handle of DLL zoeken",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "Alle processen doorzoeken op een geopend bestand, sleutel of ander object, of een geladen DLL",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "Processen met een bestand, sleutel of ander object geopend, of een DLL geladen, waarvan de naam de tekst bevat.",
+  "Text in a file, key, object or DLL name": "Tekst in een bestands-, sleutel-, object- of DLL-naam",
+  "Search": "Zoeken",
+  "Type 3 or more characters.": "Typ 3 of meer tekens.",
+  "Results for \"{0}\"": "Resultaten voor \"{0}\"",
+  "Searched {0} of {1} processes": "{0} van {1} processen doorzocht",
+  "{0} hits": "{0} resultaten",
+  "{0} could not be opened; run as administrator to search them too.": "{0} konden niet worden geopend; voer uit als beheerder om ook die te doorzoeken.",
+  "Names were not fully read in {0} processes.": "Namen niet volledig gelezen in {0} processen.",
+  "Stopped at {0} hits.": "Gestopt bij {0} resultaten.",
+  "Stopped after a minute.": "Gestopt na een minuut.",
+  "No process has a matching handle or DLL.": "Geen proces heeft een overeenkomende handle of DLL.",
+  "Show in the inspector": "Tonen in de inspector",
+  "That process has exited.": "Dat proces is beëindigd."
 }

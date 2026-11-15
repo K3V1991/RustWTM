@@ -1802,5 +1802,21 @@
   "Private": "Приватна",
   "Private executable memory: {0} in {1} allocations": "Приватна виконувана пам'ять: {0} у виділеннях: {1}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Виконувана пам'ять, не пов'язана з файлом. Її створюють JIT-компілятори (.NET, браузери, Java), а також код, впроваджений у процес.",
-  "Protection": "Захист"
+  "Protection": "Захист",
+  "Find handle or DLL": "Знайти дескриптор або DLL",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "Шукати в усіх процесах відкритий файл, розділ реєстру чи інший об'єкт або завантажену DLL",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "Процеси, у яких відкрито файл, розділ чи інший об'єкт або завантажено DLL з текстом в імені.",
+  "Text in a file, key, object or DLL name": "Текст в імені файлу, розділу, об'єкта або DLL",
+  "Search": "Знайти",
+  "Type 3 or more characters.": "Введіть щонайменше 3 символи.",
+  "Results for \"{0}\"": "Результати для \"{0}\"",
+  "Searched {0} of {1} processes": "Переглянуто процесів: {0} з {1}",
+  "{0} hits": "Знайдено: {0}",
+  "{0} could not be opened; run as administrator to search them too.": "Не вдалося відкрити: {0}; запустіть від імені адміністратора, щоб шукати й у них.",
+  "Names were not fully read in {0} processes.": "Імена прочитано не повністю в процесах: {0}.",
+  "Stopped at {0} hits.": "Зупинено на {0} результатах.",
+  "Stopped after a minute.": "Зупинено через хвилину.",
+  "No process has a matching handle or DLL.": "Жоден процес не має відповідного дескриптора або DLL.",
+  "Show in the inspector": "Показати в інспекторі",
+  "That process has exited.": "Цей процес завершився."
 }

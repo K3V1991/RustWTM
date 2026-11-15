@@ -1802,5 +1802,21 @@
   "Private": "ಖಾಸಗಿ",
   "Private executable memory: {0} in {1} allocations": "ಖಾಸಗಿ ಕಾರ್ಯಗತಗೊಳಿಸಬಹುದಾದ ಮೆಮೊರಿ: {1} ಹಂಚಿಕೆಗಳಲ್ಲಿ {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ಫೈಲ್ ಆಧಾರವಿಲ್ಲದ ಕಾರ್ಯಗತಗೊಳಿಸಬಹುದಾದ ಮೆಮೊರಿ. JIT ಕಂಪೈಲರ್‌ಗಳು (.NET, ಬ್ರೌಸರ್‌ಗಳು, Java) ಇದನ್ನು ರಚಿಸುತ್ತವೆ, ಪ್ರಕ್ರಿಯೆಗೆ ಸೇರಿಸಿದ ಕೋಡ್ ಕೂಡ.",
-  "Protection": "ರಕ್ಷಣೆ"
+  "Protection": "ರಕ್ಷಣೆ",
+  "Find handle or DLL": "ಹ್ಯಾಂಡಲ್ ಅಥವಾ DLL ಹುಡುಕಿ",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "ಪ್ರತಿ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ ತೆರೆದ ಫೈಲ್, ಕೀ ಅಥವಾ ಇತರ ವಸ್ತು, ಅಥವಾ ಲೋಡ್ ಮಾಡಿದ DLL ಹುಡುಕಿ",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "ಹೆಸರಿನಲ್ಲಿ ಈ ಪಠ್ಯವಿರುವ ಫೈಲ್, ಕೀ ಅಥವಾ ಇತರ ವಸ್ತುವನ್ನು ತೆರೆದ, ಅಥವಾ ಅಂತಹ DLL ಲೋಡ್ ಮಾಡಿದ ಪ್ರಕ್ರಿಯೆಗಳು.",
+  "Text in a file, key, object or DLL name": "ಫೈಲ್, ಕೀ, ವಸ್ತು ಅಥವಾ DLL ಹೆಸರಿನಲ್ಲಿರುವ ಪಠ್ಯ",
+  "Search": "ಹುಡುಕಿ",
+  "Type 3 or more characters.": "3 ಅಥವಾ ಹೆಚ್ಚು ಅಕ್ಷರಗಳನ್ನು ಟೈಪ್ ಮಾಡಿ.",
+  "Results for \"{0}\"": "\"{0}\" ಗಾಗಿ ಫಲಿತಾಂಶಗಳು",
+  "Searched {0} of {1} processes": "{1} ರಲ್ಲಿ {0} ಪ್ರಕ್ರಿಯೆಗಳನ್ನು ಹುಡುಕಲಾಗಿದೆ",
+  "{0} hits": "{0} ಫಲಿತಾಂಶಗಳು",
+  "{0} could not be opened; run as administrator to search them too.": "{0} ತೆರೆಯಲಾಗಲಿಲ್ಲ; ಅವನ್ನೂ ಹುಡುಕಲು ನಿರ್ವಾಹಕರಾಗಿ ಚಲಾಯಿಸಿ.",
+  "Names were not fully read in {0} processes.": "{0} ಪ್ರಕ್ರಿಯೆಗಳಲ್ಲಿ ಹೆಸರುಗಳನ್ನು ಪೂರ್ಣವಾಗಿ ಓದಲಾಗಲಿಲ್ಲ.",
+  "Stopped at {0} hits.": "{0} ಫಲಿತಾಂಶಗಳಲ್ಲಿ ನಿಲ್ಲಿಸಲಾಗಿದೆ.",
+  "Stopped after a minute.": "ಒಂದು ನಿಮಿಷದ ನಂತರ ನಿಲ್ಲಿಸಲಾಗಿದೆ.",
+  "No process has a matching handle or DLL.": "ಯಾವುದೇ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿ ಹೊಂದುವ ಹ್ಯಾಂಡಲ್ ಅಥವಾ DLL ಇಲ್ಲ.",
+  "Show in the inspector": "ಪರಿಶೀಲಕದಲ್ಲಿ ತೋರಿಸಿ",
+  "That process has exited.": "ಆ ಪ್ರಕ್ರಿಯೆ ಕೊನೆಗೊಂಡಿದೆ."
 }

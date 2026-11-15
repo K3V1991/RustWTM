@@ -1802,5 +1802,21 @@
   "Private": "Частная",
   "Private executable memory: {0} in {1} allocations": "Частная исполняемая память: {0} в выделениях: {1}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Исполняемая память, не связанная с файлом. Её создают JIT-компиляторы (.NET, браузеры, Java), а также код, внедрённый в процесс.",
-  "Protection": "Защита"
+  "Protection": "Защита",
+  "Find handle or DLL": "Найти дескриптор или DLL",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "Искать во всех процессах открытый файл, раздел реестра или другой объект либо загруженную DLL",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "Процессы, у которых открыт файл, раздел или другой объект либо загружена DLL с текстом в имени.",
+  "Text in a file, key, object or DLL name": "Текст в имени файла, раздела, объекта или DLL",
+  "Search": "Найти",
+  "Type 3 or more characters.": "Введите не менее 3 символов.",
+  "Results for \"{0}\"": "Результаты для \"{0}\"",
+  "Searched {0} of {1} processes": "Просмотрено процессов: {0} из {1}",
+  "{0} hits": "Найдено: {0}",
+  "{0} could not be opened; run as administrator to search them too.": "Не удалось открыть: {0}; запустите от имени администратора, чтобы искать и в них.",
+  "Names were not fully read in {0} processes.": "Имена прочитаны не полностью в процессах: {0}.",
+  "Stopped at {0} hits.": "Остановлено на {0} результатах.",
+  "Stopped after a minute.": "Остановлено через минуту.",
+  "No process has a matching handle or DLL.": "Ни у одного процесса нет подходящего дескриптора или DLL.",
+  "Show in the inspector": "Показать в инспекторе",
+  "That process has exited.": "Этот процесс завершился."
 }

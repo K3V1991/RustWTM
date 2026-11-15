@@ -1802,5 +1802,21 @@
   "Private": "Privat",
   "Private executable memory: {0} in {1} allocations": "Memori privat yang dapat dieksekusi: {0} dalam {1} alokasi",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Memori yang dapat dieksekusi tanpa file di baliknya. Kompiler JIT (.NET, browser, Java) membuatnya, begitu pula kode yang disuntikkan ke proses.",
-  "Protection": "Perlindungan"
+  "Protection": "Perlindungan",
+  "Find handle or DLL": "Temukan handle atau DLL",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "Cari di semua proses file, kunci, atau objek lain yang dibuka, atau DLL yang dimuat",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "Proses yang membuka file, kunci, atau objek lain, atau memuat DLL, yang namanya berisi teks.",
+  "Text in a file, key, object or DLL name": "Teks dalam nama file, kunci, objek, atau DLL",
+  "Search": "Cari",
+  "Type 3 or more characters.": "Ketik 3 karakter atau lebih.",
+  "Results for \"{0}\"": "Hasil untuk \"{0}\"",
+  "Searched {0} of {1} processes": "Mencari {0} dari {1} proses",
+  "{0} hits": "{0} hasil",
+  "{0} could not be opened; run as administrator to search them too.": "{0} tidak dapat dibuka; jalankan sebagai administrator untuk mencarinya juga.",
+  "Names were not fully read in {0} processes.": "Nama tidak terbaca lengkap di {0} proses.",
+  "Stopped at {0} hits.": "Berhenti di {0} hasil.",
+  "Stopped after a minute.": "Berhenti setelah satu menit.",
+  "No process has a matching handle or DLL.": "Tidak ada proses dengan handle atau DLL yang cocok.",
+  "Show in the inspector": "Tampilkan di inspektor",
+  "That process has exited.": "Proses itu telah berakhir."
 }

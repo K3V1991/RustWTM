@@ -1802,5 +1802,21 @@
   "Private": "ప్రైవేట్",
   "Private executable memory: {0} in {1} allocations": "ప్రైవేట్ అమలు చేయదగిన మెమరీ: {1} కేటాయింపులలో {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ఫైల్ ఆధారం లేని అమలు చేయదగిన మెమరీ. JIT కంపైలర్‌లు (.NET, బ్రౌజర్‌లు, Java) దీన్ని సృష్టిస్తాయి, ప్రాసెస్‌లోకి చొప్పించిన కోడ్ కూడా అలాగే.",
-  "Protection": "రక్షణ"
+  "Protection": "రక్షణ",
+  "Find handle or DLL": "హ్యాండిల్ లేదా DLLను కనుగొను",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "ప్రతి ప్రాసెస్‌లో తెరిచిన ఫైల్, కీ లేదా ఇతర ఆబ్జెక్ట్, లేదా లోడ్ చేసిన DLL కోసం శోధించు",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "పేరులో ఈ వచనం ఉన్న ఫైల్, కీ లేదా ఇతర ఆబ్జెక్ట్‌ను తెరిచిన, లేదా అటువంటి DLLను లోడ్ చేసిన ప్రాసెస్‌లు.",
+  "Text in a file, key, object or DLL name": "ఫైల్, కీ, ఆబ్జెక్ట్ లేదా DLL పేరులోని వచనం",
+  "Search": "శోధించు",
+  "Type 3 or more characters.": "3 లేదా అంతకంటే ఎక్కువ అక్షరాలు టైప్ చేయండి.",
+  "Results for \"{0}\"": "\"{0}\" కోసం ఫలితాలు",
+  "Searched {0} of {1} processes": "{1}లో {0} ప్రాసెస్‌లు శోధించబడ్డాయి",
+  "{0} hits": "{0} ఫలితాలు",
+  "{0} could not be opened; run as administrator to search them too.": "{0} తెరవబడలేదు; వాటిని కూడా శోధించడానికి నిర్వాహకుడిగా అమలు చేయండి.",
+  "Names were not fully read in {0} processes.": "{0} ప్రాసెస్‌లలో పేర్లు పూర్తిగా చదవబడలేదు.",
+  "Stopped at {0} hits.": "{0} ఫలితాల వద్ద ఆపబడింది.",
+  "Stopped after a minute.": "ఒక నిమిషం తర్వాత ఆపబడింది.",
+  "No process has a matching handle or DLL.": "ఏ ప్రాసెస్‌కూ సరిపోలే హ్యాండిల్ లేదా DLL లేదు.",
+  "Show in the inspector": "ఇన్‌స్పెక్టర్‌లో చూపు",
+  "That process has exited.": "ఆ ప్రాసెస్ ముగిసింది."
 }

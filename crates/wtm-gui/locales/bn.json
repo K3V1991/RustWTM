@@ -1802,5 +1802,21 @@
   "Private": "ব্যক্তিগত",
   "Private executable memory: {0} in {1} allocations": "ব্যক্তিগত নির্বাহযোগ্য মেমরি: {1}টি বরাদ্দে {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ফাইলের উপর ভিত্তি না করা নির্বাহযোগ্য মেমরি। JIT কম্পাইলার (.NET, ব্রাউজার, Java) এটি তৈরি করে, আর প্রক্রিয়ায় ঢোকানো কোডও তা করে।",
-  "Protection": "সুরক্ষা"
+  "Protection": "সুরক্ষা",
+  "Find handle or DLL": "হ্যান্ডেল বা DLL খুঁজুন",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "প্রতিটি প্রক্রিয়ায় খোলা ফাইল, কী বা অন্য অবজেক্ট, অথবা লোড করা DLL খুঁজুন",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "যে প্রক্রিয়াগুলি এমন ফাইল, কী বা অন্য অবজেক্ট খুলেছে, বা এমন DLL লোড করেছে, যার নামে এই লেখা আছে।",
+  "Text in a file, key, object or DLL name": "ফাইল, কী, অবজেক্ট বা DLL নামের লেখা",
+  "Search": "খুঁজুন",
+  "Type 3 or more characters.": "৩ বা তার বেশি অক্ষর লিখুন।",
+  "Results for \"{0}\"": "\"{0}\"-এর ফলাফল",
+  "Searched {0} of {1} processes": "{1}টির মধ্যে {0}টি প্রক্রিয়া খোঁজা হয়েছে",
+  "{0} hits": "{0}টি ফলাফল",
+  "{0} could not be opened; run as administrator to search them too.": "{0}টি খোলা যায়নি; সেগুলিও খুঁজতে প্রশাসক হিসেবে চালান।",
+  "Names were not fully read in {0} processes.": "{0}টি প্রক্রিয়ায় নাম পুরোপুরি পড়া যায়নি।",
+  "Stopped at {0} hits.": "{0}টি ফলাফলে থামানো হয়েছে।",
+  "Stopped after a minute.": "এক মিনিট পরে থামানো হয়েছে।",
+  "No process has a matching handle or DLL.": "কোনো প্রক্রিয়ায় মিলে যাওয়া হ্যান্ডেল বা DLL নেই।",
+  "Show in the inspector": "পরিদর্শকে দেখান",
+  "That process has exited.": "সেই প্রক্রিয়াটি শেষ হয়েছে।"
 }

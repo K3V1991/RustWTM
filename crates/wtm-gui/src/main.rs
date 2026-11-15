@@ -20,6 +20,7 @@ mod docker_worker;
 mod environment_view;
 mod experience;
 mod file_locks;
+mod find_view;
 mod frames;
 mod handles_view;
 mod hold;

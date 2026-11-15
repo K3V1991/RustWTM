@@ -1802,5 +1802,21 @@
   "Private": "专用",
   "Private executable memory: {0} in {1} allocations": "专用可执行内存：{1} 个分配中共 {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "不由文件支持的可执行内存。JIT 编译器（.NET、浏览器、Java）会创建它，注入进程的代码也会。",
-  "Protection": "保护"
+  "Protection": "保护",
+  "Find handle or DLL": "查找句柄或 DLL",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "在所有进程中搜索其打开的文件、注册表项或其他对象，或其加载的 DLL",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "打开了名称包含该文本的文件、注册表项或其他对象，或加载了此类 DLL 的进程。",
+  "Text in a file, key, object or DLL name": "文件、注册表项、对象或 DLL 名称中的文本",
+  "Search": "搜索",
+  "Type 3 or more characters.": "请输入至少 3 个字符。",
+  "Results for \"{0}\"": "\"{0}\" 的结果",
+  "Searched {0} of {1} processes": "已搜索 {0} / {1} 个进程",
+  "{0} hits": "{0} 个结果",
+  "{0} could not be opened; run as administrator to search them too.": "{0} 个无法打开；以管理员身份运行以同时搜索它们。",
+  "Names were not fully read in {0} processes.": "{0} 个进程的名称未完全读取。",
+  "Stopped at {0} hits.": "已在 {0} 个结果时停止。",
+  "Stopped after a minute.": "已在一分钟后停止。",
+  "No process has a matching handle or DLL.": "没有进程具有匹配的句柄或 DLL。",
+  "Show in the inspector": "在检查器中显示",
+  "That process has exited.": "该进程已退出。"
 }

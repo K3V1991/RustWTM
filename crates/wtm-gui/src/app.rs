@@ -1650,6 +1650,25 @@ impl eframe::App for App {
             state.tab = Tab::Settings;
             state.config.page = crate::settings::Page::Ai;
         }
+        match crate::find_view::window(&ctx, &mut state.processes.find, &data) {
+            Some(crate::find_view::FindAction::Search(query)) => {
+                backend.send(UiCommand::Find(Some(query)));
+            }
+            Some(crate::find_view::FindAction::Stop) => backend.send(UiCommand::Find(None)),
+            Some(crate::find_view::FindAction::Select(target)) => {
+                // Only the process that was found: its ID may since belong
+                // to another.
+                if crate::find_view::still_running(&data, &target) {
+                    state.processes.selected = Some(target);
+                    state.tab = Tab::Processes;
+                    state.processes.find.open = false;
+                    state.processes.find.note = None;
+                } else {
+                    state.processes.find.note = Some("That process has exited.");
+                }
+            }
+            None => {}
+        }
         if let Some((target, command)) = state.confirm.clone() {
             let modal = egui::Modal::new(egui::Id::unique("confirm")).show(&ctx, |ui| {
                 ui.heading(describe(command));
@@ -7395,6 +7414,7 @@ mod tests {
             UiCommand::Environment(t) => format!("environment {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Handles(t) => format!("handles {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::MemoryMap(t) => format!("memory map {:?}", t.as_ref().map(|t| t.pid)),
+            UiCommand::Find(q) => format!("find {q:?}"),
             UiCommand::Threads(t) => format!("threads {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::CloseConnection { local, remote } => format!("close {local} {remote}"),
             UiCommand::Firewall { path, block } => format!("firewall {path} {block}"),
@@ -8628,6 +8648,133 @@ mod tests {
                 .map(describe_command)
                 .any(|c| c == "memory map None")
         );
+    }
+
+    #[test]
+    fn find_handle_or_dll_searches_and_shows_only_running_processes() {
+        use egui_kittest::kittest::NodeT;
+        use wtm_core::find::{FindHit, FindProgress, HitKind};
+        let mut d = data();
+        let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
+        let gone = ProcessRef {
+            pid: 4242,
+            create_time: 7,
+            name: "gone.exe".into(),
+        };
+        d.find = Some(crate::find_view::FindState {
+            generation: 1,
+            query: "contoso".into(),
+            hits: vec![
+                FindHit {
+                    process: alpha.clone(),
+                    kind: HitKind::Dll,
+                    name: r"C:\Program Files\Contoso\contoso.dll".into(),
+                },
+                FindHit {
+                    process: gone.clone(),
+                    kind: HitKind::Handle("File".into()),
+                    name: r"C:\Users\ada\contoso-notes.txt".into(),
+                },
+            ],
+            progress: FindProgress {
+                searched: 865,
+                total: 865,
+                unreadable: 231,
+                incomplete: 2,
+                hits: 2,
+                done: true,
+                ..FindProgress::default()
+            },
+            ..Default::default()
+        });
+        let (backend, rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.run_steps(2);
+        h.get_by_label("Find handle or DLL").click();
+        h.run_steps(2);
+        for text in [
+            "Results for \"contoso\"",
+            "Searched 865 of 865 processes",
+            "231 could not be opened",
+            "Names were not fully read in 2 processes.",
+            r"C:\Program Files\Contoso\contoso.dll",
+            "DLL",
+        ] {
+            assert!(
+                h.query_all_by_label_contains(text).next().is_some(),
+                "{text}"
+            );
+        }
+
+        // Too short a text cannot be searched; three characters can.
+        let field = "Text in a file, key, object or DLL name";
+        h.get_by_label(field).click();
+        h.run_steps(2);
+        h.get_by_label(field).type_text("ab");
+        h.run_steps(2);
+        assert!(h.get_by_label("Search").accesskit_node().is_disabled());
+        h.get_by_label(field).type_text("c");
+        h.run_steps(2);
+        h.get_by_label("Search").click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "find Some(\"abc\")")
+        );
+
+        // A process that has exited is not selected; a running one is.
+        h.get_by_label("gone.exe (4242)").click();
+        h.run_steps(2);
+        assert!(h.query_by_label("That process has exited.").is_some());
+        assert!(h.state().state.processes.selected.is_none());
+        // The pointer moves there first, away from the last link's tooltip.
+        h.get_by_label("alpha.exe (100)").hover();
+        h.run_steps(2);
+        h.get_by_label("alpha.exe (100)").click();
+        h.run_steps(2);
+        assert_eq!(h.state().state.processes.selected.as_ref(), Some(&alpha));
+        assert!(!h.state().state.processes.find.open);
+
+        // A search stopped part way never says that nothing matched.
+        let none = "No process has a matching handle or DLL.";
+        h.state().backend.data().find = Some(crate::find_view::FindState {
+            generation: 2,
+            query: "zzz".into(),
+            progress: FindProgress {
+                searched: 50,
+                total: 865,
+                done: true,
+                ..FindProgress::default()
+            },
+            ..Default::default()
+        });
+        h.state_mut().state.processes.find.open = true;
+        h.run_steps(2);
+        assert!(h.query_by_label("Searched 50 of 865 processes").is_some());
+        assert!(h.query_by_label(none).is_none());
+        h.state()
+            .backend
+            .data()
+            .find
+            .as_mut()
+            .unwrap()
+            .progress
+            .searched = 865;
+        h.run_steps(2);
+        assert!(h.query_by_label(none).is_some());
     }
 
     #[test]

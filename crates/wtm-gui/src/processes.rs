@@ -772,6 +772,8 @@ pub struct ProcessView {
     pub recent_minutes: u32,
     /// Only the process table is frozen. Sampling, protection and alerts continue.
     pub paused: Option<std::sync::Arc<Snapshot>>,
+    /// The "Find handle or DLL" window.
+    pub find: crate::find_view::FindWindow,
     /// The list as it was when Ctrl was pressed; dropped when Ctrl is let go.
     ctrl_hold: Option<std::sync::Arc<Snapshot>>,
     /// Last selection revealed automatically. Sampling must not keep pulling
@@ -870,6 +872,7 @@ impl Default for ProcessView {
             more: MoreFilters::default(),
             recent_minutes: 5,
             paused: None,
+            find: Default::default(),
             ctrl_hold: None,
             revealed: None,
             cache: None,
@@ -1723,6 +1726,15 @@ impl ProcessView {
                             .unwrap_or_else(|| std::sync::Arc::new(snap.clone())),
                     ),
                 };
+            }
+            if ui
+                .button(crate::i18n::tr("Find handle or DLL"))
+                .on_hover_text(crate::i18n::tr(
+                    "Search every process for a file, key or other object it has open, or a DLL it has loaded",
+                ))
+                .clicked()
+            {
+                self.find.open = true;
             }
         });
         self.normalize_columns();

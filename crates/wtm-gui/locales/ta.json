@@ -1802,5 +1802,21 @@
   "Private": "தனிப்பட்டது",
   "Private executable memory: {0} in {1} allocations": "தனிப்பட்ட இயக்கக்கூடிய நினைவகம்: {1} ஒதுக்கீடுகளில் {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "கோப்பை அடிப்படையாகக் கொள்ளாத இயக்கக்கூடிய நினைவகம். JIT தொகுப்பிகள் (.NET, உலாவிகள், Java) இதை உருவாக்குகின்றன, செயல்முறைக்குள் புகுத்தப்பட்ட குறியீடும் அப்படியே.",
-  "Protection": "பாதுகாப்பு"
+  "Protection": "பாதுகாப்பு",
+  "Find handle or DLL": "கைப்பிடி அல்லது DLL-ஐக் கண்டறி",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "ஒவ்வொரு செயல்முறையிலும் திறந்துள்ள கோப்பு, விசை அல்லது பிற பொருள், அல்லது ஏற்றப்பட்ட DLL-ஐத் தேடு",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "பெயரில் இந்த உரை உள்ள கோப்பு, விசை அல்லது பிற பொருளைத் திறந்த, அல்லது அத்தகைய DLL-ஐ ஏற்றிய செயல்முறைகள்.",
+  "Text in a file, key, object or DLL name": "கோப்பு, விசை, பொருள் அல்லது DLL பெயரில் உள்ள உரை",
+  "Search": "தேடு",
+  "Type 3 or more characters.": "3 அல்லது அதற்கு மேற்பட்ட எழுத்துகளைத் தட்டச்சு செய்யவும்.",
+  "Results for \"{0}\"": "\"{0}\"க்கான முடிவுகள்",
+  "Searched {0} of {1} processes": "{1} இல் {0} செயல்முறைகள் தேடப்பட்டன",
+  "{0} hits": "{0} முடிவுகள்",
+  "{0} could not be opened; run as administrator to search them too.": "{0} ஐத் திறக்க முடியவில்லை; அவற்றையும் தேட நிர்வாகியாக இயக்கவும்.",
+  "Names were not fully read in {0} processes.": "{0} செயல்முறைகளில் பெயர்கள் முழுமையாகப் படிக்கப்படவில்லை.",
+  "Stopped at {0} hits.": "{0} முடிவுகளில் நிறுத்தப்பட்டது.",
+  "Stopped after a minute.": "ஒரு நிமிடத்திற்குப் பிறகு நிறுத்தப்பட்டது.",
+  "No process has a matching handle or DLL.": "பொருந்தும் கைப்பிடி அல்லது DLL உள்ள செயல்முறை இல்லை.",
+  "Show in the inspector": "ஆய்வாளரில் காட்டு",
+  "That process has exited.": "அந்தச் செயல்முறை முடிந்துவிட்டது."
 }

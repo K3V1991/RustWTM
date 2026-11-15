@@ -318,6 +318,8 @@ pub struct Data {
         ProcessRef,
         Option<Result<crate::memory_map_view::MemoryList, String>>,
     )>,
+    /// The last "Find handle or DLL" search, filled in process by process.
+    pub find: Option<crate::find_view::FindState>,
     /// The threads of a process, read each tick while the panel is drawn
     /// (`threads_wanted_ms`, Unix ms).
     pub threads: Option<crate::threads_view::ThreadsPanel>,
@@ -444,6 +446,9 @@ pub enum UiCommand {
     Handles(Option<ProcessRef>),
     /// The memory map of a process; with `None`, hides it.
     MemoryMap(Option<ProcessRef>),
+    /// Searches every process's handles and DLLs for the text; with `None`,
+    /// stops the search.
+    Find(Option<String>),
     /// Shows (or with `None` hides) the threads of a process.
     Threads(Option<ProcessRef>),
     /// Blocks (`true`) or unblocks a program's network access.
@@ -1770,6 +1775,49 @@ impl Worker {
             UiCommand::Environment(None) => self.data().environment = None,
             UiCommand::Handles(None) => self.data().handles = None,
             UiCommand::MemoryMap(None) => self.data().memory_map = None,
+            UiCommand::Find(None) => {
+                if let Some(f) = &self.data().find {
+                    f.cancel.store(true, Ordering::Release);
+                }
+            }
+            UiCommand::Find(Some(query)) => {
+                let cancel = std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false));
+                let generation = {
+                    let mut d = self.data();
+                    // A new search stops the one before.
+                    if let Some(f) = &d.find {
+                        f.cancel.store(true, Ordering::Release);
+                    }
+                    let generation = d.find.as_ref().map_or(1, |f| f.generation + 1);
+                    d.find = Some(crate::find_view::FindState {
+                        generation,
+                        query: query.clone(),
+                        cancel: cancel.clone(),
+                        ..Default::default()
+                    });
+                    generation
+                };
+                let (data, ctx) = (self.data.clone(), self.ctx.clone());
+                std::thread::spawn(move || {
+                    // Off the critical path: it opens every process in turn.
+                    let _ = wtm_core::control::enter_background_mode();
+                    wtm_core::find::find(
+                        &query,
+                        &cancel,
+                        wtm_core::find::FindLimits::default(),
+                        |hits, progress| {
+                            let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
+                            if let Some(f) = d.find.as_mut().filter(|f| f.generation == generation)
+                            {
+                                f.hits.extend(hits);
+                                f.progress = progress.clone();
+                            }
+                            drop(d);
+                            ctx.request_repaint();
+                        },
+                    );
+                });
+            }
             UiCommand::MemoryMap(Some(target)) => {
                 self.data().memory_map = Some((target.clone(), None));
                 let (data, ctx) = (self.data.clone(), self.ctx.clone());

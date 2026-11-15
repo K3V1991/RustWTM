@@ -1802,5 +1802,21 @@
   "Private": "Prywatna",
   "Private executable memory: {0} in {1} allocations": "Prywatna pamięć wykonywalna: {0} w alokacjach: {1}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Pamięć wykonywalna niepochodząca z pliku. Tworzą ją kompilatory JIT (.NET, przeglądarki, Java), a także kod wstrzyknięty do procesu.",
-  "Protection": "Ochrona"
+  "Protection": "Ochrona",
+  "Find handle or DLL": "Znajdź dojście lub bibliotekę DLL",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "Przeszukaj wszystkie procesy pod kątem otwartego pliku, klucza lub innego obiektu albo załadowanej biblioteki DLL",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "Procesy, które mają otwarty plik, klucz lub inny obiekt albo załadowaną bibliotekę DLL, której nazwa zawiera tekst.",
+  "Text in a file, key, object or DLL name": "Tekst w nazwie pliku, klucza, obiektu lub biblioteki DLL",
+  "Search": "Szukaj",
+  "Type 3 or more characters.": "Wpisz co najmniej 3 znaki.",
+  "Results for \"{0}\"": "Wyniki dla \"{0}\"",
+  "Searched {0} of {1} processes": "Przeszukano {0} z {1} procesów",
+  "{0} hits": "Wyniki: {0}",
+  "{0} could not be opened; run as administrator to search them too.": "Nie udało się otworzyć: {0}; uruchom jako administrator, aby przeszukać także je.",
+  "Names were not fully read in {0} processes.": "Nie odczytano w pełni nazw w procesach: {0}.",
+  "Stopped at {0} hits.": "Zatrzymano przy wynikach: {0}.",
+  "Stopped after a minute.": "Zatrzymano po minucie.",
+  "No process has a matching handle or DLL.": "Żaden proces nie ma pasującego dojścia ani biblioteki DLL.",
+  "Show in the inspector": "Pokaż w inspektorze",
+  "That process has exited.": "Ten proces zakończył działanie."
 }

@@ -10822,5 +10822,101 @@
     "de": "Schutz",
     "fr": "Protection",
     "es": "Protección"
+  },
+  "Find handle or DLL": {
+    "tr": "Tanıtıcı veya DLL bul",
+    "de": "Handle oder DLL suchen",
+    "fr": "Rechercher un handle ou une DLL",
+    "es": "Buscar identificador o DLL"
+  },
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": {
+    "tr": "Tüm işlemlerde açık tuttukları bir dosya, anahtar veya başka bir nesneyi ya da yükledikleri bir DLL'yi ara",
+    "de": "Alle Prozesse nach einer geöffneten Datei, einem Schlüssel oder anderen Objekt oder einer geladenen DLL durchsuchen",
+    "fr": "Rechercher dans tous les processus un fichier, une clé ou un autre objet ouvert, ou une DLL chargée",
+    "es": "Buscar en todos los procesos un archivo, clave u otro objeto abierto, o una DLL cargada"
+  },
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": {
+    "tr": "Adı metni içeren bir dosyayı, anahtarı veya başka bir nesneyi açık tutan ya da böyle bir DLL yükleyen işlemler.",
+    "de": "Prozesse, die eine Datei, einen Schlüssel oder ein anderes Objekt geöffnet oder eine DLL geladen haben, deren Name den Text enthält.",
+    "fr": "Processus ayant ouvert un fichier, une clé ou un autre objet, ou chargé une DLL, dont le nom contient le texte.",
+    "es": "Procesos con un archivo, clave u otro objeto abierto, o una DLL cargada, cuyo nombre contiene el texto."
+  },
+  "Text in a file, key, object or DLL name": {
+    "tr": "Dosya, anahtar, nesne veya DLL adındaki metin",
+    "de": "Text in einem Datei-, Schlüssel-, Objekt- oder DLL-Namen",
+    "fr": "Texte dans un nom de fichier, de clé, d'objet ou de DLL",
+    "es": "Texto en un nombre de archivo, clave, objeto o DLL"
+  },
+  "Search": {
+    "tr": "Ara",
+    "de": "Suchen",
+    "fr": "Rechercher",
+    "es": "Buscar"
+  },
+  "Type 3 or more characters.": {
+    "tr": "En az 3 karakter yazın.",
+    "de": "Geben Sie mindestens 3 Zeichen ein.",
+    "fr": "Saisissez au moins 3 caractères.",
+    "es": "Escriba al menos 3 caracteres."
+  },
+  "Results for \"{0}\"": {
+    "tr": "\"{0}\" için sonuçlar",
+    "de": "Ergebnisse für \"{0}\"",
+    "fr": "Résultats pour \"{0}\"",
+    "es": "Resultados de \"{0}\""
+  },
+  "Searched {0} of {1} processes": {
+    "tr": "{1} işlemin {0} tanesi arandı",
+    "de": "{0} von {1} Prozessen durchsucht",
+    "fr": "{0} processus sur {1} examinés",
+    "es": "Se buscaron {0} de {1} procesos"
+  },
+  "{0} hits": {
+    "tr": "{0} sonuç",
+    "de": "{0} Treffer",
+    "fr": "{0} résultats",
+    "es": "{0} resultados"
+  },
+  "{0} could not be opened; run as administrator to search them too.": {
+    "tr": "{0} işlem açılamadı; onları da aramak için yönetici olarak çalıştırın.",
+    "de": "{0} konnten nicht geöffnet werden; als Administrator ausführen, um auch sie zu durchsuchen.",
+    "fr": "{0} n'ont pas pu être ouverts ; exécutez en tant qu'administrateur pour les inclure.",
+    "es": "No se pudieron abrir {0}; ejecute como administrador para buscar también en ellos."
+  },
+  "Names were not fully read in {0} processes.": {
+    "tr": "{0} işlemde adlar tam okunamadı.",
+    "de": "Bei {0} Prozessen wurden die Namen nicht vollständig gelesen.",
+    "fr": "Noms incomplets pour {0} processus.",
+    "es": "Los nombres no se leyeron por completo en {0} procesos."
+  },
+  "Stopped at {0} hits.": {
+    "tr": "{0} sonuçta durduruldu.",
+    "de": "Bei {0} Treffern angehalten.",
+    "fr": "Arrêt à {0} résultats.",
+    "es": "Se detuvo en {0} resultados."
+  },
+  "Stopped after a minute.": {
+    "tr": "Bir dakika sonra durduruldu.",
+    "de": "Nach einer Minute angehalten.",
+    "fr": "Arrêt après une minute.",
+    "es": "Se detuvo tras un minuto."
+  },
+  "No process has a matching handle or DLL.": {
+    "tr": "Eşleşen tanıtıcısı veya DLL'si olan işlem yok.",
+    "de": "Kein Prozess hat ein passendes Handle oder eine passende DLL.",
+    "fr": "Aucun processus n'a de handle ou de DLL correspondant.",
+    "es": "Ningún proceso tiene un identificador o DLL coincidente."
+  },
+  "Show in the inspector": {
+    "tr": "Denetçide göster",
+    "de": "Im Inspektor anzeigen",
+    "fr": "Afficher dans l'inspecteur",
+    "es": "Mostrar en el inspector"
+  },
+  "That process has exited.": {
+    "tr": "Bu işlem sona erdi.",
+    "de": "Dieser Prozess wurde beendet.",
+    "fr": "Ce processus s'est terminé.",
+    "es": "Ese proceso ha terminado."
   }
 }

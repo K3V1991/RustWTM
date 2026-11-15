@@ -1802,5 +1802,21 @@
   "Private": "プライベート",
   "Private executable memory: {0} in {1} allocations": "プライベート実行可能メモリ: {1} 個の割り当てに {0}",
   "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ファイルに基づかない実行可能メモリ。JIT コンパイラ (.NET、ブラウザー、Java) が作成するほか、プロセスに注入されたコードも作成します。",
-  "Protection": "保護"
+  "Protection": "保護",
+  "Find handle or DLL": "ハンドルまたは DLL の検索",
+  "Search every process for a file, key or other object it has open, or a DLL it has loaded": "開いているファイル、キー、その他のオブジェクト、または読み込まれた DLL をすべてのプロセスから検索",
+  "Processes with a file, key or other object open, or a DLL loaded, whose name contains the text.": "名前にテキストを含むファイル、キー、その他のオブジェクトを開いているか、DLL を読み込んでいるプロセス。",
+  "Text in a file, key, object or DLL name": "ファイル、キー、オブジェクト、または DLL の名前に含まれるテキスト",
+  "Search": "検索",
+  "Type 3 or more characters.": "3 文字以上入力してください。",
+  "Results for \"{0}\"": "\"{0}\" の結果",
+  "Searched {0} of {1} processes": "{1} 個中 {0} 個のプロセスを検索しました",
+  "{0} hits": "{0} 件",
+  "{0} could not be opened; run as administrator to search them too.": "{0} 個を開けませんでした。それらも検索するには管理者として実行してください。",
+  "Names were not fully read in {0} processes.": "{0} 個のプロセスで名前を完全には読み取れませんでした。",
+  "Stopped at {0} hits.": "{0} 件で停止しました。",
+  "Stopped after a minute.": "1 分後に停止しました。",
+  "No process has a matching handle or DLL.": "一致するハンドルまたは DLL を持つプロセスはありません。",
+  "Show in the inspector": "インスペクターに表示",
+  "That process has exited.": "そのプロセスは終了しました。"
 }
