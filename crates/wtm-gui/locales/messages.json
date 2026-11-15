@@ -10750,5 +10750,77 @@
     "de": "Zugriff: {0}",
     "fr": "Accès : {0}",
     "es": "Acceso: {0}"
+  },
+  "Memory map": {
+    "tr": "Bellek haritası",
+    "de": "Speicherkarte",
+    "fr": "Carte mémoire",
+    "es": "Mapa de memoria"
+  },
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": {
+    "tr": "Ayırmalara göre adres alanı: programlar ve DLL'ler, eşlenmiş dosyalar ve özel bellek",
+    "de": "Sein Adressraum nach Zuordnungen: Programme und DLLs, zugeordnete Dateien und privater Speicher",
+    "fr": "Son espace d'adressage par allocation : programmes et DLL, fichiers mappés et mémoire privée",
+    "es": "Su espacio de direcciones por asignación: programas y DLL, archivos asignados y memoria privada"
+  },
+  "Reading the memory map…": {
+    "tr": "Bellek haritası okunuyor…",
+    "de": "Speicherkarte wird gelesen…",
+    "fr": "Lecture de la carte mémoire…",
+    "es": "Leyendo el mapa de memoria…"
+  },
+  "The map is partial: the process has very many regions, or reading took too long.": {
+    "tr": "Harita eksik: işlemin çok fazla bölgesi var ya da okuma çok uzun sürdü.",
+    "de": "Die Karte ist unvollständig: Der Prozess hat sehr viele Bereiche, oder das Lesen dauerte zu lange.",
+    "fr": "La carte est partielle : le processus a de très nombreuses régions, ou la lecture a pris trop de temps.",
+    "es": "El mapa es parcial: el proceso tiene muchísimas regiones, o la lectura tardó demasiado."
+  },
+  "Reserved": {
+    "tr": "Ayrılmış",
+    "de": "Reserviert",
+    "fr": "Réservée",
+    "es": "Reservada"
+  },
+  "Allocations": {
+    "tr": "Ayırmalar",
+    "de": "Zuordnungen",
+    "fr": "Allocations",
+    "es": "Asignaciones"
+  },
+  "Mapped file": {
+    "tr": "Eşlenmiş dosya",
+    "de": "Zugeordnete Datei",
+    "fr": "Fichier mappé",
+    "es": "Archivo asignado"
+  },
+  "Shareable": {
+    "tr": "Paylaşılabilir",
+    "de": "Freigebbar",
+    "fr": "Partageable",
+    "es": "Compartible"
+  },
+  "Private": {
+    "tr": "Özel",
+    "de": "Privat",
+    "fr": "Privée",
+    "es": "Privada"
+  },
+  "Private executable memory: {0} in {1} allocations": {
+    "tr": "Özel yürütülebilir bellek: {1} ayırmada {0}",
+    "de": "Privater ausführbarer Speicher: {0} in {1} Zuordnungen",
+    "fr": "Mémoire exécutable privée : {0} dans {1} allocations",
+    "es": "Memoria ejecutable privada: {0} en {1} asignaciones"
+  },
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": {
+    "tr": "Bir dosyaya dayanmayan yürütülebilir bellek. JIT derleyicileri (.NET, tarayıcılar, Java) bunu oluşturur; işleme enjekte edilen kod da öyle.",
+    "de": "Ausführbarer Speicher ohne zugrunde liegende Datei. JIT-Compiler (.NET, Browser, Java) erzeugen ihn, ebenso in den Prozess eingeschleuster Code.",
+    "fr": "Mémoire exécutable non adossée à un fichier. Les compilateurs JIT (.NET, navigateurs, Java) en créent, tout comme le code injecté dans le processus.",
+    "es": "Memoria ejecutable que no procede de un archivo. Los compiladores JIT (.NET, navegadores, Java) la crean, y también el código inyectado en el proceso."
+  },
+  "Protection": {
+    "tr": "Koruma",
+    "de": "Schutz",
+    "fr": "Protection",
+    "es": "Protección"
   }
 }

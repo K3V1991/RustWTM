@@ -1790,5 +1790,17 @@
   "Filter by type or name": "유형 또는 이름으로 필터",
   "Show unnamed handles": "이름 없는 핸들 표시",
   "Showing the first {0} of {1}.": "{1}개 중 처음 {0}개를 표시합니다.",
-  "Access: {0}": "액세스: {0}"
+  "Access: {0}": "액세스: {0}",
+  "Memory map": "메모리 맵",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "할당별 주소 공간: 프로그램 및 DLL, 매핑된 파일, 개인 메모리",
+  "Reading the memory map…": "메모리 맵을 읽는 중…",
+  "The map is partial: the process has very many regions, or reading took too long.": "맵이 불완전합니다: 프로세스의 영역이 매우 많거나 읽기에 시간이 너무 오래 걸렸습니다.",
+  "Reserved": "예약됨",
+  "Allocations": "할당",
+  "Mapped file": "매핑된 파일",
+  "Shareable": "공유 가능",
+  "Private": "개인",
+  "Private executable memory: {0} in {1} allocations": "개인 실행 가능 메모리: 할당 {1}개에 {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "파일에 기반하지 않은 실행 가능 메모리입니다. JIT 컴파일러(.NET, 브라우저, Java)가 만들며, 프로세스에 삽입된 코드도 만듭니다.",
+  "Protection": "보호"
 }

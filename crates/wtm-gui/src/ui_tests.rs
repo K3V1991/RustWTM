@@ -633,6 +633,7 @@ fn describe_intent(i: &Intent) -> String {
         Intent::Security(t) => format!("security {:?}", t.as_ref().map(|t| t.pid)),
         Intent::Environment(t) => format!("environment {:?}", t.as_ref().map(|t| t.pid)),
         Intent::Handles(t) => format!("handles {:?}", t.as_ref().map(|t| t.pid)),
+        Intent::MemoryMap(t) => format!("memory map {:?}", t.as_ref().map(|t| t.pid)),
         Intent::Threads(t) => format!("threads {:?}", t.as_ref().map(|t| t.pid)),
         Intent::Network(t, block) => format!("network {} {block}", t.pid),
         Intent::AskAi(t) => format!("ask ai {}", t.pid),

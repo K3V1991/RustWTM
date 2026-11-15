@@ -1790,5 +1790,17 @@
   "Filter by type or name": "種類または名前で絞り込む",
   "Show unnamed handles": "名前のないハンドルを表示",
   "Showing the first {0} of {1}.": "{1} 件中、最初の {0} 件を表示しています。",
-  "Access: {0}": "アクセス: {0}"
+  "Access: {0}": "アクセス: {0}",
+  "Memory map": "メモリ マップ",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "割り当てごとのアドレス空間: プログラムと DLL、マップされたファイル、プライベート メモリ",
+  "Reading the memory map…": "メモリ マップを読み取っています…",
+  "The map is partial: the process has very many regions, or reading took too long.": "マップは不完全です: プロセスの領域が非常に多いか、読み取りに時間がかかりすぎました。",
+  "Reserved": "予約済み",
+  "Allocations": "割り当て",
+  "Mapped file": "マップされたファイル",
+  "Shareable": "共有可能",
+  "Private": "プライベート",
+  "Private executable memory: {0} in {1} allocations": "プライベート実行可能メモリ: {1} 個の割り当てに {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ファイルに基づかない実行可能メモリ。JIT コンパイラ (.NET、ブラウザー、Java) が作成するほか、プロセスに注入されたコードも作成します。",
+  "Protection": "保護"
 }

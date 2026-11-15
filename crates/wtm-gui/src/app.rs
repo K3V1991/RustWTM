@@ -2105,6 +2105,7 @@ impl eframe::App for App {
                 Intent::Security(target) => backend.send(UiCommand::Security(target)),
                 Intent::Environment(target) => backend.send(UiCommand::Environment(target)),
                 Intent::Handles(target) => backend.send(UiCommand::Handles(target)),
+                Intent::MemoryMap(target) => backend.send(UiCommand::MemoryMap(target)),
                 Intent::Threads(target) => backend.send(UiCommand::Threads(target)),
                 Intent::AskAi(target) => state.ai.open_process(target),
                 Intent::Network(target, block) => {
@@ -2814,6 +2815,19 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
         {
             intents.push(Intent::Handles(Some(sel.clone())));
         }
+        let memory_map = data.memory_map.as_ref().filter(|(r, _)| r == sel);
+        if ui
+            .add_enabled(
+                !memory_map.is_some_and(|(_, m)| m.is_none()),
+                egui::Button::new(crate::i18n::tr("Memory map")),
+            )
+            .on_hover_text(crate::i18n::tr(
+                "Its address space by allocation: programs and DLLs, mapped files and private memory",
+            ))
+            .clicked()
+        {
+            intents.push(Intent::MemoryMap(Some(sel.clone())));
+        }
         let threads_open = data.threads.as_ref().is_some_and(|p| p.target == *sel);
         if ui
             .add_enabled(!threads_open, egui::Button::new(crate::i18n::tr("Threads")))
@@ -2855,6 +2869,7 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
     crate::security_view::show(ui, data, sel, intents);
     crate::environment_view::show(ui, data, sel, intents);
     crate::handles_view::show(ui, data, sel, intents);
+    crate::memory_map_view::show(ui, data, sel, intents);
     match ending.map(|(_, r)| r) {
         Some(None) => {
             ui.horizontal(|ui| {
@@ -7379,6 +7394,7 @@ mod tests {
             UiCommand::Security(t) => format!("security {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Environment(t) => format!("environment {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Handles(t) => format!("handles {:?}", t.as_ref().map(|t| t.pid)),
+            UiCommand::MemoryMap(t) => format!("memory map {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Threads(t) => format!("threads {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::CloseConnection { local, remote } => format!("close {local} {remote}"),
             UiCommand::Firewall { path, block } => format!("firewall {path} {block}"),
@@ -8515,6 +8531,102 @@ mod tests {
         assert!(
             h.query_by_label_contains("250000 handles, too many")
                 .is_some()
+        );
+    }
+
+    #[test]
+    fn memory_map_panel_totals_kinds_and_lists_allocations() {
+        use wtm_core::control::{Allocation, MemoryKind, MemoryMap};
+        let allocation = |kind, base, committed, executable, name: Option<&str>| Allocation {
+            base,
+            kind,
+            reserved: committed * 4,
+            committed,
+            regions: 2,
+            protection: if executable { 0x20 } else { 0x04 },
+            executable,
+            name: name.map(Into::into),
+        };
+        let mut d = data();
+        let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
+        d.memory_map = Some((
+            alpha.clone(),
+            Some(Ok(crate::memory_map_view::MemoryList::from(MemoryMap {
+                allocations: vec![
+                    allocation(
+                        MemoryKind::Image,
+                        0x7FF6_0000_0000,
+                        3 << 20,
+                        true,
+                        Some(r"C:\Apps\alphacore.dll"),
+                    ),
+                    allocation(MemoryKind::Private, 0x1_0000, 8 << 20, false, None),
+                    allocation(MemoryKind::Private, 0x2_0000, 1 << 20, true, None),
+                ],
+                incomplete: false,
+            }))),
+        ));
+        let (backend, rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 1400.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.state_mut().state.processes.selected = Some(alpha.clone());
+        h.run_steps(2);
+        for text in [
+            // The file name; the path is on hover.
+            "alphacore.dll",
+            "0x7FF600000000",
+            "9.0 MiB",
+            "Private executable memory: 1.0 MiB in 1 allocations",
+            "RX",
+        ] {
+            assert!(
+                h.query_all_by_label_contains(text).next().is_some(),
+                "{text}"
+            );
+        }
+        h.get_by_label("alphacore.dll").hover();
+        h.run();
+        assert!(h.query_by_label(r"Image: C:\Apps\alphacore.dll").is_some());
+        // Most committed first.
+        let y = |n: &str| h.get_by_label(n).rect().min.y;
+        assert!(y("0x10000") < y("0x7FF600000000") && y("0x7FF600000000") < y("0x20000"));
+        h.get_by_label("Filter by type or name").click();
+        h.run_steps(2);
+        h.get_by_label("Filter by type or name").type_text("alpha");
+        h.run_steps(2);
+        assert!(h.query_by_label("0x10000").is_none());
+        assert!(h.query_by_label("0x7FF600000000").is_some());
+
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Memory map")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "memory map Some(100)")
+        );
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Hide")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "memory map None")
         );
     }
 

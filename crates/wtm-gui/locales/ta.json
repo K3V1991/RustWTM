@@ -1790,5 +1790,17 @@
   "Filter by type or name": "வகை அல்லது பெயரால் வடிகட்டு",
   "Show unnamed handles": "பெயரில்லாத கைப்பிடிகளைக் காட்டு",
   "Showing the first {0} of {1}.": "{1} இல் முதல் {0} காட்டப்படுகின்றன.",
-  "Access: {0}": "அணுகல்: {0}"
+  "Access: {0}": "அணுகல்: {0}",
+  "Memory map": "நினைவக வரைபடம்",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "ஒதுக்கீடு வாரியாக அதன் முகவரி இடம்: நிரல்கள் மற்றும் DLL-கள், வரைபடமாக்கப்பட்ட கோப்புகள் மற்றும் தனிப்பட்ட நினைவகம்",
+  "Reading the memory map…": "நினைவக வரைபடம் படிக்கப்படுகிறது…",
+  "The map is partial: the process has very many regions, or reading took too long.": "வரைபடம் முழுமையற்றது: செயல்முறைக்கு மிக அதிகமான பகுதிகள் உள்ளன, அல்லது படிக்க மிக நேரம் ஆனது.",
+  "Reserved": "ஒதுக்கப்பட்டது",
+  "Allocations": "ஒதுக்கீடுகள்",
+  "Mapped file": "வரைபடமாக்கப்பட்ட கோப்பு",
+  "Shareable": "பகிரக்கூடியது",
+  "Private": "தனிப்பட்டது",
+  "Private executable memory: {0} in {1} allocations": "தனிப்பட்ட இயக்கக்கூடிய நினைவகம்: {1} ஒதுக்கீடுகளில் {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "கோப்பை அடிப்படையாகக் கொள்ளாத இயக்கக்கூடிய நினைவகம். JIT தொகுப்பிகள் (.NET, உலாவிகள், Java) இதை உருவாக்குகின்றன, செயல்முறைக்குள் புகுத்தப்பட்ட குறியீடும் அப்படியே.",
+  "Protection": "பாதுகாப்பு"
 }

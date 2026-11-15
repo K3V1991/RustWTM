@@ -1790,5 +1790,17 @@
   "Filter by type or name": "प्रकार किंवा नावाने फिल्टर करा",
   "Show unnamed handles": "नाव नसलेले हँडल दाखवा",
   "Showing the first {0} of {1}.": "{1} पैकी पहिले {0} दाखवत आहे.",
-  "Access: {0}": "प्रवेश: {0}"
+  "Access: {0}": "प्रवेश: {0}",
+  "Memory map": "मेमरी नकाशा",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "वाटपानुसार त्याचे पत्ता क्षेत्र: प्रोग्राम आणि DLL, मॅप केलेल्या फायली आणि खाजगी मेमरी",
+  "Reading the memory map…": "मेमरी नकाशा वाचत आहे…",
+  "The map is partial: the process has very many regions, or reading took too long.": "नकाशा अपूर्ण आहे: प्रक्रियेचे खूप जास्त क्षेत्र आहेत, किंवा वाचनाला खूप वेळ लागला.",
+  "Reserved": "राखीव",
+  "Allocations": "वाटप",
+  "Mapped file": "मॅप केलेली फाइल",
+  "Shareable": "सामायिक करण्यायोग्य",
+  "Private": "खाजगी",
+  "Private executable memory: {0} in {1} allocations": "खाजगी कार्यान्वित करण्यायोग्य मेमरी: {1} वाटपांमध्ये {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "फाइलवर आधारित नसलेली कार्यान्वित करण्यायोग्य मेमरी. JIT कंपायलर (.NET, ब्राउझर, Java) ती तयार करतात, तसेच प्रक्रियेत घुसवलेला कोडही.",
+  "Protection": "संरक्षण"
 }

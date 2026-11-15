@@ -1790,5 +1790,17 @@
   "Filter by type or name": "I-filter ayon sa uri o pangalan",
   "Show unnamed handles": "Ipakita ang mga handle na walang pangalan",
   "Showing the first {0} of {1}.": "Ipinapakita ang unang {0} sa {1}.",
-  "Access: {0}": "Access: {0}"
+  "Access: {0}": "Access: {0}",
+  "Memory map": "Memory map",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "Ang address space nito ayon sa allocation: mga program at DLL, mga naka-map na file at pribadong memory",
+  "Reading the memory map…": "Binabasa ang memory map…",
+  "The map is partial: the process has very many regions, or reading took too long.": "Hindi kumpleto ang map: napakaraming region ng proseso, o masyadong natagalan ang pagbasa.",
+  "Reserved": "Naka-reserve",
+  "Allocations": "Mga allocation",
+  "Mapped file": "Naka-map na file",
+  "Shareable": "Naibabahagi",
+  "Private": "Pribado",
+  "Private executable memory: {0} in {1} allocations": "Pribadong executable memory: {0} sa {1} allocation",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Executable memory na hindi galing sa file. Ginagawa ito ng mga JIT compiler (.NET, mga browser, Java), at gayundin ng code na isiningit sa proseso.",
+  "Protection": "Proteksyon"
 }

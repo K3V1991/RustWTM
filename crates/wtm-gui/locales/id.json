@@ -1790,5 +1790,17 @@
   "Filter by type or name": "Filter menurut jenis atau nama",
   "Show unnamed handles": "Tampilkan handle tanpa nama",
   "Showing the first {0} of {1}.": "Menampilkan {0} pertama dari {1}.",
-  "Access: {0}": "Akses: {0}"
+  "Access: {0}": "Akses: {0}",
+  "Memory map": "Peta memori",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "Ruang alamatnya per alokasi: program dan DLL, file yang dipetakan, dan memori privat",
+  "Reading the memory map…": "Membaca peta memori…",
+  "The map is partial: the process has very many regions, or reading took too long.": "Peta tidak lengkap: proses memiliki sangat banyak wilayah, atau pembacaan terlalu lama.",
+  "Reserved": "Dicadangkan",
+  "Allocations": "Alokasi",
+  "Mapped file": "File yang dipetakan",
+  "Shareable": "Dapat dibagikan",
+  "Private": "Privat",
+  "Private executable memory: {0} in {1} allocations": "Memori privat yang dapat dieksekusi: {0} dalam {1} alokasi",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Memori yang dapat dieksekusi tanpa file di baliknya. Kompiler JIT (.NET, browser, Java) membuatnya, begitu pula kode yang disuntikkan ke proses.",
+  "Protection": "Perlindungan"
 }

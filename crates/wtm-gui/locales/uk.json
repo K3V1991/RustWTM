@@ -1790,5 +1790,17 @@
   "Filter by type or name": "Фільтр за типом або іменем",
   "Show unnamed handles": "Показувати безіменні дескриптори",
   "Showing the first {0} of {1}.": "Показано перші {0} з {1}.",
-  "Access: {0}": "Доступ: {0}"
+  "Access: {0}": "Доступ: {0}",
+  "Memory map": "Карта пам'яті",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "Його адресний простір за виділеннями: програми й DLL, відображені файли та приватна пам'ять",
+  "Reading the memory map…": "Читання карти пам'яті…",
+  "The map is partial: the process has very many regions, or reading took too long.": "Карта неповна: процес має дуже багато областей, або читання тривало надто довго.",
+  "Reserved": "Зарезервовано",
+  "Allocations": "Виділення",
+  "Mapped file": "Відображений файл",
+  "Shareable": "Спільна",
+  "Private": "Приватна",
+  "Private executable memory: {0} in {1} allocations": "Приватна виконувана пам'ять: {0} у виділеннях: {1}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Виконувана пам'ять, не пов'язана з файлом. Її створюють JIT-компілятори (.NET, браузери, Java), а також код, впроваджений у процес.",
+  "Protection": "Захист"
 }

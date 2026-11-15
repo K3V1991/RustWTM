@@ -1790,5 +1790,17 @@
   "Filter by type or name": "రకం లేదా పేరుతో ఫిల్టర్ చేయి",
   "Show unnamed handles": "పేరులేని హ్యాండిల్‌లను చూపు",
   "Showing the first {0} of {1}.": "{1}లో మొదటి {0} చూపబడుతున్నాయి.",
-  "Access: {0}": "యాక్సెస్: {0}"
+  "Access: {0}": "యాక్సెస్: {0}",
+  "Memory map": "మెమరీ మ్యాప్",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "కేటాయింపుల వారీగా దాని చిరునామా స్థలం: ప్రోగ్రామ్‌లు మరియు DLLలు, మ్యాప్ చేసిన ఫైల్‌లు మరియు ప్రైవేట్ మెమరీ",
+  "Reading the memory map…": "మెమరీ మ్యాప్ చదవబడుతోంది…",
+  "The map is partial: the process has very many regions, or reading took too long.": "మ్యాప్ అసంపూర్ణం: ప్రాసెస్‌కు చాలా ఎక్కువ ప్రాంతాలు ఉన్నాయి, లేదా చదవడానికి చాలా సమయం పట్టింది.",
+  "Reserved": "రిజర్వ్ చేయబడింది",
+  "Allocations": "కేటాయింపులు",
+  "Mapped file": "మ్యాప్ చేసిన ఫైల్",
+  "Shareable": "భాగస్వామ్యం చేయదగినది",
+  "Private": "ప్రైవేట్",
+  "Private executable memory: {0} in {1} allocations": "ప్రైవేట్ అమలు చేయదగిన మెమరీ: {1} కేటాయింపులలో {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ఫైల్ ఆధారం లేని అమలు చేయదగిన మెమరీ. JIT కంపైలర్‌లు (.NET, బ్రౌజర్‌లు, Java) దీన్ని సృష్టిస్తాయి, ప్రాసెస్‌లోకి చొప్పించిన కోడ్ కూడా అలాగే.",
+  "Protection": "రక్షణ"
 }

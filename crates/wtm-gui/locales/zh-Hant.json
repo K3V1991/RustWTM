@@ -1790,5 +1790,17 @@
   "Filter by type or name": "依類型或名稱篩選",
   "Show unnamed handles": "顯示未命名的控制代碼",
   "Showing the first {0} of {1}.": "顯示 {1} 個中的前 {0} 個。",
-  "Access: {0}": "存取權限: {0}"
+  "Access: {0}": "存取權限: {0}",
+  "Memory map": "記憶體對應",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "依配置列出的位址空間：程式與 DLL、對應檔案及私人記憶體",
+  "Reading the memory map…": "正在讀取記憶體對應…",
+  "The map is partial: the process has very many regions, or reading took too long.": "對應不完整：處理程序的區域非常多，或讀取耗時過長。",
+  "Reserved": "保留",
+  "Allocations": "配置",
+  "Mapped file": "對應檔案",
+  "Shareable": "可共用",
+  "Private": "私人",
+  "Private executable memory: {0} in {1} allocations": "私人可執行記憶體：{1} 個配置中共 {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "不由檔案支援的可執行記憶體。JIT 編譯器（.NET、瀏覽器、Java）會建立它，插入處理程序的程式碼也會。",
+  "Protection": "保護"
 }

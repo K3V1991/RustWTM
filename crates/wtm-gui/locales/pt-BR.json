@@ -1790,5 +1790,17 @@
   "Filter by type or name": "Filtrar por tipo ou nome",
   "Show unnamed handles": "Mostrar identificadores sem nome",
   "Showing the first {0} of {1}.": "Mostrando os primeiros {0} de {1}.",
-  "Access: {0}": "Acesso: {0}"
+  "Access: {0}": "Acesso: {0}",
+  "Memory map": "Mapa de memória",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "Seu espaço de endereçamento por alocação: programas e DLLs, arquivos mapeados e memória privada",
+  "Reading the memory map…": "Lendo o mapa de memória…",
+  "The map is partial: the process has very many regions, or reading took too long.": "O mapa está parcial: o processo tem muitíssimas regiões, ou a leitura demorou demais.",
+  "Reserved": "Reservada",
+  "Allocations": "Alocações",
+  "Mapped file": "Arquivo mapeado",
+  "Shareable": "Compartilhável",
+  "Private": "Privada",
+  "Private executable memory: {0} in {1} allocations": "Memória executável privada: {0} em {1} alocações",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Memória executável que não vem de um arquivo. Compiladores JIT (.NET, navegadores, Java) a criam, assim como código injetado no processo.",
+  "Protection": "Proteção"
 }

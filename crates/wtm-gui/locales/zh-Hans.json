@@ -1790,5 +1790,17 @@
   "Filter by type or name": "按类型或名称筛选",
   "Show unnamed handles": "显示未命名句柄",
   "Showing the first {0} of {1}.": "显示 {1} 个中的前 {0} 个。",
-  "Access: {0}": "访问权限: {0}"
+  "Access: {0}": "访问权限: {0}",
+  "Memory map": "内存映射",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "按分配列出的地址空间：程序和 DLL、映射文件和专用内存",
+  "Reading the memory map…": "正在读取内存映射…",
+  "The map is partial: the process has very many regions, or reading took too long.": "映射不完整：进程的区域非常多，或读取耗时过长。",
+  "Reserved": "保留",
+  "Allocations": "分配",
+  "Mapped file": "映射文件",
+  "Shareable": "可共享",
+  "Private": "专用",
+  "Private executable memory: {0} in {1} allocations": "专用可执行内存：{1} 个分配中共 {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "不由文件支持的可执行内存。JIT 编译器（.NET、浏览器、Java）会创建它，注入进程的代码也会。",
+  "Protection": "保护"
 }

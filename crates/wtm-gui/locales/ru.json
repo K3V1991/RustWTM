@@ -1790,5 +1790,17 @@
   "Filter by type or name": "Фильтр по типу или имени",
   "Show unnamed handles": "Показывать безымянные дескрипторы",
   "Showing the first {0} of {1}.": "Показаны первые {0} из {1}.",
-  "Access: {0}": "Доступ: {0}"
+  "Access: {0}": "Доступ: {0}",
+  "Memory map": "Карта памяти",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "Его адресное пространство по выделениям: программы и DLL, отображённые файлы и частная память",
+  "Reading the memory map…": "Чтение карты памяти…",
+  "The map is partial: the process has very many regions, or reading took too long.": "Карта неполная: у процесса очень много областей, или чтение заняло слишком много времени.",
+  "Reserved": "Зарезервировано",
+  "Allocations": "Выделения",
+  "Mapped file": "Отображённый файл",
+  "Shareable": "Общая",
+  "Private": "Частная",
+  "Private executable memory: {0} in {1} allocations": "Частная исполняемая память: {0} в выделениях: {1}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Исполняемая память, не связанная с файлом. Её создают JIT-компиляторы (.NET, браузеры, Java), а также код, внедрённый в процесс.",
+  "Protection": "Защита"
 }

@@ -312,6 +312,12 @@ pub struct Data {
         ProcessRef,
         Option<Result<crate::handles_view::HandleList, String>>,
     )>,
+    /// The memory map of a process, totalled and sorted; `None` inside
+    /// while it is read.
+    pub memory_map: Option<(
+        ProcessRef,
+        Option<Result<crate::memory_map_view::MemoryList, String>>,
+    )>,
     /// The threads of a process, read each tick while the panel is drawn
     /// (`threads_wanted_ms`, Unix ms).
     pub threads: Option<crate::threads_view::ThreadsPanel>,
@@ -436,6 +442,8 @@ pub enum UiCommand {
     Environment(Option<ProcessRef>),
     /// The handles of a process; with `None`, hides them.
     Handles(Option<ProcessRef>),
+    /// The memory map of a process; with `None`, hides it.
+    MemoryMap(Option<ProcessRef>),
     /// Shows (or with `None` hides) the threads of a process.
     Threads(Option<ProcessRef>),
     /// Blocks (`true`) or unblocks a program's network access.
@@ -1761,6 +1769,24 @@ impl Worker {
             }
             UiCommand::Environment(None) => self.data().environment = None,
             UiCommand::Handles(None) => self.data().handles = None,
+            UiCommand::MemoryMap(None) => self.data().memory_map = None,
+            UiCommand::MemoryMap(Some(target)) => {
+                self.data().memory_map = Some((target.clone(), None));
+                let (data, ctx) = (self.data.clone(), self.ctx.clone());
+                std::thread::spawn(move || {
+                    // Off the critical path: naming mapped files.
+                    let _ = wtm_core::control::enter_background_mode();
+                    let result = wtm_core::control::memory_map(&target)
+                        .map(crate::memory_map_view::MemoryList::from)
+                        .map_err(|e| e.to_string());
+                    let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
+                    if d.memory_map.as_ref().is_some_and(|(t, _)| *t == target) {
+                        d.memory_map = Some((target, Some(result)));
+                    }
+                    drop(d);
+                    ctx.request_repaint();
+                });
+            }
             UiCommand::Handles(Some(target)) => {
                 self.data().handles = Some((target.clone(), None));
                 let (data, ctx) = (self.data.clone(), self.ctx.clone());

@@ -563,6 +563,8 @@ pub enum Intent {
     Environment(Option<ProcessRef>),
     /// Read (or with `None` hide) the process's handles.
     Handles(Option<ProcessRef>),
+    /// Read (or with `None` hide) the process's memory map.
+    MemoryMap(Option<ProcessRef>),
     /// Show (or with `None` hide) the process's threads.
     Threads(Option<ProcessRef>),
     /// Block (`true`) or unblock the program's network access with Windows Firewall.

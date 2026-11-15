@@ -1790,5 +1790,17 @@
   "Filter by type or name": "ধরন বা নাম দিয়ে ফিল্টার করুন",
   "Show unnamed handles": "নামহীন হ্যান্ডেল দেখান",
   "Showing the first {0} of {1}.": "{1}টির মধ্যে প্রথম {0}টি দেখানো হচ্ছে।",
-  "Access: {0}": "অ্যাক্সেস: {0}"
+  "Access: {0}": "অ্যাক্সেস: {0}",
+  "Memory map": "মেমরি ম্যাপ",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "বরাদ্দ অনুযায়ী এর ঠিকানা স্থান: প্রোগ্রাম ও DLL, ম্যাপ করা ফাইল এবং ব্যক্তিগত মেমরি",
+  "Reading the memory map…": "মেমরি ম্যাপ পড়া হচ্ছে…",
+  "The map is partial: the process has very many regions, or reading took too long.": "ম্যাপটি অসম্পূর্ণ: প্রক্রিয়াটির অনেক বেশি অঞ্চল আছে, অথবা পড়তে খুব বেশি সময় লেগেছে।",
+  "Reserved": "সংরক্ষিত",
+  "Allocations": "বরাদ্দ",
+  "Mapped file": "ম্যাপ করা ফাইল",
+  "Shareable": "শেয়ারযোগ্য",
+  "Private": "ব্যক্তিগত",
+  "Private executable memory: {0} in {1} allocations": "ব্যক্তিগত নির্বাহযোগ্য মেমরি: {1}টি বরাদ্দে {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ফাইলের উপর ভিত্তি না করা নির্বাহযোগ্য মেমরি। JIT কম্পাইলার (.NET, ব্রাউজার, Java) এটি তৈরি করে, আর প্রক্রিয়ায় ঢোকানো কোডও তা করে।",
+  "Protection": "সুরক্ষা"
 }

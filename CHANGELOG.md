@@ -36,6 +36,15 @@ All notable changes to this project are documented here. The format follows
   200,000 handles are listed and 5,000 named per read; lsass.exe and
   lsaiso.exe are refused. It is read on request, by this window with its
   own rights.
+- The process inspector's Memory map button shows the process's address
+  space as VMMap does: committed and reserved bytes of images, mapped files,
+  shareable and private memory, then each allocation, most committed first,
+  with its address, protection and file (the full path on hover). Private
+  memory that has become executable is marked "+X" and summed, with a note
+  that JIT compilers make it as well as injected code. Only the layout is
+  read, never the memory, with limited query rights; at most 200,000 regions
+  are walked within three seconds and the map says when it stopped early.
+  lsass.exe and lsaiso.exe are refused.
 
 ## [0.32.0] - 2026-11-14
 

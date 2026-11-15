@@ -31,6 +31,7 @@ mod kill_tab;
 mod limits_tab;
 mod logo;
 mod marks;
+mod memory_map_view;
 mod memory_view;
 mod navigation;
 mod numeric_tray;

@@ -1790,5 +1790,17 @@
   "Filter by type or name": "ಪ್ರಕಾರ ಅಥವಾ ಹೆಸರಿನಿಂದ ಫಿಲ್ಟರ್ ಮಾಡಿ",
   "Show unnamed handles": "ಹೆಸರಿಲ್ಲದ ಹ್ಯಾಂಡಲ್‌ಗಳನ್ನು ತೋರಿಸಿ",
   "Showing the first {0} of {1}.": "{1} ರಲ್ಲಿ ಮೊದಲ {0} ತೋರಿಸಲಾಗುತ್ತಿದೆ.",
-  "Access: {0}": "ಪ್ರವೇಶ: {0}"
+  "Access: {0}": "ಪ್ರವೇಶ: {0}",
+  "Memory map": "ಮೆಮೊರಿ ನಕ್ಷೆ",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "ಹಂಚಿಕೆಯ ಪ್ರಕಾರ ಅದರ ವಿಳಾಸ ಸ್ಥಳ: ಪ್ರೋಗ್ರಾಂಗಳು ಮತ್ತು DLLಗಳು, ಮ್ಯಾಪ್ ಮಾಡಿದ ಫೈಲ್‌ಗಳು ಮತ್ತು ಖಾಸಗಿ ಮೆಮೊರಿ",
+  "Reading the memory map…": "ಮೆಮೊರಿ ನಕ್ಷೆಯನ್ನು ಓದಲಾಗುತ್ತಿದೆ…",
+  "The map is partial: the process has very many regions, or reading took too long.": "ನಕ್ಷೆ ಅಪೂರ್ಣವಾಗಿದೆ: ಪ್ರಕ್ರಿಯೆಗೆ ತುಂಬಾ ಹೆಚ್ಚು ಪ್ರದೇಶಗಳಿವೆ, ಅಥವಾ ಓದಲು ತುಂಬಾ ಸಮಯ ಹಿಡಿಯಿತು.",
+  "Reserved": "ಕಾಯ್ದಿರಿಸಲಾಗಿದೆ",
+  "Allocations": "ಹಂಚಿಕೆಗಳು",
+  "Mapped file": "ಮ್ಯಾಪ್ ಮಾಡಿದ ಫೈಲ್",
+  "Shareable": "ಹಂಚಿಕೊಳ್ಳಬಹುದಾದ",
+  "Private": "ಖಾಸಗಿ",
+  "Private executable memory: {0} in {1} allocations": "ಖಾಸಗಿ ಕಾರ್ಯಗತಗೊಳಿಸಬಹುದಾದ ಮೆಮೊರಿ: {1} ಹಂಚಿಕೆಗಳಲ್ಲಿ {0}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "ಫೈಲ್ ಆಧಾರವಿಲ್ಲದ ಕಾರ್ಯಗತಗೊಳಿಸಬಹುದಾದ ಮೆಮೊರಿ. JIT ಕಂಪೈಲರ್‌ಗಳು (.NET, ಬ್ರೌಸರ್‌ಗಳು, Java) ಇದನ್ನು ರಚಿಸುತ್ತವೆ, ಪ್ರಕ್ರಿಯೆಗೆ ಸೇರಿಸಿದ ಕೋಡ್ ಕೂಡ.",
+  "Protection": "ರಕ್ಷಣೆ"
 }

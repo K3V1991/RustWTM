@@ -16,6 +16,7 @@ pub use wtm_sys::control::{
 };
 pub use wtm_sys::handles::{HandleInfo, HandleReport, MOST_HANDLES};
 use wtm_sys::job::Job;
+pub use wtm_sys::memory_map::{Allocation, MemoryKind, MemoryMap, is_executable, protection_code};
 pub use wtm_sys::mitigation::{StackProtection, UacVirtualization};
 pub use wtm_sys::token::{Account, TokenGroup, TokenPrivilege, TokenReport};
 
@@ -457,6 +458,27 @@ pub fn handles(target: &ProcessRef) -> ControlResult<HandleReport> {
     }
 }
 
+/// The allocations of `target`'s address space: only its layout, never
+/// its contents.
+///
+/// Read with this program's own rights, like the other inspector views;
+/// the sign-in secrets holders are refused as they are everywhere else.
+pub fn memory_map(target: &ProcessRef) -> ControlResult<MemoryMap> {
+    let secrets = ControlError::Protected {
+        pid: target.pid,
+        reason: "holds this PC's sign-in secrets",
+    };
+    if holds_secrets(&target.name) {
+        return Err(secrets);
+    }
+    let h = open_verified(target, Access::QUERY)?;
+    match image_name(&h) {
+        Some(name) if holds_secrets(&name) => Err(secrets),
+        Some(_) => sys(target.pid, h.memory_map()),
+        None => Err(ControlError::AccessDenied { pid: target.pid }),
+    }
+}
+
 /// The command line a process was started with.
 pub fn command_line(target: &ProcessRef) -> ControlResult<String> {
     let h = open_verified(target, Access::QUERY)?;
@@ -876,6 +898,37 @@ mod tests {
             ..me
         };
         assert!(matches!(handles(&reused), Err(ControlError::Stale { .. })));
+    }
+
+    #[test]
+    fn maps_its_own_memory_but_never_that_of_the_sign_in_secrets_holders() {
+        let created = ProcessHandle::open(std::process::id(), Access::QUERY)
+            .unwrap()
+            .create_time()
+            .unwrap();
+        let me = ProcessRef {
+            pid: std::process::id(),
+            create_time: created,
+            name: "me.exe".into(),
+        };
+        let map = memory_map(&me).unwrap();
+        assert!(map.allocations.iter().any(|a| a.kind == MemoryKind::Image));
+        let lsass = ProcessRef {
+            name: "lsass.exe".into(),
+            ..me.clone()
+        };
+        assert!(matches!(
+            memory_map(&lsass),
+            Err(ControlError::Protected { .. })
+        ));
+        let reused = ProcessRef {
+            create_time: created + 1,
+            ..me
+        };
+        assert!(matches!(
+            memory_map(&reused),
+            Err(ControlError::Stale { .. })
+        ));
     }
 
     #[test]

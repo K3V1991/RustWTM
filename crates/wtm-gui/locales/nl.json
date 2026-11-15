@@ -1790,5 +1790,17 @@
   "Filter by type or name": "Filteren op type of naam",
   "Show unnamed handles": "Naamloze handles tonen",
   "Showing the first {0} of {1}.": "De eerste {0} van {1} worden getoond.",
-  "Access: {0}": "Toegang: {0}"
+  "Access: {0}": "Toegang: {0}",
+  "Memory map": "Geheugenkaart",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "Zijn adresruimte per toewijzing: programma's en DLL's, toegewezen bestanden en privégeheugen",
+  "Reading the memory map…": "Geheugenkaart wordt gelezen…",
+  "The map is partial: the process has very many regions, or reading took too long.": "De kaart is onvolledig: het proces heeft zeer veel regio's, of het lezen duurde te lang.",
+  "Reserved": "Gereserveerd",
+  "Allocations": "Toewijzingen",
+  "Mapped file": "Toegewezen bestand",
+  "Shareable": "Deelbaar",
+  "Private": "Privé",
+  "Private executable memory: {0} in {1} allocations": "Uitvoerbaar privégeheugen: {0} in {1} toewijzingen",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Uitvoerbaar geheugen zonder onderliggend bestand. JIT-compilers (.NET, browsers, Java) maken het aan, en ook code die in het proces is geïnjecteerd.",
+  "Protection": "Beveiliging"
 }

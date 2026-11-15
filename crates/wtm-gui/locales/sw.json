@@ -1790,5 +1790,17 @@
   "Filter by type or name": "Chuja kwa aina au jina",
   "Show unnamed handles": "Onyesha vishikio visivyo na jina",
   "Showing the first {0} of {1}.": "Inaonyesha {0} vya kwanza kati ya {1}.",
-  "Access: {0}": "Ufikiaji: {0}"
+  "Access: {0}": "Ufikiaji: {0}",
+  "Memory map": "Ramani ya kumbukumbu",
+  "Its address space by allocation: programs and DLLs, mapped files and private memory": "Nafasi yake ya anwani kwa mgao: programu na DLL, faili zilizopangwa na kumbukumbu binafsi",
+  "Reading the memory map…": "Inasoma ramani ya kumbukumbu…",
+  "The map is partial: the process has very many regions, or reading took too long.": "Ramani haijakamilika: mchakato una maeneo mengi sana, au usomaji ulichukua muda mrefu mno.",
+  "Reserved": "Imehifadhiwa",
+  "Allocations": "Migao",
+  "Mapped file": "Faili iliyopangwa",
+  "Shareable": "Inayoshirikiwa",
+  "Private": "Binafsi",
+  "Private executable memory: {0} in {1} allocations": "Kumbukumbu binafsi inayotekelezeka: {0} katika migao {1}",
+  "Executable memory not backed by a file. JIT compilers (.NET, browsers, Java) create it, and so does code injected into the process.": "Kumbukumbu inayotekelezeka isiyotokana na faili. Vikusanyaji vya JIT (.NET, vivinjari, Java) huiunda, na vivyo hivyo msimbo uliodungwa kwenye mchakato.",
+  "Protection": "Ulinzi"
 }
