@@ -39,6 +39,12 @@ All notable changes to this project are documented here. The format follows
   same PID never inherits the list, and nothing is sent to the windows
   while they are listed, so a hung one cannot stall it. Titles often name
   documents, mails or web pages: they are shown, never logged.
+- The process inspector graphs its reads and writes (all its I/O, as in
+  its Disk read and Disk write rows), network traffic and GPU use over the
+  last two minutes beside CPU and memory, as System Informer does. Each appears once the process has used it in that time,
+  so an idle process keeps a short panel. The graphs share one axis width,
+  so their time axes line up, and their scales step in round numbers
+  ("20%", "4.0 MiB/s", "1.0 GiB") so each keeps a labelled mark.
 
 ### Changed
 

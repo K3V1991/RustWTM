@@ -3262,15 +3262,75 @@ fn details_panel(
             && h.cpu.len() > 1
         {
             ui.add_space(0.0);
-            process_plot(ui, "proc_cpu", "CPU", &h.times, &h.cpu, false);
+            process_plot(
+                ui,
+                "proc_cpu",
+                PlotUnit::Percent,
+                &h.times,
+                &[("CPU", &h.cpu, crate::theme::CPU)],
+            );
             process_plot(
                 ui,
                 "proc_mem",
-                crate::i18n::tr("Memory"),
+                PlotUnit::Bytes,
                 &h.times,
-                &h.memory,
-                true,
+                &[(crate::i18n::tr("Memory"), &h.memory, crate::theme::MEMORY)],
             );
+            // As in System Informer: I/O, network and GPU graphs, each once
+            // the process has used it in the window, so an idle process
+            // keeps a short panel.
+            let used = |series: &[&std::collections::VecDeque<f32>]| {
+                series.iter().any(|s| s.iter().any(|v| *v > 0.0))
+            };
+            if used(&[&h.disk_read, &h.disk_write]) {
+                process_plot(
+                    ui,
+                    "proc_disk",
+                    PlotUnit::Rate,
+                    &h.times,
+                    &[
+                        (
+                            crate::i18n::tr("Disk read"),
+                            &h.disk_read,
+                            crate::theme::DISK_READ,
+                        ),
+                        (
+                            crate::i18n::tr("Disk write"),
+                            &h.disk_write,
+                            crate::theme::DISK_WRITE,
+                        ),
+                    ],
+                );
+            }
+            if used(&[&h.net_rx, &h.net_tx]) {
+                process_plot(
+                    ui,
+                    "proc_net",
+                    PlotUnit::Rate,
+                    &h.times,
+                    &[
+                        (
+                            crate::i18n::tr("Network receive"),
+                            &h.net_rx,
+                            crate::theme::NET_RX,
+                        ),
+                        (
+                            crate::i18n::tr("Network send"),
+                            &h.net_tx,
+                            crate::theme::NET_TX,
+                        ),
+                    ],
+                );
+            }
+            if used(&[&h.gpu]) {
+                process_plot(
+                    ui,
+                    "proc_gpu",
+                    PlotUnit::Percent,
+                    &h.times,
+                    &[("GPU", &h.gpu, crate::theme::GPU)],
+                );
+            }
             ui.weak(crate::i18n::tr("Last two minutes"));
         }
     });
@@ -3467,29 +3527,93 @@ fn details_panel(
 }
 
 /// A small graph in the details panel: CPU in percent or memory in bytes.
+/// What a process graph's values are.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum PlotUnit {
+    Percent,
+    Bytes,
+    /// Bytes per second.
+    Rate,
+}
+
+impl PlotUnit {
+    fn format(self, v: f64) -> String {
+        match self {
+            Self::Percent => format!("{v:.0}%"),
+            Self::Bytes => format_bytes(v.max(0.0)),
+            Self::Rate => format!("{}/s", format_bytes(v.max(0.0))),
+        }
+    }
+
+    /// A round step near `target`: 1, 2 or 5 times a power of ten for
+    /// percentages, a power of two times a power of 1024 for bytes, so
+    /// marks read as "20%", "4.0 MiB/s" or "1.0 GiB".
+    fn round_step(self, target: f64) -> f64 {
+        let target = target.max(f64::MIN_POSITIVE);
+        let (base, multipliers): (f64, &[f64]) = if self == Self::Percent {
+            (10.0, &[1.0, 2.0, 5.0, 10.0])
+        } else {
+            (
+                1024.0,
+                &[
+                    1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0, 1024.0,
+                ],
+            )
+        };
+        let scale = base.powf(target.log(base).floor());
+        multipliers
+            .iter()
+            .map(|m| m * scale)
+            .find(|step| *step >= target)
+            .unwrap_or(base * scale)
+    }
+
+    /// About two labelled marks over `bounds`: a graph is 80 points tall,
+    /// too short for the default decimal steps, whose labels fade out.
+    fn grid(self, bounds: (f64, f64)) -> Vec<egui_plot::GridMark> {
+        let (low, high) = bounds;
+        let step = self.round_step((high - low) / 2.5);
+        let mut marks = Vec::new();
+        let mut value = (low / step).ceil() * step;
+        while value <= high && marks.len() < 8 {
+            marks.push(egui_plot::GridMark {
+                // Never "-0%": the scale's margin dips just below zero.
+                value: if value == 0.0 { 0.0 } else { value },
+                step_size: step,
+            });
+            value += step;
+        }
+        marks
+    }
+
+    /// The least top of the scale, so a near-idle series is not drawn as
+    /// a full-height graph.
+    fn least_top(self) -> f64 {
+        match self {
+            Self::Percent => 5.0,
+            Self::Bytes => 1024.0 * 1024.0,
+            Self::Rate => 64.0 * 1024.0,
+        }
+    }
+}
+
+/// The lines of one process graph, each named with its latest value.
 fn process_plot(
     ui: &mut Ui,
     id: &str,
-    label: &str,
+    unit: PlotUnit,
     times: &std::collections::VecDeque<u64>,
-    values: &std::collections::VecDeque<f32>,
-    bytes: bool,
+    lines: &[(&str, &std::collections::VecDeque<f32>, Color32)],
 ) {
-    let points = series_points(times, values);
-    let unit = move |v: f64| {
-        if bytes {
-            format_bytes(v.max(0.0))
-        } else {
-            format!("{v:.0}%")
-        }
-    };
-    let latest = values.back().map_or(0.0, |v| f64::from(*v));
     Plot::new(id)
         .height(80.0)
         .show_background(false)
         .grid_color(ui.visuals().weak_text_color().gamma_multiply(0.20))
         .include_y(0.0)
-        .include_y(if bytes { 1024.0 * 1024.0 } else { 5.0 })
+        .include_y(unit.least_top())
+        // One axis width for every graph, so their time axes line up.
+        .y_axis_min_width(72.0)
+        .y_grid_spacer(move |input| unit.grid(input.bounds))
         .include_x(-(crate::backend::PROCESS_HISTORY_LEN as f64))
         .include_x(0.0)
         .allow_drag(false)
@@ -3497,20 +3621,22 @@ fn process_plot(
         .allow_scroll(false)
         .show_x(false)
         .show_axes([false, true])
-        .y_axis_formatter(move |mark, _| unit(mark.value))
+        .y_axis_formatter(move |mark, _| unit.format(mark.value))
         .legend(egui_plot::Legend::default())
         .show(ui, |plot| {
-            let color = if bytes {
-                crate::theme::MEMORY
-            } else {
-                crate::theme::CPU
-            };
-            plot.line(
-                Line::new(format!("{label} {}", unit(latest)), points)
-                    .color(color)
-                    .width(1.8)
-                    .fill(0.0),
-            );
+            // One line fills to the axis; two are drawn as lines only, so
+            // neither hides the other.
+            let fill = lines.len() == 1;
+            for (label, values, color) in lines {
+                let latest = values.back().map_or(0.0, |v| f64::from(*v));
+                let line = Line::new(
+                    format!("{label} {}", unit.format(latest)),
+                    series_points(times, values),
+                )
+                .color(*color)
+                .width(1.8);
+                plot.line(if fill { line.fill(0.0) } else { line });
+            }
         });
 }
 
@@ -6990,6 +7116,87 @@ mod tests {
         h.get_by_label("Cancel").click();
         h.run_steps(2);
         assert!(h.state().state.confirm.is_none());
+    }
+
+    #[test]
+    fn graph_marks_are_round_in_their_unit() {
+        assert_eq!(PlotUnit::Percent.round_step(17.0), 20.0);
+        assert_eq!(PlotUnit::Percent.round_step(3.0), 5.0);
+        assert_eq!(PlotUnit::Rate.round_step(3.0e6), 4.0 * 1024.0 * 1024.0);
+        // A process just over 1 GiB gets a "1.0 GiB" mark, not "1000 MiB".
+        let gib = 1024.0 * 1024.0 * 1024.0;
+        assert_eq!(
+            PlotUnit::Bytes.round_step(1.1 * gib / 2.5),
+            512.0 * 1024.0 * 1024.0
+        );
+        assert!(
+            PlotUnit::Bytes
+                .grid((0.0, 1.1 * gib))
+                .iter()
+                .any(|m| m.value == gib)
+        );
+        assert_eq!(PlotUnit::Bytes.round_step(700.0), 1024.0);
+        let marks: Vec<f64> = PlotUnit::Percent
+            .grid((0.0, 45.0))
+            .iter()
+            .map(|m| m.value)
+            .collect();
+        assert_eq!(marks, [0.0, 20.0, 40.0]);
+        let rate = PlotUnit::Rate.grid((0.0, 8.0e6));
+        assert!(
+            (2..=4).contains(&rate.len()),
+            "{:?}",
+            rate.iter().map(|m| m.value).collect::<Vec<_>>()
+        );
+        assert!(PlotUnit::Rate.grid((0.0, 0.0)).len() <= 8);
+        let zero = PlotUnit::Percent.grid((-0.5, 20.0))[0].value;
+        assert!(zero == 0.0 && zero.is_sign_positive());
+        assert_eq!(PlotUnit::Percent.format(zero), "0%");
+    }
+
+    #[test]
+    fn inspector_graphs_io_network_and_gpu_only_once_used() {
+        let mut d = data();
+        let sel = d.details.as_ref().unwrap().0.clone();
+        let snap = d.snapshot.clone().unwrap();
+        let history = d
+            .process_history
+            .entry((sel.pid, sel.create_time))
+            .or_default();
+        history.times.extend([1_000, 2_000, 3_000]);
+        history.cpu.extend([1.0, 30.0, 12.0]);
+        history.memory.extend([1e6, 2e6, 3e6]);
+        history.disk_read.extend([0.0, 1024.0, 3072.0]);
+        history.disk_write.extend([0.0, 0.0, 2048.0]);
+        // Idle: no network or GPU use in the window.
+        history.net_rx.extend([0.0; 3]);
+        history.net_tx.extend([0.0; 3]);
+        history.gpu.extend([0.0; 3]);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([900.0, 1600.0])
+            .build_ui(|ui| {
+                let mut intents = Vec::new();
+                details_panel(ui, &d, &snap, &sel, &mut intents);
+            });
+        h.run_steps(2);
+        for text in [
+            "CPU 12%",
+            "Disk read 3.0 KiB/s",
+            "Disk write 2.0 KiB/s",
+            "Last two minutes",
+        ] {
+            assert!(
+                h.query_all_by_label_contains(text).next().is_some(),
+                "{text}"
+            );
+        }
+        for text in ["Network receive 0 B/s", "GPU 0%"] {
+            assert!(
+                h.query_all_by_label_contains(text).next().is_none(),
+                "{text}"
+            );
+        }
     }
 
     #[test]
@@ -11068,6 +11275,7 @@ mod tests {
                                                 + (i as f32 * 0.03).sin() * 1_000_000.0
                                         })
                                         .collect(),
+                                    ..Default::default()
                                 },
                             );
                             d.foreground_pid = Some(p.pid);

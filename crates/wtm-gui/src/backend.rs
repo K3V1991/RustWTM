@@ -223,6 +223,30 @@ pub struct ProcessHistory {
     pub cpu: VecDeque<f32>,
     /// Private working set, bytes.
     pub memory: VecDeque<f32>,
+    /// Bytes per second read and written (files, devices and network
+    /// I/O counted by Windows as process I/O).
+    pub disk_read: VecDeque<f32>,
+    pub disk_write: VecDeque<f32>,
+    /// Network bytes per second; zero while the network trace is off.
+    pub net_rx: VecDeque<f32>,
+    pub net_tx: VecDeque<f32>,
+    /// Busiest GPU engine, percent.
+    pub gpu: VecDeque<f32>,
+}
+
+impl ProcessHistory {
+    /// Every series of the history, for trimming them together.
+    fn series_mut(&mut self) -> [&mut VecDeque<f32>; 7] {
+        [
+            &mut self.cpu,
+            &mut self.memory,
+            &mut self.disk_read,
+            &mut self.disk_write,
+            &mut self.net_rx,
+            &mut self.net_tx,
+            &mut self.gpu,
+        ]
+    }
 }
 
 pub type ProcessHistories = std::collections::HashMap<(u32, i64), ProcessHistory>;
@@ -2584,9 +2608,15 @@ fn update_process_history(
         h.times.push_back(at_ms);
         h.cpu.push_back(p.cpu_percent);
         h.memory.push_back(p.private_working_set as f32);
+        h.disk_read.push_back(p.io_read_rate as f32);
+        h.disk_write.push_back(p.io_write_rate as f32);
+        h.net_rx.push_back(p.net_rx_rate as f32);
+        h.net_tx.push_back(p.net_tx_rate as f32);
+        h.gpu.push_back(p.gpu_percent);
         trim(&mut h.times, PROCESS_HISTORY_LEN);
-        trim(&mut h.cpu, PROCESS_HISTORY_LEN);
-        trim(&mut h.memory, PROCESS_HISTORY_LEN);
+        for series in h.series_mut() {
+            trim(series, PROCESS_HISTORY_LEN);
+        }
     }
 }
 
@@ -3060,6 +3090,15 @@ mod tests {
         );
         assert_eq!(ha.cpu.back(), Some(&((PROCESS_HISTORY_LEN + 4) as f32)));
         assert_eq!(ha.memory.len(), PROCESS_HISTORY_LEN);
+        for series in [
+            &ha.disk_read,
+            &ha.disk_write,
+            &ha.net_rx,
+            &ha.net_tx,
+            &ha.gpu,
+        ] {
+            assert_eq!(series.len(), PROCESS_HISTORY_LEN);
+        }
         // b exits.
         update_process_history(&mut h, &[a.clone()], 0);
         assert_eq!(h.len(), 1);
