@@ -8,7 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
-- Processes has Process Explorer's Find handle or DLL: every process with a
+- Processes has Process Explorer's Find handle or DLL, the magnifier at the
+  end of its toolbar: every process with a
   file, registry key or other object open, or a DLL loaded, whose name
   contains the text (three characters or more). Processes are searched one
   at a time with this window's own rights and the Handles view's limits,

@@ -1689,7 +1689,9 @@ impl ProcessView {
                 egui::Id::unique(SEARCH_ID),
                 &mut self.search,
                 crate::i18n::tr("name, PID, path or command line"),
-                if ui.available_width() < 600.0 { 150.0 } else { 240.0 },
+                // Narrower below 800 points so the toolbar keeps to one row
+                // in longer languages (Turkish, German).
+                if ui.available_width() < 800.0 { 150.0 } else { 240.0 },
             );
             egui::Frame::new().fill(ui.visuals().extreme_bg_color).corner_radius(0.0).inner_margin(0.0).show(ui, |ui| {
                 ui.horizontal(|ui| {
@@ -1727,12 +1729,18 @@ impl ProcessView {
                     ),
                 };
             }
-            if ui
-                .button(crate::i18n::tr("Find handle or DLL"))
-                .on_hover_text(crate::i18n::tr(
-                    "Search every process for a file, key or other object it has open, or a DLL it has loaded",
-                ))
-                .clicked()
+            // An icon: as words it took a toolbar row of its own in compact
+            // languages and left room for a single process.
+            if crate::theme::icon_button(
+                ui,
+                true,
+                crate::theme::icon::ZOOM,
+                crate::i18n::tr("Find handle or DLL"),
+            )
+            .on_hover_text(crate::i18n::tr(
+                "Search every process for a file, key or other object it has open, or a DLL it has loaded",
+            ))
+            .clicked()
             {
                 self.find.open = true;
             }
