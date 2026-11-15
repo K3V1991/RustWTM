@@ -1855,5 +1855,9 @@
   "Hidden": "Verborgen",
   "(no title)": "(geen titel)",
   "Title": "Titel",
-  "Thread {0}": "Thread {0}"
+  "Thread {0}": "Thread {0}",
+  "Find window's process": "Proces van een venster zoeken",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Proces van een venster zoeken: sleep dit naar een venster en laat los om het proces te selecteren waartoe het behoort",
+  "That window's process is not listed yet.": "Het proces van dat venster staat nog niet in de lijst.",
+  "No window there.": "Daar is geen venster."
 }

@@ -1855,5 +1855,9 @@
   "Hidden": "숨김",
   "(no title)": "(제목 없음)",
   "Title": "제목",
-  "Thread {0}": "스레드 {0}"
+  "Thread {0}": "스레드 {0}",
+  "Find window's process": "창의 프로세스 찾기",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "창의 프로세스 찾기: 이것을 아무 창 위로 끌어다 놓으면 해당 창의 프로세스가 선택됩니다",
+  "That window's process is not listed yet.": "해당 창의 프로세스가 아직 목록에 없습니다.",
+  "No window there.": "그곳에 창이 없습니다."
 }

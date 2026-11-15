@@ -1855,5 +1855,9 @@
   "Hidden": "Ẩn",
   "(no title)": "(không có tiêu đề)",
   "Title": "Tiêu đề",
-  "Thread {0}": "Luồng {0}"
+  "Thread {0}": "Luồng {0}",
+  "Find window's process": "Tìm tiến trình của cửa sổ",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Tìm tiến trình của cửa sổ: kéo mục này lên bất kỳ cửa sổ nào rồi thả ra để chọn tiến trình sở hữu cửa sổ đó",
+  "That window's process is not listed yet.": "Tiến trình của cửa sổ đó chưa có trong danh sách.",
+  "No window there.": "Không có cửa sổ nào ở đó."
 }

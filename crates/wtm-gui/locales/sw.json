@@ -1855,5 +1855,9 @@
   "Hidden": "Limefichwa",
   "(no title)": "(hakuna kichwa)",
   "Title": "Kichwa",
-  "Thread {0}": "Uzi {0}"
+  "Thread {0}": "Uzi {0}",
+  "Find window's process": "Tafuta mchakato wa dirisha",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Tafuta mchakato wa dirisha: buruta hiki juu ya dirisha lolote na uachilie ili kuchagua mchakato unaolimiliki",
+  "That window's process is not listed yet.": "Mchakato wa dirisha hilo bado haujaorodheshwa.",
+  "No window there.": "Hakuna dirisha hapo."
 }

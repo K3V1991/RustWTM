@@ -1855,5 +1855,9 @@
   "Hidden": "Nakatago",
   "(no title)": "(walang pamagat)",
   "Title": "Pamagat",
-  "Thread {0}": "Thread {0}"
+  "Thread {0}": "Thread {0}",
+  "Find window's process": "Hanapin ang process ng window",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Hanapin ang process ng window: i-drag ito sa anumang window at bitawan para piliin ang process na may-ari nito",
+  "That window's process is not listed yet.": "Wala pa sa listahan ang process ng window na iyon.",
+  "No window there.": "Walang window doon."
 }

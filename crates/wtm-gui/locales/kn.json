@@ -1855,5 +1855,9 @@
   "Hidden": "ಮರೆಮಾಡಲಾಗಿದೆ",
   "(no title)": "(ಶೀರ್ಷಿಕೆ ಇಲ್ಲ)",
   "Title": "ಶೀರ್ಷಿಕೆ",
-  "Thread {0}": "ಥ್ರೆಡ್ {0}"
+  "Thread {0}": "ಥ್ರೆಡ್ {0}",
+  "Find window's process": "ವಿಂಡೋದ ಪ್ರಕ್ರಿಯೆ ಹುಡುಕಿ",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "ವಿಂಡೋದ ಪ್ರಕ್ರಿಯೆ ಹುಡುಕಿ: ಇದನ್ನು ಯಾವುದೇ ವಿಂಡೋದ ಮೇಲೆ ಎಳೆದು ಬಿಡಿ, ಅದು ಸೇರಿದ ಪ್ರಕ್ರಿಯೆ ಆಯ್ಕೆಯಾಗುತ್ತದೆ",
+  "That window's process is not listed yet.": "ಆ ವಿಂಡೋದ ಪ್ರಕ್ರಿಯೆ ಇನ್ನೂ ಪಟ್ಟಿಯಲ್ಲಿಲ್ಲ.",
+  "No window there.": "ಅಲ್ಲಿ ವಿಂಡೋ ಇಲ್ಲ."
 }

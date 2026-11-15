@@ -1855,5 +1855,9 @@
   "Hidden": "Nascosta",
   "(no title)": "(senza titolo)",
   "Title": "Titolo",
-  "Thread {0}": "Thread {0}"
+  "Thread {0}": "Thread {0}",
+  "Find window's process": "Trova il processo di una finestra",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Trova il processo di una finestra: trascinalo su una finestra e rilascialo per selezionare il processo a cui appartiene",
+  "That window's process is not listed yet.": "Il processo di quella finestra non è ancora elencato.",
+  "No window there.": "Nessuna finestra lì."
 }

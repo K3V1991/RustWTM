@@ -1855,5 +1855,9 @@
   "Hidden": "Приховано",
   "(no title)": "(без заголовка)",
   "Title": "Заголовок",
-  "Thread {0}": "Потік {0}"
+  "Thread {0}": "Потік {0}",
+  "Find window's process": "Знайти процес вікна",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Знайти процес вікна: перетягніть це на будь-яке вікно й відпустіть, щоб вибрати процес, якому воно належить",
+  "That window's process is not listed yet.": "Процесу цього вікна ще немає в списку.",
+  "No window there.": "Там немає вікна."
 }

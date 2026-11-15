@@ -1855,5 +1855,9 @@
   "Hidden": "ਲੁਕੀ ਹੋਈ",
   "(no title)": "(ਕੋਈ ਸਿਰਲੇਖ ਨਹੀਂ)",
   "Title": "ਸਿਰਲੇਖ",
-  "Thread {0}": "ਥ੍ਰੈੱਡ {0}"
+  "Thread {0}": "ਥ੍ਰੈੱਡ {0}",
+  "Find window's process": "ਵਿੰਡੋ ਦੀ ਪ੍ਰੋਸੈਸ ਲੱਭੋ",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "ਵਿੰਡੋ ਦੀ ਪ੍ਰੋਸੈਸ ਲੱਭੋ: ਇਸ ਨੂੰ ਕਿਸੇ ਵੀ ਵਿੰਡੋ ਉੱਤੇ ਖਿੱਚ ਕੇ ਛੱਡੋ, ਉਸ ਵਿੰਡੋ ਦੀ ਪ੍ਰੋਸੈਸ ਚੁਣੀ ਜਾਵੇਗੀ",
+  "That window's process is not listed yet.": "ਉਸ ਵਿੰਡੋ ਦੀ ਪ੍ਰੋਸੈਸ ਅਜੇ ਸੂਚੀ ਵਿੱਚ ਨਹੀਂ ਹੈ।",
+  "No window there.": "ਉੱਥੇ ਕੋਈ ਵਿੰਡੋ ਨਹੀਂ ਹੈ।"
 }

@@ -1855,5 +1855,9 @@
   "Hidden": "隱藏",
   "(no title)": "(無標題)",
   "Title": "標題",
-  "Thread {0}": "執行緒 {0}"
+  "Thread {0}": "執行緒 {0}",
+  "Find window's process": "尋找視窗所屬處理程序",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "尋找視窗所屬處理程序：將此拖曳到任一視窗上並放開，即可選取該視窗所屬的處理程序",
+  "That window's process is not listed yet.": "該視窗的處理程序尚未列出。",
+  "No window there.": "那裡沒有視窗。"
 }

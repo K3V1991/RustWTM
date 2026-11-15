@@ -1855,5 +1855,9 @@
   "Hidden": "Скрыто",
   "(no title)": "(без заголовка)",
   "Title": "Заголовок",
-  "Thread {0}": "Поток {0}"
+  "Thread {0}": "Поток {0}",
+  "Find window's process": "Найти процесс окна",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Найти процесс окна: перетащите это на любое окно и отпустите, чтобы выбрать процесс, которому оно принадлежит",
+  "That window's process is not listed yet.": "Процесса этого окна ещё нет в списке.",
+  "No window there.": "Там нет окна."
 }

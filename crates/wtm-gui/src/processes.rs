@@ -737,6 +737,48 @@ fn windows_root() -> String {
     .clone()
 }
 
+/// Process Explorer's "Find Window's Process" target: drag it onto any
+/// window and release to select the process that owns that window. A
+/// crosshair is painted, so it shows without the icon font too.
+fn window_picker(ui: &mut Ui) -> egui::Response {
+    let label = crate::i18n::tr("Find window's process");
+    let size = egui::vec2(30.0, ui.spacing().interact_size.y);
+    let (rect, response) = ui.allocate_exact_size(size, egui::Sense::click_and_drag());
+    response.widget_info(|| egui::WidgetInfo::labeled(egui::accesskit::Role::Button, true, label));
+    if ui.is_rect_visible(rect) {
+        let visuals = ui.style().interact(&response);
+        let painter = ui.painter();
+        painter.rect(
+            rect,
+            visuals.corner_radius,
+            visuals.weak_bg_fill,
+            visuals.bg_stroke,
+            egui::StrokeKind::Inside,
+        );
+        // Dimmed while dragged: the crosshair is at the pointer then.
+        let color = if response.dragged() {
+            visuals.fg_stroke.color.gamma_multiply(0.35)
+        } else {
+            visuals.fg_stroke.color
+        };
+        let stroke = egui::Stroke::new(1.4, color);
+        let c = rect.center();
+        let r = 5.5;
+        painter.circle_stroke(c, r, stroke);
+        for (from, to) in [
+            (egui::vec2(-r - 3.0, 0.0), egui::vec2(-1.5, 0.0)),
+            (egui::vec2(1.5, 0.0), egui::vec2(r + 3.0, 0.0)),
+            (egui::vec2(0.0, -r - 3.0), egui::vec2(0.0, -1.5)),
+            (egui::vec2(0.0, 1.5), egui::vec2(0.0, r + 3.0)),
+        ] {
+            painter.line_segment([c + from, c + to], stroke);
+        }
+    }
+    response.on_hover_text(crate::i18n::tr(
+        "Find window's process: drag this onto any window and release to select the process it belongs to",
+    ))
+}
+
 pub struct ProcessView {
     pub search: String,
     pub mode: ViewMode,
@@ -778,6 +820,11 @@ pub struct ProcessView {
     pub paused: Option<std::sync::Arc<Snapshot>>,
     /// The "Find handle or DLL" window.
     pub find: crate::find_view::FindWindow,
+    /// The process owning the window under the pointer, read when the
+    /// window picker is dropped; tests put their own answer here.
+    pub pointer_process: fn() -> Option<u32>,
+    /// Why the last drop of the window picker selected nothing.
+    pub pick_note: Option<&'static str>,
     /// The list as it was when Ctrl was pressed; dropped when Ctrl is let go.
     ctrl_hold: Option<std::sync::Arc<Snapshot>>,
     /// Last selection revealed automatically. Sampling must not keep pulling
@@ -877,6 +924,8 @@ impl Default for ProcessView {
             recent_minutes: 5,
             paused: None,
             find: Default::default(),
+            pointer_process: wtm_core::window::process_at_pointer,
+            pick_note: None,
             ctrl_hold: None,
             revealed: None,
             cache: None,
@@ -1747,6 +1796,29 @@ impl ProcessView {
             .clicked()
             {
                 self.find.open = true;
+            }
+            let picker = window_picker(ui);
+            if picker.drag_started() {
+                self.pick_note = None;
+            }
+            if picker.dragged() {
+                ui.ctx().set_cursor_icon(egui::CursorIcon::Crosshair);
+            }
+            if picker.drag_stopped() {
+                // The mouse is captured while dragging, so the release is
+                // seen wherever it happens; released over RustWTM itself is
+                // taken as a change of mind.
+                match (self.pointer_process)() {
+                    Some(pid) if pid == std::process::id() => {}
+                    Some(pid) => match snap.processes.iter().find(|p| p.pid == pid) {
+                        Some(p) => intents.push(Intent::Reveal(ProcessRef::from(p))),
+                        None => self.pick_note = Some("That window's process is not listed yet."),
+                    },
+                    None => self.pick_note = Some("No window there."),
+                }
+            }
+            if let Some(note) = self.pick_note {
+                ui.weak(crate::i18n::tr(note));
             }
         });
         self.normalize_columns();

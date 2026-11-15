@@ -1855,5 +1855,9 @@
   "Hidden": "Tersembunyi",
   "(no title)": "(tanpa judul)",
   "Title": "Judul",
-  "Thread {0}": "Thread {0}"
+  "Thread {0}": "Thread {0}",
+  "Find window's process": "Temukan proses jendela",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "Temukan proses jendela: seret ini ke jendela mana pun lalu lepaskan untuk memilih proses pemiliknya",
+  "That window's process is not listed yet.": "Proses jendela itu belum tercantum.",
+  "No window there.": "Tidak ada jendela di sana."
 }

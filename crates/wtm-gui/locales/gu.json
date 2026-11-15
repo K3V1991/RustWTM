@@ -1855,5 +1855,9 @@
   "Hidden": "છુપાયેલી",
   "(no title)": "(કોઈ શીર્ષક નથી)",
   "Title": "શીર્ષક",
-  "Thread {0}": "થ્રેડ {0}"
+  "Thread {0}": "થ્રેડ {0}",
+  "Find window's process": "વિન્ડોની પ્રોસેસ શોધો",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "વિન્ડોની પ્રોસેસ શોધો: આને કોઈપણ વિન્ડો પર ખેંચીને છોડો, તે વિન્ડોની પ્રોસેસ પસંદ થશે",
+  "That window's process is not listed yet.": "તે વિન્ડોની પ્રોસેસ હજી સૂચિમાં નથી.",
+  "No window there.": "ત્યાં કોઈ વિન્ડો નથી."
 }

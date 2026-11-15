@@ -8783,6 +8783,86 @@ mod tests {
         );
     }
 
+    /// Presses on the window picker, drags past egui's threshold and
+    /// releases outside RustWTM's window, as the captured mouse reports it.
+    fn drop_window_picker(h: &mut Harness<'_, App>) {
+        let start = h.get_by_label("Find window's process").rect().center();
+        h.event(egui::Event::PointerMoved(start));
+        h.event(egui::Event::PointerButton {
+            pos: start,
+            button: egui::PointerButton::Primary,
+            pressed: true,
+            modifiers: egui::Modifiers::NONE,
+        });
+        h.run_steps(2);
+        for step in 1..=4 {
+            h.event(egui::Event::PointerMoved(
+                start + egui::vec2(0.0, -60.0 * step as f32),
+            ));
+            h.run_steps(1);
+        }
+        let end = start + egui::vec2(0.0, -400.0);
+        h.event(egui::Event::PointerButton {
+            pos: end,
+            button: egui::PointerButton::Primary,
+            pressed: false,
+            modifiers: egui::Modifiers::NONE,
+        });
+        h.run_steps(3);
+    }
+
+    #[test]
+    fn dropping_the_window_picker_selects_the_window_s_process() {
+        fn beta() -> Option<u32> {
+            Some(200)
+        }
+        fn desktop() -> Option<u32> {
+            None
+        }
+        fn rustwtm() -> Option<u32> {
+            Some(std::process::id())
+        }
+        let (backend, _rx) = Backend::offline(data());
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.run_steps(2);
+        // A search that hides beta.exe: revealing it clears the search.
+        h.state_mut().state.processes.search = "alpha".into();
+        h.state_mut().state.processes.pointer_process = beta;
+        h.run_steps(2);
+        drop_window_picker(&mut h);
+        let processes = &h.state().state.processes;
+        assert_eq!(processes.selected.as_ref().map(|r| r.pid), Some(200));
+        assert!(processes.search.is_empty());
+        assert!(h.query_all_by_label("beta.exe").next().is_some());
+
+        // Over the bare desktop: nothing selected, and it says why.
+        h.state_mut().state.processes.selected = None;
+        h.state_mut().state.processes.pointer_process = desktop;
+        h.run_steps(2);
+        drop_window_picker(&mut h);
+        assert!(h.state().state.processes.selected.is_none());
+        assert!(h.query_by_label("No window there.").is_some());
+
+        // Released over RustWTM itself: a change of mind, nothing happens.
+        h.state_mut().state.processes.pointer_process = rustwtm;
+        h.run_steps(2);
+        drop_window_picker(&mut h);
+        assert!(h.state().state.processes.selected.is_none());
+        assert!(h.query_by_label("No window there.").is_none());
+    }
+
     #[test]
     fn windows_panel_lists_visible_windows_and_switches_to_one() {
         use wtm_core::control::WindowInfo;
@@ -9238,7 +9318,7 @@ mod tests {
                 frames: Default::default(),
             });
         h.run_steps(2);
-        assert!(h.query_by_label("beta.exe").is_some());
+        assert!(h.query_all_by_label("beta.exe").next().is_some());
         h.get_by_label("Unblock").click();
         h.run_steps(2);
         let sent: Vec<String> = rx.try_iter().map(describe_command).collect();

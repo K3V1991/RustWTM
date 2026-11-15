@@ -11140,5 +11140,29 @@
     "de": "Thread {0}",
     "fr": "Thread {0}",
     "es": "Subproceso {0}"
+  },
+  "Find window's process": {
+    "tr": "Pencerenin işlemini bul",
+    "de": "Prozess eines Fensters suchen",
+    "fr": "Trouver le processus d'une fenêtre",
+    "es": "Buscar el proceso de una ventana"
+  },
+  "Find window's process: drag this onto any window and release to select the process it belongs to": {
+    "tr": "Pencerenin işlemini bul: bunu herhangi bir pencerenin üzerine sürükleyip bırakın, ait olduğu işlem seçilsin",
+    "de": "Prozess eines Fensters suchen: auf ein beliebiges Fenster ziehen und loslassen, um den zugehörigen Prozess auszuwählen",
+    "fr": "Trouver le processus d'une fenêtre : faites glisser ceci sur une fenêtre et relâchez pour sélectionner son processus",
+    "es": "Buscar el proceso de una ventana: arrastre esto sobre cualquier ventana y suéltelo para seleccionar el proceso al que pertenece"
+  },
+  "That window's process is not listed yet.": {
+    "tr": "O pencerenin işlemi henüz listede yok.",
+    "de": "Der Prozess dieses Fensters ist noch nicht aufgeführt.",
+    "fr": "Le processus de cette fenêtre n'est pas encore listé.",
+    "es": "El proceso de esa ventana aún no aparece en la lista."
+  },
+  "No window there.": {
+    "tr": "Orada pencere yok.",
+    "de": "Dort ist kein Fenster.",
+    "fr": "Aucune fenêtre à cet endroit.",
+    "es": "No hay ninguna ventana ahí."
   }
 }

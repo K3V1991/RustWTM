@@ -1855,5 +1855,9 @@
   "Hidden": "மறைக்கப்பட்டது",
   "(no title)": "(தலைப்பு இல்லை)",
   "Title": "தலைப்பு",
-  "Thread {0}": "த்ரெட் {0}"
+  "Thread {0}": "த்ரெட் {0}",
+  "Find window's process": "சாளரத்தின் செயல்முறையைக் கண்டறி",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "சாளரத்தின் செயல்முறையைக் கண்டறி: இதை எந்தச் சாளரத்தின் மீதும் இழுத்து விடுங்கள், அது சேர்ந்த செயல்முறை தேர்ந்தெடுக்கப்படும்",
+  "That window's process is not listed yet.": "அந்தச் சாளரத்தின் செயல்முறை இன்னும் பட்டியலில் இல்லை.",
+  "No window there.": "அங்கு சாளரம் இல்லை."
 }

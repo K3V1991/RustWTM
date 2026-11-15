@@ -1855,5 +1855,9 @@
   "Hidden": "非表示",
   "(no title)": "(タイトルなし)",
   "Title": "タイトル",
-  "Thread {0}": "スレッド {0}"
+  "Thread {0}": "スレッド {0}",
+  "Find window's process": "ウィンドウのプロセスを検索",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "ウィンドウのプロセスを検索: これを任意のウィンドウにドラッグして離すと、そのウィンドウのプロセスが選択されます",
+  "That window's process is not listed yet.": "そのウィンドウのプロセスはまだ一覧にありません。",
+  "No window there.": "そこにウィンドウはありません。"
 }

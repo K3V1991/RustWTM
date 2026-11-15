@@ -45,6 +45,12 @@ All notable changes to this project are documented here. The format follows
   so an idle process keeps a short panel. The graphs share one axis width,
   so their time axes line up, and their scales step in round numbers
   ("20%", "4.0 MiB/s", "1.0 GiB") so each keeps a labelled mark.
+- Processes has Process Explorer's Find Window's Process: drag the
+  crosshair at the end of the toolbar onto any window and release, and the
+  process that owns it is selected and shown in the inspector, with the
+  search and filters cleared so its row is in view. The innermost window
+  under the pointer counts. Released over RustWTM itself it does nothing;
+  over the bare desktop, or over a process not listed yet, it says so.
 
 ### Changed
 

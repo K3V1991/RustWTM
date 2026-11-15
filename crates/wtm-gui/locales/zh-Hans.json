@@ -1855,5 +1855,9 @@
   "Hidden": "隐藏",
   "(no title)": "(无标题)",
   "Title": "标题",
-  "Thread {0}": "线程 {0}"
+  "Thread {0}": "线程 {0}",
+  "Find window's process": "查找窗口所属进程",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "查找窗口所属进程：将此拖到任意窗口上并松开，即可选中该窗口所属的进程",
+  "That window's process is not listed yet.": "该窗口的进程尚未列出。",
+  "No window there.": "那里没有窗口。"
 }

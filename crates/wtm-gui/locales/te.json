@@ -1855,5 +1855,9 @@
   "Hidden": "దాచబడింది",
   "(no title)": "(శీర్షిక లేదు)",
   "Title": "శీర్షిక",
-  "Thread {0}": "థ్రెడ్ {0}"
+  "Thread {0}": "థ్రెడ్ {0}",
+  "Find window's process": "విండో ప్రాసెస్‌ను కనుగొను",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "విండో ప్రాసెస్‌ను కనుగొను: దీన్ని ఏ విండోపైకైనా లాగి వదిలితే, అది చెందిన ప్రాసెస్ ఎంచుకోబడుతుంది",
+  "That window's process is not listed yet.": "ఆ విండో ప్రాసెస్ ఇంకా జాబితాలో లేదు.",
+  "No window there.": "అక్కడ విండో లేదు."
 }

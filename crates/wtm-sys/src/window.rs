@@ -403,6 +403,31 @@ unsafe extern "system" fn collect_owned(hwnd: HWND, lparam: LPARAM) -> BOOL {
     }
 }
 
+/// The process owning the window under the mouse pointer: Process
+/// Explorer's "Find Window's Process". The innermost window there counts.
+/// `None` over the bare desktop or when the pointer cannot be read (a
+/// locked screen).
+pub fn process_at_pointer() -> Option<u32> {
+    use windows::Win32::UI::WindowsAndMessaging::GetCursorPos;
+    let mut point = windows::Win32::Foundation::POINT::default();
+    // SAFETY: `point` is writable.
+    unsafe { GetCursorPos(&mut point) }.ok()?;
+    process_at(point.x, point.y)
+}
+
+/// The process owning the window at screen point (`x`, `y`).
+fn process_at(x: i32, y: i32) -> Option<u32> {
+    use windows::Win32::UI::WindowsAndMessaging::WindowFromPoint;
+    // SAFETY: plain call; the handle is only queried.
+    let window = unsafe { WindowFromPoint(windows::Win32::Foundation::POINT { x, y }) };
+    if window.is_invalid() {
+        return None;
+    }
+    window_owner(window.0 as isize)
+        .map(|(pid, _)| pid)
+        .filter(|&pid| pid != 0)
+}
+
 /// The process and thread that own window `raw`; `None` once it is gone.
 pub fn window_owner(raw: isize) -> Option<(u32, u32)> {
     let mut pid = 0u32;
@@ -687,6 +712,32 @@ mod tests {
         unsafe { PostThreadMessageW(tid, WM_QUIT, WPARAM(0), LPARAM(0)).unwrap() };
         owner.join().unwrap();
         assert_eq!(window_owner(raw), None);
+    }
+
+    #[test]
+    fn the_window_at_a_point_names_a_live_process() {
+        use windows::Win32::UI::WindowsAndMessaging::WindowFromPoint;
+        // What lies under a point on a real desktop is not this test's to
+        // arrange (other programs keep windows above any it could show),
+        // so it checks the answer against Windows' own for that point.
+        let point = windows::Win32::Foundation::POINT { x: 1, y: 1 };
+        // SAFETY: plain call; the handle is only queried.
+        let window = unsafe { WindowFromPoint(point) };
+        let expected = (!window.is_invalid())
+            .then(|| window_owner(window.0 as isize).map(|(pid, _)| pid))
+            .flatten();
+        let found = process_at(point.x, point.y);
+        assert_eq!(found, expected.filter(|&pid| pid != 0));
+        if let Some(pid) = found {
+            let live = crate::process::ProcessSnapshotter::new()
+                .snapshot()
+                .unwrap()
+                .iter()
+                .any(|p| p.pid == pid);
+            assert!(live, "{pid}");
+        }
+        // Reading the pointer itself never fails the caller.
+        let _ = process_at_pointer();
     }
 
     #[test]

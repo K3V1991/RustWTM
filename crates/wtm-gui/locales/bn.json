@@ -1855,5 +1855,9 @@
   "Hidden": "লুকানো",
   "(no title)": "(শিরোনাম নেই)",
   "Title": "শিরোনাম",
-  "Thread {0}": "থ্রেড {0}"
+  "Thread {0}": "থ্রেড {0}",
+  "Find window's process": "উইন্ডোর প্রসেস খুঁজুন",
+  "Find window's process: drag this onto any window and release to select the process it belongs to": "উইন্ডোর প্রসেস খুঁজুন: এটি যেকোনো উইন্ডোর উপর টেনে এনে ছেড়ে দিন, সেই উইন্ডোর প্রসেস নির্বাচিত হবে",
+  "That window's process is not listed yet.": "ওই উইন্ডোর প্রসেস এখনও তালিকায় নেই।",
+  "No window there.": "সেখানে কোনো উইন্ডো নেই।"
 }
