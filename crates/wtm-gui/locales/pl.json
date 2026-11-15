@@ -1775,5 +1775,10 @@
   "Logon session": "Sesja logowania",
   "Owner": "Właściciel",
   "Domain-local": "Lokalna w domenie",
-  "Mandatory": "Obowiązkowa"
+  "Mandatory": "Obowiązkowa",
+  "Environment": "Środowisko",
+  "Its environment variables, read with this window's rights": "Jego zmienne środowiskowe, odczytane z uprawnieniami tego okna",
+  "Reading environment variables…": "Odczytywanie zmiennych środowiskowych…",
+  "{0} variables": "Zmienne: {0}",
+  "Copy all": "Kopiuj wszystko"
 }

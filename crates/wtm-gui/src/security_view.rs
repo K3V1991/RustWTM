@@ -6,12 +6,19 @@ use eframe::egui::{self, RichText, Ui};
 use wtm_core::control::{ProcessRef, TokenGroup, TokenPrivilege, TokenReport};
 
 use crate::backend::Data;
+use crate::processes::Intent;
 use crate::theme::{BAD, GOOD};
 
 /// Draws the token of `sel` once it has been asked for; a report about
 /// another process is not shown.
-pub fn show(ui: &mut Ui, data: &Data, sel: &ProcessRef) -> Option<()> {
+pub fn show(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Intent>) -> Option<()> {
     let (_, report) = data.security.as_ref().filter(|(r, _)| r == sel)?;
+    ui.horizontal(|ui| {
+        ui.strong(crate::i18n::tr("Security"));
+        if ui.small_button(crate::i18n::tr("Hide")).clicked() {
+            intents.push(Intent::Security(None));
+        }
+    });
     match report {
         None => {
             ui.horizontal(|ui| {
@@ -28,7 +35,6 @@ pub fn show(ui: &mut Ui, data: &Data, sel: &ProcessRef) -> Option<()> {
 }
 
 fn report_view(ui: &mut Ui, t: &TokenReport) {
-    ui.strong(crate::i18n::tr("Security"));
     // The inspector already names the user; the SID is what it adds.
     ui.horizontal_wrapped(|ui| {
         let sid = ui.label(RichText::new(&t.user.sid).small().monospace());

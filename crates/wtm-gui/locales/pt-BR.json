@@ -1775,5 +1775,10 @@
   "Logon session": "Sessão de logon",
   "Owner": "Proprietário",
   "Domain-local": "Local do domínio",
-  "Mandatory": "Obrigatório"
+  "Mandatory": "Obrigatório",
+  "Environment": "Ambiente",
+  "Its environment variables, read with this window's rights": "Suas variáveis de ambiente, lidas com as permissões desta janela",
+  "Reading environment variables…": "Lendo as variáveis de ambiente…",
+  "{0} variables": "{0} variáveis",
+  "Copy all": "Copiar tudo"
 }

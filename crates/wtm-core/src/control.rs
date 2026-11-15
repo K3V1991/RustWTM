@@ -401,6 +401,30 @@ pub fn token(target: &ProcessRef) -> ControlResult<TokenReport> {
     sys(target.pid, h.token_report())
 }
 
+/// The environment variables of `target`, as `(name, value)` pairs.
+///
+/// Read with this program's own rights only. The service runs as SYSTEM:
+/// asking it would show a user the variables, often secrets, of processes
+/// that user may not read, so there is no fallback to it.
+pub fn environment(target: &ProcessRef) -> ControlResult<Vec<(String, String)>> {
+    // Reading these processes' memory is what credential theft does.
+    let secrets = ControlError::Protected {
+        pid: target.pid,
+        reason: "holds this PC's sign-in secrets",
+    };
+    if holds_secrets(&target.name) {
+        return Err(secrets);
+    }
+    let h = open_verified(target, Access::READ_PARAMETERS)?;
+    // The name given is only a claim; the image opened decides, and an
+    // image that cannot be named is not read either.
+    match image_name(&h) {
+        Some(name) if holds_secrets(&name) => Err(secrets),
+        Some(_) => sys(target.pid, h.environment()),
+        None => Err(ControlError::AccessDenied { pid: target.pid }),
+    }
+}
+
 /// The command line a process was started with.
 pub fn command_line(target: &ProcessRef) -> ControlResult<String> {
     let h = open_verified(target, Access::QUERY)?;
@@ -759,6 +783,38 @@ mod tests {
             ..me
         };
         assert!(matches!(token(&reused), Err(ControlError::Stale { .. })));
+    }
+
+    #[test]
+    fn reads_the_environment_but_never_of_the_sign_in_secrets_holders() {
+        let created = ProcessHandle::open(std::process::id(), Access::QUERY)
+            .unwrap()
+            .create_time()
+            .unwrap();
+        let me = ProcessRef {
+            pid: std::process::id(),
+            create_time: created,
+            name: "me.exe".into(),
+        };
+        let vars = environment(&me).unwrap();
+        assert!(vars.iter().any(|(n, _)| n.eq_ignore_ascii_case("PATH")));
+        // Refused by name before anything is opened.
+        let lsass = ProcessRef {
+            name: "LSASS.EXE".into(),
+            ..me.clone()
+        };
+        assert!(matches!(
+            environment(&lsass),
+            Err(ControlError::Protected { .. })
+        ));
+        let reused = ProcessRef {
+            create_time: created + 1,
+            ..me
+        };
+        assert!(matches!(
+            environment(&reused),
+            Err(ControlError::Stale { .. })
+        ));
     }
 
     #[test]

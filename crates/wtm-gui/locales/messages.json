@@ -10660,5 +10660,35 @@
     "de": "Erforderlich",
     "fr": "Obligatoire",
     "es": "Obligatorio"
+  },
+  "Environment": {
+    "tr": "Ortam",
+    "de": "Umgebung",
+    "fr": "Environnement",
+    "es": "Entorno"
+  },
+  "Its environment variables, read with this window's rights": {
+    "tr": "Ortam değişkenleri, bu pencerenin yetkileriyle okunur",
+    "de": "Seine Umgebungsvariablen, mit den Rechten dieses Fensters gelesen",
+    "fr": "Ses variables d'environnement, lues avec les droits de cette fenêtre",
+    "es": "Sus variables de entorno, leídas con los permisos de esta ventana"
+  },
+  "Reading environment variables…": {
+    "tr": "Ortam değişkenleri okunuyor…",
+    "de": "Umgebungsvariablen werden gelesen…",
+    "fr": "Lecture des variables d'environnement…",
+    "es": "Leyendo las variables de entorno…"
+  },
+  "{0} variables": {
+    "tr": "{0} değişken",
+    "de": "{0} Variablen",
+    "fr": "{0} variables",
+    "es": "{0} variables"
+  },
+  "Copy all": {
+    "tr": "Tümünü kopyala",
+    "de": "Alle kopieren",
+    "fr": "Tout copier",
+    "es": "Copiar todo"
   }
 }

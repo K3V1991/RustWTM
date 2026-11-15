@@ -1775,5 +1775,10 @@
   "Logon session": "Сеанс входу",
   "Owner": "Власник",
   "Domain-local": "Локальна в домені",
-  "Mandatory": "Обов'язкова"
+  "Mandatory": "Обов'язкова",
+  "Environment": "Середовище",
+  "Its environment variables, read with this window's rights": "Його змінні середовища, прочитані з правами цього вікна",
+  "Reading environment variables…": "Читання змінних середовища…",
+  "{0} variables": "Змінних: {0}",
+  "Copy all": "Копіювати все"
 }

@@ -556,8 +556,11 @@ pub enum Intent {
     WhyAlive(ProcessRef),
     /// List the modules the process has loaded, with their signatures.
     Modules(ProcessRef),
-    /// Read the account, groups and privileges of the process's token.
-    Security(ProcessRef),
+    /// Read (or with `None` hide) the account, groups and privileges of
+    /// the process's token.
+    Security(Option<ProcessRef>),
+    /// Read (or with `None` hide) the process's environment variables.
+    Environment(Option<ProcessRef>),
     /// Show (or with `None` hide) the process's threads.
     Threads(Option<ProcessRef>),
     /// Block (`true`) or unblock the program's network access with Windows Firewall.

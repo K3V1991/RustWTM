@@ -1775,5 +1775,10 @@
   "Logon session": "ログオン セッション",
   "Owner": "所有者",
   "Domain-local": "ドメイン ローカル",
-  "Mandatory": "必須"
+  "Mandatory": "必須",
+  "Environment": "環境",
+  "Its environment variables, read with this window's rights": "このウィンドウの権限で読み取った環境変数",
+  "Reading environment variables…": "環境変数を読み取っています…",
+  "{0} variables": "{0} 個の変数",
+  "Copy all": "すべてコピー"
 }

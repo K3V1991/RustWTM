@@ -12,6 +12,7 @@ pub mod disk;
 pub mod disktrace;
 pub mod dpapi;
 pub mod ending;
+pub mod environment;
 mod error;
 pub mod etw;
 pub mod explorer;

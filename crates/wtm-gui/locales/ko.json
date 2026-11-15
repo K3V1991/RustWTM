@@ -1775,5 +1775,10 @@
   "Logon session": "로그온 세션",
   "Owner": "소유자",
   "Domain-local": "도메인 로컬",
-  "Mandatory": "필수"
+  "Mandatory": "필수",
+  "Environment": "환경",
+  "Its environment variables, read with this window's rights": "이 창의 권한으로 읽은 환경 변수",
+  "Reading environment variables…": "환경 변수를 읽는 중…",
+  "{0} variables": "변수 {0}개",
+  "Copy all": "모두 복사"
 }

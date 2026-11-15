@@ -1775,5 +1775,10 @@
   "Logon session": "Sesi masuk",
   "Owner": "Pemilik",
   "Domain-local": "Lokal domain",
-  "Mandatory": "Wajib"
+  "Mandatory": "Wajib",
+  "Environment": "Lingkungan",
+  "Its environment variables, read with this window's rights": "Variabel lingkungannya, dibaca dengan hak jendela ini",
+  "Reading environment variables…": "Membaca variabel lingkungan…",
+  "{0} variables": "{0} variabel",
+  "Copy all": "Salin semua"
 }

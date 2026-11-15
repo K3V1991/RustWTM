@@ -1775,5 +1775,10 @@
   "Logon session": "登录会话",
   "Owner": "所有者",
   "Domain-local": "域本地",
-  "Mandatory": "强制"
+  "Mandatory": "强制",
+  "Environment": "环境",
+  "Its environment variables, read with this window's rights": "它的环境变量，以此窗口的权限读取",
+  "Reading environment variables…": "正在读取环境变量…",
+  "{0} variables": "{0} 个变量",
+  "Copy all": "全部复制"
 }

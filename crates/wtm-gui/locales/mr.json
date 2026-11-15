@@ -1775,5 +1775,10 @@
   "Logon session": "लॉगऑन सत्र",
   "Owner": "मालक",
   "Domain-local": "डोमेन-स्थानिक",
-  "Mandatory": "अनिवार्य"
+  "Mandatory": "अनिवार्य",
+  "Environment": "वातावरण",
+  "Its environment variables, read with this window's rights": "त्याचे वातावरण चल, या विंडोच्या अधिकारांनी वाचलेले",
+  "Reading environment variables…": "वातावरण चल वाचत आहे…",
+  "{0} variables": "{0} चल",
+  "Copy all": "सर्व कॉपी करा"
 }

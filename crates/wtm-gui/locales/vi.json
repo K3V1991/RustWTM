@@ -1775,5 +1775,10 @@
   "Logon session": "Phiên đăng nhập",
   "Owner": "Chủ sở hữu",
   "Domain-local": "Cục bộ miền",
-  "Mandatory": "Bắt buộc"
+  "Mandatory": "Bắt buộc",
+  "Environment": "Môi trường",
+  "Its environment variables, read with this window's rights": "Các biến môi trường của nó, được đọc bằng quyền của cửa sổ này",
+  "Reading environment variables…": "Đang đọc các biến môi trường…",
+  "{0} variables": "{0} biến",
+  "Copy all": "Sao chép tất cả"
 }

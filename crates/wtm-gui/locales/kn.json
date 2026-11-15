@@ -1775,5 +1775,10 @@
   "Logon session": "ಲಾಗಾನ್ ಸೆಷನ್",
   "Owner": "ಮಾಲೀಕ",
   "Domain-local": "ಡೊಮೇನ್-ಸ್ಥಳೀಯ",
-  "Mandatory": "ಕಡ್ಡಾಯ"
+  "Mandatory": "ಕಡ್ಡಾಯ",
+  "Environment": "ಪರಿಸರ",
+  "Its environment variables, read with this window's rights": "ಈ ವಿಂಡೋದ ಹಕ್ಕುಗಳೊಂದಿಗೆ ಓದಿದ ಅದರ ಪರಿಸರ ವೇರಿಯಬಲ್‌ಗಳು",
+  "Reading environment variables…": "ಪರಿಸರ ವೇರಿಯಬಲ್‌ಗಳನ್ನು ಓದಲಾಗುತ್ತಿದೆ…",
+  "{0} variables": "{0} ವೇರಿಯಬಲ್‌ಗಳು",
+  "Copy all": "ಎಲ್ಲವನ್ನೂ ನಕಲಿಸಿ"
 }

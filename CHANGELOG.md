@@ -14,7 +14,15 @@ All notable changes to this project are documented here. The format follows
   with how the token uses it (deny only, disabled, integrity, logon session,
   owner, domain-local, mandatory) and each privilege with whether it is
   enabled and Windows' own description on hover. It is read once on request,
-  by this window with its own rights.
+  by this window with its own rights, and Hide puts it away.
+- The process inspector's Environment button lists the process's environment
+  variables by name, as Process Explorer's Environment tab does, with long
+  values whole on hover, a copy menu on each value and Copy all; 32-bit
+  processes are read from their own block. It is read once on request, by
+  this window with its own rights and never through the service, and is
+  only shown, never logged or saved, since variables often hold secrets;
+  Hide lets go of them. As with memory dumps, lsass.exe and lsaiso.exe are
+  refused.
 
 ## [0.32.0] - 2026-11-14
 

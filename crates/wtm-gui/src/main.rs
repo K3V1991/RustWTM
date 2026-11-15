@@ -17,6 +17,7 @@ mod diagnostics;
 mod disk_details;
 mod disks_tab;
 mod docker_worker;
+mod environment_view;
 mod experience;
 mod file_locks;
 mod frames;

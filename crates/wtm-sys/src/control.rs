@@ -76,6 +76,21 @@ const PROCESS_COMMAND_LINE_INFORMATION: u32 = 60;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Access(PROCESS_ACCESS_RIGHTS);
 
+/// What a read of process memory that cannot be made reports.
+pub(crate) fn unsupported() -> Error {
+    windows::core::Error::from(E_FAIL).into()
+}
+
+/// Little-endian bytes as UTF-16 code units; an odd last byte is dropped.
+pub(crate) fn utf16_units(bytes: &[u8]) -> Vec<u16> {
+    bytes
+        .as_chunks::<2>()
+        .0
+        .iter()
+        .map(|pair| u16::from_le_bytes(*pair))
+        .collect()
+}
+
 impl Access {
     pub const QUERY: Self = Self(PROCESS_QUERY_LIMITED_INFORMATION);
     /// Full query rights: needed for mitigation policies such as DEP;
@@ -407,38 +422,67 @@ impl ProcessHandle {
     /// parameters. Needs [`Access::READ_PARAMETERS`]. 32-bit processes keep
     /// theirs in a separate block and are reported as unsupported.
     pub fn current_directory(&self) -> Result<String> {
-        use windows::Win32::System::Diagnostics::Debug::ReadProcessMemory;
-        let unsupported = || -> Error { windows::core::Error::from(E_FAIL).into() };
         if self
             .architecture()
             .is_ok_and(|a| a == Architecture::X86 || a == Architecture::Arm)
         {
             return Err(unsupported());
         }
-        let read = |address: usize, out: &mut [u8]| -> Result<()> {
-            let mut done = 0usize;
-            // SAFETY: `out` is writable for its length; the remote address
-            // is only read through the system call, which validates it.
-            unsafe {
-                ReadProcessMemory(
-                    self.raw(),
-                    address as *const core::ffi::c_void,
-                    out.as_mut_ptr().cast(),
-                    out.len(),
-                    Some(&mut done),
-                )?
-            };
-            if done == out.len() {
-                Ok(())
-            } else {
-                Err(unsupported())
-            }
+        // 64-bit layouts: PEB.ProcessParameters at 0x20, and
+        // RTL_USER_PROCESS_PARAMETERS.CurrentDirectory.DosPath at 0x38.
+        let parameters = self.remote_word(self.peb_address()? + 0x20)?;
+        let mut header = [0u8; 16];
+        self.read_remote(parameters + 0x38, &mut header)?;
+        let length = usize::from(u16::from_le_bytes([header[0], header[1]]));
+        let buffer = u64::from_le_bytes(header[8..16].try_into().expect("8 bytes")) as usize;
+        if length == 0 || buffer == 0 || length > 2 * 32_767 {
+            return Err(unsupported());
+        }
+        let mut text = vec![0u8; length];
+        self.read_remote(buffer, &mut text)?;
+        Ok(crate::utf16_lossy(&utf16_units(&text)))
+    }
+
+    /// Reads exactly `out.len()` bytes at `address` in the process; a
+    /// partial read (memory freed or changed meanwhile) is an error. Needs
+    /// `PROCESS_VM_READ`.
+    pub(crate) fn read_remote(&self, address: usize, out: &mut [u8]) -> Result<()> {
+        use windows::Win32::System::Diagnostics::Debug::ReadProcessMemory;
+        let mut done = 0usize;
+        // SAFETY: `out` is writable for its length; the remote address is
+        // only read through the system call, which validates it.
+        unsafe {
+            ReadProcessMemory(
+                self.raw(),
+                address as *const core::ffi::c_void,
+                out.as_mut_ptr().cast(),
+                out.len(),
+                Some(&mut done),
+            )?
         };
-        let word = |address: usize| -> Result<usize> {
-            let mut bytes = [0u8; 8];
-            read(address, &mut bytes)?;
-            Ok(u64::from_le_bytes(bytes) as usize)
-        };
+        if done == out.len() {
+            Ok(())
+        } else {
+            Err(unsupported())
+        }
+    }
+
+    /// A 64-bit pointer-sized value in the process.
+    pub(crate) fn remote_word(&self, address: usize) -> Result<usize> {
+        let mut bytes = [0u8; 8];
+        self.read_remote(address, &mut bytes)?;
+        Ok(u64::from_le_bytes(bytes) as usize)
+    }
+
+    /// A 32-bit value in the process, such as a pointer of a WOW64 process.
+    pub(crate) fn remote_u32(&self, address: usize) -> Result<u32> {
+        let mut bytes = [0u8; 4];
+        self.read_remote(address, &mut bytes)?;
+        Ok(u32::from_le_bytes(bytes))
+    }
+
+    /// The address of the process's (native, 64-bit) PEB.
+    pub(crate) fn peb_address(&self) -> Result<usize> {
         // PROCESS_BASIC_INFORMATION: the PEB address is its second field.
         let mut basic = [0usize; 6];
         let mut len = 0u32;
@@ -453,29 +497,31 @@ impl ProcessHandle {
             )
         };
         nt_ok("NtQueryInformationProcess", status)?;
-        let peb = basic[1];
-        if peb == 0 {
-            return Err(unsupported());
+        match basic[1] {
+            0 => Err(unsupported()),
+            peb => Ok(peb),
         }
-        // 64-bit layouts: PEB.ProcessParameters at 0x20, and
-        // RTL_USER_PROCESS_PARAMETERS.CurrentDirectory.DosPath at 0x38.
-        let parameters = word(peb + 0x20)?;
-        let mut header = [0u8; 16];
-        read(parameters + 0x38, &mut header)?;
-        let length = usize::from(u16::from_le_bytes([header[0], header[1]]));
-        let buffer = u64::from_le_bytes(header[8..16].try_into().expect("8 bytes")) as usize;
-        if length == 0 || buffer == 0 || length > 2 * 32_767 {
-            return Err(unsupported());
-        }
-        let mut text = vec![0u8; length];
-        read(buffer, &mut text)?;
-        let units: Vec<u16> = text
-            .as_chunks::<2>()
-            .0
-            .iter()
-            .map(|pair| u16::from_le_bytes(*pair))
-            .collect();
-        Ok(crate::utf16_lossy(&units))
+    }
+
+    /// The address of a WOW64 process's 32-bit PEB; `None` for a native
+    /// process.
+    pub(crate) fn peb32_address(&self) -> Result<Option<usize>> {
+        /// `PROCESSINFOCLASS::ProcessWow64Information`.
+        const PROCESS_WOW64_INFORMATION: u32 = 26;
+        let mut peb32 = 0usize;
+        let mut len = 0u32;
+        // SAFETY: `peb32` is writable for a pointer-sized value.
+        let status = unsafe {
+            NtQueryInformationProcess(
+                self.raw(),
+                PROCESS_WOW64_INFORMATION,
+                std::ptr::from_mut(&mut peb32).cast(),
+                size_of::<usize>() as u32,
+                &mut len,
+            )
+        };
+        nt_ok("NtQueryInformationProcess", status)?;
+        Ok((peb32 != 0).then_some(peb32))
     }
 
     /// The account the process runs as, e.g. NT AUTHORITY\SYSTEM.

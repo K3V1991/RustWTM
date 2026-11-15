@@ -1775,5 +1775,10 @@
   "Logon session": "Aanmeldingssessie",
   "Owner": "Eigenaar",
   "Domain-local": "Domeinlokaal",
-  "Mandatory": "Verplicht"
+  "Mandatory": "Verplicht",
+  "Environment": "Omgeving",
+  "Its environment variables, read with this window's rights": "Zijn omgevingsvariabelen, gelezen met de rechten van dit venster",
+  "Reading environment variables…": "Omgevingsvariabelen worden gelezen…",
+  "{0} variables": "{0} variabelen",
+  "Copy all": "Alles kopiëren"
 }

@@ -1775,5 +1775,10 @@
   "Logon session": "લૉગઑન સત્ર",
   "Owner": "માલિક",
   "Domain-local": "ડોમેન-સ્થાનિક",
-  "Mandatory": "ફરજિયાત"
+  "Mandatory": "ફરજિયાત",
+  "Environment": "પર્યાવરણ",
+  "Its environment variables, read with this window's rights": "તેના પર્યાવરણ ચલો, આ વિન્ડોના અધિકારોથી વાંચેલા",
+  "Reading environment variables…": "પર્યાવરણ ચલો વાંચી રહ્યાં છીએ…",
+  "{0} variables": "{0} ચલો",
+  "Copy all": "બધું કૉપિ કરો"
 }

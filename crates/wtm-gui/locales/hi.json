@@ -1775,5 +1775,10 @@
   "Logon session": "लॉगऑन सत्र",
   "Owner": "स्वामी",
   "Domain-local": "डोमेन-स्थानीय",
-  "Mandatory": "अनिवार्य"
+  "Mandatory": "अनिवार्य",
+  "Environment": "परिवेश",
+  "Its environment variables, read with this window's rights": "इसके परिवेश चर, इस विंडो के अधिकारों से पढ़े गए",
+  "Reading environment variables…": "परिवेश चर पढ़े जा रहे हैं…",
+  "{0} variables": "{0} चर",
+  "Copy all": "सभी कॉपी करें"
 }

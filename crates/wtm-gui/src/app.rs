@@ -2103,6 +2103,7 @@ impl eframe::App for App {
                 Intent::WhyAlive(target) => backend.send(UiCommand::WhyAlive(target)),
                 Intent::Modules(target) => backend.send(UiCommand::Modules(target)),
                 Intent::Security(target) => backend.send(UiCommand::Security(target)),
+                Intent::Environment(target) => backend.send(UiCommand::Environment(target)),
                 Intent::Threads(target) => backend.send(UiCommand::Threads(target)),
                 Intent::AskAi(target) => state.ai.open_process(target),
                 Intent::Network(target, block) => {
@@ -2784,7 +2785,20 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
             ))
             .clicked()
         {
-            intents.push(Intent::Security(sel.clone()));
+            intents.push(Intent::Security(Some(sel.clone())));
+        }
+        let environment = data.environment.as_ref().filter(|(r, _)| r == sel);
+        if ui
+            .add_enabled(
+                !environment.is_some_and(|(_, v)| v.is_none()),
+                egui::Button::new(crate::i18n::tr("Environment")),
+            )
+            .on_hover_text(crate::i18n::tr(
+                "Its environment variables, read with this window's rights",
+            ))
+            .clicked()
+        {
+            intents.push(Intent::Environment(Some(sel.clone())));
         }
         let threads_open = data.threads.as_ref().is_some_and(|p| p.target == *sel);
         if ui
@@ -2824,7 +2838,8 @@ fn diagnostics(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Int
         Some(Some(Ok(list))) => modules_list(ui, list),
         None => {}
     }
-    crate::security_view::show(ui, data, sel);
+    crate::security_view::show(ui, data, sel, intents);
+    crate::environment_view::show(ui, data, sel, intents);
     match ending.map(|(_, r)| r) {
         Some(None) => {
             ui.horizontal(|ui| {
@@ -7346,7 +7361,8 @@ mod tests {
             UiCommand::WaitChain(t) => format!("wait chain {}", t.pid),
             UiCommand::WhyAlive(t) => format!("why alive {}", t.pid),
             UiCommand::Modules(t) => format!("modules {}", t.pid),
-            UiCommand::Security(t) => format!("security {}", t.pid),
+            UiCommand::Security(t) => format!("security {:?}", t.as_ref().map(|t| t.pid)),
+            UiCommand::Environment(t) => format!("environment {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::Threads(t) => format!("threads {:?}", t.as_ref().map(|t| t.pid)),
             UiCommand::CloseConnection { local, remote } => format!("close {local} {remote}"),
             UiCommand::Firewall { path, block } => format!("firewall {path} {block}"),
@@ -8263,8 +8279,101 @@ mod tests {
         assert!(
             rx.try_iter()
                 .map(describe_command)
-                .any(|c| c == "security 100")
+                .any(|c| c == "security Some(100)")
         );
+        // Hide lets the panel go.
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Hide")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "security None")
+        );
+        h.state().backend.data().security = None;
+        h.run_steps(2);
+        assert!(h.query_by_label("Session 3").is_none());
+    }
+
+    #[test]
+    fn environment_panel_lists_variables_by_name() {
+        use crate::backend::Variables;
+        // Printing the data never prints a variable.
+        let secret = Variables(vec![("TOKEN".into(), "s3cret".into())]);
+        assert_eq!(format!("{secret:?}"), "Variables(1 hidden)");
+        let mut d = data();
+        let alpha = ProcessRef::from(&crate::ui_tests::proc(100, 0, "alpha.exe", 20.0));
+        let path = "C:\\Windows\\system32;".repeat(8);
+        d.environment = Some((
+            alpha.clone(),
+            Some(Ok(Variables(vec![
+                ("windir".into(), "C:\\Windows".into()),
+                ("Path".into(), path.clone()),
+                ("=C:".into(), "C:\\Users".into()),
+            ]))),
+        ));
+        let (backend, rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    check_updates: false,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.state_mut().state.processes.selected = Some(alpha.clone());
+        h.run_steps(2);
+        assert!(h.query_by_label("3 variables").is_some());
+        // Sorted by name, ignoring case.
+        let y = |n: &str| h.get_by_label(n).rect().min.y;
+        assert!(y("=C:") < y("Path") && y("Path") < y("windir"));
+        // A long value is cut, whole on hover.
+        assert!(h.query_by_label(&path).is_none());
+        h.get_all_by_label_contains("C:\\Windows\\system32;C:")
+            .next()
+            .unwrap()
+            .hover();
+        h.run();
+        assert!(h.query_by_label(&path).is_some());
+
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Environment")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "environment Some(100)")
+        );
+        h.get_all_by_role_and_label(egui::accesskit::Role::Button, "Hide")
+            .next()
+            .unwrap()
+            .click();
+        h.run_steps(2);
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "environment None")
+        );
+
+        // A refusal is shown in place of the list.
+        h.state().backend.data().environment = Some((
+            alpha,
+            Some(Err(
+                "PID 100 is protected: holds this PC's sign-in secrets".into()
+            )),
+        ));
+        h.run_steps(2);
+        assert!(h.query_by_label_contains("sign-in secrets").is_some());
+        assert!(h.query_by_label("windir").is_none());
     }
 
     #[test]

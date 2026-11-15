@@ -1775,5 +1775,10 @@
   "Logon session": "ਲੌਗਆਨ ਸੈਸ਼ਨ",
   "Owner": "ਮਾਲਕ",
   "Domain-local": "ਡੋਮੇਨ-ਸਥਾਨਕ",
-  "Mandatory": "ਲਾਜ਼ਮੀ"
+  "Mandatory": "ਲਾਜ਼ਮੀ",
+  "Environment": "ਵਾਤਾਵਰਣ",
+  "Its environment variables, read with this window's rights": "ਇਸਦੇ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ, ਇਸ ਵਿੰਡੋ ਦੇ ਅਧਿਕਾਰਾਂ ਨਾਲ ਪੜ੍ਹੇ ਗਏ",
+  "Reading environment variables…": "ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ ਪੜ੍ਹੇ ਜਾ ਰਹੇ ਹਨ…",
+  "{0} variables": "{0} ਵੇਰੀਏਬਲ",
+  "Copy all": "ਸਭ ਕਾਪੀ ਕਰੋ"
 }

@@ -1775,5 +1775,10 @@
   "Logon session": "Kipindi cha kuingia",
   "Owner": "Mmiliki",
   "Domain-local": "Ya ndani ya kikoa",
-  "Mandatory": "Lazima"
+  "Mandatory": "Lazima",
+  "Environment": "Mazingira",
+  "Its environment variables, read with this window's rights": "Vigezo vyake vya mazingira, vilivyosomwa kwa haki za dirisha hili",
+  "Reading environment variables…": "Inasoma vigezo vya mazingira…",
+  "{0} variables": "Vigezo {0}",
+  "Copy all": "Nakili vyote"
 }

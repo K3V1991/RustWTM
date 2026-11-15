@@ -1775,5 +1775,10 @@
   "Logon session": "লগঅন সেশন",
   "Owner": "মালিক",
   "Domain-local": "ডোমেন-স্থানীয়",
-  "Mandatory": "বাধ্যতামূলক"
+  "Mandatory": "বাধ্যতামূলক",
+  "Environment": "পরিবেশ",
+  "Its environment variables, read with this window's rights": "এর পরিবেশ ভেরিয়েবল, এই উইন্ডোর অধিকারে পড়া",
+  "Reading environment variables…": "পরিবেশ ভেরিয়েবল পড়া হচ্ছে…",
+  "{0} variables": "{0}টি ভেরিয়েবল",
+  "Copy all": "সব কপি করুন"
 }

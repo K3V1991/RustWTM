@@ -1775,5 +1775,10 @@
   "Logon session": "లాగాన్ సెషన్",
   "Owner": "యజమాని",
   "Domain-local": "డొమైన్-స్థానిక",
-  "Mandatory": "తప్పనిసరి"
+  "Mandatory": "తప్పనిసరి",
+  "Environment": "వాతావరణం",
+  "Its environment variables, read with this window's rights": "ఈ విండో హక్కులతో చదివిన దాని ఎన్విరాన్‌మెంట్ వేరియబుల్‌లు",
+  "Reading environment variables…": "ఎన్విరాన్‌మెంట్ వేరియబుల్‌లు చదవబడుతున్నాయి…",
+  "{0} variables": "{0} వేరియబుల్‌లు",
+  "Copy all": "అన్నీ కాపీ చేయి"
 }

@@ -1775,5 +1775,10 @@
   "Logon session": "உள்நுழைவு அமர்வு",
   "Owner": "உரிமையாளர்",
   "Domain-local": "டொமைன்-உள்ளூர்",
-  "Mandatory": "கட்டாயம்"
+  "Mandatory": "கட்டாயம்",
+  "Environment": "சூழல்",
+  "Its environment variables, read with this window's rights": "இந்தச் சாளரத்தின் உரிமைகளுடன் படிக்கப்பட்ட அதன் சூழல் மாறிகள்",
+  "Reading environment variables…": "சூழல் மாறிகள் படிக்கப்படுகின்றன…",
+  "{0} variables": "{0} மாறிகள்",
+  "Copy all": "அனைத்தையும் நகலெடு"
 }

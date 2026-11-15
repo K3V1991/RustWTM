@@ -1775,5 +1775,10 @@
   "Logon session": "Logon session",
   "Owner": "May-ari",
   "Domain-local": "Domain-local",
-  "Mandatory": "Mandatory"
+  "Mandatory": "Mandatory",
+  "Environment": "Environment",
+  "Its environment variables, read with this window's rights": "Ang mga environment variable nito, binasa gamit ang mga karapatan ng window na ito",
+  "Reading environment variables…": "Binabasa ang mga environment variable…",
+  "{0} variables": "{0} variable",
+  "Copy all": "Kopyahin lahat"
 }

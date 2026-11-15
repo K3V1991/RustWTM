@@ -1775,5 +1775,10 @@
   "Logon session": "登入工作階段",
   "Owner": "擁有者",
   "Domain-local": "網域本機",
-  "Mandatory": "必要"
+  "Mandatory": "必要",
+  "Environment": "環境",
+  "Its environment variables, read with this window's rights": "它的環境變數，以此視窗的權限讀取",
+  "Reading environment variables…": "正在讀取環境變數…",
+  "{0} variables": "{0} 個變數",
+  "Copy all": "全部複製"
 }

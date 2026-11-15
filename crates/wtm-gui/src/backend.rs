@@ -20,6 +20,16 @@ pub type CommandLines = std::collections::HashMap<(u32, i64), String>;
 pub type FactsMap = std::collections::HashMap<(u32, i64), wtm_core::control::ProcessFacts>;
 /// A process's modules with who signed each.
 pub type ModuleList = Vec<(wtm_core::Module, wtm_core::Signature)>;
+/// Environment variables as `(name, value)` pairs. Its `Debug` shows only
+/// how many there are, so printing [`Data`] never prints a secret.
+#[derive(Clone, PartialEq, Eq, Default)]
+pub struct Variables(pub Vec<(String, String)>);
+
+impl std::fmt::Debug for Variables {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Variables({} hidden)", self.0.len())
+    }
+}
 /// Processes with a window Windows marks as not responding, and its title.
 pub type HungMap = std::collections::HashMap<u32, String>;
 /// Running services by the PID that hosts them.
@@ -293,6 +303,9 @@ pub struct Data {
         ProcessRef,
         Option<Result<wtm_core::control::TokenReport, String>>,
     )>,
+    /// The environment variables of a process; `None` inside while they
+    /// are read. Only shown, never logged or saved: they often hold secrets.
+    pub environment: Option<(ProcessRef, Option<Result<Variables, String>>)>,
     /// The threads of a process, read each tick while the panel is drawn
     /// (`threads_wanted_ms`, Unix ms).
     pub threads: Option<crate::threads_view::ThreadsPanel>,
@@ -410,7 +423,11 @@ pub enum UiCommand {
     /// The modules a process has loaded, with their signatures.
     Modules(ProcessRef),
     /// The account, groups and privileges of a process's token.
-    Security(ProcessRef),
+    /// With `None`, hides them again.
+    Security(Option<ProcessRef>),
+    /// The environment variables of a process; with `None`, hides them and
+    /// lets go of them.
+    Environment(Option<ProcessRef>),
     /// Shows (or with `None` hides) the threads of a process.
     Threads(Option<ProcessRef>),
     /// Blocks (`true`) or unblocks a program's network access.
@@ -1719,7 +1736,8 @@ impl Worker {
                     ctx.request_repaint();
                 });
             }
-            UiCommand::Security(target) => {
+            UiCommand::Security(None) => self.data().security = None,
+            UiCommand::Security(Some(target)) => {
                 self.data().security = Some((target.clone(), None));
                 let (data, ctx) = (self.data.clone(), self.ctx.clone());
                 std::thread::spawn(move || {
@@ -1728,6 +1746,23 @@ impl Worker {
                     let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
                     if d.security.as_ref().is_some_and(|(t, _)| *t == target) {
                         d.security = Some((target, Some(result)));
+                    }
+                    drop(d);
+                    ctx.request_repaint();
+                });
+            }
+            UiCommand::Environment(None) => self.data().environment = None,
+            UiCommand::Environment(Some(target)) => {
+                self.data().environment = Some((target.clone(), None));
+                let (data, ctx) = (self.data.clone(), self.ctx.clone());
+                std::thread::spawn(move || {
+                    // With this window's rights only, never the service's.
+                    let result = wtm_core::control::environment(&target)
+                        .map(Variables)
+                        .map_err(|e| e.to_string());
+                    let mut d = data.lock().unwrap_or_else(PoisonError::into_inner);
+                    if d.environment.as_ref().is_some_and(|(t, _)| *t == target) {
+                        d.environment = Some((target, Some(result)));
                     }
                     drop(d);
                     ctx.request_repaint();
