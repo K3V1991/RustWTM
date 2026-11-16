@@ -125,8 +125,12 @@ impl Marks {
         }
         ui.label(name);
         if let Some(note) = self.note(key) {
-            ui.add(egui::Label::new(RichText::new(format!("✎ {note}")).weak().small()).truncate())
-                .on_hover_text(note);
+            ui.add(
+                egui::Label::new(RichText::new(format!("✎ {note}")).weak().small())
+                    .truncate()
+                    .show_tooltip_when_elided(false),
+            )
+            .on_hover_text(note);
         }
     }
 

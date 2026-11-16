@@ -223,7 +223,11 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
                             egui::Layout::left_to_right(egui::Align::Center),
                             |ui| {
                                 let response = ui
-                                    .add(egui::Label::new(&sensor.name).truncate())
+                                    .add(
+                                        egui::Label::new(&sensor.name)
+                                            .truncate()
+                                            .show_tooltip_when_elided(false),
+                                    )
                                     .on_hover_text(format!("{}\n{}", sensor.name, sensor.id))
                                     .interact(egui::Sense::click());
                                 crate::context_actions::menu(

@@ -292,8 +292,7 @@ pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            ui.add(egui::Label::new(&c.project).truncate())
-                                .on_hover_text(&c.project);
+                            ui.add(egui::Label::new(&c.project).truncate());
                         })
                     });
                     row.col(|ui| {
@@ -333,8 +332,7 @@ pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            ui.add(egui::Label::new(&c.image).truncate())
-                                .on_hover_text(&c.image);
+                            ui.add(egui::Label::new(&c.image).truncate());
                         })
                     });
                     let row_response = row.response();

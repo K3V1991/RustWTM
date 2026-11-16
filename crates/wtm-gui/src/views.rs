@@ -112,8 +112,7 @@ pub fn users(ui: &mut Ui, data: &Data) -> Option<(u32, String, crate::backend::S
                     let (session, (count, cpu, memory)) = rows[row.index()];
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            ui.add(egui::Label::new(account(session)).truncate())
-                                .on_hover_text(account(session));
+                            ui.add(egui::Label::new(account(session)).truncate());
                         })
                     });
                     row.col(|ui| {
@@ -121,8 +120,7 @@ pub fn users(ui: &mut Ui, data: &Data) -> Option<(u32, String, crate::backend::S
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            ui.add(egui::Label::new(&session.station).truncate())
-                                .on_hover_text(&session.station);
+                            ui.add(egui::Label::new(&session.station).truncate());
                         })
                     });
                     row.col(|ui| {

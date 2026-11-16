@@ -264,8 +264,7 @@ impl View {
                         ] {
                             row.col(|ui| {
                                 crate::theme::table_cell(ui, |ui| {
-                                    ui.add(egui::Label::new(text).truncate())
-                                        .on_hover_text(text);
+                                    ui.add(egui::Label::new(text).truncate());
                                 })
                             });
                         }

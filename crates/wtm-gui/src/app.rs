@@ -354,15 +354,24 @@ fn nav(ui: &mut Ui, state: &mut UiState, collapsed: bool) {
                     });
             }
         }
-        if crate::navigation::row(
+        let row = crate::navigation::row(
             ui,
             *icon,
             crate::i18n::tr(label),
             state.tab == *tab,
             collapsed,
-        )
-        .clicked()
-        {
+        );
+        // In a short window the rail scrolls: bring the current page's entry
+        // into view when the page changes (and on first show), but leave the
+        // rail where the user scrolled it otherwise.
+        if state.tab == *tab {
+            let shown = egui::Id::unique("nav_shown_tab");
+            if ui.data(|d| d.get_temp::<Tab>(shown)) != Some(*tab) {
+                row.scroll_to_me(None);
+                ui.data_mut(|d| d.insert_temp(shown, *tab));
+            }
+        }
+        if row.clicked() {
             state.tab = *tab;
         }
     }
@@ -1038,8 +1047,7 @@ impl eframe::App for App {
                                 ],
                             )
                         };
-                        ui.add(egui::Label::new(&summary).truncate())
-                            .on_hover_text(summary);
+                        ui.add(egui::Label::new(&summary).truncate());
                     }
                     ui.separator();
                     if !data.kill_list.is_empty()
@@ -4565,15 +4573,13 @@ fn managed_table(ui: &mut Ui, status: &wtm_ipc::Status, intents: &mut Vec<Intent
                         row.col(|ui| {
                             crate::theme::table_cell(ui, |ui| {
                                 let value = sources(managed);
-                                ui.add(egui::Label::new(&value).truncate())
-                                    .on_hover_text(value);
+                                ui.add(egui::Label::new(&value).truncate());
                             })
                         });
                         row.col(|ui| {
                             crate::theme::table_cell(ui, |ui| {
                                 let value = crate::i18n::message(&managed.summary);
-                                ui.add(egui::Label::new(value.as_ref()).truncate())
-                                    .on_hover_text(value.as_ref());
+                                ui.add(egui::Label::new(value.as_ref()).truncate());
                             })
                         });
                     })

@@ -628,40 +628,42 @@ impl State {
         if self.options.link_hover {
             plot = plot.link_cursor(egui::Id::unique("performance-time-cursor"), [true, false]);
         }
+        // One label at the pointer: the value near a data point, how to
+        // inspect elsewhere. (A separate hover tooltip stacked a second box
+        // over the value.)
+        let hint = crate::i18n::tr("Click a chart to inspect. Double-click to follow live.");
+        let value = move |hover: &egui_plot::HoverPosition<'_>| -> Option<String> {
+            let egui_plot::HoverPosition::NearDataPoint {
+                plot_name,
+                position,
+                ..
+            } = hover
+            else {
+                return None;
+            };
+            Some(match unit {
+                Unit::Percent => format!(
+                    "{} · {plot_name}: {:.1}%",
+                    short_time(position.x),
+                    position.y
+                ),
+                Unit::Rate => return crate::app::rate_label(hover),
+                Unit::Bytes(_) => format!(
+                    "{} · {plot_name}: {}",
+                    short_time(position.x),
+                    wtm_core::format_bytes(position.y.max(0.0))
+                ),
+            })
+        };
         plot = match unit {
             Unit::Percent => plot
                 .include_y(0.0)
                 .include_y(100.0)
-                .y_axis_formatter(|m, _| format!("{:.0}%", m.value))
-                .label_formatter(|hover| match hover {
-                    egui_plot::HoverPosition::NearDataPoint {
-                        plot_name,
-                        position,
-                        ..
-                    } => Some(format!(
-                        "{} · {plot_name}: {:.1}%",
-                        short_time(position.x),
-                        position.y
-                    )),
-                    _ => None,
-                }),
-            Unit::Rate => plot
-                .include_y(0.0)
-                .include_y(1024.0)
-                .label_formatter(crate::app::rate_label),
-            Unit::Bytes(_) => plot.include_y(0.0).label_formatter(|hover| match hover {
-                egui_plot::HoverPosition::NearDataPoint {
-                    plot_name,
-                    position,
-                    ..
-                } => Some(format!(
-                    "{} · {plot_name}: {}",
-                    short_time(position.x),
-                    wtm_core::format_bytes(position.y.max(0.0))
-                )),
-                _ => None,
-            }),
-        };
+                .y_axis_formatter(|m, _| format!("{:.0}%", m.value)),
+            Unit::Rate => plot.include_y(0.0).include_y(1024.0),
+            Unit::Bytes(_) => plot.include_y(0.0),
+        }
+        .label_formatter(move |hover| value(hover).or_else(|| Some(hint.to_owned())));
         let result = plot.show(ui, |plot| {
             plot.set_plot_bounds_x(start..=end);
             plot.set_plot_bounds_y(0.0..=ceiling);
@@ -742,9 +744,6 @@ impl State {
             });
             ui.checkbox(&mut self.options.grid, crate::i18n::tr("Show chart grid"));
         });
-        result.response.on_hover_text(crate::i18n::tr(
-            "Click a chart to inspect. Double-click to follow live.",
-        ));
         if self.small {
             return;
         }
