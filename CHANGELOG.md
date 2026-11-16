@@ -6,6 +6,40 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Every page was reviewed visually in English and Turkish, light and
+  dark, wide and compact; what follows came out of it.
+- Table cells centre their content in the row, so names, plain labels and
+  numbers line up; the Disks folder tree indents across, with every row
+  keeping the expander's slot.
+- Dialogs have room around their content; About's Check for updates
+  button is centred.
+- A disabled primary action (Save, Add entry) is an ordinary disabled
+  button instead of faded orange, and Panic is red only when it can be
+  pressed.
+- More below is a rounded pill; in a short window the navigation rail
+  keeps the current page in view; a truncated label shows one tooltip,
+  not two.
+- On a narrow window the Performance timeline shows the time of day, with
+  the full date in its tooltip, so its actions stay on one row.
+- Ports gives spare width to the tool names; App history keeps room for
+  its findings; the process inspector's Refresh is an icon; Telegram's
+  fields line up; Events messages start under their header and every
+  search field says what it searches.
+- Turkish: process is "işlem" and service "servis" throughout,
+  percentages are written %42 (sliders too), seconds are "sn", and the
+  kill list, port categories, AI effort levels and disk read and write
+  labels are translated.
+- English counts of one read in the singular ("1 startup app",
+  "1 TCP port listening").
+
+### Fixed
+
+- Limits could show usage as "-0.00 cores".
+- Largest files showed nothing for an unknown modification time, which
+  put Show under Modified; it shows a dash.
+
 ## [0.34.0] - 2026-11-15
 
 More of Process Explorer and System Informer: a system-wide Find handle or
