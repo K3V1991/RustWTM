@@ -774,6 +774,55 @@ mod tests {
     }
 
     #[test]
+    fn a_second_save_is_made_from_the_reloaded_text() {
+        use egui_kittest::{Harness, kittest::Queryable};
+        let original = wtm_policy::DEFAULT_CONFIG_TOML.to_owned();
+        let data = Data {
+            config: Some(Ok(("config.toml".into(), original.clone()))),
+            mode: crate::backend::Mode::Service {
+                admin: true,
+                verified: true,
+            },
+            ..Data::default()
+        };
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1440.0, 2400.0])
+            .with_context_setup(crate::theme::apply)
+            .build_ui_state(
+                |ui, s: &mut (Data, ConfigView, Vec<UiCommand>)| {
+                    let commands = settings(ui, &s.0, &mut s.1);
+                    s.2.extend(commands);
+                },
+                (data, ConfigView::default(), Vec::new()),
+            );
+        let save = |h: &mut Harness<'_, (Data, ConfigView, Vec<UiCommand>)>, mode: &str| {
+            h.get_by_label(mode).click();
+            h.run_steps(2);
+            h.get_by_label("Save").click();
+            h.run_steps(2);
+            let saved = h.state_mut().2.drain(..).find_map(|c| match c {
+                UiCommand::SaveConfig { toml, base } => Some((toml, base)),
+                _ => None,
+            });
+            saved.expect("saved")
+        };
+        h.run_steps(2);
+        // The defaults monitor only.
+        let (first, base) = save(&mut h, "Enforcing");
+        assert_eq!(base.as_deref(), Some(original.as_str()));
+        // The service has it now, and the page reloads.
+        h.state_mut().0.config = Some(Ok(("config.toml".into(), first.clone())));
+        h.run_steps(3);
+        let (_, base) = save(&mut h, "Monitoring only");
+        assert_eq!(
+            base.as_deref(),
+            Some(first.as_str()),
+            "made from what the service has, or it would be refused"
+        );
+    }
+
+    #[test]
     fn governor_thresholds_cannot_cross() {
         use egui_kittest::{Harness, kittest::Queryable};
         // high 90, recover 70 in the defaults.
