@@ -982,7 +982,9 @@ pub fn app_history(ui: &mut Ui, data: &Data, view: &mut HistoryView) -> bool {
     .iter()
     .map(|label| crate::sort::width(ui, label, 80.0))
     .collect();
-    let min_width = 200.0 + widths.iter().sum::<f32>() + 180.0;
+    // The finding gets at least room for its words; the panel scrolls
+    // sideways before cutting it.
+    let min_width = 160.0 + widths.iter().sum::<f32>() + 180.0;
     crate::theme::table_panel(ui, "history_columns", min_width, |ui| {
         egui::ScrollArea::vertical()
             .id_salt("history_table")
@@ -997,12 +999,12 @@ pub fn app_history(ui: &mut Ui, data: &Data, view: &mut HistoryView) -> bool {
                     .max_scroll_height(table_height)
                     .sense(egui::Sense::click())
                     .cell_layout(Layout::left_to_right(Align::Center))
-                    .column(Column::initial(200.0).clip(true));
+                    .column(Column::initial(160.0).clip(true));
                 for width in &widths {
                     table = table.column(Column::initial(*width));
                 }
                 table
-                    .column(Column::remainder())
+                    .column(Column::remainder().at_least(180.0))
                     .header(row_height, |mut h| {
                         for (col, label) in [
                             crate::i18n::tr("App"),

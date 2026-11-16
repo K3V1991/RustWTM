@@ -3266,7 +3266,15 @@ fn details_panel(
         if ui.button(crate::i18n::tr("Open file location")).clicked() {
             intents.push(Intent::OpenLocation(sel.clone()));
         }
-        if ui.button(crate::i18n::tr("Refresh")).clicked() {
+        // An icon: as a word it wrapped onto a row of its own in Turkish.
+        if crate::theme::icon_button(
+            ui,
+            true,
+            crate::theme::icon::SYNC,
+            crate::i18n::tr("Refresh"),
+        )
+        .clicked()
+        {
             intents.push(Intent::Select(sel.clone()));
         }
     });

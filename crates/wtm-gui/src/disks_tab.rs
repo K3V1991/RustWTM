@@ -1070,11 +1070,17 @@ fn largest(ui: &mut Ui, r: &ScanResult, reveal: &mut Option<PathBuf>) {
                 });
                 row.col(|ui| {
                     crate::theme::table_cell(ui, |ui| {
-                        ui.label(f.modified.map_or_else(String::new, |m| {
-                            chrono::DateTime::<chrono::Local>::from(m)
-                                .format("%Y-%m-%d %H:%M")
-                                .to_string()
-                        }));
+                        // A dash for an unknown time, as other tables show: an
+                        // empty cell made the next column's button look like
+                        // it was under "Modified".
+                        ui.label(f.modified.map_or_else(
+                            || "—".to_owned(),
+                            |m| {
+                                chrono::DateTime::<chrono::Local>::from(m)
+                                    .format("%Y-%m-%d %H:%M")
+                                    .to_string()
+                            },
+                        ));
                     })
                 });
                 row.col(|ui| {
@@ -1129,7 +1135,8 @@ fn types(ui: &mut Ui, r: &ScanResult) {
         egui::Grid::new("disk_types_grid")
             .num_columns(4)
             .striped(true)
-            .spacing([8.0, 4.0])
+            // The spacing of the Folders table's columns, not 8 points.
+            .spacing([24.0, 6.0])
             .show(ui, |ui| {
                 for label in [
                     crate::i18n::tr("Type"),

@@ -546,7 +546,7 @@ fn listening_table(
     let row_height = ui.spacing().interact_size.y;
     ui.style_mut().interaction.selectable_labels = false;
     // Every header fits at first; narrow windows scroll sideways.
-    let widths: Vec<f32> = [
+    let mut widths: Vec<f32> = [
         ("Port", 64.0),
         ("Proto", 48.0),
         ("Known as", 190.0),
@@ -561,6 +561,9 @@ fn listening_table(
     .map(|(label, width)| crate::sort::width(ui, label, *width))
     .collect();
     let min_width = widths.iter().sum::<f32>() + 120.0;
+    // Room to spare goes first to "Known as", whose tool lists are long
+    // ("HTTP alt / webpack / Tomcat / Spring"), before the address.
+    widths[2] += (ui.available_width() - min_width).clamp(0.0, 160.0);
     let menu_id = ui.scope_id().with("port_context_menu");
     crate::theme::table_panel(ui, "ports", min_width, |ui| {
         crate::theme::table(ui)

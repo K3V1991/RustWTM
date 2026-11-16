@@ -2075,8 +2075,10 @@ impl ProcessView {
                                     ui.strong(format!("{label} ↓"));
                                     return;
                                 }
+                                // Right-aligned above the right-aligned values;
+                                // a full-width label centred it.
                                 ui.allocate_ui_with_layout(egui::vec2(ui.available_width(), row_height), Layout::right_to_left(Align::Center), |ui| {
-                                    ui.add_sized([ui.available_width(), row_height], egui::Label::new(RichText::new(total.unwrap_or_default()).strong()).truncate().show_tooltip_when_elided(false))
+                                    ui.add(egui::Label::new(RichText::new(total.unwrap_or_default()).strong()).truncate().show_tooltip_when_elided(false))
                                         .on_hover_text(crate::i18n::tr("System-wide total; filters only change the rows. Memory is physical use; disk is process I/O; network includes all adapters."));
                                 });
                                 let current = (self.sort == *col).then_some(self.descending);
