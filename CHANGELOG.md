@@ -34,6 +34,11 @@ All notable changes to this project are documented here. The format follows
   percentages are written %42 (sliders too), seconds are "sn", and the
   kill list, port categories, AI effort levels and disk read and write
   labels are translated.
+- Numbers use the language's decimal sign: Turkish, German, French,
+  Spanish, Italian, Dutch, Polish, Portuguese, Russian, Ukrainian,
+  Indonesian and Vietnamese write 12,5 and 8,0 GiB. Number fields show
+  the comma and accept either sign when typed. Copied diagnostics, logs,
+  config.toml and the service keep the point.
 - English counts of one read in the singular ("1 startup app",
   "1 TCP port listening").
 

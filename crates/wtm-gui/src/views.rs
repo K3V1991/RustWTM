@@ -6,7 +6,8 @@ use eframe::egui::{self, Align, Color32, Layout, Ui};
 use egui_extras::Column;
 use std::net::SocketAddr;
 
-use wtm_core::format_bytes;
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 
 use crate::backend::{Data, ServiceOp, UiCommand};
 use crate::context_actions::{action, copy, menu};
@@ -1098,7 +1099,7 @@ pub fn app_history(ui: &mut Ui, data: &Data, view: &mut HistoryView) -> bool {
                                         let __wtm_i18n_0 = &(s.cpu_core_seconds / 3600.0);
                                         crate::i18n::format(
                                             "{0} core-h",
-                                            &[format!("{:.2}", __wtm_i18n_0)],
+                                            &[crate::i18n::decimal(format!("{:.2}", __wtm_i18n_0))],
                                         )
                                     })
                                 })
@@ -1135,7 +1136,10 @@ pub fn app_history(ui: &mut Ui, data: &Data, view: &mut HistoryView) -> bool {
                                             "{0} MiB (R² {1})",
                                             &[
                                                 format!("{:+.0}", __wtm_i18n_0),
-                                                format!("{:.2}", __wtm_i18n_1),
+                                                crate::i18n::decimal(format!(
+                                                    "{:.2}",
+                                                    __wtm_i18n_1
+                                                )),
                                             ],
                                         )
                                     })

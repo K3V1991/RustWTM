@@ -237,7 +237,7 @@ fn identities(items: &[Item]) -> Identities {
                     if !name.is_empty() {
                         name.push_str(" · ");
                     }
-                    name.push_str(&wtm_core::format_bytes(bytes as f64));
+                    name.push_str(&crate::i18n::bytes(bytes as f64));
                 }
                 if let Some(clock) = field(item, "ConfiguredClockSpeed").filter(|v| *v != "0") {
                     if !name.is_empty() {
@@ -348,7 +348,7 @@ fn formatted_fields(item: &Item) -> Vec<(&'static str, String)> {
                     .parse::<u64>()
                     .ok()
                     .filter(|v| *v > 0)
-                    .map(|v| wtm_core::format_bytes(v.saturating_mul(1024) as f64))
+                    .map(|v| crate::i18n::bytes(v.saturating_mul(1024) as f64))
                     .unwrap_or_else(|| "—".into()),
                 "MaxClockSpeed" => value
                     .parse::<u32>()
@@ -363,7 +363,7 @@ fn formatted_fields(item: &Item) -> Vec<(&'static str, String)> {
                     .parse::<u64>()
                     .ok()
                     .filter(|v| *v > 0)
-                    .map(|v| wtm_core::format_bytes(v as f64))
+                    .map(|v| crate::i18n::bytes(v as f64))
                     .unwrap_or_else(|| "—".into()),
                 "ConfiguredClockSpeed" => {
                     if value == "0" {

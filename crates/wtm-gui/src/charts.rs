@@ -95,8 +95,8 @@ impl Unit {
             || "—".into(),
             |v| match self {
                 Self::Percent => crate::i18n::percent(format!("{v:.1}")),
-                Self::Rate => format!("{}/s", wtm_core::format_bytes(f64::from(v))),
-                Self::Bytes(_) => wtm_core::format_bytes(f64::from(v)),
+                Self::Rate => format!("{}/s", crate::i18n::bytes(f64::from(v))),
+                Self::Bytes(_) => crate::i18n::bytes(f64::from(v)),
             },
         )
     }
@@ -642,8 +642,8 @@ impl State {
             "",
             &match unit {
                 Unit::Percent => crate::i18n::percent("100"),
-                Unit::Rate => format!("{}/s", wtm_core::format_bytes(ceiling)),
-                Unit::Bytes(_) => wtm_core::format_bytes(ceiling),
+                Unit::Rate => format!("{}/s", crate::i18n::bytes(ceiling)),
+                Unit::Bytes(_) => crate::i18n::bytes(ceiling),
             },
         );
         let backdrop = egui::Rect::from_min_size(
@@ -687,7 +687,7 @@ impl State {
                 Unit::Bytes(_) => format!(
                     "{} · {plot_name}: {}",
                     short_time(position.x),
-                    wtm_core::format_bytes(position.y.max(0.0))
+                    crate::i18n::bytes(position.y.max(0.0))
                 ),
             })
         };

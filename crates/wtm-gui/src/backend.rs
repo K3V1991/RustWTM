@@ -2466,11 +2466,14 @@ pub fn describe(command: Command) -> String {
         Command::Limit(l) => {
             let mut parts = Vec::new();
             if let Some(c) = l.cpu_percent {
-                parts.push(crate::i18n::format("CPU ≤ {0}%", &[format!("{:.2}", c)]));
+                parts.push(crate::i18n::format(
+                    "CPU ≤ {0}%",
+                    &[crate::i18n::decimal(format!("{:.2}", c))],
+                ));
             }
             if let Some(m) = l.memory_bytes {
                 parts.push({
-                    let __wtm_i18n_0 = &(wtm_core::format_bytes(m as f64));
+                    let __wtm_i18n_0 = &(crate::i18n::bytes(m as f64));
                     crate::i18n::format("memory ≤ {0}", std::slice::from_ref(__wtm_i18n_0))
                 });
             }

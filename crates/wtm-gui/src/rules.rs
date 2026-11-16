@@ -1,4 +1,5 @@
 //! Original visual policy workspace; preview executes only the pure policy engine.
+use crate::i18n::LocalDecimal;
 use crate::i18n::PercentAffix;
 use eframe::egui::{self, Ui};
 use wtm_policy::{Action, Condition, Config, Matcher, Preset, PriorityLevel, Rule};
@@ -43,6 +44,7 @@ fn threshold(ui: &mut Ui, label: &str, value: &mut Option<f32>) {
         if let Some(value) = value {
             ui.add(
                 egui::Slider::new(value, 0.1..=100.0)
+                    .local_decimal()
                     .clamping(egui::SliderClamping::Edits)
                     .percent_affix(),
             )
@@ -228,6 +230,7 @@ impl View {
                             Action::CpuCap(v) => {
                                 ui.add(
                                     egui::Slider::new(v, 0.1..=100.0)
+                                        .local_decimal()
                                         .clamping(egui::SliderClamping::Edits)
                                         .percent_affix(),
                                 )
@@ -236,6 +239,7 @@ impl View {
                             Action::CpuCapRelative(v) => {
                                 ui.add(
                                     egui::Slider::new(v, 0.01..=1.0)
+                                        .local_decimal()
                                         .clamping(egui::SliderClamping::Edits),
                                 )
                                 .labelled_by(label.id);

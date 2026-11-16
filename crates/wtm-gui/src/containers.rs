@@ -16,7 +16,7 @@ fn value(n: Option<f64>) -> String {
     n.map(wtm_core::format_bytes).unwrap_or_else(|| "—".into())
 }
 fn rate(n: Option<f64>) -> String {
-    n.map(|n| format!("{}/s", wtm_core::format_bytes(n)))
+    n.map(|n| format!("{}/s", crate::i18n::bytes(n)))
         .unwrap_or_else(|| "—".into())
 }
 fn fresh(c: &Container, state: &State, now: Instant) -> bool {

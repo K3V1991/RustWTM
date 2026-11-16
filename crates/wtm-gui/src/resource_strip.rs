@@ -4,7 +4,8 @@
 use std::collections::VecDeque;
 
 use eframe::egui::{self, Color32, Ui};
-use wtm_core::format_bytes;
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 
 use crate::backend::Data;
 use crate::overview::Resource;

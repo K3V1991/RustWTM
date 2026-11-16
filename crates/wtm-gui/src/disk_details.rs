@@ -121,12 +121,12 @@ pub fn show(ui: &mut Ui, d: &Device) {
             (
                 "Read",
                 lifetime_bytes(d, "Data read units (512000 bytes)")
-                    .map(|v| wtm_core::format_bytes(v as f64)),
+                    .map(|v| crate::i18n::bytes(v as f64)),
             ),
             (
                 "Write",
                 lifetime_bytes(d, "Data written units (512000 bytes)")
-                    .map(|v| wtm_core::format_bytes(v as f64)),
+                    .map(|v| crate::i18n::bytes(v as f64)),
             ),
             (
                 "Power-on time",

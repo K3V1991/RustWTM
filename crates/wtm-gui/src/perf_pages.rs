@@ -5,7 +5,8 @@
 use std::collections::VecDeque;
 
 use eframe::egui::{self, RichText, Ui};
-use wtm_core::format_bytes;
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 
 use crate::backend::Data;
 use crate::charts::Unit;
@@ -58,7 +59,10 @@ pub fn bits(per_second: f64) -> String {
         (v, "bit/s")
     };
     let text = format!("{value:.1}");
-    format!("{} {unit}", text.strip_suffix(".0").unwrap_or(&text))
+    crate::i18n::decimal(format!(
+        "{} {unit}",
+        text.strip_suffix(".0").unwrap_or(&text)
+    ))
 }
 
 fn yes_no(v: bool) -> String {
@@ -199,7 +203,7 @@ fn device_series<'a>(data: &'a Data, key: &str, empty: &'a VecDeque<f32>) -> &'a
 pub fn cpu_details(ui: &mut Ui, data: &Data, s: &wtm_core::SystemStats) {
     let f = &data.perf_facts;
     let info = f.cpu.as_ref();
-    let ghz = |mhz: f64| format!("{:.2} GHz", mhz / 1000.0);
+    let ghz = |mhz: f64| crate::i18n::decimal(format!("{:.2} GHz", mhz / 1000.0));
     let mut readings = vec![
         row(
             crate::i18n::tr("Utilization"),
@@ -316,10 +320,13 @@ fn core_speeds(ui: &mut Ui, cores: &[f64]) {
                 ui.allocate_ui(egui::vec2(cell, 16.0), |ui| {
                     ui.set_width(cell);
                     ui.label(
-                        RichText::new(format!("{i:>2}  {:.2} GHz", mhz / 1000.0))
-                            .monospace()
-                            .small()
-                            .color(color),
+                        RichText::new(crate::i18n::decimal(format!(
+                            "{i:>2}  {:.2} GHz",
+                            mhz / 1000.0
+                        )))
+                        .monospace()
+                        .small()
+                        .color(color),
                     );
                 });
                 if (i + 1) % columns == 0 {
@@ -610,7 +617,7 @@ pub fn disk(
             ),
             row(
                 crate::i18n::tr("Average response time"),
-                format!("{:.1} ms", d.response_ms),
+                crate::i18n::decimal(format!("{:.1} ms", d.response_ms)),
             ),
             row(
                 crate::i18n::tr("Read speed"),
@@ -622,7 +629,7 @@ pub fn disk(
             ),
             row(
                 crate::i18n::tr("Queue length"),
-                format!("{:.2}", d.queue_length),
+                crate::i18n::decimal(format!("{:.2}", d.queue_length)),
             ),
         ];
         if let Some(t) = temperature {

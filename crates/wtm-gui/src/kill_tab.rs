@@ -1,6 +1,7 @@
 //! Kill list tab and the panic button: processes that may be ended, either
 //! automatically when they keep eating CPU or all at once on demand.
 
+use crate::i18n::LocalDecimal;
 use crate::i18n::PercentAffix;
 use eframe::egui::{self, RichText, Ui};
 use wtm_core::control::ProcessRef;
@@ -494,9 +495,9 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
             "{0}% of this PC = {1} of its {2} logical processors (one fully busy core is {3}%)",
             &[
                 format!("{:.0}", view.cpu),
-                format!("{:.1}", view.cpu / 100.0 * cpus as f32),
+                crate::i18n::decimal(format!("{:.1}", view.cpu / 100.0 * cpus as f32)),
                 format!("{}", cpus),
-                format!("{:.1}", 100.0 / cpus as f32),
+                crate::i18n::decimal(format!("{:.1}", 100.0 / cpus as f32)),
             ],
         );
         let automatic = crate::i18n::tr("End it automatically at");
@@ -504,6 +505,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
             ui.add_enabled(
                 view.automatic,
                 egui::DragValue::new(&mut view.cpu)
+                    .local_decimal()
                     .range(1.0..=100.0)
                     .clamp_existing_to_range(false)
                     .suffix(crate::i18n::tr("% CPU")),
@@ -526,6 +528,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                 ui.add_enabled(
                     view.busy_pc,
                     egui::DragValue::new(&mut view.system_cpu)
+                        .local_decimal()
                         .range(1.0..=100.0)
                         .clamp_existing_to_range(false)
                         .percent_affix(),

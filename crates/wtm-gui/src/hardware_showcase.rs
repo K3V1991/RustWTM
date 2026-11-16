@@ -202,12 +202,12 @@ impl Spec {
 }
 
 fn bytes(n: u64) -> String {
-    wtm_core::format_bytes(n as f64)
+    crate::i18n::bytes(n as f64)
 }
 
 fn clock(mhz: u32) -> String {
     if mhz >= 1000 {
-        format!("{:.1} GHz", f64::from(mhz) / 1000.0)
+        crate::i18n::decimal(format!("{:.1} GHz", f64::from(mhz) / 1000.0))
     } else {
         format!("{mhz} MHz")
     }

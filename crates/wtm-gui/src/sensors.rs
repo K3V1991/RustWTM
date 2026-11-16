@@ -1,6 +1,7 @@
 //! Sensors and capability-based cooling. Hardware writes are explicit service
 //! requests; editing a curve, changing tabs or restarting never applies one.
 use crate::backend::{Data, Mode, Panel, UiCommand};
+use crate::i18n::LocalDecimal;
 use crate::i18n::PercentAffix;
 use eframe::egui::{self, RichText, Ui};
 use std::collections::{BTreeMap, HashMap, VecDeque};
@@ -96,7 +97,7 @@ fn colour(kind: SensorKind) -> egui::Color32 {
 fn reading(kind: SensorKind, value: f32) -> String {
     match kind {
         SensorKind::Fan | SensorKind::Clock => format!("{value:.0} {}", kind.unit()),
-        _ => format!("{value:.1} {}", kind.unit()),
+        _ => crate::i18n::decimal(format!("{value:.1} {}", kind.unit())),
     }
 }
 
@@ -403,6 +404,7 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
                             let label = ui.label(crate::i18n::tr("Full speed at"));
                             ui.add(
                                 egui::DragValue::new(&mut profile.critical_celsius)
+                                    .local_decimal()
                                     .range(60.0..=95.0)
                                     .suffix(" °C"),
                             )
@@ -414,6 +416,7 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
                     CoolingMode::Manual(value) => {
                         ui.add(
                             egui::Slider::new(value, channel.min_percent..=channel.max_percent)
+                                .local_decimal()
                                 .percent_affix()
                                 .text(crate::i18n::tr("Requested duty")),
                         );
@@ -453,11 +456,13 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
                             for p in points.iter_mut() {
                                 ui.add(
                                     egui::DragValue::new(&mut p.temperature)
+                                        .local_decimal()
                                         .range(0.0..=100.0)
                                         .suffix(" °C"),
                                 );
                                 ui.add(
                                     egui::DragValue::new(&mut p.percent)
+                                        .local_decimal()
                                         .range(channel.min_percent..=channel.max_percent)
                                         .percent_affix(),
                                 );

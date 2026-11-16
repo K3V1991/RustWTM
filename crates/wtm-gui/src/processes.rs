@@ -6,7 +6,9 @@ use std::collections::{HashMap, HashSet};
 use eframe::egui::{self, Align, Color32, Layout, RichText, Sense, Ui};
 use egui_extras::Column;
 use wtm_core::control::{EcoQos, Limits, PriorityClass, ProcessRef};
-use wtm_core::{ProcessInfo, Snapshot, format_bytes};
+use wtm_core::{ProcessInfo, Snapshot};
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 use wtm_ipc::Command;
 
 /// The Limits column text per process instance.
@@ -3258,7 +3260,10 @@ pub fn context_menu(
                     &{
                         crate::i18n::format(
                             "{0}  ({1}% of machine)",
-                            &[label.to_string(), format!("{:.2}", percent)],
+                            &[
+                                label.to_string(),
+                                crate::i18n::decimal(format!("{:.2}", percent)),
+                            ],
                         )
                     },
                     Command::Limit(limits),

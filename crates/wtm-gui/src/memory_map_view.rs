@@ -8,7 +8,8 @@ use eframe::egui::{self, RichText, Ui};
 use wtm_core::control::{
     Allocation, MemoryKind, MemoryMap, ProcessRef, Usage, is_executable, protection_code,
 };
-use wtm_core::format_bytes;
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 
 use crate::backend::Data;
 use crate::processes::Intent;

@@ -3,7 +3,8 @@
 //! hardware reservation beside it.
 
 use eframe::egui::{self, Color32, Ui};
-use wtm_core::format_bytes;
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 use wtm_sys::memory::Composition;
 
 /// One part of the bar: label, bytes, colour and what it means.

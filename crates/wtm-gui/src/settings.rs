@@ -340,8 +340,9 @@ fn percent_slider(value: &mut f32, range: std::ops::RangeInclusive<f32>) -> egui
         .max_decimals(0)
         .custom_formatter(|v, _| {
             let text = format!("{v:.1}");
-            text.strip_suffix(".0").map_or(text.clone(), str::to_owned)
+            crate::i18n::decimal(text.strip_suffix(".0").map_or(text.clone(), str::to_owned))
         })
+        .custom_parser(crate::i18n::parse_decimal)
         .percent_affix()
 }
 

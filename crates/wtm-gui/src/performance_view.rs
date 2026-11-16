@@ -88,7 +88,7 @@ fn rate(values: &VecDeque<f32>) -> String {
 }
 
 pub fn rate_text(v: f64) -> String {
-    format!("{}/s", wtm_core::format_bytes(v.max(0.0)))
+    format!("{}/s", crate::i18n::bytes(v.max(0.0)))
 }
 
 fn percent(values: &VecDeque<f32>) -> String {

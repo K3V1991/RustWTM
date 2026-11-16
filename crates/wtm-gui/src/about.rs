@@ -276,7 +276,8 @@ pub fn about(
 
 /// How quickly the window draws, from the last few hundred frames.
 fn frame_timing(f: crate::frames::Summary) -> String {
-    let ms = |d: std::time::Duration| format!("{:.1}", d.as_secs_f64() * 1000.0);
+    let ms =
+        |d: std::time::Duration| crate::i18n::decimal(format!("{:.1}", d.as_secs_f64() * 1000.0));
     crate::i18n::format(
         "Window drawing: {0} ms on average, {1} ms for 95% of frames, {2} ms at worst",
         &[ms(f.average), ms(f.p95), ms(f.slowest)],

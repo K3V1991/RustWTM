@@ -240,7 +240,7 @@ impl View {
                         row.set_selected(self.selected.as_ref() == Some(&app.id));
                         let size = app
                             .estimated_bytes
-                            .map(|n| wtm_core::format_bytes(n as f64))
+                            .map(|n| crate::i18n::bytes(n as f64))
                             .unwrap_or_else(|| "—".into());
                         let mut name_response = None;
                         row.col(|ui| {

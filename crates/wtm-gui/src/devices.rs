@@ -15,8 +15,8 @@ fn device_color(kind: &str) -> egui::Color32 {
 }
 fn reading(m: &wtm_core::devices::Metric) -> String {
     match m.value {
-        Some(v) if m.unit == "bytes" => wtm_core::format_bytes(v),
-        Some(v) if m.unit == "B/s" => format!("{}/s", wtm_core::format_bytes(v)),
+        Some(v) if m.unit == "bytes" => crate::i18n::bytes(v),
+        Some(v) if m.unit == "B/s" => format!("{}/s", crate::i18n::bytes(v)),
         Some(v) => format!("{v:.0} {}", m.unit),
         None => crate::i18n::tr("Unavailable").into(),
     }
@@ -547,7 +547,7 @@ impl View {
         ));
         if let Some(value) = m.value {
             let display = if bits && m.unit == "B/s" {
-                format!("{:.1} Mbps", value * factor)
+                crate::i18n::decimal(format!("{:.1} Mbps", value * factor))
             } else {
                 reading(m)
             };
@@ -586,9 +586,9 @@ impl View {
                 .map(|p| p[1])
                 .fold(m.ceiling.unwrap_or(0.0) * factor, f64::max);
             let scale = match m.unit.as_str() {
-                "bytes" => wtm_core::format_bytes(top.max(0.0)),
-                "B/s" if bits => format!("{top:.1} Mbps"),
-                "B/s" => format!("{}/s", wtm_core::format_bytes(top.max(0.0))),
+                "bytes" => crate::i18n::bytes(top.max(0.0)),
+                "B/s" if bits => crate::i18n::decimal(format!("{top:.1} Mbps")),
+                "B/s" => format!("{}/s", crate::i18n::bytes(top.max(0.0))),
                 unit => format!("{top:.0} {unit}"),
             };
             crate::theme::chart_scale(ui, "", &scale);
@@ -684,13 +684,13 @@ impl View {
                     for (col, m) in cols.iter_mut().zip(chunk) {
                         let label = match m.value {
                             Some(v) if m.unit == "B/s" && bits => {
-                                format!("{:.2} Mbps", v * 8.0 / 1_000_000.0)
+                                crate::i18n::decimal(format!("{:.2} Mbps", v * 8.0 / 1_000_000.0))
                             }
-                            Some(v) if m.unit == "bytes" => wtm_core::format_bytes(v),
+                            Some(v) if m.unit == "bytes" => crate::i18n::bytes(v),
                             Some(v) if m.unit == "B/s" => {
-                                format!("{}/s", wtm_core::format_bytes(v))
+                                format!("{}/s", crate::i18n::bytes(v))
                             }
-                            Some(v) => format!("{v:.1} {}", m.unit),
+                            Some(v) => crate::i18n::decimal(format!("{v:.1} {}", m.unit)),
                             None => crate::i18n::tr("Unavailable").into(),
                         };
                         let selected = self.metric.as_ref() == Some(&m.id)
@@ -791,8 +791,8 @@ impl View {
                             .desired_width(ui.available_width())
                             .text(format!(
                                 "{} / {} ({})",
-                                wtm_core::format_bytes(used),
-                                wtm_core::format_bytes(used + available),
+                                crate::i18n::bytes(used),
+                                crate::i18n::bytes(used + available),
                                 crate::i18n::percent(format!("{:.0}", ratio * 100.0))
                             )),
                     );

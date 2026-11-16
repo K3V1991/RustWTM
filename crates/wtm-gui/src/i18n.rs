@@ -177,6 +177,25 @@ impl Language {
     pub fn current() -> Self {
         BY_INDEX[index()]
     }
+    /// Whether the language writes a decimal comma (12,5) rather than a
+    /// point (12.5).
+    pub fn decimal_comma(self) -> bool {
+        matches!(
+            self,
+            Self::Turkish
+                | Self::German
+                | Self::French
+                | Self::Spanish
+                | Self::Italian
+                | Self::Dutch
+                | Self::Polish
+                | Self::Portuguese
+                | Self::Russian
+                | Self::Ukrainian
+                | Self::Indonesian
+                | Self::Vietnamese
+        )
+    }
     /// Short language tag, e.g. for naming review captures and in
     /// diagnostic reports.
     pub fn code(self) -> &'static str {
@@ -473,7 +492,40 @@ pub fn format_count(one: &str, many: &str, n: usize, values: &[String]) -> Strin
 /// A percentage in the window's language: "42%", or "%42" in Turkish,
 /// which puts the sign first. `number` is already formatted ("42", "12.5").
 pub fn percent(number: impl Into<String>) -> String {
-    format("{0}%", &[number.into()])
+    format("{0}%", &[decimal(number)])
+}
+
+/// `text`, a number formatted with a decimal point, as the language shown
+/// writes it: 12,5 in Turkish or German. Only a point between two digits
+/// changes. Shown text only: config, logs, IPC and copied diagnostics keep
+/// the point.
+pub fn decimal(text: impl Into<String>) -> String {
+    let text = text.into();
+    if !Language::current().decimal_comma() || !text.contains('.') {
+        return text;
+    }
+    let chars: Vec<char> = text.chars().collect();
+    chars
+        .iter()
+        .enumerate()
+        .map(|(i, &c)| {
+            let digit = |j: Option<usize>| {
+                j.and_then(|j| chars.get(j))
+                    .is_some_and(char::is_ascii_digit)
+            };
+            if c == '.' && digit(i.checked_sub(1)) && digit(Some(i + 1)) {
+                ','
+            } else {
+                c
+            }
+        })
+        .collect()
+}
+
+/// A byte count or rate (`wtm_core::format_bytes`) as the language shown
+/// writes it: "8,0 GiB" in Turkish.
+pub fn bytes(n: f64) -> String {
+    decimal(wtm_core::format_bytes(n))
 }
 
 /// The text before and after a percentage, from the same "{0}%" template as
@@ -483,6 +535,39 @@ pub fn percent_affixes() -> (String, String) {
     match text.split_once("{0}") {
         Some((before, after)) => (before.to_owned(), after.to_owned()),
         None => (String::new(), "%".to_owned()),
+    }
+}
+
+/// A number typed in a field: "2,5" or "2.5".
+pub fn parse_decimal(text: &str) -> Option<f64> {
+    text.trim().replace(',', ".").parse().ok()
+}
+
+/// Shows a slider's or number field's decimals with the language's sign,
+/// and accepts both signs when one is typed.
+pub trait LocalDecimal {
+    fn local_decimal(self) -> Self;
+}
+
+impl LocalDecimal for eframe::egui::Slider<'_> {
+    fn local_decimal(self) -> Self {
+        self.custom_formatter(|v, decimals| {
+            decimal(eframe::egui::emath::format_with_decimals_in_range(
+                v, decimals,
+            ))
+        })
+        .custom_parser(parse_decimal)
+    }
+}
+
+impl LocalDecimal for eframe::egui::DragValue<'_> {
+    fn local_decimal(self) -> Self {
+        self.custom_formatter(|v, decimals| {
+            decimal(eframe::egui::emath::format_with_decimals_in_range(
+                v, decimals,
+            ))
+        })
+        .custom_parser(parse_decimal)
     }
 }
 
@@ -762,13 +847,37 @@ mod tests {
             assert_eq!(percent("42"), "42%");
         }
         {
+            // German writes a decimal comma.
             let _language = scope(Language::German);
-            assert_eq!(percent("12.5"), "12.5%");
+            assert_eq!(percent("12.5"), "12,5%");
         }
         // Turkish puts the sign first, on sliders too.
         let _language = scope(Language::Turkish);
         assert_eq!(percent("42"), "%42");
         assert_eq!(percent_affixes(), ("%".to_owned(), String::new()));
+    }
+
+    #[test]
+    fn decimals_follow_the_language() {
+        {
+            let _language = scope(Language::English);
+            assert_eq!(bytes(8.0 * 1024.0 * 1024.0 * 1024.0), "8.0 GiB");
+            assert_eq!(decimal("12.5"), "12.5");
+            assert_eq!(percent("12.5"), "12.5%");
+        }
+        {
+            let _language = scope(Language::German);
+            assert_eq!(bytes(8.0 * 1024.0 * 1024.0 * 1024.0), "8,0 GiB");
+            assert_eq!(percent("12.5"), "12,5%");
+        }
+        let _language = scope(Language::Turkish);
+        assert_eq!(bytes(1536.0), "1,5 KiB");
+        assert_eq!(decimal("2.25"), "2,25");
+        assert_eq!(percent("12.5"), "%12,5");
+        assert_eq!(percent("42"), "%42");
+        // Only a point between digits: a sentence's full stop stays.
+        assert_eq!(decimal("1.5 s."), "1,5 s.");
+        assert_eq!(decimal("Done."), "Done.");
     }
 
     #[test]

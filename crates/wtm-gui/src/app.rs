@@ -5,8 +5,10 @@ use crate::i18n::PercentAffix;
 use eframe::egui::{self, Color32, RichText, Ui};
 use egui_extras::Column;
 use egui_plot::{Line, Plot, PlotPoints};
+use wtm_core::Snapshot;
 use wtm_core::control::ProcessRef;
-use wtm_core::{Snapshot, format_bytes};
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 use wtm_ipc::{Command, EventLevel};
 
 use crate::backend::{Backend, Data, Mode, Panel, ServiceOp, UiCommand, describe};
@@ -3509,7 +3511,7 @@ fn details_panel(
             row("CPU", crate::i18n::percent(format!("{:.2}", p.cpu_percent)));
             row(
                 crate::i18n::tr("CPU time"),
-                format!("{:.1} s", p.cpu_time.as_secs_f64()),
+                crate::i18n::decimal(format!("{:.1} s", p.cpu_time.as_secs_f64())),
             );
             row(
                 crate::i18n::tr("Private working set"),
@@ -6153,7 +6155,11 @@ mod tests {
             }
             let summary = crate::i18n::format(
                 "CPU {0}%   Memory {1} / {2}",
-                &["42".into(), "8.0 GiB".into(), "16.0 GiB".into()],
+                &[
+                    "42".into(),
+                    crate::i18n::decimal("8.0 GiB"),
+                    crate::i18n::decimal("16.0 GiB"),
+                ],
             );
             let rect = h.get_by_label(&summary).rect();
             assert!(

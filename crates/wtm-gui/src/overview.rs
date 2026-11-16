@@ -4,8 +4,10 @@
 use std::collections::{HashMap, VecDeque};
 
 use eframe::egui::{self, Color32, RichText, Ui};
+use wtm_core::ProcessInfo;
 use wtm_core::control::{EcoQos, ProcessRef};
-use wtm_core::{ProcessInfo, format_bytes};
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 use wtm_ipc::Command;
 use wtm_policy::{Config, Preset, set_preset};
 
@@ -475,7 +477,7 @@ fn swarms(
             &[s.members.len().to_string(), s.name.to_string()],
         );
         crate::theme::card_with(ui, "", &[(&title, WARN)], |ui| {
-            ui.label({ let __wtm_i18n_0 = &(s.parents_text()); let __wtm_i18n_1 = &(format_bytes(s.memory as f64)); let __wtm_i18n_2 = &(s.cpu_percent); crate::i18n::format("Started by {0}. Together {1} of memory and {2}% CPU. Usually a tool that keeps starting helpers and never waits for them.", &[__wtm_i18n_0.to_string(), __wtm_i18n_1.to_string(), format!("{:.1}", __wtm_i18n_2)]) });
+            ui.label({ let __wtm_i18n_0 = &(s.parents_text()); let __wtm_i18n_1 = &(format_bytes(s.memory as f64)); let __wtm_i18n_2 = &(s.cpu_percent); crate::i18n::format("Started by {0}. Together {1} of memory and {2}% CPU. Usually a tool that keeps starting helpers and never waits for them.", &[__wtm_i18n_0.to_string(), __wtm_i18n_1.to_string(), crate::i18n::decimal(format!("{:.1}", __wtm_i18n_2))]) });
             ui.horizontal_wrapped(|ui| {
                 let all: Vec<ProcessRef> = s.members.iter().map(|p| ProcessRef::from(*p)).collect();
                 if ui

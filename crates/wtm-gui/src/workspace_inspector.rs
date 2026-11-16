@@ -1,7 +1,8 @@
 //! Read-only system context for the process workspace; no native queries.
 use crate::backend::Data;
 use eframe::egui::{self, RichText, Ui};
-use wtm_core::format_bytes;
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Mode {

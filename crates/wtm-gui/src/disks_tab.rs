@@ -12,7 +12,9 @@ use eframe::egui::{self, Align, Color32, Layout, RichText, Ui};
 use egui_extras::Column;
 use wtm_core::control::ProcessRef;
 use wtm_core::diskscan::{self, DirNode, Progress, ScanResult};
-use wtm_core::{DriveKind, Volume, format_bytes};
+use wtm_core::{DriveKind, Volume};
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 
 use crate::backend::Data;
 use crate::theme::{ACCENT, BAD, GOOD, WARN, card};
@@ -724,7 +726,7 @@ fn summary(ui: &mut Ui, r: &ScanResult) {
             format_bytes(r.root.size as f64),
             r.root.files.to_string(),
             r.folders.to_string(),
-            format!("{:.1}", r.elapsed.as_secs_f64()),
+            crate::i18n::decimal(format!("{:.1}", r.elapsed.as_secs_f64())),
         ],
     );
     if r.denied > 0 {

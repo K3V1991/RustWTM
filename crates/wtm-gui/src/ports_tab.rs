@@ -7,7 +7,9 @@ use eframe::egui::{self, Align, Layout, RichText, Ui};
 use egui_extras::Column;
 use wtm_core::control::ProcessRef;
 use wtm_core::ports::{self, Exposure, KNOWN_PORTS, KnownPort, PortUse};
-use wtm_core::{ProcessInfo, Protocol, format_bytes};
+use wtm_core::{ProcessInfo, Protocol};
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 use wtm_ipc::Command;
 
 use crate::backend::Data;

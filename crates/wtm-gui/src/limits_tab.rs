@@ -1,8 +1,10 @@
 //! Limits tab: per-application CPU / memory budgets kept in the service's
 //! configuration, with their live usage.
 
+use crate::i18n::LocalDecimal;
 use eframe::egui::{self, RichText, Ui};
-use wtm_core::format_bytes;
+// Shown text: written with the language's decimal sign.
+use crate::i18n::bytes as format_bytes;
 use wtm_policy::{AppLimit, Config, LimitScope, remove_app_limit, set_app_limit};
 
 use crate::backend::{Data, Mode, Panel, UiCommand};
@@ -302,7 +304,7 @@ egui::Grid::new("app_limits_grid")
                 let mut budget = budget_label(l);
                 if let Some(p) = l.cpu_percent(cpus) {
                     budget.push_str(&{
-                        crate::i18n::format(" ({0}% of machine)", &[format!("{:.1}", p)])
+                        crate::i18n::format(" ({0}% of machine)", &[crate::i18n::decimal(format!("{:.1}", p))])
                     });
                 }
                 right(ui, budget);
@@ -341,7 +343,7 @@ egui::Grid::new("app_limits_grid")
                 }
                 let cores = {
                     let __wtm_i18n_0 = &((r.cpu / 100.0 * cpus as f32).max(0.0) + 0.0);
-                    crate::i18n::format("{0} cores", &[format!("{:.2}", __wtm_i18n_0)])
+                    crate::i18n::format("{0} cores", &[crate::i18n::decimal(format!("{:.2}", __wtm_i18n_0))])
                 };
                 usage_cell(ui, cores, r.cpu_fill);
                 usage_cell(ui, format_bytes(r.mem as f64), r.mem_fill);
@@ -399,7 +401,7 @@ egui::Grid::new("app_limits_grid")
                             "{0}  ({1}% CPU, {2})",
                             &[
                                 name.to_string(),
-                                format!("{:.1}", cpu),
+                                crate::i18n::decimal(format!("{:.1}", cpu)),
                                 format_bytes(mem as f64),
                             ],
                         );
@@ -413,6 +415,7 @@ egui::Grid::new("app_limits_grid")
             ui.add_enabled(
                 view.cpu,
                 egui::DragValue::new(&mut view.cores)
+                    .local_decimal()
                     .range(0.1..=cpus as f32)
                     .clamp_existing_to_range(false)
                     .speed(0.05)
@@ -428,6 +431,7 @@ egui::Grid::new("app_limits_grid")
             ui.add_enabled(
                 view.memory,
                 egui::DragValue::new(&mut view.gb)
+                    .local_decimal()
                     .range(0.1..=4096.0)
                     .clamp_existing_to_range(false)
                     .speed(0.1)
@@ -542,6 +546,61 @@ mod tests {
         let two = Config::from_toml(&v.apply(text).unwrap()).unwrap();
         assert_eq!(two.limits.len(), 2);
         assert!(v.apply("x = [").is_err());
+    }
+
+    #[test]
+    fn a_budget_typed_with_a_decimal_comma_is_understood() {
+        use egui_kittest::{Harness, kittest::Queryable};
+        // With a sample, so the field reaches more than one core.
+        let data = Data {
+            config: Some(Ok(("config.toml".into(), String::new()))),
+            mode: crate::backend::Mode::Service {
+                admin: true,
+                verified: true,
+            },
+            ..crate::ui_tests::data()
+        };
+        let mut view = LimitsView::default();
+        view.prefill("a.exe");
+        view.cpu = true;
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_ui_state(
+                move |ui, s: &mut (LimitsView, Vec<UiCommand>)| {
+                    let _turkish = crate::i18n::scope(crate::i18n::Language::Turkish);
+                    let commands = limits_tab(ui, &data, &mut s.0);
+                    s.1.extend(commands);
+                },
+                (view, Vec::new()),
+            );
+        h.run();
+        {
+            // Shown with a comma, as Turkish writes it.
+            use egui_kittest::kittest::NodeT;
+            let field = h
+                .get_all_by_role(egui::accesskit::Role::SpinButton)
+                .next()
+                .unwrap();
+            assert_eq!(
+                field.accesskit_node().value().as_deref(),
+                Some("2,00 çekirdek")
+            );
+        }
+        let field = h
+            .get_all_by_role(egui::accesskit::Role::SpinButton)
+            .next()
+            .unwrap();
+        field.click();
+        h.run();
+        h.key_press_modifiers(egui::Modifiers::COMMAND, egui::Key::A);
+        h.get_all_by_role(egui::accesskit::Role::SpinButton)
+            .next()
+            .unwrap()
+            .type_text("2,5");
+        h.key_press(egui::Key::Enter);
+        h.run();
+        assert_eq!(h.state().0.cores, 2.5, "\"2,5\" is two and a half cores");
     }
 
     #[test]
