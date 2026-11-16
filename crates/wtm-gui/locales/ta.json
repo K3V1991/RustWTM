@@ -1894,5 +1894,6 @@
   "Show the update": "புதுப்பிப்பைக் காட்டு",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} பகுப்பாய்வு நின்றவுடன் {1} பகுப்பாய்வு செய்யப்படும்.",
   "No usage of this app was recorded in this period.": "இந்தக் காலத்தில் இந்த ஆப்ஸின் பயன்பாடு பதிவாகவில்லை.",
-  "the configuration changed since this page read it; nothing was saved, try again": "இந்தப் பக்கம் படித்த பிறகு உள்ளமைவு மாறியது; எதுவும் சேமிக்கப்படவில்லை, மீண்டும் முயலவும்"
+  "the configuration changed since this page read it; nothing was saved, try again": "இந்தப் பக்கம் படித்த பிறகு உள்ளமைவு மாறியது; எதுவும் சேமிக்கப்படவில்லை, மீண்டும் முயலவும்",
+  "The settings changed while this was open; it cannot be applied now.": "இது திறந்திருந்தபோது அமைப்புகள் மாறின; இப்போது பயன்படுத்த முடியாது."
 }

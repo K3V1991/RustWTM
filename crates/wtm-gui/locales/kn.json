@@ -1894,5 +1894,6 @@
   "Show the update": "ಅಪ್‌ಡೇಟ್ ತೋರಿಸಿ",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} ವಿಶ್ಲೇಷಣೆ ನಿಂತ ತಕ್ಷಣ {1} ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತದೆ.",
   "No usage of this app was recorded in this period.": "ಈ ಅವಧಿಯಲ್ಲಿ ಈ ಆ್ಯಪ್‌ನ ಬಳಕೆ ದಾಖಲಾಗಿಲ್ಲ.",
-  "the configuration changed since this page read it; nothing was saved, try again": "ಈ ಪುಟ ಓದಿದ ನಂತರ ಸಂರಚನೆ ಬದಲಾಗಿದೆ; ಏನೂ ಉಳಿಸಲಾಗಿಲ್ಲ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"
+  "the configuration changed since this page read it; nothing was saved, try again": "ಈ ಪುಟ ಓದಿದ ನಂತರ ಸಂರಚನೆ ಬದಲಾಗಿದೆ; ಏನೂ ಉಳಿಸಲಾಗಿಲ್ಲ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+  "The settings changed while this was open; it cannot be applied now.": "ಇದು ತೆರೆದಿರುವಾಗ ಸೆಟ್ಟಿಂಗ್‌ಗಳು ಬದಲಾದವು; ಈಗ ಇದನ್ನು ಅನ್ವಯಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."
 }

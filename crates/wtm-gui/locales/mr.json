@@ -1894,5 +1894,6 @@
   "Show the update": "अपडेट दाखवा",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} चे विश्लेषण थांबताच {1} चे विश्लेषण होईल.",
   "No usage of this app was recorded in this period.": "या कालावधीत या अ‍ॅपचा वापर नोंदवला गेला नाही.",
-  "the configuration changed since this page read it; nothing was saved, try again": "या पानाने वाचल्यानंतर कॉन्फिगरेशन बदलले; काहीही जतन झाले नाही, पुन्हा प्रयत्न करा"
+  "the configuration changed since this page read it; nothing was saved, try again": "या पानाने वाचल्यानंतर कॉन्फिगरेशन बदलले; काहीही जतन झाले नाही, पुन्हा प्रयत्न करा",
+  "The settings changed while this was open; it cannot be applied now.": "हे उघडे असताना सेटिंग्ज बदलल्या; आता हे लागू करता येत नाही."
 }

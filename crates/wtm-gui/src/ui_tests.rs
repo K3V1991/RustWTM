@@ -2801,14 +2801,49 @@ fn service_hosts_name_their_services_and_are_found_by_them() {
 
 #[test]
 fn explorer_rows_offer_a_restart_of_the_desktop() {
+    // 4242 shows this desktop; 4343 is another session's, or a folder
+    // window run in its own process. The restart acts on the desktop's
+    // Explorer, so only its row offers it.
     let mut h = process_harness();
-    h.state_mut()
-        .snap
-        .processes
-        .push(proc(4242, 4, "explorer.exe", 0.0));
+    h.state_mut().snap.processes.extend([
+        proc(4242, 4, "explorer.exe", 0.0),
+        proc(4343, 4, "explorer.exe", 0.0),
+    ]);
     h.run();
-    h.get_by_label("explorer.exe").click_secondary();
-    h.run();
+    let offering = |h: &mut Harness<'_, _>, desktop: u32| {
+        crate::processes::TEST_DESKTOP.set(Some(desktop));
+        (0..2)
+            .filter(|&row| {
+                h.get_all_by_label("explorer.exe")
+                    .nth(row)
+                    .unwrap()
+                    .click_secondary();
+                h.run();
+                let offered = h.query_by_label("Restart Windows Explorer").is_some();
+                h.key_press(egui::Key::Escape);
+                h.run();
+                offered
+            })
+            .count()
+    };
+    assert_eq!(offering(&mut h, 9999), 0, "neither shows this desktop");
+    assert_eq!(offering(&mut h, 4242), 1);
+    // Leave the desktop's menu open for the click below.
+    (0..2)
+        .find(|&row| {
+            h.get_all_by_label("explorer.exe")
+                .nth(row)
+                .unwrap()
+                .click_secondary();
+            h.run();
+            let offered = h.query_by_label("Restart Windows Explorer").is_some();
+            if !offered {
+                h.key_press(egui::Key::Escape);
+                h.run();
+            }
+            offered
+        })
+        .expect("the desktop's row offers it");
     h.get_by_label("Restart Windows Explorer").click();
     h.run();
     assert!(h.state().intents.iter().any(|i| i == "restart explorer"));

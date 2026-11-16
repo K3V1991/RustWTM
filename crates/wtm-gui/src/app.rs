@@ -463,6 +463,8 @@ struct UiState {
     /// When to pop up on CPU overload.
     alerts: crate::alert::AlertSettings,
     /// The close button hides the window; the tray menu exits.
+    /// Desktop notifications for notable service events (tray menu).
+    notifications: bool,
     tray_on_close: bool,
     /// Start in the tray at sign-in; read from the registry when needed.
     autostart: Option<bool>,
@@ -514,6 +516,10 @@ impl App {
                 .window
                 .store(w.hwnd.get(), std::sync::atomic::Ordering::Relaxed);
         }
+        let mut state = UiState::restored(cc.storage);
+        backend
+            .notifications
+            .store(state.notifications, std::sync::atomic::Ordering::Relaxed);
         let tray = Tray::new(
             &cc.egui_ctx,
             backend.notifications.clone(),
@@ -525,7 +531,6 @@ impl App {
                 wtm_core::gui_startup::Change::Initialize { first_run },
             ));
         }
-        let mut state = UiState::restored(cc.storage);
         state.onboarding.schedule(env!("CARGO_PKG_VERSION"));
         if let Some(error) = &startup_error {
             backend.data().message = Some((
@@ -593,6 +598,8 @@ struct Prefs {
     chart_options: crate::charts::Options,
     cooling_profiles: HashMap<String, wtm_policy::CoolingProfile>,
     alerts: crate::alert::AlertSettings,
+    /// The tray menu's Notifications check, which reset to on at every start.
+    notifications: bool,
     tray_on_close: bool,
     check_updates: bool,
     /// A release the user chose to skip.
@@ -695,6 +702,7 @@ impl UiState {
             chart_options: self.charts.options,
             cooling_profiles: self.sensors.profiles.clone(),
             alerts: self.alerts,
+            notifications: self.notifications,
             tray_on_close: self.tray_on_close,
             check_updates: self.check_updates,
             skip_version: self.skip_version.clone(),
@@ -713,6 +721,7 @@ impl UiState {
     }
 
     fn apply(&mut self, prefs: Prefs) {
+        self.notifications = prefs.notifications;
         self.onboarding.seen_version = prefs.onboarding_version;
         self.numeric_tray = prefs.numeric_tray;
         self.experience.prefs = prefs.experience;
@@ -816,6 +825,7 @@ impl Default for UiState {
             nav_collapsed: None,
             run_task: None,
             alerts: crate::alert::AlertSettings::default(),
+            notifications: true,
             tray_on_close: true,
             autostart: None,
             prefer_administrator: None,
@@ -901,6 +911,11 @@ impl eframe::App for App {
         }
     }
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
+        // Toggled from the tray menu, which writes the backend's flag.
+        self.state.notifications = self
+            .backend
+            .notifications
+            .load(std::sync::atomic::Ordering::Relaxed);
         eframe::set_value(storage, PREFS_KEY, &self.state.prefs());
         self.state.onboarding.save_pending = false;
     }
@@ -5999,7 +6014,7 @@ mod tests {
                 ("CPU", "CPU   ·   42%", false),
                 ("Memory", "Memory   ·   8.0 GiB", true),
                 ("GPU", "GPU   ·   12%", false),
-                ("Disk", "Disk & I/O   ·   ●", false),
+                ("Disk & I/O", "Disk & I/O   ·   ●", false),
                 ("Network", "Network   ·   ●", false),
             ] {
                 let (backend, _rx) = Backend::offline(data());
@@ -7620,6 +7635,8 @@ mod tests {
             tab: Tab::Performance,
             language: crate::i18n::Language::French,
             nav_collapsed: Some(true),
+            // Turned off from the tray menu.
+            notifications: false,
             ..UiState::default()
         };
         state.processes.mode = ViewMode::Apps;
@@ -7649,6 +7666,7 @@ mod tests {
 
         let restored = UiState::restored(Some(&storage));
         assert_eq!(restored.prefs(), state.prefs());
+        assert!(!restored.notifications);
         assert!(
             restored.processes.search.is_empty(),
             "only preferences return"
@@ -7663,6 +7681,7 @@ mod tests {
         assert_eq!(partial.tab, Tab::About);
         assert_eq!(partial.process_sort, Prefs::default().process_sort);
         assert!(partial.process_descriptions);
+        assert!(partial.notifications, "on unless turned off");
     }
 
     #[test]
@@ -9379,6 +9398,7 @@ mod tests {
 
     #[test]
     fn restarting_explorer_is_confirmed_first() {
+        crate::processes::TEST_DESKTOP.set(Some(4242));
         let mut d = data();
         let mut snap = (**d.snapshot.as_ref().unwrap()).clone();
         snap.processes

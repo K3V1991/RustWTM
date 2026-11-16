@@ -237,6 +237,12 @@ impl State {
         self.cursor = self.window.map(|w| w.end);
     }
 
+    /// The whole chosen range again, still inspecting at its latest sample.
+    fn reset_zoom(&mut self) {
+        self.window = self.live_window();
+        self.cursor = self.window.map(|w| w.end);
+    }
+
     fn zoom(&mut self, inward: bool) {
         let (Some(current), Some(extent)) = (self.bounds(), self.timeline.extent()) else {
             return;
@@ -449,8 +455,7 @@ impl State {
                     self.zoom(true);
                 }
                 if icon_button(ui, inspecting, icon::RESET, crate::i18n::tr("Reset zoom")).clicked() {
-                    self.window = self.live_window();
-                    self.cursor = self.window.map(|w| w.end);
+                    self.reset_zoom();
                 }
                 ui.add_space(6.0);
                 let label = crate::i18n::tr(if inspecting {
@@ -738,8 +743,12 @@ impl State {
             if crate::context_actions::action(ui, crate::i18n::tr("Live")) {
                 self.live();
             }
-            if crate::context_actions::action(ui, crate::i18n::tr("Reset zoom")) {
-                self.live();
+            // As the toolbar's: back to the whole range, still inspecting.
+            // ("Live" above is the way out.)
+            if self.window.is_some()
+                && crate::context_actions::action(ui, crate::i18n::tr("Reset zoom"))
+            {
+                self.reset_zoom();
             }
             crate::context_actions::copy(ui, crate::i18n::tr("Current"), || {
                 series

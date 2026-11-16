@@ -1894,5 +1894,6 @@
   "Show the update": "Tampilkan pembaruan",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} dianalisis begitu analisis {0} berhenti.",
   "No usage of this app was recorded in this period.": "Tidak ada penggunaan aplikasi ini yang tercatat dalam periode ini.",
-  "the configuration changed since this page read it; nothing was saved, try again": "konfigurasi berubah sejak halaman ini membacanya; tidak ada yang disimpan, coba lagi"
+  "the configuration changed since this page read it; nothing was saved, try again": "konfigurasi berubah sejak halaman ini membacanya; tidak ada yang disimpan, coba lagi",
+  "The settings changed while this was open; it cannot be applied now.": "Pengaturan berubah saat ini terbuka; tidak dapat diterapkan sekarang."
 }

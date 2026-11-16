@@ -3110,6 +3110,20 @@ pub fn search_url(name: &str) -> String {
     format!("https://www.bing.com/search?q={query}")
 }
 
+/// The process showing this desktop; a test names one.
+fn desktop_pid() -> Option<u32> {
+    #[cfg(test)]
+    if let Some(pid) = TEST_DESKTOP.get() {
+        return Some(pid);
+    }
+    wtm_sys::explorer::desktop_pid()
+}
+
+#[cfg(test)]
+thread_local! {
+    pub static TEST_DESKTOP: std::cell::Cell<Option<u32>> = const { std::cell::Cell::new(None) };
+}
+
 pub fn context_menu(
     ui: &mut Ui,
     t: &ProcessRef,
@@ -3118,7 +3132,10 @@ pub fn context_menu(
     hosted: &[String],
     intents: &mut Vec<Intent>,
 ) {
+    // The restart acts on the Explorer showing this desktop, not on another
+    // session's or a separate folder-window process.
     if t.name.eq_ignore_ascii_case("explorer.exe")
+        && desktop_pid() == Some(t.pid)
         && ui
             .button(crate::i18n::tr("Restart Windows Explorer"))
             .on_hover_text(crate::i18n::tr(

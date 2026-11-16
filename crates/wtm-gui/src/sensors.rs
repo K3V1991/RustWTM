@@ -519,6 +519,21 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
         &mut view.power,
     ));
     if let Some((channel, profile)) = view.confirm.clone() {
+        // Checked again while the dialog is open: the service may have gone
+        // to monitoring only, or the temperature may have gone stale.
+        let admin = matches!(data.mode, Mode::Service { admin: true, .. });
+        let enforcing = data.status.as_ref().is_some_and(|s| !s.dry_run);
+        let still_possible = report
+            .channels
+            .iter()
+            .find(|c| c.id == channel)
+            .is_some_and(|c| {
+                admin
+                    && enforcing
+                    && c.writable
+                    && profile.validate(c).is_ok()
+                    && profile.duty(report, unix_ms()).is_some()
+            });
         let modal=egui::Modal::new(egui::Id::unique("confirm_cooling"))
         .frame(crate::theme::dialog_frame(ui.ctx()))
         .show(ui.ctx(),|ui| {
@@ -526,7 +541,10 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
             let name=report.channels.iter().find(|c|c.id==channel).map_or(channel.as_str(),|c|c.name.as_str());
             ui.label(crate::i18n::format("Channel: {0}. This changes a physical fan's requested speed. Fan duty and measured RPM are different values.", &[name.to_string()]));
             ui.label(crate::i18n::tr("The selected temperature drives thermal protection. Missing/stale temperature requests hardware automatic mode. The provider attempts defaults when its control lease expires."));
-            if ui.button(crate::i18n::tr("Apply fan control")).clicked() {commands.push(UiCommand::SetCooling{channel:channel.clone(),profile:profile.clone()});view.confirm=None;}
+            if !still_possible {
+                ui.colored_label(crate::theme::text_color(ui, crate::theme::WARN), crate::i18n::tr("The settings changed while this was open; it cannot be applied now."));
+            }
+            if ui.add_enabled(still_possible, egui::Button::new(crate::i18n::tr("Apply fan control"))).clicked() {commands.push(UiCommand::SetCooling{channel:channel.clone(),profile:profile.clone()});view.confirm=None;}
             if ui.button(crate::i18n::tr("Cancel")).clicked() {view.confirm=None;}
         });
         if modal.should_close() {
@@ -649,6 +667,21 @@ mod tests {
         h.get_by_label("Cancel").click();
         h.run();
         assert!(h.state().sent.is_empty());
+        // The service went to monitoring only while the dialog was open.
+        h.get_by_label("Apply cooling profile").click();
+        h.run();
+        h.state_mut().data.status.as_mut().unwrap().dry_run = true;
+        h.run();
+        assert!(
+            h.get_by_label("Apply fan control")
+                .accesskit_node()
+                .is_disabled()
+        );
+        h.state_mut().data.status.as_mut().unwrap().dry_run = false;
+        h.run();
+        h.get_by_label("Cancel").click();
+        h.run();
+        assert!(h.query_by_label("Apply fan control").is_none());
         h.get_by_label("Temperature curve").click();
         h.run();
         h.get_by_label("Performance").click();

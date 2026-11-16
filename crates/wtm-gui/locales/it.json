@@ -1894,5 +1894,6 @@
   "Show the update": "Mostra l'aggiornamento",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} verrà analizzato non appena l'analisi di {0} si sarà fermata.",
   "No usage of this app was recorded in this period.": "Nessun utilizzo di questa app registrato in questo periodo.",
-  "the configuration changed since this page read it; nothing was saved, try again": "la configurazione è cambiata da quando questa pagina l'ha letta; non è stato salvato nulla, riprova"
+  "the configuration changed since this page read it; nothing was saved, try again": "la configurazione è cambiata da quando questa pagina l'ha letta; non è stato salvato nulla, riprova",
+  "The settings changed while this was open; it cannot be applied now.": "Le impostazioni sono cambiate mentre questa finestra era aperta; ora non si può applicare."
 }

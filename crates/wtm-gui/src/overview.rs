@@ -616,7 +616,9 @@ pub fn overview(ui: &mut Ui, data: &Data) -> (Vec<UiCommand>, Vec<Intent>) {
             },
             Stat {
                 resource: Resource::Disk,
-                title: crate::i18n::tr("Disk"),
+                // Every process's reads and writes, network and pipes too,
+                // as the Performance page of the same name.
+                title: crate::i18n::tr("Disk & I/O"),
                 accent: DISK_READ,
                 ring: None,
                 value: rate(s.io_read_rate + s.io_write_rate),

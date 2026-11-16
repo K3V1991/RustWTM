@@ -1894,5 +1894,6 @@
   "Show the update": "Onyesha sasisho",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} itachanganuliwa mara uchanganuzi wa {0} utakaposimama.",
   "No usage of this app was recorded in this period.": "Hakuna matumizi ya programu hii yaliyorekodiwa katika kipindi hiki.",
-  "the configuration changed since this page read it; nothing was saved, try again": "usanidi ulibadilika tangu ukurasa huu uusome; hakuna kilichohifadhiwa, jaribu tena"
+  "the configuration changed since this page read it; nothing was saved, try again": "usanidi ulibadilika tangu ukurasa huu uusome; hakuna kilichohifadhiwa, jaribu tena",
+  "The settings changed while this was open; it cannot be applied now.": "Mipangilio ilibadilika wakati hiki kilikuwa wazi; haiwezi kutumika sasa."
 }

@@ -216,6 +216,15 @@ pub fn power_controls(ui: &mut Ui, data: &Data, view: &mut PowerView) -> Vec<UiC
         }
     });
     if let Some(action) = view.confirm.clone() {
+        // Checked again while the dialog is open: rights, a backup made
+        // meanwhile, or a plan that changed.
+        let still_possible = matches!(&data.frequency, Some(Ok(r)) if data.elevated
+        && match &action {
+            Confirmation::Limit(request) => {
+                r.backup_plan.is_none() && r.backup_error.is_none() && request.validate().is_ok()
+            }
+            Confirmation::Restore => r.backup_plan.is_some(),
+        });
         let modal=egui::Modal::new(egui::Id::unique("confirm_frequency"))
         .frame(crate::theme::dialog_frame(ui.ctx()))
         .show(ui.ctx(),|ui| {
@@ -228,7 +237,10 @@ pub fn power_controls(ui: &mut Ui, data: &Data, view: &mut PowerView) -> Vec<UiC
                 }
                 Confirmation::Restore=>{ui.label(crate::i18n::tr("Restore the saved values on the original plan without switching plans. If another app changed these settings, RustWTM will refuse to overwrite them."));}
             }
-            if ui.button(label).clicked() {
+            if !still_possible {
+                ui.colored_label(crate::theme::text_color(ui, crate::theme::WARN), crate::i18n::tr("The settings changed while this was open; it cannot be applied now."));
+            }
+            if ui.add_enabled(still_possible, egui::Button::new(label)).clicked() {
                 commands.push(match action {Confirmation::Limit(request)=>UiCommand::SetFrequency(request),Confirmation::Restore=>UiCommand::RestoreFrequency});
                 view.confirm=None;
             }
@@ -377,5 +389,34 @@ pub(crate) mod tests {
         h.get_by_label("Restore power settings").click();
         h.run();
         assert!(matches!(h.state().sent[1], UiCommand::RestoreFrequency));
+
+        // The dialog re-checks while it is open: a limit asked for before a
+        // backup plan appeared is not written over it.
+        fn frequency<'a>(
+            h: &'a mut Harness<'_, State>,
+        ) -> &'a mut wtm_core::power::FrequencyReport {
+            h.state_mut()
+                .data
+                .frequency
+                .as_mut()
+                .unwrap()
+                .as_mut()
+                .unwrap()
+        }
+        frequency(&mut h).backup_plan = None;
+        h.run();
+        h.get_by_label("Set frequency limit…").click();
+        h.run();
+        frequency(&mut h).backup_plan = Some("old-plan".into());
+        h.run();
+        assert!(
+            h.get_by_label("Apply system frequency limit")
+                .accesskit_node()
+                .is_disabled()
+        );
+        assert!(
+            h.query_by_label_contains("changed while this was open")
+                .is_some()
+        );
     }
 }
