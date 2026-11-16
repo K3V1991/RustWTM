@@ -620,6 +620,14 @@ fn process_actions(
 }
 
 fn analysis(ui: &mut Ui, view: &mut DisksView) {
+    // Before the buttons: a folder found unreadable ends its scan in this
+    // frame, so Analyze shows beside the message, not Stop.
+    if let Some(scan) = view.scan.take_if(|s| s.unreadable.load(Ordering::Relaxed)) {
+        view.error = Some(crate::i18n::format(
+            "{0} is not a folder that can be read",
+            &[scan.path.display().to_string()],
+        ));
+    }
     ui.horizontal_wrapped(|ui| {
         ui.label(crate::i18n::tr("Folder:"));
         let edit = ui.add(
@@ -643,12 +651,6 @@ fn analysis(ui: &mut Ui, view: &mut DisksView) {
             view.start(ui.ctx(), &path);
         }
     });
-    if let Some(scan) = view.scan.take_if(|s| s.unreadable.load(Ordering::Relaxed)) {
-        view.error = Some(crate::i18n::format(
-            "{0} is not a folder that can be read",
-            &[scan.path.display().to_string()],
-        ));
-    }
     if let Some(e) = &view.error {
         crate::theme::colored(ui, BAD, e);
     }

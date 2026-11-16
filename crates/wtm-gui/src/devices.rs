@@ -13,11 +13,16 @@ fn device_color(kind: &str) -> egui::Color32 {
         _ => crate::theme::CPU,
     }
 }
+/// The unit as shown: Windows' NVMe log reports degrees as "C".
+fn shown_unit(unit: &str) -> &str {
+    if unit == "C" { "°C" } else { unit }
+}
+
 fn reading(m: &wtm_core::devices::Metric) -> String {
     match m.value {
         Some(v) if m.unit == "bytes" => crate::i18n::bytes(v),
         Some(v) if m.unit == "B/s" => format!("{}/s", crate::i18n::bytes(v)),
-        Some(v) => format!("{v:.0} {}", m.unit),
+        Some(v) => format!("{v:.0} {}", shown_unit(&m.unit)),
         None => crate::i18n::tr("Unavailable").into(),
     }
 }
@@ -542,7 +547,7 @@ impl View {
             if bits && m.unit == "B/s" {
                 "Mbps"
             } else {
-                &m.unit
+                shown_unit(&m.unit)
             }
         ));
         if let Some(value) = m.value {
@@ -589,7 +594,7 @@ impl View {
                 "bytes" => crate::i18n::bytes(top.max(0.0)),
                 "B/s" if bits => crate::i18n::decimal(format!("{top:.1} Mbps")),
                 "B/s" => format!("{}/s", crate::i18n::bytes(top.max(0.0))),
-                unit => format!("{top:.0} {unit}"),
+                unit => format!("{top:.0} {}", shown_unit(unit)),
             };
             crate::theme::chart_scale(ui, "", &scale);
             let backdrop = egui::Rect::from_min_size(
@@ -690,7 +695,9 @@ impl View {
                             Some(v) if m.unit == "B/s" => {
                                 format!("{}/s", crate::i18n::bytes(v))
                             }
-                            Some(v) => crate::i18n::decimal(format!("{v:.1} {}", m.unit)),
+                            Some(v) => {
+                                crate::i18n::decimal(format!("{v:.1} {}", shown_unit(&m.unit)))
+                            }
                             None => crate::i18n::tr("Unavailable").into(),
                         };
                         let selected = self.metric.as_ref() == Some(&m.id)
@@ -1081,6 +1088,26 @@ mod tests {
     }
 
     #[test]
+    fn nvme_degrees_are_shown_with_the_degree_sign() {
+        let mut h = egui_kittest::Harness::builder()
+            .with_size([1200.0, 900.0])
+            .build_ui_state(|ui, v: &mut View| v.show(ui), View::fixture_for("Disk"));
+        h.run();
+        // The card's button names the reading.
+        h.get_by_label("Temperature: 42.0 °C");
+        assert!(h.query_all_by_label_contains("42.0 C").next().is_none());
+        let metric = wtm_core::devices::Metric {
+            id: "nvme-temperature".into(),
+            name: "NVMe temperature".into(),
+            unit: "C".into(),
+            value: Some(41.0),
+            ceiling: None,
+            counter: false,
+        };
+        assert_eq!(reading(&metric), "41 °C");
+    }
+
+    #[test]
     fn a_hidden_device_can_be_shown_again_from_the_menu() {
         let mut view = View::fixture_for("Disk");
         let id = view.report.as_ref().unwrap().as_ref().unwrap().devices[0]
@@ -1158,7 +1185,7 @@ mod tests {
                 .build_ui_state(|ui, v: &mut View| v.show(ui), View::fixture());
             h.run();
             assert!(h.query_by_label("Example NVMe 2 TB").is_some());
-            assert!(h.query_by_label("42.0 C").is_some());
+            assert!(h.query_by_label("42.0 °C").is_some());
             if width < 940.0 {
                 h.get_by_label("Devices and health").click();
                 h.run();

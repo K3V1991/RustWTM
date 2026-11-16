@@ -11427,10 +11427,12 @@ o-such-folder",
     fn reveal_task_manager_control(h: &mut Harness<'_, App>) -> egui::Rect {
         // Later settings may extend the page below this card. Ask the actual
         // accessible control to scroll into view instead of scrolling to the end.
+        // The switch and its row carry the name; after a scroll to the end
+        // both can be in the tree, and either one locates the card.
         let label = crate::i18n::tr("Use RustWTM for Ctrl+Shift+Esc");
-        h.get_by_label(label).scroll_to_me();
+        h.get_all_by_label(label).next().unwrap().scroll_to_me();
         h.run_steps(20);
-        h.get_by_label(label).rect()
+        h.get_all_by_label(label).next().unwrap().rect()
     }
 
     #[test]

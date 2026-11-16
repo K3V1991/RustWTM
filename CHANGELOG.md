@@ -95,6 +95,8 @@ All notable changes to this project are documented here. The format follows
 - Limits could show usage as "-0.00 cores".
 - Largest files showed nothing for an unknown modification time, which
   put Show under Modified; it shows a dash.
+- A disk's NVMe temperature tile and graph read "42.0 C"; they say
+  "42.0 °C", as its Details page does.
 
 ## [0.34.0] - 2026-11-15
 
