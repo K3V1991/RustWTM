@@ -1887,5 +1887,7 @@
   " s": " 秒",
   "Process, PID or message": "プロセス、PID、またはメッセージ",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "以前の分析が、応答しないプログラムをまだ待っています。1 分後にもう一度お試しください。",
-  "The analysis stopped before it finished; these counts are partial.": "分析は完了前に停止しました。これらの数は一部のみです。"
+  "The analysis stopped before it finished; these counts are partial.": "分析は完了前に停止しました。これらの数は一部のみです。",
+  "This limit was changed or removed meanwhile; open it again to change it.": "この制限はその間に変更または削除されました。変更するにはもう一度開いてください。",
+  "{0} already has a limit of this kind; change that one instead.": "{0} には同じ種類の制限が既にあります。そちらを変更してください。"
 }

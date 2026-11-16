@@ -1887,5 +1887,7 @@
   " s": " s",
   "Process, PID or message": "Tiến trình, PID hoặc thông báo",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Các lần phân tích trước vẫn đang chờ những chương trình không phản hồi. Hãy thử lại sau một phút.",
-  "The analysis stopped before it finished; these counts are partial.": "Phân tích đã dừng trước khi xong; các số này chưa đầy đủ."
+  "The analysis stopped before it finished; these counts are partial.": "Phân tích đã dừng trước khi xong; các số này chưa đầy đủ.",
+  "This limit was changed or removed meanwhile; open it again to change it.": "Giới hạn này đã bị thay đổi hoặc xóa trong lúc đó; hãy mở lại để thay đổi.",
+  "{0} already has a limit of this kind; change that one instead.": "{0} đã có một giới hạn loại này; hãy thay đổi giới hạn đó."
 }

@@ -230,7 +230,9 @@ impl KillView {
         let entry = self.entry();
         match set_kill_entry(text, &entry, index) {
             Ok(new) => {
-                self.saving = Some(entry);
+                // Compared with the list loaded after the save, so as the
+                // file will give it back.
+                self.saving = Some(entry.as_stored());
                 self.error = None;
                 Some(new)
             }
@@ -301,6 +303,19 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
         }
         Some(Ok((_, text))) => text,
     };
+    // The backend keeps an empty list when the file does not parse; that is
+    // not the same as an empty kill list, as Limits says too.
+    if let Err(e) = wtm_policy::Config::from_toml(text) {
+        crate::theme::colored(
+            ui,
+            BAD,
+            crate::i18n::format(
+                "The configuration is invalid ({0}); fix it in Settings.",
+                &[format!("{e}")],
+            ),
+        );
+        return commands;
+    }
     if view
         .saving
         .as_ref()
@@ -664,5 +679,56 @@ mod tests {
         assert!(view.save(&config(&[]), &[]).is_some());
         assert_eq!(view.saving, Some(entry("new.exe")));
         assert_eq!(view.name, "new.exe", "kept while the save is under way");
+    }
+
+    #[test]
+    fn an_invalid_config_is_not_shown_as_an_empty_list() {
+        use egui_kittest::{Harness, kittest::Queryable};
+        // A typo in config.toml: the kill list cannot be read.
+        let data = Data {
+            config: Some(Ok((
+                "config.toml".into(),
+                "[[kill]]\nname = \"a.exe\"\ntree = maybe\n".into(),
+            ))),
+            ..Data::default()
+        };
+        let mut view = KillView::default();
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1000.0, 800.0])
+            .build_ui(move |ui| {
+                let mut panic = false;
+                let _ = kill_tab(ui, &data, &mut view, &mut panic);
+            });
+        h.run_steps(2);
+        assert!(
+            h.query_by_label_contains("The kill list is empty")
+                .is_none(),
+            "the entries are still in the file"
+        );
+        assert!(
+            h.query_by_label_contains("The configuration is invalid")
+                .is_some()
+        );
+        assert!(h.query_by_label("Add entry").is_none(), "nothing to add to");
+    }
+
+    #[test]
+    fn a_panic_only_entry_is_recognised_once_saved() {
+        // Automatic ending off, the wait left at something other than the
+        // default: config.toml keeps no wait for such an entry.
+        let mut view = KillView {
+            name: "tool.exe".into(),
+            automatic: false,
+            seconds: 30,
+            ..KillView::default()
+        };
+        let new = view.save(&config(&[]), &[]).unwrap();
+        let reloaded = wtm_policy::Config::from_toml(&new).unwrap().kill;
+        assert!(
+            view.saving.as_ref().is_some_and(|s| reloaded.contains(s)),
+            "the form must see its entry in the reloaded list, or Add entry adds it again: {:?} vs {reloaded:?}",
+            view.saving
+        );
     }
 }

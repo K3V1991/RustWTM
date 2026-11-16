@@ -84,7 +84,29 @@ impl LimitsView {
     /// The configuration text with the form's limit saved into it.
     fn apply(&self, text: &str) -> Result<String, String> {
         let text = match &self.editing {
-            Some((name, scope)) => remove_app_limit(text, name, *scope)?,
+            Some((name, scope)) => {
+                // Matched as the service matches apps: by name in any case.
+                let limits = Config::from_toml(text).map_err(|e| e.to_string())?.limits;
+                let same_app = |a: &str, b: &str| a.to_lowercase() == b.to_lowercase();
+                let has = |n: &str, s: LimitScope| {
+                    limits.iter().any(|l| l.scope == s && same_app(&l.name, n))
+                };
+                if !has(name, *scope) {
+                    return Err(crate::i18n::tr(
+                        "This limit was changed or removed meanwhile; open it again to change it.",
+                    )
+                    .into());
+                }
+                let target = self.limit();
+                let same = target.scope == *scope && same_app(&target.name, name);
+                if !same && has(&target.name, target.scope) {
+                    return Err(crate::i18n::format(
+                        "{0} already has a limit of this kind; change that one instead.",
+                        &[target.name],
+                    ));
+                }
+                remove_app_limit(text, name, *scope)?
+            }
             None => text.to_owned(),
         };
         set_app_limit(&text, &self.limit())
@@ -520,5 +542,35 @@ mod tests {
         let two = Config::from_toml(&v.apply(text).unwrap()).unwrap();
         assert_eq!(two.limits.len(), 2);
         assert!(v.apply("x = [").is_err());
+    }
+
+    #[test]
+    fn an_edit_never_overwrites_another_limit_or_revives_a_removed_one() {
+        let text = "[[limit]]\nname = \"a.exe\"\nmemory_gb = 4.0\nscope = \"group\"\n\
+                    [[limit]]\nname = \"b.exe\"\nmemory_gb = 8.0\nscope = \"group\"\n";
+        let config = Config::from_toml(text).unwrap();
+        // Renaming a.exe's limit to b.exe, which has one of its own.
+        let mut v = LimitsView::default();
+        v.edit(&config.limits[0]);
+        v.name = "B.exe".into();
+        assert!(v.apply(text).is_err(), "b.exe's 8 GB limit would be lost");
+
+        // a.exe's limit was removed elsewhere while its form was open.
+        let mut v = LimitsView::default();
+        v.edit(&config.limits[0]);
+        v.gb = 6.0;
+        let without_a = "[[limit]]\nname = \"b.exe\"\nmemory_gb = 8.0\nscope = \"group\"\n";
+        assert!(
+            v.apply(without_a).is_err(),
+            "a removed limit is not brought back"
+        );
+
+        // Changing only the case or the budget is an ordinary edit.
+        let mut v = LimitsView::default();
+        v.edit(&config.limits[0]);
+        v.name = "A.EXE".into();
+        v.gb = 6.0;
+        let new = Config::from_toml(&v.apply(text).unwrap()).unwrap();
+        assert_eq!(new.limits.len(), 2);
     }
 }

@@ -1887,5 +1887,7 @@
   " s": " s",
   "Process, PID or message": "Proseso, PID o mensahe",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Naghihintay pa ang mga naunang pagsusuri sa mga programang hindi tumutugon. Subukang muli pagkalipas ng isang minuto.",
-  "The analysis stopped before it finished; these counts are partial.": "Huminto ang pagsusuri bago matapos; hindi kumpleto ang mga bilang na ito."
+  "The analysis stopped before it finished; these counts are partial.": "Huminto ang pagsusuri bago matapos; hindi kumpleto ang mga bilang na ito.",
+  "This limit was changed or removed meanwhile; open it again to change it.": "Binago o inalis ang limitasyong ito sa pansamantala; buksan itong muli para baguhin.",
+  "{0} already has a limit of this kind; change that one instead.": "May limitasyon nang ganitong uri ang {0}; iyon na lang ang baguhin."
 }

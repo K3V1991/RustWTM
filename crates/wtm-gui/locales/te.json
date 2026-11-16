@@ -1887,5 +1887,7 @@
   " s": " s",
   "Process, PID or message": "ప్రాసెస్, PID లేదా సందేశం",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "మునుపటి విశ్లేషణలు స్పందించని ప్రోగ్రామ్‌ల కోసం ఇంకా వేచి ఉన్నాయి. ఒక నిమిషం తర్వాత మళ్లీ ప్రయత్నించండి.",
-  "The analysis stopped before it finished; these counts are partial.": "విశ్లేషణ పూర్తి కాకముందే ఆగిపోయింది; ఈ లెక్కలు పాక్షికం."
+  "The analysis stopped before it finished; these counts are partial.": "విశ్లేషణ పూర్తి కాకముందే ఆగిపోయింది; ఈ లెక్కలు పాక్షికం.",
+  "This limit was changed or removed meanwhile; open it again to change it.": "ఈలోగా ఈ పరిమితి మార్చబడింది లేదా తీసివేయబడింది; మార్చడానికి దాన్ని మళ్లీ తెరవండి.",
+  "{0} already has a limit of this kind; change that one instead.": "{0}కి ఈ రకమైన పరిమితి ఇప్పటికే ఉంది; బదులుగా దాన్ని మార్చండి."
 }

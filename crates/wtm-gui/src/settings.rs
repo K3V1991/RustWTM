@@ -325,6 +325,21 @@ fn policy_switch(
         .then_some(on)
 }
 
+/// A threshold slider in percent. Showing it never rewrites config.toml:
+/// a value it did not set (92.5, or one outside its range) stays as it is
+/// until the user moves it, and only what the user sets is kept in range
+/// and to whole percents.
+fn percent_slider(value: &mut f32, range: std::ops::RangeInclusive<f32>) -> egui::Slider<'_> {
+    egui::Slider::new(value, range)
+        .clamping(egui::SliderClamping::Edits)
+        .max_decimals(0)
+        .custom_formatter(|v, _| {
+            let text = format!("{v:.1}");
+            text.strip_suffix(".0").map_or(text.clone(), str::to_owned)
+        })
+        .percent_affix()
+}
+
 /// The settings most people change, as controls; returns the edited text.
 fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
     let mut out: Option<String> = None;
@@ -370,11 +385,10 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
             |ui, label| {
                 let mut high = g.high_cpu_percent;
                 if ui
-                    .add(
-                        egui::Slider::new(&mut high, 50.0..=100.0)
-                            .percent_affix()
-                            .fixed_decimals(0),
-                    )
+                    .add(percent_slider(
+                        &mut high,
+                        (g.recover_cpu_percent + 1.0).max(50.0)..=100.0,
+                    ))
                     .labelled_by(label)
                     .changed()
                 {
@@ -386,6 +400,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                     .add(
                         egui::DragValue::new(&mut secs)
                             .range(1..=300)
+                            .clamp_existing_to_range(false)
                             .suffix(crate::i18n::tr(" s")),
                     )
                     .labelled_by(label)
@@ -403,11 +418,10 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
             |ui, label| {
                 let mut low = g.recover_cpu_percent;
                 if ui
-                    .add(
-                        egui::Slider::new(&mut low, 10.0..=99.0)
-                            .percent_affix()
-                            .fixed_decimals(0),
-                    )
+                    .add(percent_slider(
+                        &mut low,
+                        10.0..=(g.high_cpu_percent - 1.0).min(99.0),
+                    ))
                     .labelled_by(label)
                     .changed()
                 {
@@ -419,6 +433,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                     .add(
                         egui::DragValue::new(&mut secs)
                             .range(1..=600)
+                            .clamp_existing_to_range(false)
                             .suffix(crate::i18n::tr(" s")),
                     )
                     .labelled_by(label)
@@ -436,7 +451,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
             |ui, label| {
                 let mut n = g.max_offenders as u64;
                 if ui
-                    .add(egui::DragValue::new(&mut n).range(1..=20))
+                    .add(
+                        egui::DragValue::new(&mut n)
+                            .range(1..=20)
+                            .clamp_existing_to_range(false),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -467,11 +486,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
             |ui, label| {
                 let mut high = m.high_percent;
                 if ui
-                    .add(
-                        egui::Slider::new(&mut high, 50.0..=99.0)
-                            .percent_affix()
-                            .fixed_decimals(0),
-                    )
+                    .add(percent_slider(&mut high, 50.0..=99.0))
                     .labelled_by(label)
                     .changed()
                 {
@@ -483,6 +498,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                     .add(
                         egui::DragValue::new(&mut secs)
                             .range(1..=600)
+                            .clamp_existing_to_range(false)
                             .suffix(crate::i18n::tr(" s")),
                     )
                     .labelled_by(label)
@@ -540,11 +556,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                 let mut high = r.trigger_cpu_percent;
                 let range = (r.release_cpu_percent + 1.0).max(50.0)..=100.0;
                 if ui
-                    .add(
-                        egui::Slider::new(&mut high, range)
-                            .percent_affix()
-                            .fixed_decimals(0),
-                    )
+                    .add(percent_slider(&mut high, range))
                     .labelled_by(label)
                     .changed()
                 {
@@ -556,6 +568,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                     .add(
                         egui::DragValue::new(&mut secs)
                             .range(1..=120)
+                            .clamp_existing_to_range(false)
                             .suffix(crate::i18n::tr(" s")),
                     )
                     .labelled_by(label)
@@ -574,7 +587,12 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
         |ui, label| {
             let mut mb = r.working_set_mb;
             if ui
-                .add(egui::DragValue::new(&mut mb).range(0..=1024).suffix(" MB"))
+                .add(
+                    egui::DragValue::new(&mut mb)
+                        .range(0..=1024)
+                        .clamp_existing_to_range(false)
+                        .suffix(" MB"),
+                )
                 .labelled_by(label)
                 .changed()
             {
@@ -591,7 +609,9 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
         let copies = crate::i18n::tr("copies or more");
         let count = ui.add_enabled(
             swarm.enabled,
-            egui::DragValue::new(&mut n).range(10..=10_000),
+            egui::DragValue::new(&mut n)
+                .range(10..=10_000)
+                .clamp_existing_to_range(false),
         );
         count.widget_info(|| {
             egui::WidgetInfo::labeled(egui::accesskit::Role::SpinButton, swarm.enabled, copies)
@@ -622,6 +642,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                     .add(
                         egui::DragValue::new(&mut mins)
                             .range(0..=10_080)
+                            .clamp_existing_to_range(false)
                             .suffix(crate::i18n::tr(" min")),
                     )
                     .labelled_by(label)
@@ -650,6 +671,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                 .add(
                     egui::DragValue::new(&mut days)
                         .range(1..=365)
+                        .clamp_existing_to_range(false)
                         .suffix(crate::i18n::tr(" days")),
                 )
                 .labelled_by(label)
@@ -698,6 +720,91 @@ mod toml_edit_value {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// A valid config.toml with values the form's controls do not reach:
+    /// written by hand, by an older version, or by the service.
+    fn hand_edited_config() -> String {
+        let mut text = wtm_policy::DEFAULT_CONFIG_TOML.to_owned();
+        for (table, key, value) in [
+            ("governor", "high_cpu_percent", 92.5),
+            ("governor", "recover_cpu_percent", 69.5),
+        ] {
+            text = wtm_policy::set_config_value(&text, table, key, value).unwrap();
+        }
+        for (table, key, value) in [
+            ("", "history_days", 730i64),
+            ("governor", "sustain_secs", 600),
+            ("governor", "max_offenders", 50),
+            ("reserve", "sustain_secs", 300),
+            ("swarm", "min_count", 20_000),
+        ] {
+            text = wtm_policy::set_config_value(&text, table, key, value).unwrap();
+        }
+        text
+    }
+
+    #[test]
+    fn opening_the_form_changes_nothing() {
+        use egui_kittest::Harness;
+        let text = hand_edited_config();
+        let config = wtm_policy::Config::from_toml(&text).expect("valid");
+        let edited = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+        let seen = edited.clone();
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1440.0, 2400.0])
+            .with_context_setup(crate::theme::apply)
+            .build_ui(move |ui| {
+                if let Some(new) = form(ui, &config, &text) {
+                    seen.lock().unwrap().push(new);
+                }
+            });
+        h.run_steps(4);
+        let edited = edited.lock().unwrap();
+        assert!(
+            edited.is_empty(),
+            "the form rewrote config.toml without any input: {} edits",
+            edited.len()
+        );
+    }
+
+    #[test]
+    fn governor_thresholds_cannot_cross() {
+        use egui_kittest::{Harness, kittest::Queryable};
+        // high 90, recover 70 in the defaults.
+        let text = wtm_policy::DEFAULT_CONFIG_TOML;
+        let config = wtm_policy::Config::from_toml(text).unwrap();
+        let edited = std::sync::Arc::new(std::sync::Mutex::new(None));
+        let seen = edited.clone();
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1440.0, 2400.0])
+            .with_context_setup(crate::theme::apply)
+            .build_ui(move |ui| {
+                if let Some(new) = form(ui, &config, text) {
+                    *seen.lock().unwrap() = Some(new);
+                }
+            });
+        h.run_steps(2);
+        for (label, value) in [
+            ("Undo once it stays below", 95.0),
+            ("Act when the CPU stays above", 60.0),
+        ] {
+            *edited.lock().unwrap() = None;
+            h.get_by_role_and_label(egui::accesskit::Role::Slider, label)
+                .set_value_accesskit(value);
+            h.run_steps(2);
+            let new = edited.lock().unwrap().clone().expect("the slider moved");
+            let g = wtm_policy::Config::from_toml(&new)
+                .unwrap_or_else(|e| {
+                    panic!("{label} {value}: the form wrote an invalid config: {e:?}")
+                })
+                .governor;
+            assert!(g.recover_cpu_percent < g.high_cpu_percent, "{label}: {g:?}");
+            assert_eq!(g.recover_cpu_percent.fract(), 0.0, "whole percents");
+        }
+    }
+
     #[test]
     fn service_thresholds_have_accessible_names_at_both_widths() {
         use egui_kittest::{Harness, kittest::Queryable};

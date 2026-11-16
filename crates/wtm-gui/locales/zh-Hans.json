@@ -1887,5 +1887,7 @@
   " s": " 秒",
   "Process, PID or message": "进程、PID 或消息",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "之前的分析仍在等待无响应的程序。请一分钟后重试。",
-  "The analysis stopped before it finished; these counts are partial.": "分析在完成前停止；这些计数并不完整。"
+  "The analysis stopped before it finished; these counts are partial.": "分析在完成前停止；这些计数并不完整。",
+  "This limit was changed or removed meanwhile; open it again to change it.": "此限制在此期间已被更改或删除；请重新打开后再更改。",
+  "{0} already has a limit of this kind; change that one instead.": "{0} 已有此类限制；请改为更改该限制。"
 }

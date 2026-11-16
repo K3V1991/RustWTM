@@ -11332,5 +11332,17 @@
     "de": "Die Analyse wurde vor dem Ende abgebrochen; diese Zahlen sind unvollständig.",
     "fr": "L'analyse s'est arrêtée avant la fin ; ces chiffres sont partiels.",
     "es": "El análisis se detuvo antes de terminar; estos recuentos son parciales."
+  },
+  "This limit was changed or removed meanwhile; open it again to change it.": {
+    "tr": "Bu sınır bu arada değiştirildi veya kaldırıldı; değiştirmek için yeniden açın.",
+    "de": "Dieses Limit wurde inzwischen geändert oder entfernt; öffnen Sie es erneut, um es zu ändern.",
+    "fr": "Cette limite a été modifiée ou supprimée entre-temps ; rouvrez-la pour la modifier.",
+    "es": "Este límite se cambió o se quitó mientras tanto; ábralo de nuevo para cambiarlo."
+  },
+  "{0} already has a limit of this kind; change that one instead.": {
+    "tr": "{0} için bu türde bir sınır zaten var; onun yerine onu değiştirin.",
+    "de": "{0} hat bereits ein Limit dieser Art; ändern Sie stattdessen dieses.",
+    "fr": "{0} a déjà une limite de ce type ; modifiez plutôt celle-ci.",
+    "es": "{0} ya tiene un límite de este tipo; cambie ese en su lugar."
   }
 }

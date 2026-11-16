@@ -1887,5 +1887,7 @@
   " s": " с",
   "Process, PID or message": "Процесс, PID или сообщение",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Предыдущие анализы всё ещё ждут программ, которые не отвечают. Повторите через минуту.",
-  "The analysis stopped before it finished; these counts are partial.": "Анализ остановился, не завершившись; эти числа неполные."
+  "The analysis stopped before it finished; these counts are partial.": "Анализ остановился, не завершившись; эти числа неполные.",
+  "This limit was changed or removed meanwhile; open it again to change it.": "Это ограничение тем временем изменили или удалили; откройте его снова, чтобы изменить.",
+  "{0} already has a limit of this kind; change that one instead.": "У {0} уже есть ограничение этого вида; измените его."
 }

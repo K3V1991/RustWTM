@@ -1887,5 +1887,7 @@
   " s": " s",
   "Process, PID or message": "Processo, PID ou mensagem",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Análises anteriores ainda aguardam programas que não respondem. Tente novamente em um minuto.",
-  "The analysis stopped before it finished; these counts are partial.": "A análise parou antes de terminar; estas contagens são parciais."
+  "The analysis stopped before it finished; these counts are partial.": "A análise parou antes de terminar; estas contagens são parciais.",
+  "This limit was changed or removed meanwhile; open it again to change it.": "Este limite foi alterado ou removido nesse meio-tempo; abra-o novamente para alterá-lo.",
+  "{0} already has a limit of this kind; change that one instead.": "{0} já tem um limite deste tipo; altere esse."
 }

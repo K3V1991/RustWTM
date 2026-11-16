@@ -1887,5 +1887,7 @@
   " s": " s",
   "Process, PID or message": "प्रक्रिया, PID किंवा संदेश",
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "आधीची विश्लेषणे अजूनही प्रतिसाद न देणाऱ्या प्रोग्रामची वाट पाहत आहेत. एका मिनिटाने पुन्हा प्रयत्न करा.",
-  "The analysis stopped before it finished; these counts are partial.": "विश्लेषण पूर्ण होण्यापूर्वी थांबले; ही संख्या अपूर्ण आहे."
+  "The analysis stopped before it finished; these counts are partial.": "विश्लेषण पूर्ण होण्यापूर्वी थांबले; ही संख्या अपूर्ण आहे.",
+  "This limit was changed or removed meanwhile; open it again to change it.": "दरम्यान ही मर्यादा बदलली किंवा काढली गेली; बदलण्यासाठी ती पुन्हा उघडा.",
+  "{0} already has a limit of this kind; change that one instead.": "{0} साठी या प्रकारची मर्यादा आधीच आहे; त्याऐवजी ती बदला."
 }

@@ -9,6 +9,11 @@ pub struct View {
     preview: Vec<String>,
     previewed: bool,
     pending: Option<(String, String, String)>,
+    /// The draft rule the pending review saves, if it saves one.
+    pending_rule: Option<Rule>,
+    /// The rule sent to the service; the draft is kept until the
+    /// configuration loaded afterwards has it, so a failed save loses nothing.
+    saving: Option<Rule>,
     error: Option<String>,
 }
 fn pattern(ui: &mut Ui, label: &str, value: &mut Option<String>) {
@@ -60,8 +65,18 @@ impl View {
                 return None;
             }
         };
+        if let Some(rule) = self.saving.take_if(|r| config.rules.contains(r)) {
+            // Changed again meanwhile: those edits stay open.
+            if self.draft.as_ref() == Some(&rule) {
+                self.draft = None;
+                self.original_name = None;
+                self.preview.clear();
+                self.previewed = false;
+            }
+        }
         let admin = matches!(data.mode, crate::backend::Mode::Service { admin: true, .. });
         let mut proposed = None;
+        let mut proposed_rule = None;
         crate::theme::card(ui, crate::i18n::tr("Protection profiles"), |ui| {
             ui.weak(crate::i18n::tr("Profiles change RustWTM policy settings after review; they do not silently change Windows power plans."));
             ui.horizontal_wrapped(|ui| {
@@ -330,6 +345,7 @@ impl View {
                 }
             }
             if save {
+                proposed_rule = Some(rule.clone());
                 proposed = Some(
                     wtm_policy::rule_editor::replace(text, self.original_name.as_deref(), rule)
                         .map(|next| (next, crate::i18n::tr("Save process rule").into())),
@@ -349,6 +365,7 @@ impl View {
             match result {
                 Ok((next, description)) => {
                     self.pending = Some((text.clone(), next, description));
+                    self.pending_rule = proposed_rule;
                     self.error = None
                 }
                 Err(e) => self.error = Some(e),
@@ -373,12 +390,19 @@ impl View {
             if save {
                 command = Some(crate::backend::UiCommand::SaveConfig(next));
                 self.pending = None;
-                self.draft = None;
-                self.original_name = None;
-                self.preview.clear();
-                self.previewed = false;
+                match self.pending_rule.take() {
+                    // Kept until the reloaded configuration has it.
+                    Some(rule) => self.saving = Some(rule),
+                    None => {
+                        self.draft = None;
+                        self.original_name = None;
+                        self.preview.clear();
+                        self.previewed = false;
+                    }
+                }
             } else if cancel || modal.should_close() {
                 self.pending = None;
+                self.pending_rule = None;
             }
         }
         command
@@ -442,5 +466,48 @@ mod tests {
                 .is_some()
         );
         assert!(h.state().pending.is_none());
+    }
+
+    #[test]
+    fn a_rule_draft_is_kept_until_the_saved_rule_is_loaded() {
+        use std::sync::{Arc, Mutex};
+        let data = Arc::new(Mutex::new(crate::backend::Data {
+            config: Some(Ok(("fixture".into(), "dry_run = true\n".into()))),
+            mode: crate::backend::Mode::Service {
+                admin: true,
+                verified: true,
+            },
+            ..Default::default()
+        }));
+        let sent = Arc::new(Mutex::new(None));
+        let (shared, out) = (data.clone(), sent.clone());
+        let mut h = egui_kittest::Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1100.0, 1800.0])
+            .build_ui_state(
+                move |ui, v: &mut View| {
+                    if let Some(crate::backend::UiCommand::SaveConfig(text)) =
+                        v.show(ui, &shared.lock().unwrap())
+                    {
+                        *out.lock().unwrap() = Some(text);
+                    }
+                },
+                View::fixture(),
+            );
+        h.run();
+        h.get_by_label("Review rule changes").click();
+        h.run();
+        h.get_by_label("Save reviewed configuration").click();
+        h.run();
+        let saved = sent.lock().unwrap().clone().expect("saved");
+        // The service has not answered yet, or refused: the draft is kept.
+        assert!(
+            h.state().draft.is_some(),
+            "a failed save would lose the rule"
+        );
+        // The reloaded file has the rule: the editor closes.
+        data.lock().unwrap().config = Some(Ok(("fixture".into(), saved)));
+        h.run();
+        assert!(h.state().draft.is_none());
     }
 }

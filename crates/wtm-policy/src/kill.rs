@@ -93,6 +93,19 @@ impl KillEntry {
         }
     }
 
+    /// The entry as config.toml keeps it and reads it back: without a CPU
+    /// threshold the wait is not written, so it comes back as the default.
+    pub fn as_stored(&self) -> KillEntry {
+        KillEntry {
+            for_secs: if self.cpu_above.is_some() {
+                self.for_secs
+            } else {
+                default_for_secs()
+            },
+            ..self.clone()
+        }
+    }
+
     /// When it is ended, in words.
     pub fn describe(&self) -> String {
         let Some(cpu) = self.cpu_above else {
@@ -343,6 +356,29 @@ pub fn remove_kill_entry(text: &str, index: usize) -> Result<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_entry_reads_back_as_stored() {
+        for entry in [
+            KillEntry {
+                name: "panic-only.exe".into(),
+                for_secs: 30,
+                ..KillEntry::default()
+            },
+            KillEntry {
+                name: "auto.exe".into(),
+                cmdline: Some("--watch".into()),
+                cpu_above: Some(40.0),
+                for_secs: 30,
+                system_cpu_above: Some(90.0),
+                tree: false,
+            },
+        ] {
+            let text = set_kill_entry("", &entry, None).unwrap();
+            let back = crate::Config::from_toml(&text).unwrap().kill;
+            assert_eq!(back, [entry.as_stored()], "{text}");
+        }
+    }
 
     fn proc(pid: u32, parent: u32, name: &str, cpu: f32) -> ProcessInfo {
         ProcessInfo {
