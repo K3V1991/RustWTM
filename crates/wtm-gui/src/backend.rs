@@ -416,6 +416,26 @@ pub struct Data {
     pub service_error: Option<String>,
 }
 
+impl Data {
+    /// Drops the inspector panels' results that belong to a process other
+    /// than `target`.
+    pub fn forget_panels_of_others(&mut self, target: &ProcessRef) {
+        fn keep<T>(slot: &mut Option<(ProcessRef, T)>, target: &ProcessRef) {
+            if slot.as_ref().is_some_and(|(t, _)| t != target) {
+                *slot = None;
+            }
+        }
+        keep(&mut self.wait_report, target);
+        keep(&mut self.modules, target);
+        keep(&mut self.security, target);
+        keep(&mut self.environment, target);
+        keep(&mut self.handles, target);
+        keep(&mut self.windows, target);
+        keep(&mut self.memory_map, target);
+        keep(&mut self.end_report, target);
+    }
+}
+
 #[derive(Debug, PartialEq, Eq)]
 pub enum SampleFreshness {
     Waiting,
@@ -2009,7 +2029,12 @@ impl Worker {
                     Some(c) => inspect_with(c, &target),
                     None => control::inspect(&target).map_err(|e| e.to_string()),
                 };
-                self.data().details = Some((target, result));
+                let mut data = self.data();
+                // Another process chosen: the panels read for the previous
+                // one go, so coming back reads them again rather than
+                // showing an old read as if it were current.
+                data.forget_panels_of_others(&target);
+                data.details = Some((target, result));
             }
             UiCommand::Control { target, command } => {
                 // A limit this window set while it ran without the service is
@@ -3499,6 +3524,33 @@ mod tests {
             std::thread::sleep(Duration::from_millis(10));
         }
         assert!(Updater::default().latest as usize != 0);
+    }
+
+    #[test]
+    fn another_process_does_not_inherit_old_panel_results() {
+        let mut w = worker();
+        let target = |pid| ProcessRef {
+            pid,
+            create_time: 1,
+            name: "x.exe".into(),
+        };
+        let report = || {
+            Some(Ok(wtm_core::WaitReport {
+                chains: Vec::new(),
+                threads: 3,
+                analyzed: 0,
+                skipped: 0,
+                complete: true,
+                busy: false,
+            }))
+        };
+        w.data().wait_report = Some((target(1), report()));
+        // Read again for the same process (as after a command): kept.
+        w.handle(UiCommand::Inspect(target(1)));
+        assert!(w.data().wait_report.is_some());
+        // Another process: gone, so going back reads it afresh.
+        w.handle(UiCommand::Inspect(target(2)));
+        assert!(w.data().wait_report.is_none());
     }
 
     #[test]
