@@ -7571,10 +7571,10 @@ mod tests {
         h.run_steps(4);
         assert_eq!(h.state().state.tab, Tab::Processes);
         assert!(h.query_by_label("Find a column").is_some());
-        assert!(
-            !rx.try_iter()
-                .any(|cmd| matches!(cmd, UiCommand::SaveConfig(_) | UiCommand::Control { .. }))
-        );
+        assert!(!rx.try_iter().any(|cmd| matches!(
+            cmd,
+            UiCommand::SaveConfig { .. } | UiCommand::Control { .. }
+        )));
     }
 
     #[test]
@@ -7756,7 +7756,7 @@ mod tests {
             }
             UiCommand::LoadSeries { app, hours } => format!("series {app} {hours}"),
             UiCommand::Service { name, op } => format!("service {name} {op:?}"),
-            UiCommand::SaveConfig(toml) => format!("save config {}", toml.len()),
+            UiCommand::SaveConfig { toml, .. } => format!("save config {}", toml.len()),
             UiCommand::SaveTelegram(c) => format!("save telegram {}", c.enabled),
             UiCommand::TestTelegram => "test telegram".into(),
             UiCommand::SetCooling { channel, .. } => format!("cooling {channel}"),
@@ -7921,7 +7921,9 @@ mod tests {
         let saved = |h: &mut Harness<'_, App>| {
             h.run_steps(2);
             rx.try_iter().find_map(|c| match c {
-                UiCommand::SaveConfig(t) => Some(wtm_policy::Config::from_toml(&t).unwrap()),
+                UiCommand::SaveConfig { toml: t, .. } => {
+                    Some(wtm_policy::Config::from_toml(&t).unwrap())
+                }
                 _ => None,
             })
         };
@@ -9912,7 +9914,7 @@ mod tests {
                 .any(|c| matches!(c, UiCommand::Load(Panel::Config)))
         );
         let saved = sent.iter().find_map(|c| match c {
-            UiCommand::SaveConfig(toml) => Some(toml.clone()),
+            UiCommand::SaveConfig { toml, .. } => Some(toml.clone()),
             _ => None,
         });
         let saved = saved.expect("Save sends the edited text");
@@ -10031,7 +10033,7 @@ mod tests {
         // What was saved, loaded back as the service does after saving.
         let saved = |h: &mut Harness<'_, App>, rx: &std::sync::mpsc::Receiver<UiCommand>| {
             let text = rx.try_iter().find_map(|c| match c {
-                UiCommand::SaveConfig(t) => Some(t),
+                UiCommand::SaveConfig { toml: t, .. } => Some(t),
                 _ => None,
             })?;
             h.state().backend.data().config = Some(Ok(("config.toml".into(), text.clone())));
@@ -10177,7 +10179,9 @@ mod tests {
 
     fn saved_config(rx: &std::sync::mpsc::Receiver<UiCommand>) -> Option<wtm_policy::Config> {
         rx.try_iter().find_map(|c| match c {
-            UiCommand::SaveConfig(t) => Some(wtm_policy::Config::from_toml(&t).unwrap()),
+            UiCommand::SaveConfig { toml: t, .. } => {
+                Some(wtm_policy::Config::from_toml(&t).unwrap())
+            }
             _ => None,
         })
     }

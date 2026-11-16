@@ -11368,5 +11368,11 @@
     "de": "Für diesen Zeitraum wurde keine Nutzung dieser App aufgezeichnet.",
     "fr": "Aucune utilisation de cette application n'a été enregistrée sur cette période.",
     "es": "No se registró uso de esta aplicación en este periodo."
+  },
+  "the configuration changed since this page read it; nothing was saved, try again": {
+    "tr": "yapılandırma bu sayfa okuduktan sonra değişti; hiçbir şey kaydedilmedi, yeniden deneyin",
+    "de": "die Konfiguration hat sich geändert, seit diese Seite sie gelesen hat; nichts wurde gespeichert, versuchen Sie es erneut",
+    "fr": "la configuration a changé depuis que cette page l'a lue ; rien n'a été enregistré, réessayez",
+    "es": "la configuración cambió desde que esta página la leyó; no se guardó nada, inténtelo de nuevo"
   }
 }

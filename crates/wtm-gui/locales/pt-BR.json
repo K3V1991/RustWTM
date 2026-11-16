@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "A versão {0} está disponível.",
   "Show the update": "Mostrar a atualização",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} será analisado assim que a análise de {0} parar.",
-  "No usage of this app was recorded in this period.": "Nenhum uso deste aplicativo foi registrado neste período."
+  "No usage of this app was recorded in this period.": "Nenhum uso deste aplicativo foi registrado neste período.",
+  "the configuration changed since this page read it; nothing was saved, try again": "a configuração mudou desde que esta página a leu; nada foi salvo, tente novamente"
 }

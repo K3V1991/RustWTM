@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "संस्करण {0} उपलब्ध है।",
   "Show the update": "अपडेट दिखाएँ",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} का विश्लेषण रुकते ही {1} का विश्लेषण होगा।",
-  "No usage of this app was recorded in this period.": "इस अवधि में इस ऐप का कोई उपयोग दर्ज नहीं हुआ।"
+  "No usage of this app was recorded in this period.": "इस अवधि में इस ऐप का कोई उपयोग दर्ज नहीं हुआ।",
+  "the configuration changed since this page read it; nothing was saved, try again": "इस पेज के पढ़ने के बाद कॉन्फ़िगरेशन बदल गया; कुछ भी सहेजा नहीं गया, फिर से प्रयास करें"
 }

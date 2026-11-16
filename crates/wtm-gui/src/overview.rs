@@ -905,7 +905,7 @@ fn protection(ui: &mut Ui, data: &Data, commands: &mut Vec<UiCommand>) {
             if turn_on.clicked()
                 && let Some(new) = crate::settings::set_dry_run(text, false)
             {
-                commands.push(UiCommand::SaveConfig(new));
+                commands.push(UiCommand::save_config(text, new));
             }
         } else {
             ui.label(
@@ -921,7 +921,7 @@ fn protection(ui: &mut Ui, data: &Data, commands: &mut Vec<UiCommand>) {
                 .clicked()
                 && let Some(new) = crate::settings::set_dry_run(text, true)
             {
-                commands.push(UiCommand::SaveConfig(new));
+                commands.push(UiCommand::save_config(text, new));
             }
         }
         if !admin {
@@ -947,7 +947,7 @@ fn protection(ui: &mut Ui, data: &Data, commands: &mut Vec<UiCommand>) {
                 && current != Some(p)
                 && let Ok(new) = set_preset(text, p)
             {
-                commands.push(UiCommand::SaveConfig(new));
+                commands.push(UiCommand::save_config(text, new));
             }
         }
         if current.is_none() {
@@ -1094,7 +1094,7 @@ mod tests {
                 .1
                 .iter()
                 .find_map(|command| match command {
-                    UiCommand::SaveConfig(text) => Some(text),
+                    UiCommand::SaveConfig { toml: text, .. } => Some(text),
                     _ => None,
                 })
                 .expect("mode switch sends a config save");

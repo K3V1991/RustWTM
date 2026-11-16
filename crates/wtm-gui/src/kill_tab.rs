@@ -400,7 +400,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                                         {
                                             match remove_kill_entry(text, i) {
                                                 Ok(new) => {
-                                                    commands.push(UiCommand::SaveConfig(new))
+                                                    commands.push(UiCommand::save_config(text, new))
                                                 }
                                                 Err(e) => view.error = Some(e),
                                             }
@@ -432,7 +432,9 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                                     .clicked()
                                     {
                                         match remove_kill_entry(text, i) {
-                                            Ok(new) => commands.push(UiCommand::SaveConfig(new)),
+                                            Ok(new) => {
+                                                commands.push(UiCommand::save_config(text, new))
+                                            }
                                             Err(e) => view.error = Some(e),
                                         }
                                     }
@@ -574,7 +576,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
             if crate::theme::primary_action(ui, admin, label).clicked()
                 && let Some(new) = view.save(text, &data.kill_list)
             {
-                commands.push(UiCommand::SaveConfig(new));
+                commands.push(UiCommand::save_config(text, new));
             }
             if view.editing.is_some() && ui.button(crate::i18n::tr("Cancel")).clicked() {
                 *view = KillView::default();

@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "版本 {0} 可用。",
   "Show the update": "显示更新",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} 的分析停止后将立即分析 {1}。",
-  "No usage of this app was recorded in this period.": "此期间未记录此应用的使用情况。"
+  "No usage of this app was recorded in this period.": "此期间未记录此应用的使用情况。",
+  "the configuration changed since this page read it; nothing was saved, try again": "自此页面读取后配置已更改；未保存任何内容，请重试"
 }

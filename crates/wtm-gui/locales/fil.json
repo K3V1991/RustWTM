@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "Available na ang bersyon {0}.",
   "Show the update": "Ipakita ang update",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "Susuriin ang {1} sa sandaling huminto ang pagsusuri sa {0}.",
-  "No usage of this app was recorded in this period.": "Walang naitalang paggamit ng app na ito sa panahong ito."
+  "No usage of this app was recorded in this period.": "Walang naitalang paggamit ng app na ito sa panahong ito.",
+  "the configuration changed since this page read it; nothing was saved, try again": "nagbago ang configuration mula nang basahin ito ng pahinang ito; walang na-save, subukang muli"
 }

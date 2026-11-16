@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "Đã có phiên bản {0}.",
   "Show the update": "Hiện bản cập nhật",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} sẽ được phân tích ngay khi việc phân tích {0} dừng lại.",
-  "No usage of this app was recorded in this period.": "Không ghi nhận việc dùng ứng dụng này trong khoảng thời gian này."
+  "No usage of this app was recorded in this period.": "Không ghi nhận việc dùng ứng dụng này trong khoảng thời gian này.",
+  "the configuration changed since this page read it; nothing was saved, try again": "cấu hình đã thay đổi kể từ khi trang này đọc nó; chưa lưu gì, hãy thử lại"
 }

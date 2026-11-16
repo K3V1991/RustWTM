@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "వెర్షన్ {0} అందుబాటులో ఉంది.",
   "Show the update": "అప్‌డేట్ చూపించు",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} విశ్లేషణ ఆగగానే {1} విశ్లేషించబడుతుంది.",
-  "No usage of this app was recorded in this period.": "ఈ వ్యవధిలో ఈ యాప్ వినియోగం నమోదు కాలేదు."
+  "No usage of this app was recorded in this period.": "ఈ వ్యవధిలో ఈ యాప్ వినియోగం నమోదు కాలేదు.",
+  "the configuration changed since this page read it; nothing was saved, try again": "ఈ పేజీ చదివిన తర్వాత కాన్ఫిగరేషన్ మారింది; ఏదీ సేవ్ కాలేదు, మళ్లీ ప్రయత్నించండి"
 }

@@ -241,7 +241,12 @@ pub fn settings(ui: &mut Ui, data: &Data, view: &mut ConfigView) -> Vec<UiComman
         };
         let save = crate::theme::primary_action(ui, admin && dirty && valid.is_ok(), label);
         if save.clicked() {
-            commands.push(UiCommand::SaveConfig(view.text.clone()));
+            // "Save and replace" overwrites on purpose; a plain save only applies
+            // to the text it was edited from.
+            commands.push(UiCommand::SaveConfig {
+                toml: view.text.clone(),
+                base: view.original.clone().filter(|_| !view.conflict),
+            });
         }
         if ui
             .add_enabled(dirty, egui::Button::new(crate::i18n::tr("Discard changes")))

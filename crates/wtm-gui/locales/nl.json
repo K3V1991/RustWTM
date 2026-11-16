@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "Versie {0} is beschikbaar.",
   "Show the update": "Update tonen",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} wordt geanalyseerd zodra de analyse van {0} is gestopt.",
-  "No usage of this app was recorded in this period.": "In deze periode is geen gebruik van deze app vastgelegd."
+  "No usage of this app was recorded in this period.": "In deze periode is geen gebruik van deze app vastgelegd.",
+  "the configuration changed since this page read it; nothing was saved, try again": "de configuratie is gewijzigd sinds deze pagina haar las; er is niets opgeslagen, probeer het opnieuw"
 }

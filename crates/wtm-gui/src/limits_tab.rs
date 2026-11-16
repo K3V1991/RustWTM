@@ -294,7 +294,7 @@ egui::Grid::new("app_limits_grid")
                     if admin && crate::context_actions::action(ui, crate::i18n::tr("Edit")) { view.edit(l); }
                     if admin && crate::context_actions::action(ui, crate::i18n::tr("Remove")) {
                         match remove_app_limit(text, &l.name, l.scope) {
-                            Ok(new) => commands.push(UiCommand::SaveConfig(new)),
+                            Ok(new) => commands.push(UiCommand::save_config(text, new)),
                             Err(e) => view.error = Some(e),
                         }
                     }
@@ -355,7 +355,7 @@ egui::Grid::new("app_limits_grid")
 .clicked()
                     {
                             match remove_app_limit(text, &l.name, l.scope) {
-                                Ok(new) => commands.push(UiCommand::SaveConfig(new)),
+                                Ok(new) => commands.push(UiCommand::save_config(text, new)),
                                 Err(e) => view.error = Some(e),
                             }
                         }
@@ -468,7 +468,7 @@ egui::Grid::new("app_limits_grid")
             {
                 match view.apply(text) {
                     Ok(new) => {
-                        commands.push(UiCommand::SaveConfig(new));
+                        commands.push(UiCommand::save_config(text, new));
                         view.saving = Some(candidate);
                         view.error = None;
                     }
@@ -579,7 +579,7 @@ mod tests {
             .1
             .iter()
             .find_map(|c| match c {
-                UiCommand::SaveConfig(t) => Some(t.clone()),
+                UiCommand::SaveConfig { toml: t, .. } => Some(t.clone()),
                 _ => None,
             })
             .expect("saved");

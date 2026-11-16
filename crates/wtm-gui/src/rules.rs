@@ -410,7 +410,7 @@ impl View {
     if text!=&base{ui.label(crate::i18n::tr("Configuration changed. Close this review and prepare it again."));}
    });
             if save {
-                command = Some(crate::backend::UiCommand::SaveConfig(next));
+                command = Some(crate::backend::UiCommand::save_config(&base, next));
                 self.pending = None;
                 match self.pending_rule.take() {
                     // Kept until the reloaded configuration has it.
@@ -508,7 +508,7 @@ mod tests {
             .with_size([1100.0, 1800.0])
             .build_ui_state(
                 move |ui, v: &mut View| {
-                    if let Some(crate::backend::UiCommand::SaveConfig(text)) =
+                    if let Some(crate::backend::UiCommand::SaveConfig { toml: text, .. }) =
                         v.show(ui, &shared.lock().unwrap())
                     {
                         *out.lock().unwrap() = Some(text);

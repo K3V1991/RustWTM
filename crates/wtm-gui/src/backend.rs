@@ -512,8 +512,13 @@ pub enum UiCommand {
         name: String,
         op: ServiceOp,
     },
-    /// Replace the service's configuration file (admin only).
-    SaveConfig(String),
+    /// Replace the service's configuration file (admin only). With `base`,
+    /// only while the service still has that text: an edit built from an
+    /// older text would undo what was saved since.
+    SaveConfig {
+        toml: String,
+        base: Option<String>,
+    },
     /// Replace the Telegram bot settings (admin only).
     SaveTelegram(wtm_policy::TelegramConfig),
     /// Have the service send a test message to the allowed chats.
@@ -557,6 +562,17 @@ pub enum UiCommand {
     CheckUpdate,
     /// Download, verify and install this release, then restart.
     InstallUpdate(wtm_core::update::Release),
+}
+
+impl UiCommand {
+    /// Saves `toml`, made from `base`, unless the service's text has
+    /// changed since.
+    pub fn save_config(base: &str, toml: String) -> Self {
+        Self::SaveConfig {
+            toml,
+            base: Some(base.to_owned()),
+        }
+    }
 }
 
 /// Where the update check stands.
@@ -1602,14 +1618,33 @@ impl Worker {
                 (self.calm)(self.window.load(Ordering::Relaxed));
             }
             UiCommand::HoldAlert => self.data().alert_watch.held = true,
-            UiCommand::SaveConfig(toml) => {
+            UiCommand::SaveConfig { toml, base } => {
                 let result = match self.client.as_mut() {
                     None => Err(without_service(&self.data, NO_CONFIG)),
-                    Some(c) => match c.call(&Request::SetConfig { toml }) {
-                        Ok(Response::Done) => Ok(()),
-                        Ok(other) => Err(unexpected(other).to_string()),
-                        Err(e) => Err(e.to_string()),
-                    },
+                    Some(c) => {
+                        let current = match &base {
+                            None => Ok(None),
+                            Some(_) => match c.call(&Request::GetConfig) {
+                                Ok(Response::Config { toml, .. }) => Ok(Some(toml)),
+                                Ok(other) => Err(unexpected(other).to_string()),
+                                Err(e) => Err(e.to_string()),
+                            },
+                        };
+                        match current {
+                            Err(e) => Err(e),
+                            Ok(Some(now)) if base.as_deref() != Some(now.as_str()) => Err(
+                                crate::i18n::tr(
+                                    "the configuration changed since this page read it; nothing was saved, try again",
+                                )
+                                .to_owned(),
+                            ),
+                            Ok(_) => match c.call(&Request::SetConfig { toml }) {
+                                Ok(Response::Done) => Ok(()),
+                                Ok(other) => Err(unexpected(other).to_string()),
+                                Err(e) => Err(e.to_string()),
+                            },
+                        }
+                    }
                 };
                 self.data().message = Some(match result {
                     Ok(()) => (
@@ -3568,7 +3603,10 @@ mod tests {
         let no_history = format!("{NO_SERVICE}, which is not running.");
         let no_config = format!("{NO_CONFIG}, which is not running.");
         assert!(matches!(&w.data().app_history, Some(Err(e)) if *e == no_history));
-        w.handle(UiCommand::SaveConfig(String::new()));
+        w.handle(UiCommand::SaveConfig {
+            toml: String::new(),
+            base: None,
+        });
         assert!(message(&w).1.ends_with(&no_config));
         w.handle(UiCommand::TestTelegram);
         assert!(message(&w).1.contains(NO_TELEGRAM));
@@ -3940,11 +3978,30 @@ mod tests {
         assert!(matches!(&w.data().details, Some((_, Err(e))) if e == "denied"));
         w.handle(UiCommand::LoadHistory { hours: 24 });
         assert!(matches!(w.data().app_history, Some(Ok(_))));
-        w.handle(UiCommand::SaveConfig("dry_run = true\n".into()));
+        w.handle(UiCommand::SaveConfig {
+            toml: "dry_run = true\n".into(),
+            base: None,
+        });
         assert_eq!(message(&w).0, EventLevel::Info);
         assert!(
             matches!(&w.data().config, Some(Ok((path, toml))) if path == r"C:\cfg.toml" && toml.starts_with("dry_run"))
         );
+        // An edit made from an older text (a second removal sent before the
+        // first one's reload) would undo the first: it is refused.
+        w.data().message = None;
+        w.handle(UiCommand::save_config(
+            "dry_run = false\n",
+            "dry_run = false\n[[kill]]\nname = \"a.exe\"\n".into(),
+        ));
+        let (level, text) = message(&w);
+        assert_eq!(level, EventLevel::Error);
+        assert!(text.contains("changed since this page read it"), "{text}");
+        // Made from what the service has: saved.
+        w.handle(UiCommand::save_config(
+            "dry_run = true\n",
+            "dry_run = false\n".into(),
+        ));
+        assert_eq!(message(&w).0, EventLevel::Info);
         w.handle(UiCommand::LoadSeries {
             app: "x.exe".into(),
             hours: 24,
@@ -4159,7 +4216,10 @@ mod tests {
             hours: 1,
         });
         assert!(matches!(&w.data().series, Some((_, 1, Err(e))) if e == "unknown app"));
-        w.handle(UiCommand::SaveConfig(String::new()));
+        w.handle(UiCommand::SaveConfig {
+            toml: String::new(),
+            base: None,
+        });
         let (level, text) = message(&w);
         assert_eq!(level, EventLevel::Error);
         assert!(text.ends_with("invalid configuration: x"), "{text}");
@@ -4180,7 +4240,10 @@ mod tests {
         w.client = Some(hang_up_after_hello(&w.pipe, true));
         w.handle(UiCommand::LoadHistory { hours: 1 });
         assert!(matches!(w.data().app_history, Some(Err(_))));
-        w.handle(UiCommand::SaveConfig(String::new()));
+        w.handle(UiCommand::SaveConfig {
+            toml: String::new(),
+            base: None,
+        });
         assert_eq!(message(&w).0, EventLevel::Error);
         assert!(matches!(w.data().config, Some(Err(_))));
         // The connection for the request cannot be made either.

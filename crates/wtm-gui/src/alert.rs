@@ -350,7 +350,7 @@ pub fn dialog(
                             .clicked()
                             && let Some(new) = crate::settings::set_dry_run(text, false)
                         {
-                            commands.push(UiCommand::SaveConfig(new));
+                            commands.push(UiCommand::save_config(text, new));
                         }
                     });
                 }

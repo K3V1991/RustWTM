@@ -1893,5 +1893,6 @@
   "Version {0} is available.": "Доступна версия {0}.",
   "Show the update": "Показать обновление",
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} будет проанализирован, как только остановится анализ {0}.",
-  "No usage of this app was recorded in this period.": "За этот период использование этого приложения не записано."
+  "No usage of this app was recorded in this period.": "За этот период использование этого приложения не записано.",
+  "the configuration changed since this page read it; nothing was saved, try again": "конфигурация изменилась с тех пор, как эта страница её прочитала; ничего не сохранено, повторите попытку"
 }
