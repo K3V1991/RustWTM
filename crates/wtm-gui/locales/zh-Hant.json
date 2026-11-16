@@ -1897,5 +1897,6 @@
   "the configuration changed since this page read it; nothing was saved, try again": "自此頁面讀取後設定已變更；未儲存任何內容，請重試",
   "The settings changed while this was open; it cannot be applied now.": "開啟期間設定已變更；現在無法套用。",
   "Not running": "未執行",
-  "Blocked programs could not be read: {0}": "無法讀取被封鎖的程式：{0}"
+  "Blocked programs could not be read: {0}": "無法讀取被封鎖的程式：{0}",
+  "Nothing matches the filter.": "沒有符合篩選條件的項目。"
 }

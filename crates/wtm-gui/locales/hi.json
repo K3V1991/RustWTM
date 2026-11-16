@@ -1897,5 +1897,6 @@
   "the configuration changed since this page read it; nothing was saved, try again": "इस पेज के पढ़ने के बाद कॉन्फ़िगरेशन बदल गया; कुछ भी सहेजा नहीं गया, फिर से प्रयास करें",
   "The settings changed while this was open; it cannot be applied now.": "इसके खुले रहते सेटिंग बदल गईं; अभी इसे लागू नहीं किया जा सकता।",
   "Not running": "नहीं चल रहे",
-  "Blocked programs could not be read: {0}": "ब्लॉक किए गए प्रोग्राम पढ़े नहीं जा सके: {0}"
+  "Blocked programs could not be read: {0}": "ब्लॉक किए गए प्रोग्राम पढ़े नहीं जा सके: {0}",
+  "Nothing matches the filter.": "फ़िल्टर से कुछ भी मेल नहीं खाता।"
 }

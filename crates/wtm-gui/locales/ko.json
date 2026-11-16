@@ -1897,5 +1897,6 @@
   "the configuration changed since this page read it; nothing was saved, try again": "이 페이지가 읽은 뒤 구성이 변경되었습니다. 아무것도 저장되지 않았습니다. 다시 시도하세요",
   "The settings changed while this was open; it cannot be applied now.": "열려 있는 동안 설정이 바뀌어 지금은 적용할 수 없습니다.",
   "Not running": "실행 중 아님",
-  "Blocked programs could not be read: {0}": "차단된 프로그램을 읽을 수 없습니다: {0}"
+  "Blocked programs could not be read: {0}": "차단된 프로그램을 읽을 수 없습니다: {0}",
+  "Nothing matches the filter.": "필터와 일치하는 항목이 없습니다."
 }

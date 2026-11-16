@@ -194,7 +194,7 @@ pub fn show(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Intent
         Some(Err(e)) => {
             crate::theme::colored(ui, BAD, e);
         }
-        Some(Ok(list)) => list_view(ui, list),
+        Some(Ok(list)) => list_view(ui, sel, list),
     }
     Some(())
 }
@@ -203,7 +203,7 @@ fn bytes(n: u64) -> String {
     format_bytes(n as f64)
 }
 
-fn list_view(ui: &mut Ui, list: &MemoryList) {
+fn list_view(ui: &mut Ui, sel: &ProcessRef, list: &MemoryList) {
     if list.incomplete {
         ui.weak(crate::i18n::tr(
             "The map is partial: the process has very many regions, or reading took too long.",
@@ -252,7 +252,8 @@ fn list_view(ui: &mut Ui, list: &MemoryList) {
         ));
     }
 
-    let filter_id = egui::Id::unique("memory_map_filter");
+    // Per process, as the Handles filter.
+    let filter_id = egui::Id::unique(("memory_map_filter", sel.pid, sel.create_time));
     let mut filter: String = ui.data(|d| d.get_temp(filter_id)).unwrap_or_default();
     let label = crate::i18n::tr("Filter by type or name");
     let edit = ui.add(
@@ -272,6 +273,10 @@ fn list_view(ui: &mut Ui, list: &MemoryList) {
         .filter(|(_, key)| needle.is_empty() || key.contains(&needle))
         .map(|(a, _)| a)
         .collect();
+    if matching.is_empty() && !needle.is_empty() {
+        ui.weak(crate::i18n::tr("Nothing matches the filter."));
+        return;
+    }
     if matching.len() > SHOWN_ALLOCATIONS {
         ui.weak(crate::i18n::format(
             "Showing the first {0} of {1}.",

@@ -1897,5 +1897,6 @@
   "the configuration changed since this page read it; nothing was saved, try again": "このページが読み込んだ後に構成が変更されました。何も保存されていません。もう一度お試しください",
   "The settings changed while this was open; it cannot be applied now.": "開いている間に設定が変わったため、今は適用できません。",
   "Not running": "実行中でない",
-  "Blocked programs could not be read: {0}": "ブロックされたプログラムを読み取れませんでした: {0}"
+  "Blocked programs could not be read: {0}": "ブロックされたプログラムを読み取れませんでした: {0}",
+  "Nothing matches the filter.": "フィルターに一致するものはありません。"
 }

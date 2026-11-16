@@ -106,7 +106,8 @@ fn list_view(ui: &mut Ui, sel: &ProcessRef, list: &WindowList, intents: &mut Vec
         return;
     }
 
-    let filter_id = egui::Id::unique("windows_filter");
+    // Per process, as the Handles filter.
+    let filter_id = egui::Id::unique(("windows_filter", sel.pid, sel.create_time));
     let hidden_id = egui::Id::unique("windows_hidden");
     let mut filter: String = ui.data(|d| d.get_temp(filter_id)).unwrap_or_default();
     let mut hidden: bool = ui.data(|d| d.get_temp(hidden_id)).unwrap_or(false);
@@ -138,6 +139,10 @@ fn list_view(ui: &mut Ui, sel: &ProcessRef, list: &WindowList, intents: &mut Vec
         .collect();
     if matching.is_empty() && needle.is_empty() {
         ui.weak(crate::i18n::tr("No visible windows."));
+        return;
+    }
+    if matching.is_empty() && !needle.is_empty() {
+        ui.weak(crate::i18n::tr("Nothing matches the filter."));
         return;
     }
     if matching.len() > SHOWN_WINDOWS {

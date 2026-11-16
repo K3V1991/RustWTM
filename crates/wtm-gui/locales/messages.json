@@ -11392,5 +11392,11 @@
     "de": "Blockierte Programme konnten nicht gelesen werden: {0}",
     "fr": "Impossible de lire les programmes bloqués : {0}",
     "es": "No se pudieron leer los programas bloqueados: {0}"
+  },
+  "Nothing matches the filter.": {
+    "tr": "Filtreyle eşleşen bir şey yok.",
+    "de": "Nichts entspricht dem Filter.",
+    "fr": "Rien ne correspond au filtre.",
+    "es": "Nada coincide con el filtro."
   }
 }

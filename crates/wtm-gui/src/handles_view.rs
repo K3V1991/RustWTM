@@ -93,12 +93,12 @@ pub fn show(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Intent
         Some(Err(e)) => {
             crate::theme::colored(ui, BAD, e);
         }
-        Some(Ok(list)) => list_view(ui, list),
+        Some(Ok(list)) => list_view(ui, sel, list),
     }
     Some(())
 }
 
-fn list_view(ui: &mut Ui, list: &HandleList) {
+fn list_view(ui: &mut Ui, sel: &ProcessRef, list: &HandleList) {
     if list.too_many {
         crate::theme::colored(
             ui,
@@ -125,7 +125,9 @@ fn list_view(ui: &mut Ui, list: &HandleList) {
         }
     });
 
-    let filter_id = egui::Id::unique("handles_filter");
+    // Per process: a filter typed for one process does not hide the next
+    // one's handles.
+    let filter_id = egui::Id::unique(("handles_filter", sel.pid, sel.create_time));
     let unnamed_id = egui::Id::unique("handles_unnamed");
     let mut filter: String = ui.data(|d| d.get_temp(filter_id)).unwrap_or_default();
     // As in Process Explorer, only named handles unless asked; without
@@ -160,6 +162,10 @@ fn list_view(ui: &mut Ui, list: &HandleList) {
         })
         .map(|(h, _)| h)
         .collect();
+    if matching.is_empty() && !needle.is_empty() {
+        ui.weak(crate::i18n::tr("Nothing matches the filter."));
+        return;
+    }
     if matching.len() > SHOWN_HANDLES {
         ui.weak(crate::i18n::format(
             "Showing the first {0} of {1}.",
@@ -217,6 +223,39 @@ mod tests {
             name: name.map(Into::into),
             access: 0,
         }
+    }
+
+    #[test]
+    fn a_filter_belongs_to_its_process() {
+        use egui_kittest::{Harness, kittest::Queryable};
+        let list = HandleList::from(HandleReport {
+            total: 2,
+            handles: vec![handle("Event", None, 0x18), handle("File", None, 0x1C)],
+            can_name: false,
+            names_incomplete: false,
+        });
+        let process = |pid| ProcessRef {
+            pid,
+            create_time: 1,
+            name: "a.exe".into(),
+        };
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([600.0, 500.0])
+            .build_ui_state(
+                move |ui, sel: &mut ProcessRef| list_view(ui, sel, &list),
+                process(100),
+            );
+        h.run_steps(2);
+        h.get_by_label("Filter by type or name").click();
+        h.run_steps(1);
+        h.get_by_label("Filter by type or name").type_text("zzz");
+        h.run_steps(2);
+        assert!(h.query_by_label("Nothing matches the filter.").is_some());
+        // Another process: its handles are not hidden by that filter.
+        *h.state_mut() = process(200);
+        h.run_steps(2);
+        assert!(h.query_by_label("0x18").is_some() && h.query_by_label("0x1C").is_some());
     }
 
     #[test]
