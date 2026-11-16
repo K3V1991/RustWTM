@@ -73,6 +73,20 @@ All notable changes to this project are documented here. The format follows
   that is not elevated restarted the window and dropped the change.
 - The CPU frequency and fan-control confirmations check again before
   applying, in case the service, rights or readings changed meanwhile.
+- An update already found stays offered when a later check fails
+  offline. Removing an entry from a config.toml that writes the kill
+  list, limits or rules as an inline array now says it cannot, instead
+  of reporting a removal that did not happen.
+- The Network tab reads RustWTM's firewall rules again each minute and
+  shows a read error; the Disks tab no longer polls disk activity during
+  an analysis or on File owners.
+- Inspector filters (Handles, Windows, Memory map) are kept per process
+  and say when nothing matches; Containers sort CPU and memory by what
+  they show, and "Stopped" is "Not running".
+- Sensors' Reset min/max no longer adds the current sample twice; the
+  welcome guide's "Continue to overview" goes to the overview; Overview
+  offers "Restart as administrator" only to a window that is not
+  elevated; "Show hidden devices" counts only devices present.
 - Limits could show usage as "-0.00 cores".
 - Largest files showed nothing for an unknown modification time, which
   put Show under Modified; it shows a dash.
