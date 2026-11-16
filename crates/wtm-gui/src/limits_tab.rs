@@ -414,6 +414,7 @@ egui::Grid::new("app_limits_grid")
                 view.cpu,
                 egui::DragValue::new(&mut view.cores)
                     .range(0.1..=cpus as f32)
+                    .clamp_existing_to_range(false)
                     .speed(0.05)
                     .max_decimals(2)
                     .suffix(crate::i18n::tr(" cores")),
@@ -428,6 +429,7 @@ egui::Grid::new("app_limits_grid")
                 view.memory,
                 egui::DragValue::new(&mut view.gb)
                     .range(0.1..=4096.0)
+                    .clamp_existing_to_range(false)
                     .speed(0.1)
                     .max_decimals(2)
                     .suffix(crate::i18n::tr(" GB")),
@@ -540,6 +542,54 @@ mod tests {
         let two = Config::from_toml(&v.apply(text).unwrap()).unwrap();
         assert_eq!(two.limits.len(), 2);
         assert!(v.apply("x = [").is_err());
+    }
+
+    #[test]
+    fn showing_a_limit_does_not_change_its_budget() {
+        use egui_kittest::{Harness, kittest::Queryable};
+        // No sample yet, so the processor count is not known, and a hand-set
+        // memory budget below the field's lower end.
+        let text =
+            "[[limit]]\nname = \"a.exe\"\ncpu_cores = 2.0\nmemory_gb = 0.05\nscope = \"group\"\n";
+        let data = Data {
+            config: Some(Ok(("config.toml".into(), text.into()))),
+            mode: crate::backend::Mode::Service {
+                admin: true,
+                verified: true,
+            },
+            ..Data::default()
+        };
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_ui_state(
+                move |ui, s: &mut (LimitsView, Vec<UiCommand>)| {
+                    let commands = limits_tab(ui, &data, &mut s.0);
+                    s.1.extend(commands);
+                },
+                (LimitsView::default(), Vec::new()),
+            );
+        h.run();
+        h.get_by_label("Edit").click();
+        h.run_steps(3);
+        h.get_by_label("Save limit").click();
+        h.run();
+        let saved = h
+            .state()
+            .1
+            .iter()
+            .find_map(|c| match c {
+                UiCommand::SaveConfig(t) => Some(t.clone()),
+                _ => None,
+            })
+            .expect("saved");
+        let limit = &Config::from_toml(&saved).unwrap().limits[0];
+        assert_eq!(
+            limit.cpu_cores,
+            Some(2.0),
+            "not cut to the 1 core assumed before a sample"
+        );
+        assert_eq!(limit.memory_gb, Some(0.05));
     }
 
     #[test]

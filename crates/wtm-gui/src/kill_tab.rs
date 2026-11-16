@@ -503,6 +503,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                 view.automatic,
                 egui::DragValue::new(&mut view.cpu)
                     .range(1.0..=100.0)
+                    .clamp_existing_to_range(false)
                     .suffix(crate::i18n::tr("% CPU")),
             );
             ui.label(crate::i18n::tr("for"));
@@ -510,6 +511,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                 view.automatic,
                 egui::DragValue::new(&mut view.seconds)
                     .range(1..=3600)
+                    .clamp_existing_to_range(false)
                     .suffix(crate::i18n::tr(" s")),
             );
             ui.add_space(8.0);
@@ -523,6 +525,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                     view.busy_pc,
                     egui::DragValue::new(&mut view.system_cpu)
                         .range(1.0..=100.0)
+                        .clamp_existing_to_range(false)
                         .percent_affix(),
                 );
                 ui.add_space(8.0);

@@ -41,8 +41,12 @@ fn threshold(ui: &mut Ui, label: &str, value: &mut Option<f32>) {
             *value = enabled.then_some(20.0);
         }
         if let Some(value) = value {
-            ui.add(egui::Slider::new(value, 0.1..=100.0).percent_affix())
-                .labelled_by(label.id);
+            ui.add(
+                egui::Slider::new(value, 0.1..=100.0)
+                    .clamping(egui::SliderClamping::Edits)
+                    .percent_affix(),
+            )
+            .labelled_by(label.id);
         }
     });
 }
@@ -195,8 +199,13 @@ impl View {
                             when.memory_above_mb = enabled.then_some(1024);
                         }
                         if let Some(v) = &mut when.memory_above_mb {
-                            ui.add(egui::DragValue::new(v).range(1..=1_048_576).suffix(" MiB"))
-                                .labelled_by(label.id);
+                            ui.add(
+                                egui::DragValue::new(v)
+                                    .range(1..=1_048_576)
+                                    .clamp_existing_to_range(false)
+                                    .suffix(" MiB"),
+                            )
+                            .labelled_by(label.id);
                         }
                     });
                     ui.horizontal_wrapped(|ui| {
@@ -204,6 +213,7 @@ impl View {
                         ui.add(
                             egui::DragValue::new(&mut when.for_secs)
                                 .range(1..=86400)
+                                .clamp_existing_to_range(false)
                                 .suffix(crate::i18n::tr(" s")),
                         )
                         .labelled_by(label.id);
@@ -216,16 +226,28 @@ impl View {
                         let label = ui.label(action.to_string());
                         match action {
                             Action::CpuCap(v) => {
-                                ui.add(egui::Slider::new(v, 0.1..=100.0).percent_affix())
-                                    .labelled_by(label.id);
+                                ui.add(
+                                    egui::Slider::new(v, 0.1..=100.0)
+                                        .clamping(egui::SliderClamping::Edits)
+                                        .percent_affix(),
+                                )
+                                .labelled_by(label.id);
                             }
                             Action::CpuCapRelative(v) => {
-                                ui.add(egui::Slider::new(v, 0.01..=1.0))
-                                    .labelled_by(label.id);
+                                ui.add(
+                                    egui::Slider::new(v, 0.01..=1.0)
+                                        .clamping(egui::SliderClamping::Edits),
+                                )
+                                .labelled_by(label.id);
                             }
                             Action::MemoryCapMb(v) => {
-                                ui.add(egui::DragValue::new(v).range(1..=1_048_576).suffix(" MiB"))
-                                    .labelled_by(label.id);
+                                ui.add(
+                                    egui::DragValue::new(v)
+                                        .range(1..=1_048_576)
+                                        .clamp_existing_to_range(false)
+                                        .suffix(" MiB"),
+                                )
+                                .labelled_by(label.id);
                             }
                             Action::Priority(v) => {
                                 egui::ComboBox::from_id_salt(("rule-priority", index))

@@ -2412,6 +2412,7 @@ fn window_settings(ui: &mut Ui, state: &mut UiState, data: &Data) -> Option<UiCo
                 ui.add_enabled(
                     a.enabled,
                     egui::Slider::new(&mut a.threshold, 50.0..=100.0)
+                        .clamping(egui::SliderClamping::Edits)
                         .percent_affix()
                         .fixed_decimals(0)
                         .text("CPU"),

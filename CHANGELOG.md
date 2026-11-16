@@ -40,7 +40,9 @@ All notable changes to this project are documented here. The format follows
   any input: number fields pulled hand-set values into their range
   (history_days 730 became 365) and sliders rounded them. Shown values
   are now left alone until the user changes them, and the governor's two
-  thresholds can no longer cross and lock the form.
+  thresholds can no longer cross and lock the form. Kill list, Limits
+  and the rule editor do the same: editing a 2-core limit before the
+  first sample no longer saves it as 1 core.
 - Clicking a Find handle or DLL hit never loaded the process's details.
 - A wait-chain analysis that could not run read "0 threads, 0 blocked";
   it now says it is busy, or that its counts are partial.
