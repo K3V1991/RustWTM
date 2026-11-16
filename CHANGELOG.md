@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.35.0] - 2026-11-16
+
+A review release: every page was gone over visually and functionally.
+Settings no longer rewrites config.toml when it is only opened, a save
+made from an older text is refused instead of undoing the other change,
+and numbers use the language's decimal sign. IPC stays at protocol 17,
+so the GUI and the service of 0.34.0 and 0.35.0 work together.
+
 ### Changed
 
 - Every page was reviewed visually in English and Turkish, light and
@@ -1848,7 +1856,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.34.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.35.0...HEAD
+[0.35.0]: https://github.com/rustwtm/rustwtm/compare/v0.34.0...v0.35.0
 [0.34.0]: https://github.com/rustwtm/rustwtm/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/rustwtm/rustwtm/compare/v0.32.0...v0.33.0
 [0.32.0]: https://github.com/rustwtm/rustwtm/compare/v0.31.0...v0.32.0

@@ -43,7 +43,29 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.34.0
+## New in 0.35.0
+
+[Release scope and validation](docs/0.35.0-review.md)
+
+A review release: every page was gone over visually and functionally.
+
+- **Settings leave config.toml alone** until something is changed: opening
+  Service settings no longer pulls hand-set values into range or rounds
+  them, and the governor's two thresholds cannot cross.
+- **No lost edits:** a save built from an older text (two quick removals,
+  or the file edited meanwhile) is refused with a message and the page
+  reloads, instead of undoing the other change.
+- **Decimal sign:** Turkish, German, French and nine more languages write
+  12,5 and 8,0 GiB, and number fields accept either sign. Copied
+  diagnostics, logs and config.toml keep the point.
+- **Fixes across the pages:** Find hits load the process, wait chains say
+  when they are partial, Ports sorts addresses, Restart Windows Explorer
+  is offered only on the desktop's Explorer, and more in the
+  [changelog](CHANGELOG.md).
+
+IPC stays at protocol 17, so a 0.34.0 service keeps working with this GUI.
+
+## Included since 0.34.0
 
 [Release scope and validation](docs/0.34.0-review.md)
 
@@ -500,8 +522,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.34.0-x64.msi            # interactive
-msiexec /i RustWTM-0.34.0-x64.msi /qn        # silent
+msiexec /i RustWTM-0.35.0-x64.msi            # interactive
+msiexec /i RustWTM-0.35.0-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc
