@@ -252,8 +252,17 @@ pub enum NetworkAction {
 
 /// Programs cut off the network, each with a way back.
 fn blocked_programs(ui: &mut Ui, data: &Data, action: &mut Option<NetworkAction>) {
-    let Some(Ok(list)) = &data.firewall else {
-        return;
+    let list = match &data.firewall {
+        Some(Ok(list)) => list,
+        // Said, so an empty line is not taken for "nothing is blocked".
+        Some(Err(e)) => {
+            ui.weak(crate::i18n::format(
+                "Blocked programs could not be read: {0}",
+                std::slice::from_ref(e),
+            ));
+            return;
+        }
+        None => return,
     };
     if list.is_empty() {
         return;

@@ -1895,5 +1895,7 @@
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} sẽ được phân tích ngay khi việc phân tích {0} dừng lại.",
   "No usage of this app was recorded in this period.": "Không ghi nhận việc dùng ứng dụng này trong khoảng thời gian này.",
   "the configuration changed since this page read it; nothing was saved, try again": "cấu hình đã thay đổi kể từ khi trang này đọc nó; chưa lưu gì, hãy thử lại",
-  "The settings changed while this was open; it cannot be applied now.": "Cài đặt đã thay đổi trong lúc mục này mở; không thể áp dụng bây giờ."
+  "The settings changed while this was open; it cannot be applied now.": "Cài đặt đã thay đổi trong lúc mục này mở; không thể áp dụng bây giờ.",
+  "Not running": "Không chạy",
+  "Blocked programs could not be read: {0}": "Không đọc được các chương trình bị chặn: {0}"
 }

@@ -1455,6 +1455,23 @@ fn app_context_menu_keeps_its_group_when_live_totals_reorder() {
 }
 
 #[test]
+fn a_firewall_read_error_is_shown_not_taken_for_none_blocked() {
+    let mut d = data();
+    d.firewall = Some(Err("access denied".into()));
+    let mut h = Harness::builder()
+        .allow_missing_glyphs()
+        .with_size([1200.0, 900.0])
+        .build_ui(move |ui| {
+            let _ = views::network(ui, &d, &mut String::new(), None);
+        });
+    h.run_steps(2);
+    assert!(
+        h.query_by_label("Blocked programs could not be read: access denied")
+            .is_some()
+    );
+}
+
+#[test]
 fn an_empty_network_list_clears_every_filter_that_hides_rows() {
     let d = data();
     // A TCP listener on 8080, but the UDP chip is on.

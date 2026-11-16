@@ -11380,5 +11380,17 @@
     "de": "Die Einstellungen haben sich geändert, während dies geöffnet war; es kann jetzt nicht angewendet werden.",
     "fr": "Les paramètres ont changé pendant que ceci était ouvert ; impossible de l'appliquer maintenant.",
     "es": "La configuración cambió mientras esto estaba abierto; ahora no se puede aplicar."
+  },
+  "Not running": {
+    "tr": "Çalışmıyor",
+    "de": "Nicht aktiv",
+    "fr": "Non démarrés",
+    "es": "Sin ejecutar"
+  },
+  "Blocked programs could not be read: {0}": {
+    "tr": "Engellenen programlar okunamadı: {0}",
+    "de": "Blockierte Programme konnten nicht gelesen werden: {0}",
+    "fr": "Impossible de lire les programmes bloqués : {0}",
+    "es": "No se pudieron leer los programas bloqueados: {0}"
   }
 }

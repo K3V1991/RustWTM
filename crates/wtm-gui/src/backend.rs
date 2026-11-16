@@ -689,6 +689,7 @@ impl Backend {
         let mut worker = Worker {
             local_hardware: None,
             startup_impact_at: None,
+            firewall_at: None,
             threads: Default::default(),
             data: data.clone(),
             ctx,
@@ -763,6 +764,8 @@ struct Worker {
     local_hardware: Option<wtm_core::hardware::LocalHardware>,
     /// When startup impact was last read.
     startup_impact_at: Option<Instant>,
+    /// When the firewall rules RustWTM made were last read.
+    firewall_at: Option<Instant>,
     /// Reads the threads panel's process while it is shown.
     threads: crate::threads_view::ThreadReader,
     data: Arc<Mutex<Data>>,
@@ -2171,8 +2174,14 @@ impl Worker {
             Panel::Network => {
                 let r = wtm_core::connections().map_err(|e| e.to_string());
                 self.data().connections = Some(r);
-                // Rules change rarely: read once, then after each change.
-                if self.data().firewall.is_none() {
+                // Rules change rarely: read after each change made here, and
+                // once a minute for those made elsewhere or a failed read.
+                if self
+                    .firewall_at
+                    .is_none_or(|t| t.elapsed() >= FIREWALL_REREAD)
+                    || self.data().firewall.is_none()
+                {
+                    self.firewall_at = Some(Instant::now());
                     let blocked = firewall_blocked(self.client.as_mut());
                     self.data().firewall = Some(blocked);
                 }
@@ -2702,6 +2711,9 @@ fn cached_signature(path: &str) -> wtm_core::Signature {
     s
 }
 
+/// How often the Network tab reads the firewall rules again.
+const FIREWALL_REREAD: Duration = Duration::from_secs(60);
+
 /// Programs blocked from the network, from the service when connected.
 fn firewall_blocked(client: Option<&mut Client>) -> Result<Vec<String>, String> {
     match client {
@@ -3075,6 +3087,7 @@ mod tests {
         Worker {
             local_hardware: None,
             startup_impact_at: None,
+            firewall_at: None,
             threads: Default::default(),
             data: Arc::new(Mutex::new(Data::default())),
             ctx: egui::Context::default(),
@@ -3486,6 +3499,22 @@ mod tests {
             std::thread::sleep(Duration::from_millis(10));
         }
         assert!(Updater::default().latest as usize != 0);
+    }
+
+    #[test]
+    fn firewall_rules_are_read_again_after_a_minute() {
+        let mut w = worker();
+        let marker = || Some(Ok(vec!["marker.exe".to_owned()]));
+        // Read a moment ago: kept.
+        w.firewall_at = Some(Instant::now());
+        w.data().firewall = marker();
+        w.handle(UiCommand::Load(Panel::Network));
+        assert_eq!(w.data().firewall, marker());
+        // A minute later, rules made elsewhere (or a failed read) are read
+        // again.
+        w.firewall_at = Instant::now().checked_sub(FIREWALL_REREAD);
+        w.handle(UiCommand::Load(Panel::Network));
+        assert_ne!(w.data().firewall, marker());
     }
 
     fn background_message(w: &Worker) -> (EventLevel, String) {

@@ -1895,5 +1895,7 @@
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} విశ్లేషణ ఆగగానే {1} విశ్లేషించబడుతుంది.",
   "No usage of this app was recorded in this period.": "ఈ వ్యవధిలో ఈ యాప్ వినియోగం నమోదు కాలేదు.",
   "the configuration changed since this page read it; nothing was saved, try again": "ఈ పేజీ చదివిన తర్వాత కాన్ఫిగరేషన్ మారింది; ఏదీ సేవ్ కాలేదు, మళ్లీ ప్రయత్నించండి",
-  "The settings changed while this was open; it cannot be applied now.": "ఇది తెరిచి ఉన్నప్పుడు సెట్టింగ్‌లు మారాయి; ఇప్పుడు దీన్ని వర్తింపజేయలేరు."
+  "The settings changed while this was open; it cannot be applied now.": "ఇది తెరిచి ఉన్నప్పుడు సెట్టింగ్‌లు మారాయి; ఇప్పుడు దీన్ని వర్తింపజేయలేరు.",
+  "Not running": "నడవడం లేదు",
+  "Blocked programs could not be read: {0}": "బ్లాక్ చేసిన ప్రోగ్రామ్‌లను చదవలేకపోయాం: {0}"
 }

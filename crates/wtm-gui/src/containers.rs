@@ -146,7 +146,8 @@ pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
             for (filter, label) in [
                 (0, crate::i18n::tr("All containers")),
                 (1, crate::i18n::tr("Running")),
-                (2, crate::i18n::tr("Stopped")),
+                // Paused, restarting and created ones too, not only stopped.
+                (2, crate::i18n::tr("Not running")),
             ] {
                 crate::theme::choice(ui, &mut view.filter, filter, label);
             }
@@ -215,16 +216,17 @@ pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
         );
     }
     let mut sort = crate::sort::Sort::load(ui, "containers", crate::sort::Sort::new(0, false));
+    let shown = |c: &Container| fresh(c, state, now).then_some((c.metrics.cpu, c.metrics.memory));
     sort.apply(&mut rows, |a, b, col| match col {
         0 => crate::sort::text(&a.name, &b.name),
         1 => crate::sort::text(&a.project, &b.project),
         2 => crate::sort::text(&a.state, &b.state),
-        3 => a
-            .metrics
-            .cpu
+        // By what the table shows: an old reading shows as a dash.
+        3 => shown(a)
+            .and_then(|m| m.0)
             .unwrap_or(-1.0)
-            .total_cmp(&b.metrics.cpu.unwrap_or(-1.0)),
-        4 => a.metrics.memory.cmp(&b.metrics.memory),
+            .total_cmp(&shown(b).and_then(|m| m.0).unwrap_or(-1.0)),
+        4 => shown(a).and_then(|m| m.1).cmp(&shown(b).and_then(|m| m.1)),
         _ => crate::sort::text(&a.image, &b.image),
     });
     let table_height = if view.selected.is_some() {
@@ -635,7 +637,7 @@ mod tests {
                 assert!(h.query_by_label("3 of 5 containers").is_some());
                 h.get_by_label("Clear search").click();
                 h.run();
-                h.get_all_by_label("Stopped").next().unwrap().click();
+                h.get_by_label("Not running").click();
                 h.run();
                 assert!(h.query_by_label("1 of 5 containers").is_some());
                 h.get_by_label("All containers").click();
