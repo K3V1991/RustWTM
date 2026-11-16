@@ -376,14 +376,26 @@ mod tests {
         }
     }
 
+    /// Whether `p` is a child of `parent`. Tests running alongside spawn
+    /// the same cmd and ping pair; when one of their cmd processes exits,
+    /// its PID can be reused here and its orphaned ping still names it as
+    /// parent. A real child started after its parent.
+    fn child_of(procs: &[ProcessInfo], p: &ProcessInfo, parent: u32) -> bool {
+        p.parent_pid == parent
+            && procs
+                .iter()
+                .find(|q| q.pid == parent)
+                .is_some_and(|q| p.create_time >= q.create_time)
+    }
+
     fn sample_with(pids: &[u32]) -> Vec<ProcessInfo> {
         let mut sampler = Sampler::new();
         crate::test_util::wait_for("children in the snapshot", || {
             let snap = sampler.sample().unwrap();
             let all = pids.iter().all(|pid| {
-                snap.processes
-                    .iter()
-                    .any(|p| p.parent_pid == *pid && p.name.eq_ignore_ascii_case("ping.exe"))
+                snap.processes.iter().any(|p| {
+                    child_of(&snap.processes, p, *pid) && p.name.eq_ignore_ascii_case("ping.exe")
+                })
             });
             all.then_some(snap.processes)
         })
@@ -452,7 +464,10 @@ mod tests {
         assert_eq!(budget.cpu, Some(12.5));
         assert_eq!(budget.memory, Some(1 << 30));
         // The children were put into (or inherited) the parent's job.
-        let child = procs.iter().find(|p| p.parent_pid == a.0.id()).unwrap();
+        let child = procs
+            .iter()
+            .find(|p| child_of(&procs, p, a.0.id()))
+            .unwrap();
         let h = ProcessHandle::open(child.pid, Access::QUERY).unwrap();
         assert!(
             limiter
@@ -515,7 +530,7 @@ mod tests {
         limiter.tick(&procs, 8);
         let children: Vec<u32> = procs
             .iter()
-            .filter(|p| p.parent_pid == a.0.id() || p.parent_pid == b.0.id())
+            .filter(|p| child_of(&procs, p, a.0.id()) || child_of(&procs, p, b.0.id()))
             // A console host may come and go with its parent; ping outlives it.
             .filter(|p| p.name.eq_ignore_ascii_case("ping.exe"))
             .map(|p| p.pid)
