@@ -2499,27 +2499,41 @@ fn window_settings(ui: &mut Ui, state: &mut UiState, data: &Data) -> Option<UiCo
             .prefer_administrator
             .get_or_insert_with(|| wtm_core::gui_startup::settings().administrator);
         let busy = data.gui_startup.as_ref().is_some_and(|s| s.busy);
+        // Administrator startup is kept in a task only an elevated window
+        // may change; from this window the tray start cannot be saved.
+        let needs_elevation = administrator && !data.elevated;
+        let mut turned_admin_on = false;
         let mut changed = false;
         ui.add_enabled_ui(!busy, |ui| {
-            changed |= crate::theme::option_switch(
+            let admin_switch = crate::theme::option_switch(
                 ui,
                 crate::theme::icon::ADMIN,
                 crate::i18n::tr("Always open RustWTM as administrator"),
                 "",
                 &mut administrator,
-            )
-            .changed();
-            changed |= crate::theme::option_switch(
-                ui,
-                crate::theme::icon::PLAY,
-                crate::i18n::tr("Start RustWTM in the tray when I sign in"),
-                "",
-                &mut on,
-            )
-            .changed();
+            );
+            turned_admin_on = admin_switch.changed() && administrator;
+            changed |= admin_switch.changed();
+            ui.add_enabled_ui(!needs_elevation, |ui| {
+                changed |= crate::theme::option_switch(
+                    ui,
+                    crate::theme::icon::PLAY,
+                    crate::i18n::tr("Start RustWTM in the tray when I sign in"),
+                    "",
+                    &mut on,
+                )
+                .changed();
+            });
+            if needs_elevation {
+                ui.weak(crate::i18n::tr(
+                    "Restart RustWTM as administrator to change administrator startup",
+                ));
+            }
         });
         if changed {
-            if administrator && !data.elevated {
+            // Only turning administrator start on restarts the window, as
+            // it asks for; another change is never dropped for a restart.
+            if turned_admin_on && !data.elevated {
                 command = Some(UiCommand::RestartElevated);
             } else {
                 state.autostart = Some(on);
@@ -5925,6 +5939,44 @@ mod tests {
                 "a pending save cannot enqueue another startup change"
             );
         }
+
+        // Administrator startup is on, but this window is not elevated (the
+        // UAC prompt was declined). Changing the tray start cannot be saved
+        // from here; it must not restart the window and drop the change.
+        let mut d = data();
+        d.elevated = false;
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1000.0, 700.0])
+            .build_ui_state(
+                |ui, s: &mut (UiState, Data, Option<UiCommand>)| {
+                    if let Some(command) = window_settings(ui, &mut s.0, &s.1) {
+                        s.2 = Some(command);
+                    }
+                },
+                (
+                    UiState {
+                        autostart: Some(false),
+                        prefer_administrator: Some(true),
+                        ..Default::default()
+                    },
+                    d,
+                    None,
+                ),
+            );
+        h.run();
+        {
+            use egui_kittest::kittest::NodeT;
+            let switch = h.get_by_label("Start RustWTM in the tray when I sign in");
+            assert!(switch.accesskit_node().is_disabled(), "said, not attempted");
+            switch.click();
+        }
+        h.run();
+        assert!(h.state().2.is_none(), "nothing sent, no restart");
+        assert!(
+            h.query_by_label("Restart RustWTM as administrator to change administrator startup")
+                .is_some()
+        );
     }
 
     #[test]
