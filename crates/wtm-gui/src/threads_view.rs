@@ -289,7 +289,7 @@ pub fn show(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Intent
                             std::time::Duration::from_nanos(t.cpu_time.saturating_mul(100)),
                         );
                         let cpu = if t.cpu_percent >= 0.01 {
-                            format!("{:.2}%", t.cpu_percent)
+                            crate::i18n::percent(format!("{:.2}", t.cpu_percent))
                         } else {
                             String::new()
                         };

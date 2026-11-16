@@ -113,7 +113,7 @@ fn detail(identity: &str, counters: String) -> String {
 
 fn percent(value: f32, available: bool, digits: usize) -> String {
     if available && value.is_finite() && (0.0..=100.0).contains(&value) {
-        format!("{value:.digits$}%")
+        crate::i18n::percent(format!("{value:.digits$}"))
     } else {
         "—".into()
     }

@@ -252,7 +252,7 @@ pub fn dialog(
                             ""
                         });
                     ui.label(
-                        RichText::new(format!("{:.0}%", a.cpu))
+                        RichText::new(crate::i18n::percent(format!("{:.0}", a.cpu)))
                             .color(text_color(ui, if a.cpu >= 50.0 { BAD } else { WARN })),
                     );
                     ui.horizontal(|ui| {

@@ -130,7 +130,9 @@ pub fn users(ui: &mut Ui, data: &Data) -> Option<(u32, String, crate::backend::S
                     });
                     row.col(|ui| crate::theme::table_cell(ui, |ui| right(ui, count.to_string())));
                     row.col(|ui| {
-                        crate::theme::table_cell(ui, |ui| right(ui, format!("{cpu:.1}%")))
+                        crate::theme::table_cell(ui, |ui| {
+                            right(ui, crate::i18n::percent(format!("{cpu:.1}")))
+                        })
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| right(ui, format_bytes(memory as f64)))
@@ -1043,22 +1045,22 @@ pub fn app_history(ui: &mut Ui, data: &Data, view: &mut HistoryView) -> bool {
                             });
                             row.col(|ui| {
                                 crate::theme::table_cell(ui, |ui| {
-                                    right(ui, format!("{:.2}%", s.cpu_avg));
+                                    right(ui, crate::i18n::percent(format!("{:.2}", s.cpu_avg)));
                                 })
                             });
                             row.col(|ui| {
                                 crate::theme::table_cell(ui, |ui| {
-                                    right(ui, format!("{:.2}%", s.cpu_p95));
+                                    right(ui, crate::i18n::percent(format!("{:.2}", s.cpu_p95)));
                                 })
                             });
                             row.col(|ui| {
                                 crate::theme::table_cell(ui, |ui| {
-                                    right(ui, format!("{:.1}%", s.cpu_peak));
+                                    right(ui, crate::i18n::percent(format!("{:.1}", s.cpu_peak)));
                                 })
                             });
                             row.col(|ui| {
                                 crate::theme::table_cell(ui, |ui| {
-                                    right(ui, format!("{:.1}%", s.gpu_avg));
+                                    right(ui, crate::i18n::percent(format!("{:.1}", s.gpu_avg)));
                                 })
                             });
                             row.col(|ui| {

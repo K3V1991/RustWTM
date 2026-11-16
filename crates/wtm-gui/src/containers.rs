@@ -85,9 +85,9 @@ pub fn overview(ui: &mut Ui, state: &State) -> bool {
             });
             for c in busy.into_iter().take(3) {
                 ui.label(format!(
-                    "{}  ·  {:.1}% CPU  ·  {}",
+                    "{}  ·  {} CPU  ·  {}",
                     c.name,
-                    c.metrics.cpu.unwrap_or(0.0),
+                    crate::i18n::percent(format!("{:.1}", c.metrics.cpu.unwrap_or(0.0))),
                     value(c.metrics.memory.map(|n| n as f64))
                 ));
             }
@@ -314,7 +314,7 @@ pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
                             ui.label(if current {
                                 c.metrics
                                     .cpu
-                                    .map(|n| format!("{n:.1}%"))
+                                    .map(|n| crate::i18n::percent(format!("{n:.1}")))
                                     .unwrap_or("—".into())
                             } else {
                                 "—".into()

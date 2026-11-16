@@ -11,6 +11,33 @@ use crate::processes::Intent;
 
 use crate::theme::{BAD, WARN, right};
 
+/// `KillEntry::label` in the window's language. The English label stays
+/// the key that running processes are matched by.
+fn shown_label(e: &KillEntry) -> String {
+    match &e.cmdline {
+        Some(c) => crate::i18n::format("{0} running \"{1}\"", &[e.name.clone(), c.clone()]),
+        None => e.name.clone(),
+    }
+}
+
+/// `KillEntry::describe` in the window's language.
+fn shown_when(e: &KillEntry) -> String {
+    let Some(cpu) = e.cpu_above else {
+        return crate::i18n::tr("only with the panic button").to_owned();
+    };
+    let (secs, cpu) = (e.for_secs.to_string(), format!("{cpu:.0}"));
+    match e.system_cpu_above {
+        Some(sys) => crate::i18n::format(
+            "automatically after {0} s at {1}% CPU or more while the PC is above {2}%",
+            &[secs, cpu, format!("{sys:.0}")],
+        ),
+        None => crate::i18n::format(
+            "automatically after {0} s at {1}% CPU or more",
+            &[secs, cpu],
+        ),
+    }
+}
+
 /// A process the panic button would end.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Target {
@@ -81,7 +108,7 @@ pub fn panic_dialog(ctx: &egui::Context, data: &Data, open: &mut bool, intents: 
                         };
                         ui.label(name);
                         right(ui, t.process.pid.to_string());
-                        right(ui, format!("{:.1}%", t.cpu));
+                        right(ui, crate::i18n::percent(format!("{:.1}", t.cpu)));
                         ui.weak(&t.entry);
                         crate::theme::end_row(ui);
                     }
@@ -327,7 +354,8 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                             crate::theme::end_row(ui);
                             for (i, e) in data.kill_list.iter().enumerate() {
                                 let label = e.label();
-                                let response = ui.label(&label).interact(egui::Sense::click());
+                                let response =
+                                    ui.label(shown_label(e)).interact(egui::Sense::click());
                                 crate::context_actions::menu(
                                     &response,
                                     ("kill-list", &label, e.describe(), e.tree),
@@ -360,7 +388,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                                         }
                                     },
                                 );
-                                ui.label(e.describe());
+                                ui.label(shown_when(e));
                                 ui.label(crate::i18n::tr(if e.tree { "yes" } else { "no" }));
                                 let label = e.label();
                                 let n = running.iter().filter(|t| t.entry == label).count();
@@ -538,6 +566,44 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn shown_text_matches_the_policy_s_words_and_is_translated() {
+        let entries = [
+            KillEntry {
+                name: "python.exe".into(),
+                ..KillEntry::default()
+            },
+            KillEntry {
+                name: "node.exe".into(),
+                cmdline: Some("vitest".into()),
+                cpu_above: Some(50.0),
+                for_secs: 60,
+                ..KillEntry::default()
+            },
+            KillEntry {
+                name: "node.exe".into(),
+                cpu_above: Some(50.0),
+                for_secs: 60,
+                system_cpu_above: Some(85.0),
+                ..KillEntry::default()
+            },
+        ];
+        {
+            let _language = crate::i18n::scope(crate::i18n::Language::English);
+            for e in &entries {
+                assert_eq!(shown_label(e), e.label());
+                assert_eq!(shown_when(e), e.describe());
+            }
+        }
+        let _language = crate::i18n::scope(crate::i18n::Language::Turkish);
+        assert_eq!(shown_label(&entries[1]), "\"vitest\" çalıştıran node.exe");
+        assert_eq!(shown_when(&entries[0]), "yalnızca acil düğmesiyle");
+        assert_eq!(
+            shown_when(&entries[2]),
+            "bilgisayar %85 üzerindeyken, %50 veya üzeri CPU'da 60 sn sonra otomatik"
+        );
+    }
 
     fn entry(name: &str) -> KillEntry {
         KillEntry {

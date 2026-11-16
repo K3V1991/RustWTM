@@ -51,7 +51,10 @@ impl Facts {
             ("Language", self.language.clone()),
             ("Logical processors", self.logical_cpus.to_string()),
             ("Memory", format_bytes(self.memory as f64)),
-            ("Interface scale", format!("{:.0}%", self.scale * 100.0)),
+            (
+                "Interface scale",
+                crate::i18n::percent(format!("{:.0}", self.scale * 100.0)),
+            ),
             (
                 "Window",
                 format!("{:.0} x {:.0}", self.window.0, self.window.1),

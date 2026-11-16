@@ -389,7 +389,7 @@ fn known_ports(ui: &mut Ui, all: &[PortRow<'_>], view: &mut PortsView, intents: 
                                 RichText::new(port.to_string()).monospace().strong(),
                             );
                             ui.label(known.map_or(crate::i18n::tr("Watched port"), |k| k.service));
-                            ui.weak(known.map_or("", |k| k.category));
+                            ui.weak(known.map_or("", |k| category_label(k.category)));
                             match row {
                                 Some(r) => {
                                     let label = ui.label(r.process_text());
@@ -642,7 +642,9 @@ fn listening_table(
                         crate::theme::table_cell(ui, |ui| {
                             crate::theme::right(
                                 ui,
-                                p.map_or(String::new(), |p| format!("{:.1}%", p.cpu_percent)),
+                                p.map_or(String::new(), |p| {
+                                    crate::i18n::percent(format!("{:.1}", p.cpu_percent))
+                                }),
                             );
                         })
                     });
@@ -763,6 +765,27 @@ fn port_menu(
         view.watched.sort_unstable();
         ui.close();
     }
+}
+
+/// A catalog category (an English constant of `wtm_core::ports`) in the
+/// window's language. "Search" has its own key: the plain word is the verb
+/// of search boxes.
+fn category_label(category: &str) -> &'static str {
+    use wtm_core::ports as p;
+    let key = match category {
+        c if c == p::DEV_SERVER => "Dev servers",
+        c if c == p::DATABASE => "Databases",
+        c if c == p::CACHE => "Caches & queues",
+        c if c == p::SEARCH => "Search engines",
+        c if c == p::CONTAINERS => "Containers & cloud",
+        c if c == p::MONITORING => "Monitoring",
+        c if c == p::AI => "AI & notebooks",
+        c if c == p::DEBUG => "Debuggers & tools",
+        c if c == p::WEB => "Web servers",
+        c if c == p::SYSTEM => "Windows & remote access",
+        _ => return "",
+    };
+    crate::i18n::tr(key)
 }
 
 #[cfg(test)]

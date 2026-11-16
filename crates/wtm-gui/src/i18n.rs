@@ -463,6 +463,12 @@ fn captures(template: &str, text: &str) -> Option<Vec<String>> {
     }
     (rest == pattern).then_some(values)
 }
+/// A percentage in the window's language: "42%", or "%42" in Turkish,
+/// which puts the sign first. `number` is already formatted ("42", "12.5").
+pub fn percent(number: impl Into<String>) -> String {
+    format("{0}%", &[number.into()])
+}
+
 pub fn format(english: &str, values: &[String]) -> String {
     let text = tr(english);
     let mut result =
@@ -712,6 +718,21 @@ mod tests {
             "Kural: sonlandır (kural 'Idle')"
         );
     }
+    #[test]
+    fn percentages_follow_the_language() {
+        {
+            let _language = scope(Language::English);
+            assert_eq!(percent("42"), "42%");
+        }
+        {
+            let _language = scope(Language::German);
+            assert_eq!(percent("12.5"), "12.5%");
+        }
+        // Turkish puts the sign first.
+        let _language = scope(Language::Turkish);
+        assert_eq!(percent("42"), "%42");
+    }
+
     #[test]
     fn literal_ui_lookups_have_catalog_entries() {
         let sources = [

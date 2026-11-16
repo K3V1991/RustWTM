@@ -483,7 +483,10 @@ fn usage_cell(ui: &mut Ui, text: String, fill: Option<f32>) {
             .corner_radius(0.0)
             .desired_width(150.0)
             .fill(color.gamma_multiply(0.8))
-            .text(RichText::new(format!("{text} ({:.0}%)", fill * 100.0))),
+            .text(RichText::new(format!(
+                "{text} ({})",
+                crate::i18n::percent(format!("{:.0}", fill * 100.0))
+            ))),
     )
     .on_hover_text(crate::i18n::tr(
         "Use of the budget; for one budget per instance, the fullest instance",

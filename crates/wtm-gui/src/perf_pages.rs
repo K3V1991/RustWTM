@@ -203,7 +203,7 @@ pub fn cpu_details(ui: &mut Ui, data: &Data, s: &wtm_core::SystemStats) {
     let mut readings = vec![
         row(
             crate::i18n::tr("Utilization"),
-            format!("{:.0}%", s.cpu_percent),
+            crate::i18n::percent(format!("{:.0}", s.cpu_percent)),
         ),
         row(
             crate::i18n::tr("Speed"),
@@ -225,16 +225,19 @@ pub fn cpu_details(ui: &mut Ui, data: &Data, s: &wtm_core::SystemStats) {
         .collect();
     if !kernel.is_empty() {
         let mean = kernel.iter().sum::<f32>() / kernel.len() as f32;
-        readings.push(row(crate::i18n::tr("Kernel time"), format!("{mean:.1}%")));
+        readings.push(row(
+            crate::i18n::tr("Kernel time"),
+            crate::i18n::percent(format!("{mean:.1}")),
+        ));
     }
     if let Some(b) = f.breakdown {
         readings.push(row(
             crate::i18n::tr("DPC time"),
-            format!("{:.1}%", b.dpc_percent),
+            crate::i18n::percent(format!("{:.1}", b.dpc_percent)),
         ));
         readings.push(row(
             crate::i18n::tr("Interrupt time"),
-            format!("{:.1}%", b.interrupt_percent),
+            crate::i18n::percent(format!("{:.1}", b.interrupt_percent)),
         ));
         if let Some(rate) = b.interrupts_per_sec {
             readings.push(row(crate::i18n::tr("Interrupts/s"), count(rate)));
@@ -354,7 +357,7 @@ pub fn battery(ui: &mut Ui, data: &Data, view: &mut crate::charts::State) {
             let mut readings = vec![row(
                 crate::i18n::tr("Charge"),
                 b.percent
-                    .map_or_else(|| "—".to_owned(), |p| format!("{p}%")),
+                    .map_or_else(|| "—".to_owned(), |p| crate::i18n::percent(format!("{p}"))),
             )];
             readings.push(row(
                 crate::i18n::tr("Power source"),
@@ -603,7 +606,7 @@ pub fn disk(
         let mut readings = vec![
             row(
                 crate::i18n::tr("Active time"),
-                format!("{:.0}%", d.active_percent),
+                crate::i18n::percent(format!("{:.0}", d.active_percent)),
             ),
             row(
                 crate::i18n::tr("Average response time"),
@@ -711,12 +714,12 @@ fn nvme_rows(n: &crate::device_facts::NvmeHealth) -> Rows {
     let units = |u: u128| format_bytes(u.saturating_mul(512_000) as f64);
     let mut rows = vec![row(
         crate::i18n::tr("NVMe remaining endurance"),
-        format!("{}%", 100u8.saturating_sub(n.used)),
+        crate::i18n::percent(format!("{}", 100u8.saturating_sub(n.used))),
     )];
     if let Some(spare) = n.spare {
         rows.push(row(
             crate::i18n::tr("NVMe available spare"),
-            format!("{spare}%"),
+            crate::i18n::percent(format!("{spare}")),
         ));
     }
     rows.push(row(
@@ -817,7 +820,7 @@ pub fn network(
                 let used = a.rx_rate.max(a.tx_rate) * 8.0 / a.link_speed as f64 * 100.0;
                 readings.push(row(
                     crate::i18n::tr("Link utilization"),
-                    format!("{:.1}%", used.min(100.0)),
+                    crate::i18n::percent(format!("{:.1}", used.min(100.0))),
                 ));
             }
             let mut facts = vec![
@@ -839,7 +842,7 @@ pub fn network(
                 }
                 facts.push(row(
                     crate::i18n::tr("Signal strength"),
-                    format!("{}%", w.signal),
+                    crate::i18n::percent(format!("{}", w.signal)),
                 ));
                 if let Some(standard) = w.standard {
                     facts.push(row(crate::i18n::tr("Wi-Fi standard"), standard));
@@ -959,13 +962,19 @@ pub fn gpu(
                             .map_or(0.0, |e| e.1);
                         // As in Task Manager, each graph's engine can be chosen.
                         egui::ComboBox::from_id_salt(("gpu-engine", luid, slot))
-                            .selected_text(format!("{engine} · {load:.0}%"))
+                            .selected_text(format!(
+                                "{engine} · {}",
+                                crate::i18n::percent(format!("{load:.0}"))
+                            ))
                             .show_ui(col, |ui| {
                                 for (name, l) in &g.engines {
                                     if ui
                                         .selectable_label(
                                             name == engine,
-                                            format!("{name} · {l:.0}%"),
+                                            format!(
+                                                "{name} · {}",
+                                                crate::i18n::percent(format!("{l:.0}"))
+                                            ),
                                         )
                                         .clicked()
                                     {
@@ -1054,7 +1063,10 @@ pub fn gpu(
             (None, t) => format!("— / {}", format_bytes(t as f64)),
         };
         let mut readings = vec![
-            row(crate::i18n::tr("Utilization"), format!("{:.0}%", g.percent)),
+            row(
+                crate::i18n::tr("Utilization"),
+                crate::i18n::percent(format!("{:.0}", g.percent)),
+            ),
             row(
                 crate::i18n::tr("Dedicated GPU memory"),
                 of(g.dedicated_used, dedicated_total),
@@ -1138,9 +1150,13 @@ fn engine_list(ui: &mut Ui, luid: &str, engines: &[(String, f32)], search: &mut 
     crate::app::load_bars(
         ui,
         &format!("gpu_engines_{luid}"),
-        shown
-            .into_iter()
-            .map(|(name, load)| (name.clone(), *load, format!("{load:.0}%"))),
+        shown.into_iter().map(|(name, load)| {
+            (
+                name.clone(),
+                *load,
+                crate::i18n::percent(format!("{load:.0}")),
+            )
+        }),
     );
 }
 

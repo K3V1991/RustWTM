@@ -94,7 +94,7 @@ impl Unit {
         value.filter(|v| self.valid(*v)).map_or_else(
             || "—".into(),
             |v| match self {
-                Self::Percent => format!("{v:.1}%"),
+                Self::Percent => crate::i18n::percent(format!("{v:.1}")),
                 Self::Rate => format!("{}/s", wtm_core::format_bytes(f64::from(v))),
                 Self::Bytes(_) => wtm_core::format_bytes(f64::from(v)),
             },
@@ -605,7 +605,7 @@ impl State {
             ui,
             "",
             &match unit {
-                Unit::Percent => "100%".to_owned(),
+                Unit::Percent => crate::i18n::percent("100"),
                 Unit::Rate => format!("{}/s", wtm_core::format_bytes(ceiling)),
                 Unit::Bytes(_) => wtm_core::format_bytes(ceiling),
             },
@@ -643,9 +643,9 @@ impl State {
             };
             Some(match unit {
                 Unit::Percent => format!(
-                    "{} · {plot_name}: {:.1}%",
+                    "{} · {plot_name}: {}",
                     short_time(position.x),
-                    position.y
+                    crate::i18n::percent(format!("{:.1}", position.y))
                 ),
                 Unit::Rate => return crate::app::rate_label(hover),
                 Unit::Bytes(_) => format!(
@@ -659,7 +659,7 @@ impl State {
             Unit::Percent => plot
                 .include_y(0.0)
                 .include_y(100.0)
-                .y_axis_formatter(|m, _| format!("{:.0}%", m.value)),
+                .y_axis_formatter(|m, _| crate::i18n::percent(format!("{:.0}", m.value))),
             Unit::Rate => plot.include_y(0.0).include_y(1024.0),
             Unit::Bytes(_) => plot.include_y(0.0),
         }

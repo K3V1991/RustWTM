@@ -6,7 +6,7 @@
     "es": "Apariencia"
   },
   "Process workspace": {
-    "tr": "Süreç çalışma alanı",
+    "tr": "İşlem çalışma alanı",
     "de": "Prozessarbeitsbereich",
     "fr": "Espace des processus",
     "es": "Área de procesos"
@@ -126,7 +126,7 @@
     "es": "Altura completa"
   },
   "Process table behavior": {
-    "tr": "Süreç tablosu davranışı",
+    "tr": "İşlem tablosu davranışı",
     "de": "Verhalten der Prozesstabelle",
     "fr": "Comportement du tableau des processus",
     "es": "Comportamiento de la tabla de procesos"
@@ -156,7 +156,7 @@
     "es": "Diseños de columnas"
   },
   "Open process column editor": {
-    "tr": "Süreç sütun düzenleyicisini aç",
+    "tr": "İşlem sütun düzenleyicisini aç",
     "de": "Prozessspalten-Editor öffnen",
     "fr": "Ouvrir l’éditeur de colonnes",
     "es": "Abrir el editor de columnas"
@@ -660,7 +660,7 @@
     "es": "Lectura / Escritura"
   },
   "Process inspector": {
-    "tr": "Süreç inceleme",
+    "tr": "İşlem inceleme",
     "de": "Prozessinspektor",
     "fr": "Inspecteur de processus",
     "es": "Inspector de procesos"
@@ -672,7 +672,7 @@
     "es": "Aplicación en primer plano"
   },
   "Show resource cards above processes": {
-    "tr": "Süreçlerin üstünde kaynak kartlarını göster",
+    "tr": "İşlemlerin üstünde kaynak kartlarını göster",
     "de": "Ressourcenkarten über Prozessen anzeigen",
     "fr": "Afficher les ressources au-dessus des processus",
     "es": "Mostrar recursos encima de los procesos"
@@ -1302,7 +1302,7 @@
     "es": "Estos procesos tienen objetos de trabajo propios y no pueden compartir el presupuesto. Se incorporan al reiniciar la aplicación."
   },
   "No app limits yet. Add one below, or right-click a process and choose \"Limit this app…\".": {
-    "tr": "Henüz uygulama sınırı yok. Aşağıdan veya işleme sağ tıklayıp Bu uygulamayı sınırla'yı seçerek ekleyin.",
+    "tr": "Henüz uygulama sınırı yok. Aşağıdan ekleyin ya da bir işleme sağ tıklayıp \"Sınırla…\" seçeneğini kullanın.",
     "de": "Noch keine App-Grenzen. Unten oder per Prozess-Rechtsklick hinzufügen.",
     "fr": "Aucune limite. Ajoutez-en ci-dessous ou par clic droit sur un processus.",
     "es": "Sin límites de aplicaciones. Añada uno abajo o con clic derecho en un proceso."
@@ -1398,7 +1398,7 @@
     "es": "Ningún proceso los espera ya"
   },
   "Stuck helpers, with the console hosts they started": {
-    "tr": "Takılmış yardımcılar ve başlattıkları konsol süreçleri",
+    "tr": "Takılmış yardımcılar ve başlattıkları konsol işlemleri",
     "de": "Hängende Helfer samt gestarteten Konsolenhosts",
     "fr": "Assistants bloqués et leurs hôtes de console",
     "es": "Auxiliares bloqueados y sus hosts de consola"
@@ -6852,13 +6852,13 @@
     "es": "Cargando sesiones…"
   },
   "Loading services…": {
-    "tr": "Hizmetler yükleniyor…",
+    "tr": "Servisler yükleniyor…",
     "de": "Dienste werden geladen…",
     "fr": "Chargement des services…",
     "es": "Cargando servicios…"
   },
   "No matching services": {
-    "tr": "Eşleşen hizmet yok",
+    "tr": "Eşleşen servis yok",
     "de": "Keine passenden Dienste",
     "fr": "Aucun service correspondant",
     "es": "Ningún servicio coincide"
@@ -6942,7 +6942,7 @@
     "es": "No hay nada configurado para iniciarse al iniciar sesión."
   },
   "{0} of {1} services": {
-    "tr": "{0} / {1} hizmet",
+    "tr": "{0} / {1} servis",
     "de": "{0} von {1} Diensten",
     "fr": "{0} sur {1} services",
     "es": "{0} de {1} servicios"
@@ -7002,7 +7002,7 @@
     "es": "Suspendido"
   },
   "Per-process network needs the RustWTM service or administrator rights": {
-    "tr": "Süreç başına ağ için RustWTM servisi veya yönetici hakları gerekir",
+    "tr": "İşlem başına ağ için RustWTM servisi veya yönetici hakları gerekir",
     "de": "Netzwerk pro Prozess erfordert den RustWTM-Dienst oder Administratorrechte",
     "fr": "Le réseau par processus nécessite le service RustWTM ou des droits administrateur",
     "es": "La red por proceso requiere el servicio RustWTM o derechos de administrador"
@@ -7026,19 +7026,19 @@
     "es": "El PID {0} aún no está en la lista de procesos; inténtelo de nuevo en un momento"
   },
   "Stop the service \"{0}\"? Programs that rely on it may stop working until it runs again.": {
-    "tr": "\"{0}\" hizmeti durdurulsun mu? Ona bağlı programlar, hizmet yeniden çalışana kadar düzgün çalışmayabilir.",
+    "tr": "\"{0}\" servisi durdurulsun mu? Ona bağlı programlar, servis yeniden çalışana kadar düzgün çalışmayabilir.",
     "de": "Dienst \"{0}\" beenden? Programme, die ihn brauchen, funktionieren womöglich nicht, bis er wieder läuft.",
     "fr": "Arrêter le service « {0} » ? Les programmes qui en dépendent peuvent cesser de fonctionner jusqu'à ce qu'il redémarre.",
     "es": "¿Detener el servicio \"{0}\"? Los programas que dependen de él pueden dejar de funcionar hasta que vuelva a ejecutarse."
   },
   "Restart the service \"{0}\"? It stops for a moment; programs that rely on it may lose their connection to it.": {
-    "tr": "\"{0}\" hizmeti yeniden başlatılsın mı? Bir an için durur; ona bağlı programlar bağlantılarını kaybedebilir.",
+    "tr": "\"{0}\" servisi yeniden başlatılsın mı? Bir an için durur; ona bağlı programlar bağlantılarını kaybedebilir.",
     "de": "Dienst \"{0}\" neu starten? Er hält kurz an; Programme, die ihn brauchen, können die Verbindung zu ihm verlieren.",
     "fr": "Redémarrer le service « {0} » ? Il s'arrête un instant ; les programmes qui en dépendent peuvent perdre leur connexion.",
     "es": "¿Reiniciar el servicio \"{0}\"? Se detiene un momento; los programas que dependen de él pueden perder la conexión."
   },
   "Disable the service \"{0}\"? It will no longer start, not even when Windows or a program needs it.": {
-    "tr": "\"{0}\" hizmeti devre dışı bırakılsın mı? Windows veya bir program ihtiyaç duysa bile artık başlamayacak.",
+    "tr": "\"{0}\" servisi devre dışı bırakılsın mı? Windows veya bir program ihtiyaç duysa bile artık başlamayacak.",
     "de": "Dienst \"{0}\" deaktivieren? Er startet nicht mehr, auch nicht, wenn Windows oder ein Programm ihn braucht.",
     "fr": "Désactiver le service « {0} » ? Il ne démarrera plus, même quand Windows ou un programme en a besoin.",
     "es": "¿Deshabilitar el servicio \"{0}\"? Ya no se iniciará, ni siquiera cuando Windows o un programa lo necesite."
@@ -7260,7 +7260,7 @@
     "es": "Núcleos físicos"
   },
   "Actions": {
-    "tr": "İşlemler",
+    "tr": "Eylemler",
     "de": "Aktionen",
     "fr": "Actions",
     "es": "Acciones"
@@ -7284,7 +7284,7 @@
     "es": "Gráficos"
   },
   "Service": {
-    "tr": "Hizmet",
+    "tr": "Servis",
     "de": "Dienst",
     "fr": "Service",
     "es": "Servicio"
@@ -7590,7 +7590,7 @@
     "es": "Aplicaciones de escritorio"
   },
   "Store apps": {
-    "tr": "Store uygulamaları",
+    "tr": "Mağaza uygulamaları",
     "de": "Store-Apps",
     "fr": "Applications du Store",
     "es": "Aplicaciones de Store"
@@ -7818,7 +7818,7 @@
     "es": "Actualizar historial registrado"
   },
   "Recorded by the service every five seconds. At most 21 contributors per moment; missing intervals are not activity.": {
-    "tr": "Hizmet her beş saniyede kaydeder. Her anda en fazla 21 işlem bulunur; eksik aralıklar etkinlik sayılmaz.",
+    "tr": "Servis her beş saniyede kaydeder. Her anda en fazla 21 işlem bulunur; eksik aralıklar etkinlik sayılmaz.",
     "de": "Der Dienst zeichnet alle fünf Sekunden auf. Maximal 21 Prozesse je Zeitpunkt; fehlende Intervalle bedeuten keine Aktivität.",
     "fr": "Le service enregistre toutes les cinq secondes. Au plus 21 processus par instant ; les intervalles manquants ne représentent pas d’activité.",
     "es": "El servicio registra cada cinco segundos. Hasta 21 procesos por instante; los intervalos ausentes no representan actividad."
@@ -8058,7 +8058,7 @@
     "es": "La configuración cambió. Cierre esta revisión y prepárela de nuevo."
   },
   "Load the service configuration to edit policies.": {
-    "tr": "İlkeleri düzenlemek için hizmet yapılandırmasını yükleyin.",
+    "tr": "İlkeleri düzenlemek için servis yapılandırmasını yükleyin.",
     "de": "Laden Sie die Dienstkonfiguration, um Regeln zu bearbeiten.",
     "fr": "Chargez la configuration du service pour modifier les règles.",
     "es": "Cargue la configuración del servicio para editar políticas."
@@ -8070,7 +8070,7 @@
     "es": "Actividad de la interfaz y atajos"
   },
   "These intervals affect window refresh requests, not service protection or sampling.": {
-    "tr": "Bu süreler pencere yenilemesini etkiler; hizmet korumasını veya örneklemeyi etkilemez.",
+    "tr": "Bu süreler pencere yenilemesini etkiler; servis korumasını veya örneklemeyi etkilemez.",
     "de": "Diese Intervalle betreffen Fensteraktualisierungen, nicht den Dienstschutz oder die Messung.",
     "fr": "Ces intervalles concernent l’actualisation de la fenêtre, pas la protection ni les mesures du service.",
     "es": "Estos intervalos afectan a la actualización de la ventana, no a la protección ni al muestreo del servicio."
@@ -9030,25 +9030,25 @@
     "es": "Versión del archivo"
   },
   "Group processes by user": {
-    "tr": "Süreçleri kullanıcıya göre grupla",
+    "tr": "İşlemleri kullanıcıya göre grupla",
     "de": "Prozesse nach Benutzer gruppieren",
     "fr": "Regrouper les processus par utilisateur",
     "es": "Agrupar procesos por usuario"
   },
   "Grouping and system processes": {
-    "tr": "Gruplama ve sistem süreçleri",
+    "tr": "Gruplama ve sistem işlemleri",
     "de": "Gruppierung und Systemprozesse",
     "fr": "Regroupement et processus système",
     "es": "Agrupación y procesos del sistema"
   },
   "Hide Windows components and services. Edit the program lists in Settings > Processes.": {
-    "tr": "Windows bileşenlerini ve hizmetlerini gizler. Program listelerini Ayarlar > Süreçler'de düzenleyin.",
+    "tr": "Windows bileşenlerini ve servislerini gizler. Program listelerini Ayarlar > İşlemler'de düzenleyin.",
     "de": "Blendet Windows-Komponenten und -Dienste aus. Die Programmlisten bearbeiten Sie unter Einstellungen > Prozesse.",
     "fr": "Masque les composants et services Windows. Modifiez les listes de programmes dans Paramètres > Processus.",
     "es": "Oculta los componentes y servicios de Windows. Edite las listas de programas en Configuración > Procesos."
   },
   "Hide system processes": {
-    "tr": "Sistem süreçlerini gizle",
+    "tr": "Sistem işlemlerini gizle",
     "de": "Systemprozesse ausblenden",
     "fr": "Masquer les processus système",
     "es": "Ocultar procesos del sistema"
@@ -9090,7 +9090,7 @@
     "es": "Cerrar sesión…"
   },
   "Start the process tree collapsed": {
-    "tr": "Süreç ağacını daraltılmış başlat",
+    "tr": "İşlem ağacını daraltılmış başlat",
     "de": "Prozessbaum zugeklappt starten",
     "fr": "Démarrer l'arborescence des processus réduite",
     "es": "Iniciar el árbol de procesos contraído"
@@ -11082,7 +11082,7 @@
     "es": "Esa ventana se ha cerrado."
   },
   "No windows on this desktop. A service or another user's program has none here.": {
-    "tr": "Bu masaüstünde pencere yok. Bir hizmetin ya da başka bir kullanıcının programının burada penceresi olmaz.",
+    "tr": "Bu masaüstünde pencere yok. Bir servisin ya da başka bir kullanıcının programının burada penceresi olmaz.",
     "de": "Keine Fenster auf diesem Desktop. Ein Dienst oder das Programm eines anderen Benutzers hat hier keine.",
     "fr": "Aucune fenêtre sur ce bureau. Un service ou le programme d'un autre utilisateur n'en a pas ici.",
     "es": "No hay ventanas en este escritorio. Un servicio o el programa de otro usuario no tiene ninguna aquí."
@@ -11164,5 +11164,119 @@
     "de": "Dort ist kein Fenster.",
     "fr": "Aucune fenêtre à cet endroit.",
     "es": "No hay ninguna ventana ahí."
+  },
+  "{0} running \"{1}\"": {
+    "tr": "\"{1}\" çalıştıran {0}",
+    "de": "{0} mit \"{1}\"",
+    "fr": "{0} exécutant « {1} »",
+    "es": "{0} ejecutando \"{1}\""
+  },
+  "only with the panic button": {
+    "tr": "yalnızca acil düğmesiyle",
+    "de": "nur mit der Paniktaste",
+    "fr": "uniquement avec le bouton panique",
+    "es": "solo con el botón de pánico"
+  },
+  "automatically after {0} s at {1}% CPU or more": {
+    "tr": "%{1} veya üzeri CPU'da {0} sn sonra otomatik",
+    "de": "automatisch nach {0} s bei {1}% CPU oder mehr",
+    "fr": "automatiquement après {0} s à {1}% de CPU ou plus",
+    "es": "automáticamente tras {0} s con {1}% de CPU o más"
+  },
+  "automatically after {0} s at {1}% CPU or more while the PC is above {2}%": {
+    "tr": "bilgisayar %{2} üzerindeyken, %{1} veya üzeri CPU'da {0} sn sonra otomatik",
+    "de": "automatisch nach {0} s bei {1}% CPU oder mehr, solange der PC über {2}% liegt",
+    "fr": "automatiquement après {0} s à {1}% de CPU ou plus tant que le PC dépasse {2}%",
+    "es": "automáticamente tras {0} s con {1}% de CPU o más mientras el equipo supere el {2}%"
+  },
+  "Dev servers": {
+    "tr": "Geliştirme sunucuları",
+    "de": "Entwicklungsserver",
+    "fr": "Serveurs de développement",
+    "es": "Servidores de desarrollo"
+  },
+  "Databases": {
+    "tr": "Veritabanları",
+    "de": "Datenbanken",
+    "fr": "Bases de données",
+    "es": "Bases de datos"
+  },
+  "Caches & queues": {
+    "tr": "Önbellekler ve kuyruklar",
+    "de": "Caches und Warteschlangen",
+    "fr": "Caches et files d'attente",
+    "es": "Cachés y colas"
+  },
+  "Search engines": {
+    "tr": "Arama motorları",
+    "de": "Suchmaschinen",
+    "fr": "Moteurs de recherche",
+    "es": "Motores de búsqueda"
+  },
+  "Containers & cloud": {
+    "tr": "Konteynerler ve bulut",
+    "de": "Container und Cloud",
+    "fr": "Conteneurs et cloud",
+    "es": "Contenedores y nube"
+  },
+  "Monitoring": {
+    "tr": "İzleme",
+    "de": "Überwachung",
+    "fr": "Supervision",
+    "es": "Supervisión"
+  },
+  "AI & notebooks": {
+    "tr": "Yapay zekâ ve not defterleri",
+    "de": "KI und Notebooks",
+    "fr": "IA et notebooks",
+    "es": "IA y cuadernos"
+  },
+  "Debuggers & tools": {
+    "tr": "Hata ayıklayıcılar ve araçlar",
+    "de": "Debugger und Tools",
+    "fr": "Débogueurs et outils",
+    "es": "Depuradores y herramientas"
+  },
+  "Web servers": {
+    "tr": "Web sunucuları",
+    "de": "Webserver",
+    "fr": "Serveurs web",
+    "es": "Servidores web"
+  },
+  "Windows & remote access": {
+    "tr": "Windows ve uzak erişim",
+    "de": "Windows und Fernzugriff",
+    "fr": "Windows et accès à distance",
+    "es": "Windows y acceso remoto"
+  },
+  "AI": {
+    "tr": "YZ",
+    "de": "KI",
+    "fr": "IA",
+    "es": "IA"
+  },
+  "Extra high": {
+    "tr": "Çok yüksek",
+    "de": "Sehr hoch",
+    "fr": "Très élevé",
+    "es": "Muy alto"
+  },
+  "Maximum": {
+    "tr": "En yüksek",
+    "de": "Maximal",
+    "fr": "Maximum",
+    "es": "Máximo"
+  },
+  "R {0}  W {1}": {
+    "tr": "O {0}  Y {1}",
+    "de": "L {0}  S {1}",
+    "fr": "L {0}  É {1}",
+    "es": "L {0}  E {1}"
+  },
+  "{0}%": {
+    "tr": "%{0}",
+    "de": "{0}%",
+    "fr": "{0}%",
+    "es": "{0}%"
   }
 }

@@ -92,9 +92,10 @@ pub fn rate_text(v: f64) -> String {
 }
 
 fn percent(values: &VecDeque<f32>) -> String {
-    values
-        .back()
-        .map_or_else(|| "—".to_owned(), |v| format!("{v:.0}%"))
+    values.back().map_or_else(
+        || "—".to_owned(),
+        |v| crate::i18n::percent(format!("{v:.0}")),
+    )
 }
 
 pub fn disk_id(number: u32) -> String {
@@ -231,7 +232,7 @@ pub fn entries(data: &crate::backend::Data) -> Vec<Entry> {
     let mut seen: Vec<String> = Vec::new();
     for d in disks {
         let Some(n) = d.number() else { continue };
-        let busy = format!("{:.0}%", d.active_percent);
+        let busy = crate::i18n::percent(format!("{:.0}", d.active_percent));
         let key = match facts
             .disk(n)
             .map(|f| f.model.as_str())
@@ -263,10 +264,9 @@ pub fn entries(data: &crate::backend::Data) -> Vec<Entry> {
     out.push(Entry::base(
         Page::Disk,
         "Disk & I/O",
-        format!(
-            "R {}  W {}",
-            rate(&history.io_read),
-            rate(&history.io_write)
+        crate::i18n::format(
+            "R {0}  W {1}",
+            &[rate(&history.io_read), rate(&history.io_write)],
         ),
         vec![
             (tail(&history.io_read), DISK_READ),
@@ -316,8 +316,11 @@ pub fn entries(data: &crate::backend::Data) -> Vec<Entry> {
         };
         // "38% (46 °C)", as Task Manager writes a GPU's load and temperature.
         let load = match facts.gpu_perf(&g.luid).and_then(|p| p.temperature) {
-            Some(t) => format!("{:.0}% ({t:.0} °C)", g.percent),
-            None => format!("{:.0}%", g.percent),
+            Some(t) => format!(
+                "{} ({t:.0} °C)",
+                crate::i18n::percent(format!("{:.0}", g.percent))
+            ),
+            None => crate::i18n::percent(format!("{:.0}", g.percent)),
         };
         out.push(Entry {
             key: Some(key),
@@ -366,7 +369,7 @@ pub fn entries(data: &crate::backend::Data) -> Vec<Entry> {
 pub fn battery_reading(b: &wtm_sys::power::BatteryStatus) -> String {
     let charge = b
         .percent
-        .map_or_else(|| "—".to_owned(), |p| format!("{p}%"));
+        .map_or_else(|| "—".to_owned(), |p| crate::i18n::percent(format!("{p}")));
     let state = if b.charging {
         crate::i18n::tr("Charging").to_owned()
     } else if let Some(s) = b.seconds_left.filter(|_| b.on_ac != Some(true)) {

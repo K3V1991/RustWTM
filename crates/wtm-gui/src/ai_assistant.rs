@@ -412,6 +412,12 @@ fn key_status(cfg: &AiConfig) -> String {
 fn effort_label(effort: &str) -> String {
     match effort {
         "" => crate::i18n::tr("Model default").to_owned(),
+        "low" => crate::i18n::tr("Low").to_owned(),
+        "medium" => crate::i18n::tr("Medium").to_owned(),
+        "high" => crate::i18n::tr("High").to_owned(),
+        "xhigh" => crate::i18n::tr("Extra high").to_owned(),
+        "max" => crate::i18n::tr("Maximum").to_owned(),
+        // A value typed into the file is shown as it is.
         e => e.to_owned(),
     }
 }

@@ -95,9 +95,10 @@ fn stat_card(ui: &mut Ui, s: &Stat<'_>) -> egui::Response {
                                     .strong()
                                     .color(crate::theme::text_color(ui, s.accent)),
                             );
-                            let value = s
-                                .ring
-                                .map_or_else(|| s.value.clone(), |p| format!("{p:.0}%"));
+                            let value = s.ring.map_or_else(
+                                || s.value.clone(),
+                                |p| crate::i18n::percent(format!("{p:.0}")),
+                            );
                             let color = s
                                 .ring
                                 .filter(|p| *p >= 70.0)
@@ -161,9 +162,10 @@ fn stat_card(ui: &mut Ui, s: &Stat<'_>) -> egui::Response {
         frame.response.id.with("open"),
         egui::Sense::click(),
     );
-    let value = s
-        .ring
-        .map_or_else(|| s.value.clone(), |p| format!("{p:.0}%"));
+    let value = s.ring.map_or_else(
+        || s.value.clone(),
+        |p| crate::i18n::percent(format!("{p:.0}")),
+    );
     response.widget_info(|| {
         egui::WidgetInfo::labeled(
             egui::Role::Button,
@@ -724,7 +726,7 @@ fn busiest_table(
                     });
                 });
                 let cpus = data.snapshot.as_ref().map_or(1, |s| s.system.logical_cpus);
-                let mut cpu = RichText::new(format!("{:.1}%", a.cpu));
+                let mut cpu = RichText::new(crate::i18n::percent(format!("{:.1}", a.cpu)));
                 if let Some(color) = app_color(a.cpu, cpus) {
                     cpu = cpu.color(crate::theme::text_color(ui, color));
                 }

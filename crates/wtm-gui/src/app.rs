@@ -3255,7 +3255,7 @@ fn details_panel(
         ui.columns(2, |cols| {
             cols[0].label(RichText::new("CPU").small().weak());
             cols[0].label(
-                RichText::new(format!("{:.1}%", p.cpu_percent))
+                RichText::new(crate::i18n::percent(format!("{:.1}", p.cpu_percent)))
                     .size(27.0)
                     .color(crate::theme::text_color(&cols[0], crate::theme::CPU)),
             );
@@ -3400,7 +3400,7 @@ fn details_panel(
             row(crate::i18n::tr("Parent PID"), p.parent_pid.to_string());
             row(crate::i18n::tr("Session"), p.session_id.to_string());
             row(crate::i18n::tr("Uptime"), uptime(p.start_time()));
-            row("CPU", format!("{:.2}%", p.cpu_percent));
+            row("CPU", crate::i18n::percent(format!("{:.2}", p.cpu_percent)));
             row(
                 crate::i18n::tr("CPU time"),
                 format!("{:.1} s", p.cpu_time.as_secs_f64()),
@@ -3547,7 +3547,7 @@ enum PlotUnit {
 impl PlotUnit {
     fn format(self, v: f64) -> String {
         match self {
-            Self::Percent => format!("{v:.0}%"),
+            Self::Percent => crate::i18n::percent(format!("{v:.0}")),
             Self::Bytes => format_bytes(v.max(0.0)),
             Self::Rate => format!("{}/s", format_bytes(v.max(0.0))),
         }
@@ -3823,11 +3823,11 @@ fn core_grid(
             painter.text(
                 rect.right_top() + egui::vec2(-6.0, 3.0),
                 egui::Align2::RIGHT_TOP,
-                format!("{load:.0}%"),
+                crate::i18n::percent(format!("{load:.0}")),
                 egui::FontId::proportional(12.0),
                 color,
             );
-            let mut text = format!("{label}: {load:.1}%");
+            let mut text = format!("{label}: {}", crate::i18n::percent(format!("{load:.1}")));
             if let Some(c) = cpu {
                 text.push_str(&{
                     let __wtm_i18n_0 = &(c.group);
@@ -4031,7 +4031,7 @@ fn perf_cpu(
         ui,
         "CPU",
         &[(
-            &format!("{:.0}%", s.cpu_percent),
+            &crate::i18n::percent(format!("{:.0}", s.cpu_percent)),
             crate::theme::load_color(s.cpu_percent),
         )],
         |ui| {
@@ -4131,9 +4131,10 @@ fn perf_memory(
         crate::i18n::tr("Memory"),
         &[(
             &format!(
-                "{} / {} ({mem_pct:.0}%)",
+                "{} / {} ({})",
                 format_bytes(s.memory_used() as f64),
-                format_bytes(s.memory_total as f64)
+                format_bytes(s.memory_total as f64),
+                crate::i18n::percent(format!("{mem_pct:.0}"))
             ),
             crate::theme::load_color(mem_pct as f32),
         )],
@@ -4228,15 +4229,20 @@ fn perf_gpu(
                 load_bars(
                     ui,
                     "gpu_engines",
-                    engines
-                        .iter()
-                        .take(limit)
-                        .map(|(name, load)| (name.clone(), *load, format!("{load:.0}%"))),
+                    engines.iter().take(limit).map(|(name, load)| {
+                        (
+                            name.clone(),
+                            *load,
+                            crate::i18n::percent(format!("{load:.0}")),
+                        )
+                    }),
                 );
                 if engines.len() > limit {
                     let rest: Vec<String> = engines[GPU_ENGINES_SHOWN..]
                         .iter()
-                        .map(|(name, load)| format!("{name} {load:.0}%"))
+                        .map(|(name, load)| {
+                            format!("{name} {}", crate::i18n::percent(format!("{load:.0}")))
+                        })
                         .collect();
                     ui.weak({
                         let __wtm_i18n_0 = &(engines.len() - GPU_ENGINES_SHOWN);

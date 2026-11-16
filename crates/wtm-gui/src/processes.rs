@@ -2061,11 +2061,11 @@ impl ProcessView {
                                 ui.vertical(|ui| {
                                 ui.spacing_mut().item_spacing.y = 0.0;
                                 let total = match col {
-                                    Col::Cpu => Some(format!("{:.0}%", snap.system.cpu_percent)),
-                                    Col::Memory if snap.system.memory_total > 0 => Some(format!("{:.0}%", snap.system.memory_used() as f64 * 100.0 / snap.system.memory_total as f64)),
+                                    Col::Cpu => Some(crate::i18n::percent(format!("{:.0}", snap.system.cpu_percent))),
+                                    Col::Memory if snap.system.memory_total > 0 => Some(crate::i18n::percent(format!("{:.0}", snap.system.memory_used() as f64 * 100.0 / snap.system.memory_total as f64))),
                                     Col::Disk => Some(format!("{}/s", format_bytes(snap.system.io_read_rate + snap.system.io_write_rate))),
                                     Col::Network => Some(format!("{}/s", format_bytes(snap.system.net_rx_rate + snap.system.net_tx_rate))),
-                                    Col::Gpu => Some(format!("{:.0}%", snap.system.gpu_percent)),
+                                    Col::Gpu => Some(crate::i18n::percent(format!("{:.0}", snap.system.gpu_percent))),
                                     _ => None,
                                 };
                                 if ui.is_sizing_pass() {
@@ -2238,7 +2238,7 @@ impl ProcessView {
                                             }
                                         }
                                         Col::Pid => right(ui, p.pid.to_string()),
-                                        Col::Cpu => right(ui, format!("{:.1}%", p.cpu_percent)),
+                                        Col::Cpu => right(ui, crate::i18n::percent(format!("{:.1}", p.cpu_percent))),
                                         Col::Memory => {
                                             right(ui, format_bytes(p.private_working_set as f64))
                                         }
@@ -2304,7 +2304,7 @@ impl ProcessView {
                                             ui,
                                             format_bytes(p.gpu_detail.shared_memory as f64),
                                         ),
-                                        Col::Cycle => right(ui, format!("{:.1}%", p.cycle_percent)),
+                                        Col::Cycle => right(ui, crate::i18n::percent(format!("{:.1}", p.cycle_percent))),
                                         Col::SharedWorkingSet => {
                                             right(ui, format_bytes(shared_working_set(p) as f64))
                                         }
@@ -2412,7 +2412,7 @@ impl ProcessView {
                                         Col::Network => {
                                             right(ui, format!("{}/s", format_bytes(p.net_rate())))
                                         }
-                                        Col::Gpu => right(ui, format!("{:.1}%", p.gpu_percent)),
+                                        Col::Gpu => right(ui, crate::i18n::percent(format!("{:.1}", p.gpu_percent))),
                                         Col::GpuMemory => {
                                             right(ui, format_bytes(p.gpu_memory as f64))
                                         }

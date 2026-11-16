@@ -79,7 +79,7 @@ pub fn show(ui: &mut Ui, d: &Device) {
                 } else {
                     "Wear used"
                 },
-                &remaining.map_or_else(unavailable, |v| format!("{v:.0}%")),
+                &remaining.map_or_else(unavailable, |v| crate::i18n::percent(format!("{v:.0}"))),
             );
             if let Some(percent) = remaining {
                 col.add(
@@ -104,7 +104,7 @@ pub fn show(ui: &mut Ui, d: &Device) {
             value(
                 col,
                 "NVMe available spare",
-                &spare.map_or_else(unavailable, |v| format!("{v:.0}%")),
+                &spare.map_or_else(unavailable, |v| crate::i18n::percent(format!("{v:.0}"))),
             );
             if let Some(percent) = spare {
                 col.add(

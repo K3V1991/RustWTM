@@ -790,10 +790,10 @@ impl View {
                             .fill(crate::theme::text_color(ui, crate::theme::MEMORY))
                             .desired_width(ui.available_width())
                             .text(format!(
-                                "{} / {} ({:.0}%)",
+                                "{} / {} ({})",
                                 wtm_core::format_bytes(used),
                                 wtm_core::format_bytes(used + available),
-                                ratio * 100.0
+                                crate::i18n::percent(format!("{:.0}", ratio * 100.0))
                             )),
                     );
                 }

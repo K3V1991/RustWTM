@@ -332,7 +332,7 @@ fn drives(ui: &mut Ui, view: &mut DisksView) {
                             ui.horizontal(|ui| {
                                 bar(ui, percent / 100.0, 226.0, used_color(percent));
                                 ui.label(
-                                    RichText::new(format!("{percent:.0}%"))
+                                    RichText::new(crate::i18n::percent(format!("{percent:.0}")))
                                         .color(crate::theme::text_color(ui, used_color(percent))),
                                 );
                             });
@@ -808,7 +808,7 @@ fn size_cells(row: &mut egui_extras::TableRow<'_, '_>, size: u64, files: u64, pa
         crate::theme::table_cell(ui, |ui| {
             let s = share(size, parent);
             bar(ui, s, 90.0, ACCENT);
-            ui.label(format!("{:.1}%", s * 100.0));
+            ui.label(crate::i18n::percent(format!("{:.1}", s * 100.0)));
         })
     });
     row.col(|ui| {
@@ -1117,7 +1117,7 @@ fn types(ui: &mut Ui, r: &ScanResult) {
                     ui.horizontal(|ui| {
                         let s = share(t.size, r.root.size);
                         bar(ui, s, 160.0, ACCENT);
-                        ui.label(format!("{:.1}%", s * 100.0));
+                        ui.label(crate::i18n::percent(format!("{:.1}", s * 100.0)));
                     });
                     ui.label(t.files.to_string());
                     crate::theme::end_row(ui);

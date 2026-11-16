@@ -30,7 +30,7 @@ pub fn show(ui: &mut Ui, data: &Data, band: crate::preferences::Band) -> Option<
         Metric {
             resource: Resource::Cpu,
             title: "CPU",
-            value: format!("{:.0}%", s.cpu_percent),
+            value: crate::i18n::percent(format!("{:.0}", s.cpu_percent)),
             detail: crate::i18n::format("{0} logical processors", &[s.logical_cpus.to_string()]),
             color: theme::CPU,
             series: vec![(&h.cpu, theme::CPU)],
@@ -40,7 +40,11 @@ pub fn show(ui: &mut Ui, data: &Data, band: crate::preferences::Band) -> Option<
             resource: Resource::Memory,
             title: crate::i18n::tr("Memory"),
             value: format_bytes(s.memory_used() as f64),
-            detail: format!("{memory:.0}% · {}", format_bytes(s.memory_total as f64)),
+            detail: format!(
+                "{} · {}",
+                crate::i18n::percent(format!("{memory:.0}")),
+                format_bytes(s.memory_total as f64)
+            ),
             color: theme::MEMORY,
             series: vec![(&h.memory, theme::MEMORY)],
             ceiling: Some(100.0),
@@ -73,7 +77,7 @@ pub fn show(ui: &mut Ui, data: &Data, band: crate::preferences::Band) -> Option<
         Metric {
             resource: Resource::Gpu,
             title: "GPU",
-            value: format!("{:.0}%", s.gpu_percent),
+            value: crate::i18n::percent(format!("{:.0}", s.gpu_percent)),
             detail: crate::i18n::tr("busiest engine").into(),
             color: theme::GPU,
             series: vec![(&h.gpu, theme::GPU)],
@@ -256,32 +260,32 @@ pub fn show(ui: &mut Ui, data: &Data, band: crate::preferences::Band) -> Option<
     clicked
 }
 
-/// Numeric readings lead; smaller units stay on the same baseline.
+/// Numeric readings lead; smaller units stay on the same baseline. A unit
+/// may come first, as Turkish writes "%42".
 fn value_job(value: &str, size: f32, ink: Color32, muted: Color32) -> egui::text::LayoutJob {
+    let (prefix, value) = match value.strip_prefix('%') {
+        Some(rest) => ("%", rest),
+        None => ("", value),
+    };
     let split = value
         .find(|c: char| c.is_whitespace() || c == '%')
         .unwrap_or(value.len());
     let (number, unit) = value.split_at(split);
+    let big = egui::TextFormat {
+        font_id: egui::FontId::proportional(size),
+        color: ink,
+        ..Default::default()
+    };
+    let small = egui::TextFormat {
+        font_id: egui::FontId::proportional(size * 0.55),
+        color: muted,
+        valign: egui::Align::Max,
+        ..Default::default()
+    };
     let mut job = egui::text::LayoutJob::default();
-    job.append(
-        number,
-        0.0,
-        egui::TextFormat {
-            font_id: egui::FontId::proportional(size),
-            color: ink,
-            ..Default::default()
-        },
-    );
-    job.append(
-        unit,
-        0.0,
-        egui::TextFormat {
-            font_id: egui::FontId::proportional(size * 0.55),
-            color: muted,
-            valign: egui::Align::Max,
-            ..Default::default()
-        },
-    );
+    job.append(prefix, 0.0, small.clone());
+    job.append(number, 0.0, big);
+    job.append(unit, 0.0, small);
     job
 }
 
@@ -338,6 +342,29 @@ fn draw_history(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn the_number_is_large_with_its_unit_before_or_after() {
+        let parts = |value: &str| {
+            let job = value_job(value, 20.0, Color32::WHITE, Color32::GRAY);
+            job.sections
+                .iter()
+                .filter(|s| !s.byte_range.is_empty())
+                .map(|s| {
+                    (
+                        job.text[s.byte_range.start.0..s.byte_range.end.0].to_owned(),
+                        s.format.font_id.size,
+                    )
+                })
+                .collect::<Vec<(String, f32)>>()
+        };
+        assert_eq!(parts("42%"), [("42".into(), 20.0), ("%".into(), 11.0)]);
+        assert_eq!(parts("%42"), [("%".into(), 11.0), ("42".into(), 20.0)]);
+        assert_eq!(
+            parts("8.0 GiB"),
+            [("8.0".into(), 20.0), (" GiB".into(), 11.0)]
+        );
+    }
 
     #[test]
     fn charts_break_at_missing_samples_and_reject_unpaired_history() {

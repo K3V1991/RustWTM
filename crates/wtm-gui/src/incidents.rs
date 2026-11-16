@@ -136,7 +136,7 @@ impl View {
                         .y_axis_min_width(64.0)
                         .y_axis_formatter(|mark, _| {
                             if percent {
-                                format!("{:.0}%", mark.value)
+                                crate::i18n::percent(format!("{:.0}", mark.value))
                             } else if metric == 1 {
                                 wtm_core::format_bytes(mark.value.max(0.0))
                             } else {
@@ -192,11 +192,11 @@ impl View {
                                 );
                             ui.strong(stamp);
                             ui.label(format!(
-                                "CPU {:.0}% · RAM {} / {} · GPU {:.0}%",
-                                f.cpu,
+                                "CPU {} · RAM {} / {} · GPU {}",
+                                crate::i18n::percent(format!("{:.0}", f.cpu)),
                                 wtm_core::format_bytes(f.memory as f64),
                                 wtm_core::format_bytes(f.memory_total as f64),
-                                f.gpu
+                                crate::i18n::percent(format!("{:.0}", f.gpu))
                             ));
                             if f.partial {
                                 crate::theme::colored(
@@ -211,9 +211,9 @@ impl View {
                                         .label(RichText::new(&p.target.name).strong())
                                         .interact(egui::Sense::click());
                                     ui.weak(format!(
-                                        "PID {} · CPU {:.1}% · {}",
+                                        "PID {} · CPU {} · {}",
                                         p.target.pid,
-                                        p.cpu,
+                                        crate::i18n::percent(format!("{:.1}", p.cpu)),
                                         wtm_core::format_bytes(p.memory as f64)
                                     ));
                                     let live = data.snapshot.as_ref().is_some_and(|s| {

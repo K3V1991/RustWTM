@@ -400,7 +400,10 @@ fn body(ui: &mut Ui, session: &mut Session) {
                 ui,
                 1,
                 "Display and accessibility",
-                &format!("{theme_name} · {}% · {density}", d.display.scale),
+                &format!(
+                    "{theme_name} · {} · {density}",
+                    crate::i18n::percent(d.display.scale.to_string())
+                ),
                 &[("Reduce interface animation", d.display.reduced_motion)],
             ) {
                 edit = Some(1);
