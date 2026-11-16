@@ -36,6 +36,28 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- Opening Settings › Service settings could change config.toml without
+  any input: number fields pulled hand-set values into their range
+  (history_days 730 became 365) and sliders rounded them. Shown values
+  are now left alone until the user changes them, and the governor's two
+  thresholds can no longer cross and lock the form.
+- Clicking a Find handle or DLL hit never loaded the process's details.
+- A wait-chain analysis that could not run read "0 threads, 0 blocked";
+  it now says it is busy, or that its counts are partial.
+- Go to services could open an empty list when Stopped was chosen
+  earlier; Details and Properties bring back a hidden inspector.
+- A kill-list entry without automatic ending could be added twice, and
+  an invalid config.toml showed as an empty kill list.
+- Renaming a limit onto another app's limit overwrote it; a refused rule
+  save lost the rule being edited.
+- Ports' Address column sorted by memory; Overview's Copy Current copied
+  nothing for CPU, Memory and GPU.
+- Recorded incidents and App history could show another period's data,
+  or keep loading for ever; Analyze on a second drive during a scan was
+  dropped.
+- Network's empty state could not clear a kind filter; About pointed at
+  an update bar that Later had hidden; AI's Forget key saved other
+  unsaved edits.
 - Limits could show usage as "-0.00 cores".
 - Largest files showed nothing for an unknown modification time, which
   put Show under Modified; it shows a dash.
