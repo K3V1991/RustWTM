@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "முந்தைய பகுப்பாய்வுகள் பதிலளிக்காத நிரல்களுக்காக இன்னும் காத்திருக்கின்றன. ஒரு நிமிடம் கழித்து மீண்டும் முயலவும்.",
   "The analysis stopped before it finished; these counts are partial.": "பகுப்பாய்வு முடிவதற்கு முன்பே நின்றுவிட்டது; இந்த எண்ணிக்கைகள் முழுமையற்றவை.",
   "This limit was changed or removed meanwhile; open it again to change it.": "இதற்கிடையில் இந்த வரம்பு மாற்றப்பட்டது அல்லது அகற்றப்பட்டது; மாற்ற மீண்டும் திறக்கவும்.",
-  "{0} already has a limit of this kind; change that one instead.": "{0}-க்கு இந்த வகை வரம்பு ஏற்கனவே உள்ளது; அதற்குப் பதிலாக அதை மாற்றவும்."
+  "{0} already has a limit of this kind; change that one instead.": "{0}-க்கு இந்த வகை வரம்பு ஏற்கனவே உள்ளது; அதற்குப் பதிலாக அதை மாற்றவும்.",
+  "Version {0} is available.": "பதிப்பு {0} கிடைக்கிறது.",
+  "Show the update": "புதுப்பிப்பைக் காட்டு",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} பகுப்பாய்வு நின்றவுடன் {1} பகுப்பாய்வு செய்யப்படும்.",
+  "No usage of this app was recorded in this period.": "இந்தக் காலத்தில் இந்த ஆப்ஸின் பயன்பாடு பதிவாகவில்லை."
 }

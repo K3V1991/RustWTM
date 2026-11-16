@@ -11344,5 +11344,29 @@
     "de": "{0} hat bereits ein Limit dieser Art; ändern Sie stattdessen dieses.",
     "fr": "{0} a déjà une limite de ce type ; modifiez plutôt celle-ci.",
     "es": "{0} ya tiene un límite de este tipo; cambie ese en su lugar."
+  },
+  "Version {0} is available.": {
+    "tr": "{0} sürümü çıktı.",
+    "de": "Version {0} ist verfügbar.",
+    "fr": "La version {0} est disponible.",
+    "es": "La versión {0} está disponible."
+  },
+  "Show the update": {
+    "tr": "Güncellemeyi göster",
+    "de": "Update anzeigen",
+    "fr": "Afficher la mise à jour",
+    "es": "Mostrar la actualización"
+  },
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": {
+    "tr": "{0} analizi durduğunda {1} analiz edilecek.",
+    "de": "{1} wird analysiert, sobald die Analyse von {0} beendet ist.",
+    "fr": "{1} sera analysé dès que l'analyse de {0} sera arrêtée.",
+    "es": "{1} se analizará en cuanto se detenga el análisis de {0}."
+  },
+  "No usage of this app was recorded in this period.": {
+    "tr": "Bu dönemde bu uygulamanın kullanımı kaydedilmedi.",
+    "de": "Für diesen Zeitraum wurde keine Nutzung dieser App aufgezeichnet.",
+    "fr": "Aucune utilisation de cette application n'a été enregistrée sur cette période.",
+    "es": "No se registró uso de esta aplicación en este periodo."
   }
 }

@@ -38,14 +38,27 @@ const HIGHLIGHTS: [(&str, &str); 6] = [
 
 /// Returns whether the user asked to check for updates.
 /// `diagnostics` makes the text "Copy diagnostic information" copies.
+/// What the About page asks of the app.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Asked {
+    Nothing,
+    CheckForUpdates,
+    /// Show again the update bar that Later or Skip hid.
+    ShowUpdate,
+}
+
+/// `bar_hidden`: a newer release is out but its bar was put away (Later, or
+/// Skip this version), so About must not point at it.
 pub fn about(
     ui: &mut Ui,
     update: &crate::backend::UpdateState,
+    bar_hidden: bool,
     frames: Option<crate::frames::Summary>,
     diagnostics: &dyn Fn() -> String,
-) -> bool {
+) -> Asked {
     use crate::backend::UpdateState;
     let mut check = false;
+    let mut show_update = false;
     let mut area = egui::ScrollArea::vertical().id_salt("about");
     if let Some(y) = crate::theme::take_scroll(ui, "about") {
         area = area.vertical_scroll_offset(y);
@@ -115,6 +128,10 @@ pub fn about(
                         UpdateState::UpToDate => {
                             crate::i18n::tr("You have the latest version.").into()
                         }
+                        UpdateState::Available(r) if bar_hidden => crate::i18n::format(
+                            "Version {0} is available.",
+                            &[r.version_text()],
+                        ),
                         UpdateState::Available(r) => {
                             let __wtm_i18n_0 = &(r.version_text());
                             crate::i18n::format(
@@ -147,6 +164,12 @@ pub fn about(
                     }
                     if !status.is_empty() {
                         ui.weak(status);
+                    }
+                    if bar_hidden
+                        && matches!(update, UpdateState::Available(_))
+                        && ui.button(crate::i18n::tr("Show the update")).clicked()
+                    {
+                        show_update = true;
                     }
                 });
                 ui.add_space(0.0);
@@ -242,7 +265,13 @@ pub fn about(
         }
     });
     crate::theme::more_below(ui, "about", &out, ui.visuals().panel_fill);
-    check
+    if show_update {
+        Asked::ShowUpdate
+    } else if check {
+        Asked::CheckForUpdates
+    } else {
+        Asked::Nothing
+    }
 }
 
 /// How quickly the window draws, from the last few hundred frames.
@@ -265,9 +294,13 @@ mod tests {
             .allow_missing_glyphs()
             .with_size([1100.0, 900.0])
             .build_ui(|ui| {
-                about(ui, &crate::backend::UpdateState::UpToDate, None, &|| {
-                    "diagnostics".into()
-                });
+                about(
+                    ui,
+                    &crate::backend::UpdateState::UpToDate,
+                    false,
+                    None,
+                    &|| "diagnostics".into(),
+                );
             });
         h.run();
         assert!(h.query_by_label("An oxog.net project.").is_some());
@@ -314,7 +347,7 @@ mod tests {
                 .allow_missing_glyphs()
                 .with_size([1100.0, 900.0])
                 .build_ui(|ui| {
-                    about(ui, &state, None, &String::new);
+                    about(ui, &state, false, None, &String::new);
                 });
             h.run();
             assert!(h.query_by_label(text).is_some(), "{text}");
@@ -322,7 +355,7 @@ mod tests {
         let mut h = egui_kittest::Harness::builder()
             .allow_missing_glyphs()
             .build_ui(|ui| {
-                about(ui, &UpdateState::Unknown, None, &String::new);
+                about(ui, &UpdateState::Unknown, false, None, &String::new);
             });
         h.run();
         assert!(h.query_by_label("Check for updates").is_some());

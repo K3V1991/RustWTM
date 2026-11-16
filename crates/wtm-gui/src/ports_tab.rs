@@ -473,6 +473,37 @@ fn known_ports(ui: &mut Ui, all: &[PortRow<'_>], view: &mut PortsView, intents: 
     });
 }
 
+/// The order of two rows of the listening-ports table by column `col`.
+fn order(
+    col: usize,
+    (a, ap): (&PortUse, Option<&ProcessInfo>),
+    (b, bp): (&PortUse, Option<&ProcessInfo>),
+) -> std::cmp::Ordering {
+    fn name(p: Option<&ProcessInfo>) -> &str {
+        p.map_or("?", |p| p.name.as_str())
+    }
+    match col {
+        0 => a.port.cmp(&b.port),
+        2 => text(
+            a.known().map_or("", |k| k.service),
+            b.known().map_or("", |k| k.service),
+        ),
+        3 => text(name(ap), name(bp)),
+        4 => a.pid.cmp(&b.pid),
+        5 => a.exposure().cmp(&b.exposure()),
+        6 => a.connections.cmp(&b.connections),
+        7 => num(
+            f64::from(ap.map_or(0.0, |p| p.cpu_percent)),
+            f64::from(bp.map_or(0.0, |p| p.cpu_percent)),
+        ),
+        8 => ap
+            .map_or(0, |p| p.private_working_set)
+            .cmp(&bp.map_or(0, |p| p.private_working_set)),
+        // The addresses themselves, so 127.0.0.1 sorts before ::1.
+        _ => a.addresses.cmp(&b.addresses),
+    }
+}
+
 fn listening_table(
     ui: &mut Ui,
     uses: &[PortUse],
@@ -505,31 +536,11 @@ fn listening_table(
                     .is_some_and(|k| k.service.to_lowercase().contains(&f))
         })
         .collect();
-    fn name<'a>(p: &Option<&'a ProcessInfo>) -> &'a str {
-        p.map_or("?", |p| p.name.as_str())
-    }
     let mut sort = Sort::load(ui, "ports", Sort::new(0, false));
     if sort.col == 1 {
         sort.apply_text(&mut rows, |(a, _)| format!("{:?}", a.protocol));
     } else {
-        sort.apply(&mut rows, |(a, ap), (b, bp), col| match col {
-            0 => a.port.cmp(&b.port),
-            2 => text(
-                a.known().map_or("", |k| k.service),
-                b.known().map_or("", |k| k.service),
-            ),
-            3 => text(name(ap), name(bp)),
-            4 => a.pid.cmp(&b.pid),
-            5 => a.exposure().cmp(&b.exposure()),
-            6 => a.connections.cmp(&b.connections),
-            7 => num(
-                f64::from(ap.map_or(0.0, |p| p.cpu_percent)),
-                f64::from(bp.map_or(0.0, |p| p.cpu_percent)),
-            ),
-            _ => ap
-                .map_or(0, |p| p.private_working_set)
-                .cmp(&bp.map_or(0, |p| p.private_working_set)),
-        });
+        sort.apply(&mut rows, |a, b, col| order(col, *a, *b));
     }
     if rows.is_empty() && !f.is_empty() {
         crate::theme::empty_state(
@@ -843,6 +854,27 @@ mod tests {
                     intents: Vec::new(),
                 },
             )
+    }
+
+    #[test]
+    fn every_column_sorts_by_its_own_value() {
+        use std::cmp::Ordering;
+        let uses = ports::port_uses(&[listen("127.0.0.1:3000", 1), listen("[::]:4000", 2)]);
+        let (local, any) = (&uses[0], &uses[1]);
+        let small = ProcessInfo {
+            private_working_set: 1,
+            ..crate::ui_tests::data().snapshot.unwrap().processes[0].clone()
+        };
+        let big = ProcessInfo {
+            private_working_set: 1 << 30,
+            ..small.clone()
+        };
+        // 127.0.0.1 uses much more memory than ::, so Memory and Address
+        // put them in opposite orders.
+        let a = (local, Some(&big));
+        let b = (any, Some(&small));
+        assert_eq!(order(8, a, b), Ordering::Greater, "Memory");
+        assert_eq!(order(9, a, b), Ordering::Less, "Address");
     }
 
     #[test]

@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Предыдущие анализы всё ещё ждут программ, которые не отвечают. Повторите через минуту.",
   "The analysis stopped before it finished; these counts are partial.": "Анализ остановился, не завершившись; эти числа неполные.",
   "This limit was changed or removed meanwhile; open it again to change it.": "Это ограничение тем временем изменили или удалили; откройте его снова, чтобы изменить.",
-  "{0} already has a limit of this kind; change that one instead.": "У {0} уже есть ограничение этого вида; измените его."
+  "{0} already has a limit of this kind; change that one instead.": "У {0} уже есть ограничение этого вида; измените его.",
+  "Version {0} is available.": "Доступна версия {0}.",
+  "Show the update": "Показать обновление",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} будет проанализирован, как только остановится анализ {0}.",
+  "No usage of this app was recorded in this period.": "За этот период использование этого приложения не записано."
 }

@@ -41,6 +41,9 @@ pub struct AiSettingsView {
     models: Vec<String>,
     models_task: Task<Vec<String>>,
     test_task: Task<String>,
+    /// The provider and address the running listing or test asked; a reply
+    /// for another one is dropped.
+    asked: Option<(ProviderKind, String)>,
     /// The outcome of the last save, key change, test or model listing.
     status: Option<Result<String, String>>,
     /// Where the key comes from, worked out once per provider and stored
@@ -64,27 +67,40 @@ impl AiSettingsView {
         };
         match action {
             Action::Save => {
-                let key = std::mem::take(&mut self.key);
-                if !key.trim().is_empty()
-                    && let Err(e) = form.set_key(&key)
+                // A key that cannot be stored stays in its field.
+                if !self.key.trim().is_empty()
+                    && let Err(e) = form.set_key(&self.key)
                 {
                     self.status = Some(Err(e));
                     return;
                 }
+                self.key.clear();
                 self.save();
             }
             Action::Forget => {
+                // Only the key: the page's other changes stay unsaved.
+                let provider = form.provider;
                 form.forget_key();
-                self.save();
+                let mut stored = self.saved.clone().unwrap_or_else(|| form.clone());
+                stored.keys.remove(provider.id());
+                self.status = Some(match write(&stored) {
+                    Ok(()) => {
+                        self.saved = Some(stored);
+                        Ok(crate::i18n::tr("Saved.").to_owned())
+                    }
+                    Err(e) => Err(e),
+                });
             }
             Action::Models => {
                 let cfg = form.clone();
+                self.asked = Some((cfg.provider, cfg.base_url.clone()));
                 self.status = None;
                 self.models_task
                     .start(ctx, move || wtm_ai::Client::from_config(cfg)?.models());
             }
             Action::Test => {
                 let cfg = form.clone();
+                self.asked = Some((cfg.provider, cfg.base_url.clone()));
                 self.status = None;
                 self.test_task.start(ctx, move || {
                     let client = wtm_ai::Client::from_config(cfg)?;
@@ -116,11 +132,7 @@ impl AiSettingsView {
         form.model = form.model.trim().to_owned();
         form.base_url = form.base_url.trim().to_owned();
         form.language = form.language.trim().to_owned();
-        #[cfg(not(test))]
-        let saved = form.save();
-        #[cfg(test)]
-        let saved: Result<(), String> = Ok(());
-        self.status = Some(match saved {
+        self.status = Some(match write(form) {
             Ok(()) => {
                 self.saved = Some(form.clone());
                 Ok(crate::i18n::tr("Saved.").to_owned())
@@ -130,10 +142,23 @@ impl AiSettingsView {
     }
 }
 
+/// Writes `cfg` to disk; tests never touch the user's file.
+fn write(cfg: &AiConfig) -> Result<(), String> {
+    #[cfg(not(test))]
+    return cfg.save();
+    #[cfg(test)]
+    {
+        let _ = cfg;
+        Ok(())
+    }
+}
+
 /// Settings → AI assistant.
 pub fn settings(ui: &mut Ui, view: &mut AiSettingsView) {
     view.ensure_loaded();
-    if let Some(result) = view.models_task.poll() {
+    let current = view.form.as_ref().map(|f| (f.provider, f.base_url.clone()));
+    let for_this = view.asked == current;
+    if let Some(result) = view.models_task.poll().filter(|_| for_this) {
         view.status = Some(match result {
             Ok(models) if models.is_empty() => {
                 Err(crate::i18n::tr("The provider listed no models.").to_owned())
@@ -149,7 +174,7 @@ pub fn settings(ui: &mut Ui, view: &mut AiSettingsView) {
             Err(e) => Err(e),
         });
     }
-    if let Some(result) = view.test_task.poll() {
+    if let Some(result) = view.test_task.poll().filter(|_| for_this) {
         view.status = Some(result);
     }
     crate::theme::option_group(ui, crate::i18n::tr("AI assistant"));
@@ -774,6 +799,50 @@ fn render_answer(ui: &mut Ui, text: &str) {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn loaded(form: AiConfig) -> AiSettingsView {
+        AiSettingsView {
+            saved: Some(form.clone()),
+            form: Some(form),
+            ..AiSettingsView::default()
+        }
+    }
+
+    #[test]
+    fn forgetting_the_key_saves_nothing_else() {
+        let mut stored = AiConfig::default();
+        stored
+            .keys
+            .insert(stored.provider.id().to_owned(), "sealed".into());
+        let mut view = loaded(stored.clone());
+        // An unsaved edit, then Forget the stored key.
+        view.form.as_mut().unwrap().model = "unsaved-model".into();
+        view.act(&egui::Context::default(), Action::Forget);
+        let saved = view.saved.as_ref().unwrap();
+        assert!(saved.keys.is_empty(), "the key is gone");
+        assert_eq!(saved.model, stored.model, "the model edit was not saved");
+        assert_eq!(
+            view.form.as_ref().unwrap().model,
+            "unsaved-model",
+            "and is kept"
+        );
+    }
+
+    #[test]
+    fn a_reply_for_another_provider_is_dropped() {
+        let ctx = egui::Context::default();
+        let mut view = loaded(AiConfig::default());
+        view.act(&ctx, Action::Models);
+        view.act(&ctx, Action::Test);
+        // The provider changes before the replies are read.
+        view.form.as_mut().unwrap().provider = wtm_ai::ProviderKind::OpenAi;
+        ctx.run_pass(egui::RawInput::default(), |ctx| {
+            ctx.root_ui(|ui| settings(ui, &mut view));
+        })
+        .drop_without_applying_deltas();
+        assert!(view.status.is_none(), "{:?}", view.status);
+        assert!(view.models.is_empty());
+    }
 
     fn harness(chat: AiChat) -> egui_kittest::Harness<'static, AiChat> {
         egui_kittest::Harness::builder()

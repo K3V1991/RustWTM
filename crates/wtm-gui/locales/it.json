@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Analisi precedenti attendono ancora programmi che non rispondono. Riprova tra un minuto.",
   "The analysis stopped before it finished; these counts are partial.": "L'analisi si è interrotta prima di finire; questi conteggi sono parziali.",
   "This limit was changed or removed meanwhile; open it again to change it.": "Questo limite è stato modificato o rimosso nel frattempo; riaprilo per modificarlo.",
-  "{0} already has a limit of this kind; change that one instead.": "{0} ha già un limite di questo tipo; modifica quello."
+  "{0} already has a limit of this kind; change that one instead.": "{0} ha già un limite di questo tipo; modifica quello.",
+  "Version {0} is available.": "È disponibile la versione {0}.",
+  "Show the update": "Mostra l'aggiornamento",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} verrà analizzato non appena l'analisi di {0} si sarà fermata.",
+  "No usage of this app was recorded in this period.": "Nessun utilizzo di questa app registrato in questo periodo."
 }

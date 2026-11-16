@@ -63,6 +63,9 @@ pub struct DisksView {
     error: Option<String>,
     analysis_open: bool,
     scan_generation: u64,
+    /// Asked for while an earlier scan was still stopping; started once it
+    /// has.
+    queued: Option<PathBuf>,
 }
 
 impl Default for DisksView {
@@ -79,6 +82,7 @@ impl Default for DisksView {
             error: None,
             analysis_open: false,
             scan_generation: 0,
+            queued: None,
         }
     }
 }
@@ -152,8 +156,12 @@ impl DisksView {
         // Cancellation cannot interrupt a blocked filesystem read. Reopening
         // the drive page must not accumulate background scan workers.
         if self.scanning() {
+            // The new folder replaces the one being read.
+            self.queued = Some(path.to_owned());
+            self.cancel();
             return;
         }
+        self.queued = None;
         self.scan_generation = self.scan_generation.wrapping_add(1);
         if let Some(old) = self.scan.take() {
             old.progress.cancel();
@@ -199,6 +207,15 @@ impl DisksView {
         });
     }
 
+    /// Starts the analysis asked for meanwhile, once the earlier scan stopped.
+    pub fn start_queued(&mut self, ctx: &egui::Context) {
+        if !self.scanning()
+            && let Some(path) = self.queued.take()
+        {
+            self.start(ctx, &path);
+        }
+    }
+
     pub fn cancel(&mut self) {
         if let Some(scan) = &self.scan {
             scan.progress.cancel();
@@ -207,6 +224,7 @@ impl DisksView {
 }
 
 pub fn disks_tab(ui: &mut Ui, data: &Data, view: &mut DisksView) -> Option<ProcessRef> {
+    view.start_queued(ui.ctx());
     if view.analysis_open {
         ui.horizontal(|ui| {
             ui.spacing_mut().item_spacing.x = 8.0;
@@ -631,6 +649,18 @@ fn analysis(ui: &mut Ui, view: &mut DisksView) {
     }
     if let Some(e) = &view.error {
         crate::theme::colored(ui, BAD, e);
+    }
+    if let (Some(next), Some(scan)) = (&view.queued, &view.scan) {
+        // A blocked read cannot be interrupted; until it returns, what
+        // shows below is still the earlier folder.
+        crate::theme::colored(
+            ui,
+            crate::theme::WARN,
+            crate::i18n::format(
+                "{1} is analyzed as soon as the analysis of {0} has stopped.",
+                &[scan.path.display().to_string(), next.display().to_string()],
+            ),
+        );
     }
     let Some(scan) = &view.scan else {
         ui.weak(crate::i18n::tr(
@@ -1552,6 +1582,24 @@ mod tests {
         assert_eq!(scan.path, Path::new(r"Z:\pending"));
         assert!(Arc::ptr_eq(&scan.progress, &progress));
         assert_eq!(view.scan_generation, 0);
+
+        // The request is not lost: it waits, said so, and starts once the
+        // earlier worker has stopped.
+        assert_eq!(view.queued.as_deref(), Some(Path::new(r"Z:\another")));
+        view.start_queued(&egui::Context::default());
+        assert_eq!(
+            view.scan.as_ref().unwrap().path,
+            Path::new(r"Z:\pending"),
+            "still running"
+        );
+        view.scan
+            .as_ref()
+            .unwrap()
+            .unreadable
+            .store(true, Ordering::Relaxed);
+        view.start_queued(&egui::Context::default());
+        assert_eq!(view.scan.as_ref().unwrap().path, Path::new(r"Z:\another"));
+        assert!(view.queued.is_none());
     }
 
     #[test]

@@ -374,7 +374,9 @@ pub struct Data {
     >,
     pub app_history: Option<Result<AppHistory, String>>,
     /// Per-minute rows for the app selected in App history.
-    pub series: Option<(String, Vec<MinuteRow>)>,
+    /// The per-minute usage of one app over `hours`, or why it could not be
+    /// read: the page tells loading, empty and failed apart.
+    pub series: Option<(String, u32, Result<Vec<MinuteRow>, String>)>,
     /// Command lines per process instance, read with this window's own
     /// rights (empty when not readable). The service never sends them.
     pub command_lines: CommandLines,
@@ -1251,14 +1253,19 @@ impl Worker {
                 self.data().app_history = Some(r);
             }
             UiCommand::LoadSeries { app, hours } => {
-                if let Some(c) = self.client.as_mut()
-                    && let Ok(Response::Series(rows)) = c.call(&Request::AppSeries {
+                let rows = match self.client.as_mut() {
+                    None => Err(without_service(&self.data, NO_SERVICE)),
+                    Some(c) => match c.call(&Request::AppSeries {
                         app: app.clone(),
                         hours,
-                    })
-                {
-                    self.data().series = Some((app, rows));
-                }
+                    }) {
+                        Ok(Response::Series(rows)) => Ok(rows),
+                        Ok(Response::Error(e)) => Err(e),
+                        Ok(other) => Err(unexpected(other).to_string()),
+                        Err(e) => Err(e.to_string()),
+                    },
+                };
+                self.data().series = Some((app, hours, rows));
             }
             UiCommand::Service {
                 name,
@@ -3587,7 +3594,8 @@ mod tests {
             app: "x".into(),
             hours: 1,
         });
-        assert!(w.data().series.is_none());
+        // Said, not dropped: a dropped reply left the chart loading forever.
+        assert!(matches!(&w.data().series, Some((_, 1, Err(e))) if e.starts_with(NO_SERVICE)));
 
         let child = spawn();
         w.tick();
@@ -3941,7 +3949,7 @@ mod tests {
             app: "x.exe".into(),
             hours: 24,
         });
-        assert!(w.data().series.is_some());
+        assert!(matches!(&w.data().series, Some((_, 24, Ok(_)))));
         w.handle(UiCommand::SaveTelegram(
             wtm_policy::TelegramConfig::default(),
         ));
@@ -4150,7 +4158,7 @@ mod tests {
             app: "x.exe".into(),
             hours: 1,
         });
-        assert!(w.data().series.is_none());
+        assert!(matches!(&w.data().series, Some((_, 1, Err(e))) if e == "unknown app"));
         w.handle(UiCommand::SaveConfig(String::new()));
         let (level, text) = message(&w);
         assert_eq!(level, EventLevel::Error);

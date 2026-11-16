@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "আগের বিশ্লেষণগুলো এখনও সাড়া না দেওয়া প্রোগ্রামের জন্য অপেক্ষা করছে। এক মিনিট পরে আবার চেষ্টা করুন।",
   "The analysis stopped before it finished; these counts are partial.": "বিশ্লেষণ শেষ হওয়ার আগেই থেমে গেছে; এই গণনাগুলো আংশিক।",
   "This limit was changed or removed meanwhile; open it again to change it.": "এর মধ্যে এই সীমা পরিবর্তন বা সরানো হয়েছে; পরিবর্তন করতে এটি আবার খুলুন।",
-  "{0} already has a limit of this kind; change that one instead.": "{0}-এর এই ধরনের সীমা আগে থেকেই আছে; বরং সেটি পরিবর্তন করুন।"
+  "{0} already has a limit of this kind; change that one instead.": "{0}-এর এই ধরনের সীমা আগে থেকেই আছে; বরং সেটি পরিবর্তন করুন।",
+  "Version {0} is available.": "সংস্করণ {0} পাওয়া যাচ্ছে।",
+  "Show the update": "আপডেট দেখান",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0}-এর বিশ্লেষণ থামলেই {1} বিশ্লেষণ করা হবে।",
+  "No usage of this app was recorded in this period.": "এই সময়ে এই অ্যাপের কোনো ব্যবহার রেকর্ড হয়নি।"
 }

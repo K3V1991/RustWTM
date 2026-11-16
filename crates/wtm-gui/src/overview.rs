@@ -54,6 +54,16 @@ struct Stat<'a> {
     max: Option<f32>,
 }
 
+impl Stat<'_> {
+    /// The reading the card shows: the ring's percentage, or the value.
+    fn current(&self) -> String {
+        self.ring.map_or_else(
+            || self.value.clone(),
+            |p| crate::i18n::percent(format!("{p:.0}")),
+        )
+    }
+}
+
 const STAT_HEIGHT: f32 = 166.0;
 /// Ring or value block at the top of every card, so all cards line up.
 const STAT_HEADER: f32 = 80.0;
@@ -95,10 +105,7 @@ fn stat_card(ui: &mut Ui, s: &Stat<'_>) -> egui::Response {
                                     .strong()
                                     .color(crate::theme::text_color(ui, s.accent)),
                             );
-                            let value = s.ring.map_or_else(
-                                || s.value.clone(),
-                                |p| crate::i18n::percent(format!("{p:.0}")),
-                            );
+                            let value = s.current();
                             let color = s
                                 .ring
                                 .filter(|p| *p >= 70.0)
@@ -162,10 +169,7 @@ fn stat_card(ui: &mut Ui, s: &Stat<'_>) -> egui::Response {
         frame.response.id.with("open"),
         egui::Sense::click(),
     );
-    let value = s.ring.map_or_else(
-        || s.value.clone(),
-        |p| crate::i18n::percent(format!("{p:.0}")),
-    );
+    let value = s.current();
     response.widget_info(|| {
         egui::WidgetInfo::labeled(
             egui::Role::Button,
@@ -222,7 +226,7 @@ fn stat_row(ui: &mut Ui, stats: &[Stat<'_>], intents: &mut Vec<Intent>) {
                         ("overview-resource", response.id),
                         |ui| {
                             crate::context_actions::copy(ui, crate::i18n::tr("Current"), || {
-                                s.value.to_string()
+                                s.current()
                             });
                             open |= crate::context_actions::action(ui, crate::i18n::tr("Details"));
                         },
@@ -1029,6 +1033,42 @@ mod tests {
             });
         h.run_steps(2);
     }
+
+    #[test]
+    fn copy_current_copies_the_reading_the_card_shows() {
+        use egui_kittest::kittest::Queryable;
+        let stats = [super::Stat {
+            resource: Resource::Cpu,
+            title: "CPU",
+            accent: crate::theme::CPU,
+            ring: Some(42.0),
+            value: String::new(),
+            detail: String::new(),
+            series: Vec::new(),
+            max: Some(100.0),
+        }];
+        let mut h = egui_kittest::Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([400.0, 400.0])
+            .build_ui(|ui| super::stat_row(ui, &stats, &mut Vec::new()));
+        h.run_steps(2);
+        h.get_by_label_contains("CPU: 42%").click_secondary();
+        h.run_steps(2);
+        h.get_by_label("Copy Current").click();
+        h.run_steps(1);
+        let copied: Vec<_> = h
+            .output()
+            .platform_output
+            .commands
+            .iter()
+            .filter_map(|c| match c {
+                egui::OutputCommand::CopyText(text) => Some(text.clone()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(copied, ["42%"]);
+    }
+
     #[test]
     fn protection_button_saves_quoted_or_defaulted_mode_keys() {
         use egui_kittest::kittest::Queryable;

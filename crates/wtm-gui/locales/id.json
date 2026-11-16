@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Analisis sebelumnya masih menunggu program yang tidak merespons. Coba lagi dalam satu menit.",
   "The analysis stopped before it finished; these counts are partial.": "Analisis berhenti sebelum selesai; jumlah ini belum lengkap.",
   "This limit was changed or removed meanwhile; open it again to change it.": "Batas ini telah diubah atau dihapus sementara itu; buka lagi untuk mengubahnya.",
-  "{0} already has a limit of this kind; change that one instead.": "{0} sudah memiliki batas jenis ini; ubah batas tersebut."
+  "{0} already has a limit of this kind; change that one instead.": "{0} sudah memiliki batas jenis ini; ubah batas tersebut.",
+  "Version {0} is available.": "Versi {0} tersedia.",
+  "Show the update": "Tampilkan pembaruan",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} dianalisis begitu analisis {0} berhenti.",
+  "No usage of this app was recorded in this period.": "Tidak ada penggunaan aplikasi ini yang tercatat dalam periode ini."
 }

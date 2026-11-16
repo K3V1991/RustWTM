@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Eerdere analyses wachten nog op programma's die niet reageren. Probeer het over een minuut opnieuw.",
   "The analysis stopped before it finished; these counts are partial.": "De analyse stopte voordat ze klaar was; deze aantallen zijn onvolledig.",
   "This limit was changed or removed meanwhile; open it again to change it.": "Deze limiet is intussen gewijzigd of verwijderd; open hem opnieuw om hem te wijzigen.",
-  "{0} already has a limit of this kind; change that one instead.": "{0} heeft al een limiet van deze soort; wijzig die in plaats daarvan."
+  "{0} already has a limit of this kind; change that one instead.": "{0} heeft al een limiet van deze soort; wijzig die in plaats daarvan.",
+  "Version {0} is available.": "Versie {0} is beschikbaar.",
+  "Show the update": "Update tonen",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} wordt geanalyseerd zodra de analyse van {0} is gestopt.",
+  "No usage of this app was recorded in this period.": "In deze periode is geen gebruik van deze app vastgelegd."
 }

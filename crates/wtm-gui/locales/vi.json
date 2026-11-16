@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Các lần phân tích trước vẫn đang chờ những chương trình không phản hồi. Hãy thử lại sau một phút.",
   "The analysis stopped before it finished; these counts are partial.": "Phân tích đã dừng trước khi xong; các số này chưa đầy đủ.",
   "This limit was changed or removed meanwhile; open it again to change it.": "Giới hạn này đã bị thay đổi hoặc xóa trong lúc đó; hãy mở lại để thay đổi.",
-  "{0} already has a limit of this kind; change that one instead.": "{0} đã có một giới hạn loại này; hãy thay đổi giới hạn đó."
+  "{0} already has a limit of this kind; change that one instead.": "{0} đã có một giới hạn loại này; hãy thay đổi giới hạn đó.",
+  "Version {0} is available.": "Đã có phiên bản {0}.",
+  "Show the update": "Hiện bản cập nhật",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} sẽ được phân tích ngay khi việc phân tích {0} dừng lại.",
+  "No usage of this app was recorded in this period.": "Không ghi nhận việc dùng ứng dụng này trong khoảng thời gian này."
 }

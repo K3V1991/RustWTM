@@ -580,7 +580,7 @@ pub fn data() -> Data {
                 detail: "average CPU 12.5%".into(),
             }],
         ))),
-        series: Some(("alpha.exe".into(), vec![row(1, 5.0), row(2, 15.0)])),
+        series: Some(("alpha.exe".into(), 24, Ok(vec![row(1, 5.0), row(2, 15.0)]))),
         message: Some((EventLevel::Info, "ready".into())),
         ..Data::default()
     };
@@ -1455,6 +1455,39 @@ fn app_context_menu_keeps_its_group_when_live_totals_reorder() {
 }
 
 #[test]
+fn an_empty_network_list_clears_every_filter_that_hides_rows() {
+    let d = data();
+    // A TCP listener on 8080, but the UDP chip is on.
+    let mut h = Harness::builder()
+        .allow_missing_glyphs()
+        .with_size([1200.0, 900.0])
+        .build_ui_state(
+            move |ui, filter: &mut String| {
+                let _ = views::network(ui, &d, filter, None);
+            },
+            "8080".to_owned(),
+        );
+    h.ctx.data_mut(|m| {
+        m.insert_persisted(
+            egui::Id::unique("network_connection_kind"),
+            views::ConnectionKind::Udp,
+        )
+    });
+    h.run_steps(2);
+    assert!(
+        h.query_by_label("No program uses port 8080").is_none(),
+        "a TCP program does use it"
+    );
+    h.get_by_label("Clear filters").click();
+    h.run_steps(2);
+    assert!(h.state().is_empty());
+    assert!(
+        h.query_by_label("127.0.0.1:8080").is_some(),
+        "the row shows again"
+    );
+}
+
+#[test]
 fn the_network_list_narrows_to_a_selection_only_while_it_runs() {
     let d = data();
     let alpha = ProcessRef::from(&proc(100, 4, "alpha.exe", 0.0));
@@ -1884,6 +1917,8 @@ fn app_history_view_switches_window_sort_and_selection() {
     h.get_by_label("7 days").click();
     h.run();
     assert_eq!(h.state().1.hours, 168);
+    // The app reloads the chart for the new period.
+    h.state_mut().0.series.as_mut().expect("fixture").1 = 168;
     // Every column header sorts; the second click reverses.
     for header in [
         "App", "Seen", "p95 CPU", "Peak CPU", "Avg GPU", "CPU time", "Network", "Avg mem",
@@ -1905,6 +1940,25 @@ fn app_history_view_switches_window_sort_and_selection() {
     assert_eq!(app, "alpha.exe");
     assert!(cores >= 0.5);
     assert!(h.state().2 >= 2);
+
+    // The app's chart: a reply for 24 h is not shown under 7 days, and an
+    // empty or failed reply ends the waiting.
+    let loading = "Loading the usage of this app…";
+    let mut day = h.state().0.series.clone().expect("fixture");
+    day.1 = 24;
+    h.state_mut().0.series = Some(day);
+    h.run_steps(2);
+    assert!(h.query_by_label(loading).is_some());
+    h.state_mut().0.series = Some(("alpha.exe".into(), 168, Ok(Vec::new())));
+    h.run();
+    assert!(h.query_by_label(loading).is_none());
+    assert!(
+        h.query_by_label("No usage of this app was recorded in this period.")
+            .is_some()
+    );
+    h.state_mut().0.series = Some(("alpha.exe".into(), 168, Err("pipe closed".into())));
+    h.run();
+    assert!(h.query_by_label("pipe closed").is_some());
 
     // Error / loading states.
     h.state_mut().0.app_history = Some(Err("no service".into()));

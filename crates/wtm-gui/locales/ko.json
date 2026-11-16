@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "이전 분석이 아직 응답하지 않는 프로그램을 기다리고 있습니다. 1분 후에 다시 시도하세요.",
   "The analysis stopped before it finished; these counts are partial.": "분석이 끝나기 전에 중지되었습니다. 이 수치는 일부입니다.",
   "This limit was changed or removed meanwhile; open it again to change it.": "이 제한은 그동안 변경되거나 제거되었습니다. 변경하려면 다시 여세요.",
-  "{0} already has a limit of this kind; change that one instead.": "{0}에는 이미 같은 종류의 제한이 있습니다. 그 제한을 변경하세요."
+  "{0} already has a limit of this kind; change that one instead.": "{0}에는 이미 같은 종류의 제한이 있습니다. 그 제한을 변경하세요.",
+  "Version {0} is available.": "버전 {0}을(를) 사용할 수 있습니다.",
+  "Show the update": "업데이트 표시",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} 분석이 멈추는 대로 {1}을(를) 분석합니다.",
+  "No usage of this app was recorded in this period.": "이 기간에 이 앱의 사용이 기록되지 않았습니다."
 }

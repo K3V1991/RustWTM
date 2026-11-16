@@ -5,6 +5,8 @@ use wtm_core::incidents::Replay;
 #[derive(Default)]
 pub struct View {
     task: crate::background::Task<Replay>,
+    /// The range the running fetch asked for.
+    fetching: u32,
     frames: Option<Result<Replay, String>>,
     hours: u32,
     selected: usize,
@@ -16,7 +18,9 @@ impl View {
         if self.hours == 0 {
             self.hours = 24;
         }
-        if let Some(result) = self.task.poll() {
+        // A reply for a range no longer chosen is dropped; the chosen
+        // range is then fetched.
+        if let Some(result) = self.task.poll().filter(|_| self.fetching == self.hours) {
             self.selected = result
                 .as_ref()
                 .map_or(0, |v| v.frames.len().saturating_sub(1));
@@ -45,6 +49,7 @@ impl View {
         });
         if self.frames.is_none() && !self.task.busy() {
             let hours = self.hours;
+            self.fetching = hours;
             self.task.start(ui.ctx(), move || {
                 let mut client =
                     wtm_ipc::Client::connect_to(wtm_ipc::PIPE_NAME).map_err(|e| e.to_string())?;
@@ -349,5 +354,38 @@ impl View {
             selected: 59,
             ..Default::default()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn a_reply_for_another_range_is_not_shown_under_this_one() {
+        let data = crate::backend::Data::default();
+        let ctx = egui::Context::default();
+        let mut view = View::default();
+        let frame = |view: &mut View| {
+            // One pass per frame, so a reply can wait between them.
+            ctx.run_pass(egui::RawInput::default(), |ctx| {
+                ctx.root_ui(|ui| {
+                    view.show(ui, &data);
+                });
+            })
+            .drop_without_applying_deltas();
+        };
+        // The 24 h fetch starts; its reply waits to be read.
+        frame(&mut view);
+        assert!(view.task.busy());
+        // "7 days" is chosen before that reply is read.
+        view.hours = 168;
+        view.frames = None;
+        frame(&mut view);
+        assert!(view.frames.is_none(), "the 24 h reply was taken for 7 days");
+        // The 7-day fetch started instead, and its reply is kept.
+        assert!(view.task.busy());
+        frame(&mut view);
+        assert!(view.frames.is_some());
     }
 }

@@ -445,7 +445,8 @@ pub fn network(
     marks.pinned_first(&mut rows, |(.., key)| key.clone());
     let mut marks_changed = false;
     if rows.is_empty() && (!f.is_empty() || kind != ConnectionKind::All) {
-        if f.parse::<u16>().is_ok() {
+        // "No program uses port N" only when no chip hides the others.
+        if f.parse::<u16>().is_ok() && kind == ConnectionKind::All {
             crate::theme::empty_state(
                 ui,
                 &crate::i18n::format("No program uses port {0}", std::slice::from_ref(&f)),
@@ -458,8 +459,15 @@ pub fn network(
                 crate::i18n::tr("Try another process name, address or port."),
             );
         }
-        if ui.button(crate::i18n::tr("Clear search")).clicked() {
+        // The search and the kind chip both hide rows: clear whichever is set.
+        let label = if kind == ConnectionKind::All {
+            crate::i18n::tr("Clear search")
+        } else {
+            crate::i18n::tr("Clear filters")
+        };
+        if ui.button(label).clicked() {
             filter.clear();
+            ConnectionKind::All.store(ui);
         }
         return close;
     }
@@ -1171,11 +1179,24 @@ pub fn app_history(ui: &mut Ui, data: &Data, view: &mut HistoryView) -> bool {
             });
         }
         let app = &app;
+        // Only a reply for this app and this period; another one is old.
         match &data.series {
-            Some((name, rows)) if name == app && !rows.is_empty() => {
-                series_charts(ui, app, rows, (chart_height - 44.0).clamp(66.0, 190.0))
+            Some((name, hours, rows)) if name == app && *hours == view.hours => match rows {
+                Ok(rows) if !rows.is_empty() => {
+                    series_charts(ui, app, rows, (chart_height - 44.0).clamp(66.0, 190.0));
+                }
+                Ok(_) => {
+                    ui.weak(crate::i18n::tr(
+                        "No usage of this app was recorded in this period.",
+                    ));
+                }
+                Err(e) => {
+                    crate::theme::colored(ui, BAD, e);
+                }
+            },
+            _ => {
+                crate::theme::loading(ui, crate::i18n::tr("Loading the usage of this app…"));
             }
-            _ => crate::theme::loading(ui, crate::i18n::tr("Loading the usage of this app…")),
         }
     }
     changed

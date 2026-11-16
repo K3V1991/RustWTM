@@ -1496,9 +1496,28 @@ impl eframe::App for App {
                             }
                             .report()
                         };
-                        if crate::about::about(ui, &data.update, frames.summary(), &diagnostics) {
-                            state.last_update_check = Some(Instant::now());
-                            service_cmds.push(UiCommand::CheckUpdate);
+                        let bar_hidden = matches!(
+                            &data.update,
+                            crate::backend::UpdateState::Available(r)
+                                if state.update_later
+                                    || state.skip_version.as_deref() == Some(&r.tag)
+                        );
+                        match crate::about::about(
+                            ui,
+                            &data.update,
+                            bar_hidden,
+                            frames.summary(),
+                            &diagnostics,
+                        ) {
+                            crate::about::Asked::CheckForUpdates => {
+                                state.last_update_check = Some(Instant::now());
+                                service_cmds.push(UiCommand::CheckUpdate);
+                            }
+                            crate::about::Asked::ShowUpdate => {
+                                state.update_later = false;
+                                state.skip_version = None;
+                            }
+                            crate::about::Asked::Nothing => {}
                         }
                     }
                     Tab::Limits => {
@@ -8229,6 +8248,23 @@ mod tests {
         h.get_by_label("Later").click();
         h.run_steps(2);
         assert!(h.query_by_label_contains("is available").is_none());
+
+        // About does not point at a bar that is not there, and brings it
+        // back on request.
+        h.state_mut().state.tab = Tab::About;
+        h.run_steps(2);
+        assert!(
+            h.query_by_label_contains("see the bar at the top")
+                .is_none()
+        );
+        assert!(h.query_by_label("Version 99.1.0 is available.").is_some());
+        h.get_by_label("Show the update").click();
+        h.run_steps(2);
+        assert!(!h.state().state.update_later);
+        assert!(
+            h.query_by_label_contains("is available (you have")
+                .is_some()
+        );
 
         // About checks on request.
         h.state_mut().state.tab = Tab::About;

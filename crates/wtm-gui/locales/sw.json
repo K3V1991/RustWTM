@@ -1889,5 +1889,9 @@
   "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Uchanganuzi wa awali bado unasubiri programu zisizojibu. Jaribu tena baada ya dakika moja.",
   "The analysis stopped before it finished; these counts are partial.": "Uchanganuzi ulisimama kabla ya kumaliza; hesabu hizi hazijakamilika.",
   "This limit was changed or removed meanwhile; open it again to change it.": "Kikomo hiki kilibadilishwa au kuondolewa wakati huo; kifungue tena ili kukibadilisha.",
-  "{0} already has a limit of this kind; change that one instead.": "{0} tayari ina kikomo cha aina hii; badilisha hicho badala yake."
+  "{0} already has a limit of this kind; change that one instead.": "{0} tayari ina kikomo cha aina hii; badilisha hicho badala yake.",
+  "Version {0} is available.": "Toleo {0} linapatikana.",
+  "Show the update": "Onyesha sasisho",
+  "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} itachanganuliwa mara uchanganuzi wa {0} utakaposimama.",
+  "No usage of this app was recorded in this period.": "Hakuna matumizi ya programu hii yaliyorekodiwa katika kipindi hiki."
 }
