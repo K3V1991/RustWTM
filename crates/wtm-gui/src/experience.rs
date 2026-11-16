@@ -258,7 +258,9 @@ impl View {
         let mut destination = None;
         if self.guide {
             let mut close = false;
-            let modal=egui::Modal::new(egui::Id::unique("welcome-guide")).show(ctx,|ui|{
+            let modal=egui::Modal::new(egui::Id::unique("welcome-guide"))
+        .frame(crate::theme::dialog_frame(ctx))
+        .show(ctx,|ui|{
    ui.set_max_width(620.0);ui.heading(crate::i18n::tr("Welcome to RustWTM"));ui.label(crate::i18n::tr("Understand your PC, inspect changes and keep important work responsive."));
    for (title,description,target) in [("Explore devices","Inspect device identity, health and recent readings.",Destination::Hardware),("Manage applications","Review installed apps and choose package updates.",Destination::Applications),("Build a protection rule","Preview the matching programs before saving a policy.",Destination::Rules),("Review recorded activity","Inspect resource history and recorded protection actions.",Destination::History)]{
     crate::theme::panel(ui,|ui|{if ui.button(crate::i18n::tr(title)).clicked(){destination=Some(target);close=true;}ui.weak(crate::i18n::tr(description));});
@@ -271,32 +273,34 @@ impl View {
         }
         if self.help {
             let mut close = false;
-            let modal = egui::Modal::new(egui::Id::unique("shortcut-reference")).show(ctx, |ui| {
-                ui.set_max_width(560.0);
-                ui.heading(crate::i18n::tr("Keyboard shortcuts"));
-                for (key, action) in [
-                    ("Ctrl+K", "Quick navigation"),
-                    ("Ctrl+F", "Search"),
-                    ("Ctrl+Tab", "Next page"),
-                    ("Ctrl+Shift+Tab", "Previous page"),
-                    ("F6", "Pause process updates"),
-                    ("Esc", "Close details"),
-                    ("F1", "Keyboard shortcuts"),
-                ] {
-                    ui.horizontal(|ui| {
-                        ui.monospace(key);
-                        ui.label(crate::i18n::tr(action));
-                    });
-                }
-                if self.prefs.global_shortcut {
-                    ui.label(format!(
-                        "Ctrl+Alt+F{} · {}",
-                        self.prefs.function_key,
-                        crate::i18n::tr("Global show / hide shortcut")
-                    ));
-                }
-                close = ui.button(crate::i18n::tr("Close")).clicked();
-            });
+            let modal = egui::Modal::new(egui::Id::unique("shortcut-reference"))
+                .frame(crate::theme::dialog_frame(ctx))
+                .show(ctx, |ui| {
+                    ui.set_max_width(560.0);
+                    ui.heading(crate::i18n::tr("Keyboard shortcuts"));
+                    for (key, action) in [
+                        ("Ctrl+K", "Quick navigation"),
+                        ("Ctrl+F", "Search"),
+                        ("Ctrl+Tab", "Next page"),
+                        ("Ctrl+Shift+Tab", "Previous page"),
+                        ("F6", "Pause process updates"),
+                        ("Esc", "Close details"),
+                        ("F1", "Keyboard shortcuts"),
+                    ] {
+                        ui.horizontal(|ui| {
+                            ui.monospace(key);
+                            ui.label(crate::i18n::tr(action));
+                        });
+                    }
+                    if self.prefs.global_shortcut {
+                        ui.label(format!(
+                            "Ctrl+Alt+F{} · {}",
+                            self.prefs.function_key,
+                            crate::i18n::tr("Global show / hide shortcut")
+                        ));
+                    }
+                    close = ui.button(crate::i18n::tr("Close")).clicked();
+                });
             if close || modal.should_close() {
                 self.help = false;
             }

@@ -360,7 +360,9 @@ impl View {
         if let Some((base, next, description)) = self.pending.clone() {
             let mut save = false;
             let mut cancel = false;
-            let modal=egui::Modal::new(egui::Id::unique("policy-review")).show(ui.ctx(),|ui|{
+            let modal=egui::Modal::new(egui::Id::unique("policy-review"))
+        .frame(crate::theme::dialog_frame(ui.ctx()))
+        .show(ui.ctx(),|ui|{
     ui.set_max_width(680.0);ui.heading(crate::i18n::tr("Review policy changes"));ui.label(&description);
     ui.weak(crate::i18n::tr("Existing safety checks and dry-run mode still apply. Matching rules may act on running programs immediately after saving."));
     egui::ScrollArea::vertical().max_height(280.0).show(ui,|ui|{ui.monospace(&next);});

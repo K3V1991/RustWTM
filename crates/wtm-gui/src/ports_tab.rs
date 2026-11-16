@@ -202,15 +202,22 @@ pub fn ports_tab(ui: &mut Ui, data: &Data, view: &mut PortsView, intents: &mut V
     ui.horizontal_wrapped(|ui| {
         ui.label(
             RichText::new({
-                crate::i18n::format("{0} TCP ports listening", &[format!("{}", tcp)])
+                crate::i18n::format_count(
+                    "{0} TCP port listening",
+                    "{0} TCP ports listening",
+                    tcp,
+                    &[tcp.to_string()],
+                )
             })
             .strong(),
         );
         crate::theme::divider(ui);
         ui.label({
-            crate::i18n::format(
+            crate::i18n::format_count(
+                "{0} well-known tool or server running",
                 "{0} well-known tools and servers running",
-                &[format!("{}", tools)],
+                tools,
+                &[tools.to_string()],
             )
         });
         crate::theme::divider(ui);

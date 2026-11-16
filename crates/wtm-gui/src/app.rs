@@ -92,112 +92,119 @@ fn quick_navigation(ctx: &egui::Context, state: &mut UiState) {
     let nav = &mut state.quick_navigation;
     let mut destination = None;
     let width = (ctx.content_rect().width() - 48.0).clamp(160.0, 580.0);
-    let modal = egui::Modal::new(egui::Id::unique("quick_navigation")).show(ctx, |ui| {
-        ui.set_width(width);
-        ui.spacing_mut().item_spacing = crate::theme::SECTION_SPACING;
-        ui.horizontal(|ui| {
-            ui.heading(crate::i18n::tr("Quick navigation"));
-            ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                ui.weak("Ctrl+K");
+    let modal = egui::Modal::new(egui::Id::unique("quick_navigation"))
+        .frame(crate::theme::dialog_frame(ctx))
+        .show(ctx, |ui| {
+            ui.set_width(width);
+            ui.spacing_mut().item_spacing = crate::theme::SECTION_SPACING;
+            ui.horizontal(|ui| {
+                ui.heading(crate::i18n::tr("Quick navigation"));
+                ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                    ui.weak("Ctrl+K");
+                });
             });
-        });
-        let down = ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::ArrowDown));
-        let up = ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::ArrowUp));
-        let enter = ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Enter));
-        let label = crate::i18n::tr("Find a page");
-        let edit = ui.add(
-            egui::TextEdit::singleline(&mut nav.query)
-                .char_limit(128)
-                .desired_width(ui.available_width())
-                .hint_text(label),
-        );
-        edit.widget_info(|| egui::WidgetInfo::labeled(egui::Role::TextInput, true, label));
-        if nav.focus {
-            edit.request_focus();
-            nav.focus = false;
-        }
-        if edit.changed() {
-            nav.selected = 0;
-        }
-        let query = nav.query.to_lowercase();
-        let terms: Vec<_> = query.split_whitespace().collect();
-        let matches: Vec<_> = NAV
-            .iter()
-            .filter(|(tab, _, key)| {
-                let text = format!("{} {} {}", tab.label(), tab.subtitle(), key).to_lowercase();
-                terms.iter().all(|term| text.contains(term))
-            })
-            .collect();
-        if matches.is_empty() {
-            nav.selected = 0;
-        } else {
-            nav.selected = nav.selected.min(matches.len() - 1);
-            if down {
-                nav.selected = (nav.selected + 1) % matches.len();
+            let down = ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::ArrowDown));
+            let up = ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::ArrowUp));
+            let enter = ui.input_mut(|i| i.consume_key(egui::Modifiers::NONE, egui::Key::Enter));
+            let label = crate::i18n::tr("Find a page");
+            let edit = ui.add(
+                egui::TextEdit::singleline(&mut nav.query)
+                    .char_limit(128)
+                    .desired_width(ui.available_width())
+                    .hint_text(label),
+            );
+            edit.widget_info(|| egui::WidgetInfo::labeled(egui::Role::TextInput, true, label));
+            if nav.focus {
+                edit.request_focus();
+                nav.focus = false;
             }
-            if up {
-                nav.selected = (nav.selected + matches.len() - 1) % matches.len();
+            if edit.changed() {
+                nav.selected = 0;
             }
-        }
-        crate::theme::divider(ui);
-        let height = (ctx.content_rect().height() * 0.46).clamp(80.0, 360.0);
-        egui::ScrollArea::vertical()
-            .id_salt("quick_navigation_results")
-            .max_height(height)
-            .show(ui, |ui| {
-                if matches.is_empty() {
-                    ui.strong(crate::i18n::tr("No matching pages"));
-                    ui.weak(crate::i18n::tr("Try a page name or a task description."));
+            let query = nav.query.to_lowercase();
+            let terms: Vec<_> = query.split_whitespace().collect();
+            let matches: Vec<_> = NAV
+                .iter()
+                .filter(|(tab, _, key)| {
+                    let text = format!("{} {} {}", tab.label(), tab.subtitle(), key).to_lowercase();
+                    terms.iter().all(|term| text.contains(term))
+                })
+                .collect();
+            if matches.is_empty() {
+                nav.selected = 0;
+            } else {
+                nav.selected = nav.selected.min(matches.len() - 1);
+                if down {
+                    nav.selected = (nav.selected + 1) % matches.len();
                 }
-                for (index, (tab, _, _)) in matches.iter().enumerate() {
-                    let selected = nav.selected == index;
-                    let mut job = egui::text::LayoutJob::default();
-                    job.append(
-                        tab.label(),
-                        0.0,
-                        egui::TextFormat {
-                            font_id: egui::FontId::proportional(15.0),
-                            color: ui.visuals().strong_text_color(),
-                            ..Default::default()
-                        },
-                    );
-                    job.append(
-                        &format!("\n{}", tab.subtitle()),
-                        0.0,
-                        egui::TextFormat {
-                            font_id: egui::FontId::proportional(12.0),
-                            color: ui.visuals().weak_text_color(),
-                            ..Default::default()
-                        },
-                    );
-                    let response = ui.add_sized(
-                        [ui.available_width(), 58.0],
-                        egui::Button::new("")
-                            .left_text(job)
-                            .selected(selected)
-                            .frame(selected)
-                            .wrap(),
-                    );
-                    response.widget_info(|| {
-                        egui::WidgetInfo::selected(egui::Role::Button, true, selected, tab.label())
-                    });
-                    if selected {
-                        ui.painter().line_segment(
-                            [response.rect.left_top(), response.rect.left_bottom()],
-                            egui::Stroke::new(2.0, crate::theme::ACCENT),
+                if up {
+                    nav.selected = (nav.selected + matches.len() - 1) % matches.len();
+                }
+            }
+            crate::theme::divider(ui);
+            let height = (ctx.content_rect().height() * 0.46).clamp(80.0, 360.0);
+            egui::ScrollArea::vertical()
+                .id_salt("quick_navigation_results")
+                .max_height(height)
+                .show(ui, |ui| {
+                    if matches.is_empty() {
+                        ui.strong(crate::i18n::tr("No matching pages"));
+                        ui.weak(crate::i18n::tr("Try a page name or a task description."));
+                    }
+                    for (index, (tab, _, _)) in matches.iter().enumerate() {
+                        let selected = nav.selected == index;
+                        let mut job = egui::text::LayoutJob::default();
+                        job.append(
+                            tab.label(),
+                            0.0,
+                            egui::TextFormat {
+                                font_id: egui::FontId::proportional(15.0),
+                                color: ui.visuals().strong_text_color(),
+                                ..Default::default()
+                            },
                         );
-                        if up || down || edit.changed() {
-                            response.scroll_to_me(Some(egui::Align::Center));
+                        job.append(
+                            &format!("\n{}", tab.subtitle()),
+                            0.0,
+                            egui::TextFormat {
+                                font_id: egui::FontId::proportional(12.0),
+                                color: ui.visuals().weak_text_color(),
+                                ..Default::default()
+                            },
+                        );
+                        let response = ui.add_sized(
+                            [ui.available_width(), 58.0],
+                            egui::Button::new("")
+                                .left_text(job)
+                                .selected(selected)
+                                .frame(selected)
+                                .wrap(),
+                        );
+                        response.widget_info(|| {
+                            egui::WidgetInfo::selected(
+                                egui::Role::Button,
+                                true,
+                                selected,
+                                tab.label(),
+                            )
+                        });
+                        if selected {
+                            ui.painter().line_segment(
+                                [response.rect.left_top(), response.rect.left_bottom()],
+                                egui::Stroke::new(2.0, crate::theme::ACCENT),
+                            );
+                            if up || down || edit.changed() {
+                                response.scroll_to_me(Some(egui::Align::Center));
+                            }
+                        }
+                        if response.clicked() || selected && enter {
+                            destination = Some(*tab);
                         }
                     }
-                    if response.clicked() || selected && enter {
-                        destination = Some(*tab);
-                    }
-                }
-            });
-        crate::theme::divider(ui);
-        ui.weak(crate::i18n::tr("↑ ↓ Choose · Enter Open · Esc Close"));
-    });
+                });
+            crate::theme::divider(ui);
+            ui.weak(crate::i18n::tr("↑ ↓ Choose · Enter Open · Esc Close"));
+        });
     if let Some(tab) = destination {
         state.tab = tab;
     }
@@ -1678,7 +1685,9 @@ impl eframe::App for App {
             None => {}
         }
         if let Some((target, command)) = state.confirm.clone() {
-            let modal = egui::Modal::new(egui::Id::unique("confirm")).show(&ctx, |ui| {
+            let modal = egui::Modal::new(egui::Id::unique("confirm"))
+        .frame(crate::theme::dialog_frame(&ctx))
+        .show(&ctx, |ui| {
                 ui.heading(describe(command));
                 let values = [
                     describe(command),
@@ -1739,33 +1748,35 @@ impl eframe::App for App {
                 // Written in its own dialog below, never confirmed here.
                 SessionOp::Message => (crate::i18n::tr("Send message"), ""),
             };
-            let modal = egui::Modal::new(egui::Id::unique("confirm_session")).show(&ctx, |ui| {
-                ui.heading(title);
-                ui.label({
-                    crate::i18n::format(
-                        "{0} {1} (session {2})? {3}",
-                        &[
-                            title.to_string(),
-                            user.to_string(),
-                            format!("{}", id),
-                            warning.to_string(),
-                        ],
-                    )
+            let modal = egui::Modal::new(egui::Id::unique("confirm_session"))
+                .frame(crate::theme::dialog_frame(&ctx))
+                .show(&ctx, |ui| {
+                    ui.heading(title);
+                    ui.label({
+                        crate::i18n::format(
+                            "{0} {1} (session {2})? {3}",
+                            &[
+                                title.to_string(),
+                                user.to_string(),
+                                format!("{}", id),
+                                warning.to_string(),
+                            ],
+                        )
+                    });
+                    ui.add_space(0.0);
+                    ui.horizontal(|ui| {
+                        if ui
+                            .button(RichText::new(title).color(crate::theme::text_color(ui, BAD)))
+                            .clicked()
+                        {
+                            service_cmds.push(UiCommand::Session { id, op });
+                            state.confirm_session = None;
+                        }
+                        if ui.button(crate::i18n::tr("Cancel")).clicked() {
+                            state.confirm_session = None;
+                        }
+                    });
                 });
-                ui.add_space(0.0);
-                ui.horizontal(|ui| {
-                    if ui
-                        .button(RichText::new(title).color(crate::theme::text_color(ui, BAD)))
-                        .clicked()
-                    {
-                        service_cmds.push(UiCommand::Session { id, op });
-                        state.confirm_session = None;
-                    }
-                    if ui.button(crate::i18n::tr("Cancel")).clicked() {
-                        state.confirm_session = None;
-                    }
-                });
-            });
             if modal.should_close() {
                 state.confirm_session = None;
             }
@@ -1773,55 +1784,59 @@ impl eframe::App for App {
 
         if let Some((id, user, mut title, mut text)) = state.compose_message.take() {
             let mut keep = true;
-            let modal = egui::Modal::new(egui::Id::unique("compose_message")).show(&ctx, |ui| {
-                ui.heading(crate::i18n::tr("Send message"));
-                ui.label(crate::i18n::format(
-                    "To {0} (session {1}). It appears on their screen.",
-                    &[user.clone(), id.to_string()],
-                ));
-                let title_label = ui.label(crate::i18n::tr("Message title"));
-                ui.add(
-                    egui::TextEdit::singleline(&mut title)
-                        .char_limit(wtm_sys::sessions::MESSAGE_TITLE_MAX)
-                        .desired_width(360.0),
-                )
-                .labelled_by(title_label.id);
-                let text_label = ui.label(crate::i18n::tr("Message"));
-                ui.add(
-                    egui::TextEdit::multiline(&mut text)
-                        .char_limit(wtm_sys::sessions::MESSAGE_TEXT_MAX)
-                        .desired_rows(4)
-                        .desired_width(360.0),
-                )
-                .labelled_by(text_label.id);
-                ui.add_space(0.0);
-                ui.horizontal(|ui| {
-                    if ui
-                        .add_enabled(
-                            !text.trim().is_empty(),
-                            egui::Button::new(crate::i18n::tr("Send now")),
-                        )
-                        .clicked()
-                    {
-                        service_cmds.push(UiCommand::SendMessage {
-                            id,
-                            title: title.clone(),
-                            text: text.clone(),
-                        });
-                        keep = false;
-                    }
-                    if ui.button(crate::i18n::tr("Cancel")).clicked() {
-                        keep = false;
-                    }
+            let modal = egui::Modal::new(egui::Id::unique("compose_message"))
+                .frame(crate::theme::dialog_frame(&ctx))
+                .show(&ctx, |ui| {
+                    ui.heading(crate::i18n::tr("Send message"));
+                    ui.label(crate::i18n::format(
+                        "To {0} (session {1}). It appears on their screen.",
+                        &[user.clone(), id.to_string()],
+                    ));
+                    let title_label = ui.label(crate::i18n::tr("Message title"));
+                    ui.add(
+                        egui::TextEdit::singleline(&mut title)
+                            .char_limit(wtm_sys::sessions::MESSAGE_TITLE_MAX)
+                            .desired_width(360.0),
+                    )
+                    .labelled_by(title_label.id);
+                    let text_label = ui.label(crate::i18n::tr("Message"));
+                    ui.add(
+                        egui::TextEdit::multiline(&mut text)
+                            .char_limit(wtm_sys::sessions::MESSAGE_TEXT_MAX)
+                            .desired_rows(4)
+                            .desired_width(360.0),
+                    )
+                    .labelled_by(text_label.id);
+                    ui.add_space(0.0);
+                    ui.horizontal(|ui| {
+                        if ui
+                            .add_enabled(
+                                !text.trim().is_empty(),
+                                egui::Button::new(crate::i18n::tr("Send now")),
+                            )
+                            .clicked()
+                        {
+                            service_cmds.push(UiCommand::SendMessage {
+                                id,
+                                title: title.clone(),
+                                text: text.clone(),
+                            });
+                            keep = false;
+                        }
+                        if ui.button(crate::i18n::tr("Cancel")).clicked() {
+                            keep = false;
+                        }
+                    });
                 });
-            });
             if keep && !modal.should_close() {
                 state.compose_message = Some((id, user, title, text));
             }
         }
 
         if state.confirm_explorer {
-            let modal = egui::Modal::new(egui::Id::unique("confirm_explorer")).show(&ctx, |ui| {
+            let modal = egui::Modal::new(egui::Id::unique("confirm_explorer"))
+        .frame(crate::theme::dialog_frame(&ctx))
+        .show(&ctx, |ui| {
                 ui.heading(crate::i18n::tr("Restart Windows Explorer?"));
                 ui.label(crate::i18n::tr(
                     "The taskbar, desktop and open folder windows close for a moment and come back. Programs keep running.",
@@ -1858,35 +1873,37 @@ impl eframe::App for App {
         if let Some((line, elevated)) = &mut state.run_task {
             let mut run = false;
             let mut close = false;
-            let modal = egui::Modal::new(egui::Id::unique("run_task")).show(&ctx, |ui| {
-                ui.heading(crate::i18n::tr("Run new task"));
-                ui.label(crate::i18n::tr(
-                    "Type the name of a program, folder, document or website.",
-                ));
-                ui.add_space(0.0);
-                let edit = ui.add(
-                    egui::TextEdit::singleline(line)
-                        .hint_text(r"notepad, cmd, C:\Tools\app.exe --flag, https://…")
-                        .desired_width(380.0),
-                );
-                // Ready to type as soon as the dialog opens.
-                if ui.memory(|m| m.focused().is_none()) && !edit.lost_focus() {
-                    edit.request_focus();
-                }
-                run |= edit.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
-                ui.checkbox(
-                    elevated,
-                    crate::i18n::tr("Create this task with administrator rights"),
-                );
-                ui.add_space(0.0);
-                ui.horizontal(|ui| {
-                    let ready = !line.trim().is_empty();
-                    run |= ui
-                        .add_enabled(ready, egui::Button::new(crate::i18n::tr("Run")))
-                        .clicked();
-                    close |= ui.button(crate::i18n::tr("Cancel")).clicked();
+            let modal = egui::Modal::new(egui::Id::unique("run_task"))
+                .frame(crate::theme::dialog_frame(&ctx))
+                .show(&ctx, |ui| {
+                    ui.heading(crate::i18n::tr("Run new task"));
+                    ui.label(crate::i18n::tr(
+                        "Type the name of a program, folder, document or website.",
+                    ));
+                    ui.add_space(0.0);
+                    let edit = ui.add(
+                        egui::TextEdit::singleline(line)
+                            .hint_text(r"notepad, cmd, C:\Tools\app.exe --flag, https://…")
+                            .desired_width(380.0),
+                    );
+                    // Ready to type as soon as the dialog opens.
+                    if ui.memory(|m| m.focused().is_none()) && !edit.lost_focus() {
+                        edit.request_focus();
+                    }
+                    run |= edit.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
+                    ui.checkbox(
+                        elevated,
+                        crate::i18n::tr("Create this task with administrator rights"),
+                    );
+                    ui.add_space(0.0);
+                    ui.horizontal(|ui| {
+                        let ready = !line.trim().is_empty();
+                        run |= ui
+                            .add_enabled(ready, egui::Button::new(crate::i18n::tr("Run")))
+                            .clicked();
+                        close |= ui.button(crate::i18n::tr("Cancel")).clicked();
+                    });
                 });
-            });
             if run && !line.trim().is_empty() {
                 service_cmds.push(UiCommand::Run {
                     line: line.trim().to_owned(),
@@ -1901,23 +1918,25 @@ impl eframe::App for App {
 
         if let Some(change) = state.confirm_change.clone() {
             let (title, question) = change.describe();
-            let modal = egui::Modal::new(egui::Id::unique("confirm_change")).show(&ctx, |ui| {
-                ui.heading(&title);
-                ui.label(question);
-                ui.add_space(0.0);
-                ui.horizontal(|ui| {
-                    if ui
-                        .button(RichText::new(&title).color(crate::theme::text_color(ui, BAD)))
-                        .clicked()
-                    {
-                        service_cmds.push(change.command());
-                        state.confirm_change = None;
-                    }
-                    if ui.button(crate::i18n::tr("Cancel")).clicked() {
-                        state.confirm_change = None;
-                    }
+            let modal = egui::Modal::new(egui::Id::unique("confirm_change"))
+                .frame(crate::theme::dialog_frame(&ctx))
+                .show(&ctx, |ui| {
+                    ui.heading(&title);
+                    ui.label(question);
+                    ui.add_space(0.0);
+                    ui.horizontal(|ui| {
+                        if ui
+                            .button(RichText::new(&title).color(crate::theme::text_color(ui, BAD)))
+                            .clicked()
+                        {
+                            service_cmds.push(change.command());
+                            state.confirm_change = None;
+                        }
+                        if ui.button(crate::i18n::tr("Cancel")).clicked() {
+                            state.confirm_change = None;
+                        }
+                    });
                 });
-            });
             if modal.should_close() {
                 state.confirm_change = None;
             }
@@ -1927,7 +1946,9 @@ impl eframe::App for App {
             let name = targets.first().map_or("", |t| t.name.as_str()).to_owned();
             // One app's instances, or different programs (e.g. on one port).
             let same = targets.iter().all(|t| t.name == name);
-            let modal = egui::Modal::new(egui::Id::unique("confirm_many")).show(&ctx, |ui| {
+            let modal = egui::Modal::new(egui::Id::unique("confirm_many"))
+        .frame(crate::theme::dialog_frame(&ctx))
+        .show(&ctx, |ui| {
                 if same && command == Command::Suspend {
                     ui.heading(format!("{} — {name}", describe(command)));
                     ui.label(crate::i18n::format(
@@ -4669,8 +4690,10 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
                 || e.pid.is_some_and(|pid| pid.to_string().contains(&query))
         })
         .collect();
-    ui.weak(crate::i18n::format(
+    ui.weak(crate::i18n::format_count(
+        "{0} of {1} event",
         "{0} of {1} events",
+        data.events.len(),
         &[items.len().to_string(), data.events.len().to_string()],
     ));
     // Filtering keeps an open detail; eviction from the bounded buffer clears it.
@@ -10270,11 +10293,11 @@ mod tests {
                 for query in ["ALPHA.EXE", "100", "detailed diagnostic"] {
                     h.state_mut().1.search = query.into();
                     h.run();
-                    assert!(h.query_by_label("1 of 1 events").is_some());
+                    assert!(h.query_by_label("1 of 1 event").is_some());
                 }
                 h.state_mut().1.search = "no-such-event".into();
                 h.run();
-                assert!(h.query_by_label("0 of 1 events").is_some());
+                assert!(h.query_by_label("0 of 1 event").is_some());
                 h.get_by_label("Clear search").click();
                 h.run();
                 assert!(h.state().1.search.is_empty());
@@ -10391,9 +10414,11 @@ mod tests {
                 (data(), EventsView::default()),
             );
         h.run();
-        let total = h.state().0.events.len().to_string();
+        let count = h.state().0.events.len();
+        let total = count.to_string();
+        let noun = if count == 1 { "event" } else { "events" };
         assert!(
-            h.query_by_label(&format!("{total} of {total} events"))
+            h.query_by_label(&format!("{total} of {total} {noun}"))
                 .is_some()
         );
         assert!(h.query_by_label("● Service · no data for 42 s").is_some());

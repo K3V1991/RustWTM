@@ -578,149 +578,151 @@ pub fn chat_window(ctx: &egui::Context, chat: &mut AiChat) -> bool {
     let mut open_settings = false;
     let mut close = false;
     let title = chat.title();
-    let modal = egui::Modal::new(egui::Id::unique("ai-assistant")).show(ctx, |ui| {
-        ui.set_width(ui.ctx().content_rect().width().clamp(320.0, 760.0) - 40.0);
-        ui.heading(title);
-        if let Err(why) = &ready {
-            ui.colored_label(crate::theme::text_color(ui, WARN), why);
-            ui.horizontal(|ui| {
-                if ui.button(crate::i18n::tr("Open AI settings")).clicked() {
-                    open_settings = true;
+    let modal = egui::Modal::new(egui::Id::unique("ai-assistant"))
+        .frame(crate::theme::dialog_frame(ctx))
+        .show(ctx, |ui| {
+            ui.set_width(ui.ctx().content_rect().width().clamp(320.0, 760.0) - 40.0);
+            ui.heading(title);
+            if let Err(why) = &ready {
+                ui.colored_label(crate::theme::text_color(ui, WARN), why);
+                ui.horizontal(|ui| {
+                    if ui.button(crate::i18n::tr("Open AI settings")).clicked() {
+                        open_settings = true;
+                    }
+                    close = ui.button(crate::i18n::tr("Close")).clicked();
+                });
+                return;
+            }
+            let cfg = cfg.as_ref().expect("ready");
+            ui.label(
+                RichText::new(format!("{} · {}", cfg.provider.label(), cfg.model()))
+                    .small()
+                    .weak(),
+            );
+            ui.add(
+                egui::TextEdit::multiline(&mut chat.question)
+                    .desired_rows(2)
+                    .desired_width(f32::INFINITY)
+                    .hint_text(crate::i18n::tr(
+                        "Your question (leave empty for a general explanation)",
+                    )),
+            );
+            let busy = chat.task.busy();
+            let presets: Vec<&str> = match chat.topic {
+                Some(Topic::Process(_)) => process_presets().to_vec(),
+                _ => system_presets().to_vec(),
+            };
+            ui.horizontal_wrapped(|ui| {
+                for preset in presets {
+                    if ui
+                        .add_enabled(!busy, egui::Button::new(RichText::new(preset).small()))
+                        .clicked()
+                    {
+                        chat.question = preset.to_owned();
+                        chat.ask(ui.ctx(), cfg.clone());
+                    }
                 }
-                close = ui.button(crate::i18n::tr("Close")).clicked();
             });
-            return;
-        }
-        let cfg = cfg.as_ref().expect("ready");
-        ui.label(
-            RichText::new(format!("{} · {}", cfg.provider.label(), cfg.model()))
-                .small()
-                .weak(),
-        );
-        ui.add(
-            egui::TextEdit::multiline(&mut chat.question)
-                .desired_rows(2)
-                .desired_width(f32::INFINITY)
-                .hint_text(crate::i18n::tr(
-                    "Your question (leave empty for a general explanation)",
-                )),
-        );
-        let busy = chat.task.busy();
-        let presets: Vec<&str> = match chat.topic {
-            Some(Topic::Process(_)) => process_presets().to_vec(),
-            _ => system_presets().to_vec(),
-        };
-        ui.horizontal_wrapped(|ui| {
-            for preset in presets {
-                if ui
-                    .add_enabled(!busy, egui::Button::new(RichText::new(preset).small()))
-                    .clicked()
-                {
-                    chat.question = preset.to_owned();
+            ui.horizontal_wrapped(|ui| {
+                if crate::theme::primary_action(ui, !busy, crate::i18n::tr("Ask")).clicked() {
                     chat.ask(ui.ctx(), cfg.clone());
                 }
-            }
-        });
-        ui.horizontal_wrapped(|ui| {
-            if crate::theme::primary_action(ui, !busy, crate::i18n::tr("Ask")).clicked() {
-                chat.ask(ui.ctx(), cfg.clone());
-            }
-            if busy {
-                if ui.button(crate::i18n::tr("Stop")).clicked() {
-                    chat.cancel.store(true, Ordering::Relaxed);
+                if busy {
+                    if ui.button(crate::i18n::tr("Stop")).clicked() {
+                        chat.cancel.store(true, Ordering::Relaxed);
+                    }
+                    ui.spinner();
+                    let looked = chat
+                        .progress
+                        .lock()
+                        .unwrap_or_else(PoisonError::into_inner)
+                        .join(", ");
+                    if looked.is_empty() {
+                        ui.weak(crate::i18n::tr(
+                            "Gathering facts and waiting for the answer…",
+                        ));
+                    } else {
+                        ui.weak(crate::i18n::format("Looked up: {0}", &[looked]));
+                    }
                 }
-                ui.spinner();
-                let looked = chat
-                    .progress
-                    .lock()
-                    .unwrap_or_else(PoisonError::into_inner)
-                    .join(", ");
-                if looked.is_empty() {
-                    ui.weak(crate::i18n::tr(
-                        "Gathering facts and waiting for the answer…",
-                    ));
-                } else {
-                    ui.weak(crate::i18n::format("Looked up: {0}", &[looked]));
-                }
-            }
-        });
-        ui.separator();
-        match &chat.answer {
-            Some(Ok(asked)) => {
-                let answer = &asked.answer;
-                egui::ScrollArea::vertical()
-                    .max_height((ui.ctx().content_rect().height() * 0.55).max(200.0))
-                    .show(ui, |ui| render_answer(ui, &answer.text));
-                if answer.truncated {
-                    ui.colored_label(
-                        crate::theme::text_color(ui, WARN),
-                        crate::i18n::tr("The answer was cut short at the token limit."),
-                    );
-                }
-                let mut info = answer.model.clone();
-                if let (Some(i), Some(o)) = (answer.input_tokens, answer.output_tokens) {
-                    info.push_str(&format!(" · {i} → {o} tokens"));
-                }
-                ui.label(RichText::new(info).small().weak());
-                if !asked.lookups.is_empty() {
-                    ui.label(
-                        RichText::new(crate::i18n::format(
-                            "Looked up: {0}",
-                            &[asked.lookups.join(", ")],
-                        ))
-                        .small()
-                        .weak(),
-                    );
-                }
-                if asked.tools_unsupported {
-                    ui.label(
+            });
+            ui.separator();
+            match &chat.answer {
+                Some(Ok(asked)) => {
+                    let answer = &asked.answer;
+                    egui::ScrollArea::vertical()
+                        .max_height((ui.ctx().content_rect().height() * 0.55).max(200.0))
+                        .show(ui, |ui| render_answer(ui, &answer.text));
+                    if answer.truncated {
+                        ui.colored_label(
+                            crate::theme::text_color(ui, WARN),
+                            crate::i18n::tr("The answer was cut short at the token limit."),
+                        );
+                    }
+                    let mut info = answer.model.clone();
+                    if let (Some(i), Some(o)) = (answer.input_tokens, answer.output_tokens) {
+                        info.push_str(&format!(" · {i} → {o} tokens"));
+                    }
+                    ui.label(RichText::new(info).small().weak());
+                    if !asked.lookups.is_empty() {
+                        ui.label(
+                            RichText::new(crate::i18n::format(
+                                "Looked up: {0}",
+                                &[asked.lookups.join(", ")],
+                            ))
+                            .small()
+                            .weak(),
+                        );
+                    }
+                    if asked.tools_unsupported {
+                        ui.label(
                         RichText::new(crate::i18n::tr(
                             "This model cannot look things up; it answered from the facts sent.",
                         ))
                         .small()
                         .weak(),
                     );
+                    }
                 }
+                Some(Err(e)) => {
+                    ui.colored_label(crate::theme::text_color(ui, BAD), e);
+                }
+                None if !busy => {
+                    ui.weak(crate::i18n::tr("No answer yet."));
+                }
+                None => {}
             }
-            Some(Err(e)) => {
-                ui.colored_label(crate::theme::text_color(ui, BAD), e);
-            }
-            None if !busy => {
-                ui.weak(crate::i18n::tr("No answer yet."));
-            }
-            None => {}
-        }
-        if chat.show_sent
-            && let Some(sent) = &chat.sent
-        {
-            ui.separator();
-            ui.label(RichText::new(crate::i18n::tr("Sent to the provider:")).strong());
-            egui::ScrollArea::vertical()
-                .id_salt("ai-sent")
-                .max_height(220.0)
-                .show(ui, |ui| {
-                    ui.monospace(sent);
-                });
-        }
-        ui.horizontal(|ui| {
-            if let Some(Ok(asked)) = &chat.answer
-                && ui.button(crate::i18n::tr("Copy answer")).clicked()
+            if chat.show_sent
+                && let Some(sent) = &chat.sent
             {
-                ui.ctx().copy_text(asked.answer.text.clone());
+                ui.separator();
+                ui.label(RichText::new(crate::i18n::tr("Sent to the provider:")).strong());
+                egui::ScrollArea::vertical()
+                    .id_salt("ai-sent")
+                    .max_height(220.0)
+                    .show(ui, |ui| {
+                        ui.monospace(sent);
+                    });
             }
-            if chat.sent.is_some() {
-                ui.toggle_value(&mut chat.show_sent, crate::i18n::tr("Show what was sent"));
-            }
-            close = ui.button(crate::i18n::tr("Close")).clicked();
+            ui.horizontal(|ui| {
+                if let Some(Ok(asked)) = &chat.answer
+                    && ui.button(crate::i18n::tr("Copy answer")).clicked()
+                {
+                    ui.ctx().copy_text(asked.answer.text.clone());
+                }
+                if chat.sent.is_some() {
+                    ui.toggle_value(&mut chat.show_sent, crate::i18n::tr("Show what was sent"));
+                }
+                close = ui.button(crate::i18n::tr("Close")).clicked();
+            });
+            ui.label(
+                RichText::new(crate::i18n::tr(
+                    "AI answers can be wrong. Check before ending or removing anything.",
+                ))
+                .small()
+                .weak(),
+            );
         });
-        ui.label(
-            RichText::new(crate::i18n::tr(
-                "AI answers can be wrong. Check before ending or removing anything.",
-            ))
-            .small()
-            .weak(),
-        );
-    });
     if close || modal.should_close() {
         chat.open = false;
         chat.cancel.store(true, Ordering::Relaxed);

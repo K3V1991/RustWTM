@@ -520,7 +520,11 @@ pub fn table_cell(ui: &mut Ui, add: impl FnOnce(&mut Ui)) {
             }
             ui.set_min_height(size.y);
             ui.spacing_mut().item_spacing = CONTENT_SPACING;
-            add(ui);
+            // Centred in the row, as `right` centres numbers: in a top-down
+            // layout plain labels sat a few points above the numbers of the
+            // same row, and an indent added with `add_space` (the Disks
+            // folder tree) went down instead of across.
+            ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), add);
         });
     ui.data_mut(|d| {
         d.remove::<(egui::Rect, egui::layers::ShapeIdx)>(key);
@@ -531,13 +535,21 @@ pub fn table_cell(ui: &mut Ui, add: impl FnOnce(&mut Ui)) {
 }
 
 /// A named row action with the table's density and full-cell hit area.
+/// The frame of a dialog: egui's popup frame, whose margin is the 6-point
+/// one of menus, with room around the title, text and buttons.
+pub fn dialog_frame(ctx: &egui::Context) -> egui::Frame {
+    egui::Frame::popup(&ctx.global_style()).inner_margin(Margin::same(16))
+}
+
 pub fn table_name(ui: &mut Ui, name: &str, selected: bool) -> egui::Response {
-    let response = ui.add_sized(
-        [ui.available_width(), ui.spacing().interact_size.y],
-        egui::Button::new("")
-            .left_text(name)
-            .frame(false)
-            .truncate(),
+    // A clickable label rather than a button: a button is at least
+    // `interact_size` tall and centres its text, which put the name about 5
+    // points below the plain labels in the same row.
+    let response = ui.add(
+        egui::Label::new(name)
+            .truncate()
+            .show_tooltip_when_elided(false)
+            .sense(egui::Sense::click()),
     );
     response.widget_info(|| {
         egui::WidgetInfo::selected(egui::Role::Button, ui.is_enabled(), selected, name)

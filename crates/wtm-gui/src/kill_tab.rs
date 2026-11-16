@@ -74,7 +74,9 @@ pub fn panic_dialog(ctx: &egui::Context, data: &Data, open: &mut bool, intents: 
         return;
     }
     let targets = targets(data);
-    let modal = egui::Modal::new(egui::Id::unique("panic")).show(ctx, |ui| {
+    let modal = egui::Modal::new(egui::Id::unique("panic"))
+        .frame(crate::theme::dialog_frame(ctx))
+        .show(ctx, |ui| {
         ui.set_width(620.0);
         ui.label(RichText::new(crate::i18n::tr("🚨 Panic: end the kill list")).size(22.0).color(crate::theme::text_color(ui, BAD)));
         if targets.is_empty() {

@@ -1878,5 +1878,10 @@
   "Extra high": "非常高",
   "Maximum": "最高",
   "R {0}  W {1}": "讀 {0}  寫 {1}",
-  "{0}%": "{0}%"
+  "{0}%": "{0}%",
+  "{0} of {1} event": "{1} 個事件中的 {0} 個",
+  "{0} TCP port listening": "{0} 個 TCP 連接埠接聽中",
+  "{0} well-known tool or server running": "{0} 個已知工具與伺服器正在執行",
+  "{0} startup app, {1} enabled": "{0} 個啟動應用程式，{1} 個已啟用",
+  "{0} window, {1} visible": "{0} 個視窗，{1} 個可見"
 }

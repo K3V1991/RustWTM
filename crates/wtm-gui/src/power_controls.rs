@@ -216,7 +216,9 @@ pub fn power_controls(ui: &mut Ui, data: &Data, view: &mut PowerView) -> Vec<UiC
         }
     });
     if let Some(action) = view.confirm.clone() {
-        let modal=egui::Modal::new(egui::Id::unique("confirm_frequency")).show(ui.ctx(),|ui| {
+        let modal=egui::Modal::new(egui::Id::unique("confirm_frequency"))
+        .frame(crate::theme::dialog_frame(ui.ctx()))
+        .show(ui.ctx(),|ui| {
             let (heading,label)=match &action {Confirmation::Limit(_)=>(crate::i18n::tr("Change shared CPU frequency policy?"),crate::i18n::tr("Apply system frequency limit")),Confirmation::Restore=>(crate::i18n::tr("Restore original frequency settings?"),crate::i18n::tr("Restore power settings"))};
             ui.heading(heading);
             match &action {

@@ -165,214 +165,220 @@ pub fn dialog(
     };
     let mut close = None;
 
-    let modal = egui::Modal::new(egui::Id::unique("cpu_alert")).show(ctx, |ui| {
-        ui.set_width(640.0);
-        let color = text_color(
-            ui,
-            if alert.cpu >= settings.threshold {
-                BAD
-            } else {
-                GOOD
-            },
-        );
-        ui.label(
-            RichText::new({
-                let __wtm_i18n_0 = &(alert.cpu);
-                crate::i18n::format(
-                    "⚠ Your PC is overloaded: CPU {0}%",
-                    &[format!("{:.0}", __wtm_i18n_0)],
-                )
-            })
-            .size(22.0)
-            .color(color),
-        );
-        if alert.cpu < settings.threshold {
-            ui.horizontal_wrapped(|ui| {
-                crate::theme::colored(ui, GOOD, crate::i18n::tr("The load is back to normal."));
-                if let Some(left) = data.alert_watch.closes_in(std::time::Instant::now()) {
-                    ui.label(crate::i18n::format(
-                        "Closes by itself in {0} s.",
-                        &[left.as_secs().max(1).to_string()],
-                    ));
-                    if ui
-                        .button(crate::i18n::tr("Keep it open"))
-                        .on_hover_text(crate::i18n::tr(
-                            "Stops the countdown; the alert stays until you close it",
-                        ))
-                        .clicked()
-                    {
-                        commands.push(UiCommand::HoldAlert);
-                    }
-                    ui.ctx().request_repaint_after(Duration::from_millis(500));
-                }
-            });
-        } else {
-            ui.label(crate::i18n::tr(
-                "These apps use the most CPU. One click brings them down; nothing is lost.",
-            ));
-        }
-        ui.add_space(0.0);
-
-        if !apps.is_empty() {
-            let background: Vec<&ProcessRef> = apps
-                .iter()
-                .filter(|a| !in_use(a))
-                .flat_map(|a| &a.instances)
-                .collect();
-            if ui
-                .button(
-                    RichText::new(crate::i18n::tr("⚡ Calm them all down"))
-                        .size(16.0)
-                        .strong(),
-                )
-                .on_hover_text(crate::i18n::tr(
-                    "Efficiency mode and lower priority for these apps (except the one you are \
-                     using): they keep running, but stop crowding out everything else.",
-                ))
-                .clicked()
-            {
-                for t in background {
-                    intents.extend(calm(t));
-                }
-            }
-            ui.add_space(0.0);
-        }
-
-        egui::Grid::new("alert_apps")
-            .num_columns(3)
-            .striped(true)
-            .spacing([8.0, 4.0])
-            .show(ui, |ui| {
-                for a in &apps {
-                    let using = in_use(a);
-                    ui.label(RichText::new(a.name).strong())
-                        .on_hover_text(if using {
-                            crate::i18n::tr("The app you are using")
-                        } else {
-                            ""
-                        });
-                    ui.label(
-                        RichText::new(crate::i18n::percent(format!("{:.0}", a.cpu)))
-                            .color(text_color(ui, if a.cpu >= 50.0 { BAD } else { WARN })),
-                    );
-                    ui.horizontal(|ui| {
-                        let all = |c: Command| {
-                            a.instances
-                                .iter()
-                                .map(move |t| Intent::Command(t.clone(), c))
-                        };
+    let modal = egui::Modal::new(egui::Id::unique("cpu_alert"))
+        .frame(crate::theme::dialog_frame(ctx))
+        .show(ctx, |ui| {
+            ui.set_width(640.0);
+            let color = text_color(
+                ui,
+                if alert.cpu >= settings.threshold {
+                    BAD
+                } else {
+                    GOOD
+                },
+            );
+            ui.label(
+                RichText::new({
+                    let __wtm_i18n_0 = &(alert.cpu);
+                    crate::i18n::format(
+                        "⚠ Your PC is overloaded: CPU {0}%",
+                        &[format!("{:.0}", __wtm_i18n_0)],
+                    )
+                })
+                .size(22.0)
+                .color(color),
+            );
+            if alert.cpu < settings.threshold {
+                ui.horizontal_wrapped(|ui| {
+                    crate::theme::colored(ui, GOOD, crate::i18n::tr("The load is back to normal."));
+                    if let Some(left) = data.alert_watch.closes_in(std::time::Instant::now()) {
+                        ui.label(crate::i18n::format(
+                            "Closes by itself in {0} s.",
+                            &[left.as_secs().max(1).to_string()],
+                        ));
                         if ui
-                            .button(crate::i18n::tr("Efficiency mode"))
+                            .button(crate::i18n::tr("Keep it open"))
                             .on_hover_text(crate::i18n::tr(
-                                "Runs it on efficient cores at lower priority",
+                                "Stops the countdown; the alert stays until you close it",
                             ))
                             .clicked()
                         {
-                            for t in &a.instances {
-                                intents.extend(calm(t));
-                            }
+                            commands.push(UiCommand::HoldAlert);
                         }
-                        let one_core = 100.0 / cpus as f32;
-                        if ui
-                            .button(crate::i18n::tr("Limit to 1 core"))
-                            .on_hover_text(crate::i18n::tr(
-                                "A hard cap for each of its processes, until you remove it",
-                            ))
-                            .clicked()
-                        {
-                            intents.extend(all(Command::Limit(Limits {
-                                cpu_percent: Some(one_core),
-                                memory_bytes: None,
-                            })));
-                        }
-                        if ui
-                            .button(crate::i18n::tr("Pause"))
-                            .on_hover_text(crate::i18n::tr(
-                                "Stops it completely; right-click → Resume brings it back",
-                            ))
-                            .clicked()
-                        {
-                            intents.extend(all(Command::Suspend));
-                        }
-                        if ui
-                            .button(
-                                RichText::new(crate::i18n::tr("End")).color(text_color(ui, BAD)),
-                            )
-                            .clicked()
-                        {
-                            intents.push(Intent::ConfirmMany(a.instances.clone(), Command::Kill));
-                        }
-                    });
-                    crate::theme::end_row(ui);
-                }
-            });
-        if apps.is_empty() {
-            ui.weak(crate::i18n::tr(
-                "No single app stands out; many small ones add up.",
-            ));
-        }
-        let doomed = crate::kill_tab::targets(data).len();
-        if doomed > 0 {
-            ui.add_space(0.0);
-            if ui
-                .button(
-                    RichText::new({
-                        crate::i18n::format(
-                            "🚨 End the kill list ({0} processes)",
-                            &[format!("{}", doomed)],
-                        )
-                    })
-                    .strong()
-                    .color(text_color(ui, BAD)),
-                )
-                .on_hover_text(crate::i18n::tr("Shows them first"))
-                .clicked()
-            {
-                *panic = true;
-            }
-        }
-
-        ui.add_space(0.0);
-        match &data.config {
-            Some(Ok((_, text))) if data.status.as_ref().is_some_and(|s| s.dry_run) => {
-                ui.horizontal(|ui| {
-                    ui.label(crate::i18n::tr("Automatic protection is off."));
-                    let admin = matches!(data.mode, Mode::Service { admin: true, .. });
-                    if ui
-                        .add_enabled(admin, egui::Button::new(crate::i18n::tr("Turn it on")))
-                        .on_hover_text(crate::i18n::tr("RustWTM then steps in by itself next time"))
-                        .clicked()
-                        && let Some(new) = crate::settings::set_dry_run(text, false)
-                    {
-                        commands.push(UiCommand::SaveConfig(new));
+                        ui.ctx().request_repaint_after(Duration::from_millis(500));
                     }
                 });
-            }
-            _ if !matches!(data.mode, Mode::Service { .. }) => {
-                ui.weak(crate::i18n::tr(
-                    "Install the RustWTM service and it steps in automatically next time.",
+            } else {
+                ui.label(crate::i18n::tr(
+                    "These apps use the most CPU. One click brings them down; nothing is lost.",
                 ));
             }
-            _ => {}
-        }
+            ui.add_space(0.0);
 
-        ui.add_space(0.0);
-        ui.horizontal(|ui| {
-            if ui.button(crate::i18n::tr("Close")).clicked() {
-                close = Some(QUIET_AFTER_CLOSE);
+            if !apps.is_empty() {
+                let background: Vec<&ProcessRef> = apps
+                    .iter()
+                    .filter(|a| !in_use(a))
+                    .flat_map(|a| &a.instances)
+                    .collect();
+                if ui
+                    .button(
+                        RichText::new(crate::i18n::tr("⚡ Calm them all down"))
+                            .size(16.0)
+                            .strong(),
+                    )
+                    .on_hover_text(crate::i18n::tr(
+                        "Efficiency mode and lower priority for these apps (except the one you are \
+                     using): they keep running, but stop crowding out everything else.",
+                    ))
+                    .clicked()
+                {
+                    for t in background {
+                        intents.extend(calm(t));
+                    }
+                }
+                ui.add_space(0.0);
             }
-            if ui.button(crate::i18n::tr("Snooze for 1 hour")).clicked() {
-                close = Some(SNOOZE);
+
+            egui::Grid::new("alert_apps")
+                .num_columns(3)
+                .striped(true)
+                .spacing([8.0, 4.0])
+                .show(ui, |ui| {
+                    for a in &apps {
+                        let using = in_use(a);
+                        ui.label(RichText::new(a.name).strong())
+                            .on_hover_text(if using {
+                                crate::i18n::tr("The app you are using")
+                            } else {
+                                ""
+                            });
+                        ui.label(
+                            RichText::new(crate::i18n::percent(format!("{:.0}", a.cpu)))
+                                .color(text_color(ui, if a.cpu >= 50.0 { BAD } else { WARN })),
+                        );
+                        ui.horizontal(|ui| {
+                            let all = |c: Command| {
+                                a.instances
+                                    .iter()
+                                    .map(move |t| Intent::Command(t.clone(), c))
+                            };
+                            if ui
+                                .button(crate::i18n::tr("Efficiency mode"))
+                                .on_hover_text(crate::i18n::tr(
+                                    "Runs it on efficient cores at lower priority",
+                                ))
+                                .clicked()
+                            {
+                                for t in &a.instances {
+                                    intents.extend(calm(t));
+                                }
+                            }
+                            let one_core = 100.0 / cpus as f32;
+                            if ui
+                                .button(crate::i18n::tr("Limit to 1 core"))
+                                .on_hover_text(crate::i18n::tr(
+                                    "A hard cap for each of its processes, until you remove it",
+                                ))
+                                .clicked()
+                            {
+                                intents.extend(all(Command::Limit(Limits {
+                                    cpu_percent: Some(one_core),
+                                    memory_bytes: None,
+                                })));
+                            }
+                            if ui
+                                .button(crate::i18n::tr("Pause"))
+                                .on_hover_text(crate::i18n::tr(
+                                    "Stops it completely; right-click → Resume brings it back",
+                                ))
+                                .clicked()
+                            {
+                                intents.extend(all(Command::Suspend));
+                            }
+                            if ui
+                                .button(
+                                    RichText::new(crate::i18n::tr("End"))
+                                        .color(text_color(ui, BAD)),
+                                )
+                                .clicked()
+                            {
+                                intents
+                                    .push(Intent::ConfirmMany(a.instances.clone(), Command::Kill));
+                            }
+                        });
+                        crate::theme::end_row(ui);
+                    }
+                });
+            if apps.is_empty() {
+                ui.weak(crate::i18n::tr(
+                    "No single app stands out; many small ones add up.",
+                ));
             }
-            if ui
-                .button(crate::i18n::tr("Turn off these alerts"))
-                .clicked()
-            {
-                settings.enabled = false;
-                close = Some(QUIET_AFTER_CLOSE);
+            let doomed = crate::kill_tab::targets(data).len();
+            if doomed > 0 {
+                ui.add_space(0.0);
+                if ui
+                    .button(
+                        RichText::new({
+                            crate::i18n::format(
+                                "🚨 End the kill list ({0} processes)",
+                                &[format!("{}", doomed)],
+                            )
+                        })
+                        .strong()
+                        .color(text_color(ui, BAD)),
+                    )
+                    .on_hover_text(crate::i18n::tr("Shows them first"))
+                    .clicked()
+                {
+                    *panic = true;
+                }
             }
+
+            ui.add_space(0.0);
+            match &data.config {
+                Some(Ok((_, text))) if data.status.as_ref().is_some_and(|s| s.dry_run) => {
+                    ui.horizontal(|ui| {
+                        ui.label(crate::i18n::tr("Automatic protection is off."));
+                        let admin = matches!(data.mode, Mode::Service { admin: true, .. });
+                        if ui
+                            .add_enabled(admin, egui::Button::new(crate::i18n::tr("Turn it on")))
+                            .on_hover_text(crate::i18n::tr(
+                                "RustWTM then steps in by itself next time",
+                            ))
+                            .clicked()
+                            && let Some(new) = crate::settings::set_dry_run(text, false)
+                        {
+                            commands.push(UiCommand::SaveConfig(new));
+                        }
+                    });
+                }
+                _ if !matches!(data.mode, Mode::Service { .. }) => {
+                    ui.weak(crate::i18n::tr(
+                        "Install the RustWTM service and it steps in automatically next time.",
+                    ));
+                }
+                _ => {}
+            }
+
+            ui.add_space(0.0);
+            ui.horizontal(|ui| {
+                if ui.button(crate::i18n::tr("Close")).clicked() {
+                    close = Some(QUIET_AFTER_CLOSE);
+                }
+                if ui.button(crate::i18n::tr("Snooze for 1 hour")).clicked() {
+                    close = Some(SNOOZE);
+                }
+                if ui
+                    .button(crate::i18n::tr("Turn off these alerts"))
+                    .clicked()
+                {
+                    settings.enabled = false;
+                    close = Some(QUIET_AFTER_CLOSE);
+                }
+            });
         });
-    });
     if modal.should_close() {
         close.get_or_insert(QUIET_AFTER_CLOSE);
     }

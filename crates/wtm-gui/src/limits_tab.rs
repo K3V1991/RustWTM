@@ -318,7 +318,7 @@ egui::Grid::new("app_limits_grid")
                     right(ui, count);
                 }
                 let cores = {
-                    let __wtm_i18n_0 = &(r.cpu / 100.0 * cpus as f32);
+                    let __wtm_i18n_0 = &((r.cpu / 100.0 * cpus as f32).max(0.0) + 0.0);
                     crate::i18n::format("{0} cores", &[format!("{:.2}", __wtm_i18n_0)])
                 };
                 usage_cell(ui, cores, r.cpu_fill);
@@ -485,7 +485,7 @@ fn usage_cell(ui: &mut Ui, text: String, fill: Option<f32>) {
             .fill(color.gamma_multiply(0.8))
             .text(RichText::new(format!(
                 "{text} ({})",
-                crate::i18n::percent(format!("{:.0}", fill * 100.0))
+                crate::i18n::percent(format!("{:.0}", (fill * 100.0).max(0.0) + 0.0))
             ))),
     )
     .on_hover_text(crate::i18n::tr(

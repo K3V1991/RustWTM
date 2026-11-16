@@ -59,8 +59,10 @@ pub fn show(ui: &mut Ui, data: &Data, sel: &ProcessRef, intents: &mut Vec<Intent
     ui.horizontal_wrapped(|ui| {
         ui.strong(crate::i18n::tr("Windows"));
         if let Some(Ok(list)) = read {
-            ui.weak(crate::i18n::format(
+            ui.weak(crate::i18n::format_count(
+                "{0} window, {1} visible",
                 "{0} windows, {1} visible",
+                list.rows.len(),
                 &[list.rows.len().to_string(), list.visible.to_string()],
             ));
         }

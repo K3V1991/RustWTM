@@ -191,7 +191,7 @@ pub fn show_editor(ctx: &egui::Context, editor: &mut Option<Editor>) -> Option<S
     let width = (ctx.content_rect().width() - 72.0).clamp(320.0, 720.0);
     let content_height = (ctx.content_rect().height() - 56.0).clamp(340.0, 640.0);
     let height = (content_height - 160.0).clamp(110.0, 480.0);
-    let frame = egui::Frame::popup(&ctx.global_style());
+    let frame = crate::theme::dialog_frame(ctx);
     let id = egui::Id::unique("process-column-editor");
     let area = egui::Modal::default_area(id)
         .default_size(egui::vec2(width, content_height) + frame.total_margin().sum());

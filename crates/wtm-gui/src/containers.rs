@@ -311,23 +311,30 @@ pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            ui.label(if current {
-                                c.metrics
-                                    .cpu
-                                    .map(|n| crate::i18n::percent(format!("{n:.1}")))
-                                    .unwrap_or("—".into())
-                            } else {
-                                "—".into()
-                            });
+                            // Right-aligned under their right-aligned headers.
+                            crate::theme::right(
+                                ui,
+                                if current {
+                                    c.metrics
+                                        .cpu
+                                        .map(|n| crate::i18n::percent(format!("{n:.1}")))
+                                        .unwrap_or("—".into())
+                                } else {
+                                    "—".into()
+                                },
+                            );
                         })
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            ui.label(if current {
-                                value(c.metrics.memory.map(|n| n as f64))
-                            } else {
-                                "—".into()
-                            });
+                            crate::theme::right(
+                                ui,
+                                if current {
+                                    value(c.metrics.memory.map(|n| n as f64))
+                                } else {
+                                    "—".into()
+                                },
+                            );
                         })
                     });
                     row.col(|ui| {

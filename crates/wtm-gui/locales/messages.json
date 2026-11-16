@@ -11278,5 +11278,35 @@
     "de": "{0}%",
     "fr": "{0}%",
     "es": "{0}%"
+  },
+  "{0} of {1} event": {
+    "tr": "{0} / {1} olay",
+    "de": "{0} von {1} Ereignissen",
+    "fr": "{0} sur {1} événements",
+    "es": "{0} de {1} eventos"
+  },
+  "{0} TCP port listening": {
+    "tr": "{0} TCP portu dinliyor",
+    "de": "{0} TCP-Ports lauschen",
+    "fr": "{0} ports TCP en écoute",
+    "es": "{0} puertos TCP en escucha"
+  },
+  "{0} well-known tool or server running": {
+    "tr": "{0} bilinen araç ve sunucu çalışıyor",
+    "de": "{0} bekannte Tools und Server aktiv",
+    "fr": "{0} outils et serveurs connus actifs",
+    "es": "{0} herramientas y servidores conocidos activos"
+  },
+  "{0} startup app, {1} enabled": {
+    "tr": "{0} başlangıç uygulaması, {1} etkin",
+    "de": "{0} Autostart-Apps, {1} aktiviert",
+    "fr": "{0} applications de démarrage, {1} activées",
+    "es": "{0} aplicaciones de inicio, {1} habilitadas"
+  },
+  "{0} window, {1} visible": {
+    "tr": "{0} pencere, {1} görünür",
+    "de": "{0} Fenster, {1} sichtbar",
+    "fr": "{0} fenêtres, {1} visibles",
+    "es": "{0} ventanas, {1} visibles"
   }
 }

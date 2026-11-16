@@ -289,7 +289,9 @@ impl View {
         }
         if let Some(text) = self.export.clone() {
             let mut close = false;
-            let modal=egui::Modal::new(egui::Id::unique("incident-export")).show(ui.ctx(),|ui|{
+            let modal=egui::Modal::new(egui::Id::unique("incident-export"))
+        .frame(crate::theme::dialog_frame(ui.ctx()))
+        .show(ui.ctx(),|ui|{
    ui.set_max_width(680.0);ui.heading(crate::i18n::tr("Diagnostic snapshot"));ui.weak(crate::i18n::tr("Review before sharing: process names, IDs, resource usage and available event messages are included."));
    egui::ScrollArea::vertical().max_height(320.0).show(ui,|ui|{ui.monospace(&text);});
    ui.horizontal(|ui|{if ui.button(crate::i18n::tr("Copy snapshot")).clicked(){ui.ctx().copy_text(text.clone());}close=ui.button(crate::i18n::tr("Close")).clicked();});

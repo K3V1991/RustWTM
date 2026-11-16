@@ -1878,5 +1878,10 @@
   "Extra high": "Juu sana",
   "Maximum": "Upeo",
   "R {0}  W {1}": "S {0}  A {1}",
-  "{0}%": "{0}%"
+  "{0}%": "{0}%",
+  "{0} of {1} event": "Matukio {0} kati ya {1}",
+  "{0} TCP port listening": "Milango {0} ya TCP inasikiliza",
+  "{0} well-known tool or server running": "Zana na seva {0} zinazojulikana zinaendeshwa",
+  "{0} startup app, {1} enabled": "Programu {0} za kuanza, {1} zimewashwa",
+  "{0} window, {1} visible": "Madirisha {0}, yanayoonekana {1}"
 }

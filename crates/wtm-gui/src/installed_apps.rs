@@ -316,7 +316,9 @@ impl View {
         };
         let mut start = false;
         let mut cancel = false;
-        let modal = egui::Modal::new(egui::Id::unique("uninstall_app")).show(ctx, |ui| {
+        let modal = egui::Modal::new(egui::Id::unique("uninstall_app"))
+        .frame(crate::theme::dialog_frame(ctx))
+        .show(ctx, |ui| {
             ui.set_width((ctx.content_rect().width()-64.0).clamp(200.0,520.0));
             ui.heading(crate::i18n::tr("Uninstall application?"));
             ui.strong(&app.name);

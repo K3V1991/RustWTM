@@ -142,33 +142,35 @@ impl Marks {
         };
         let mut saved = false;
         let mut open = true;
-        let modal = egui::Modal::new(Id::unique(("row-mark-editor", list))).show(ui.ctx(), |ui| {
-            ui.heading(crate::i18n::format(
-                "Note for {0}",
-                std::slice::from_ref(&draft.title),
-            ));
-            let label = crate::i18n::tr("Note");
-            let field = ui.add(
-                egui::TextEdit::multiline(&mut draft.text)
-                    .char_limit(NOTE_LIMIT)
-                    .desired_rows(3)
-                    .hint_text(crate::i18n::tr("Only on this PC, for your own reference")),
-            );
-            field.widget_info(|| egui::WidgetInfo::labeled(egui::Role::TextInput, true, label));
-            if !field.has_focus() && draft.text.is_empty() {
-                field.request_focus();
-            }
-            ui.horizontal(|ui| {
-                if ui.button(crate::i18n::tr("Save")).clicked() {
-                    self.set_note(&draft.key, &draft.text);
-                    saved = true;
-                    open = false;
+        let modal = egui::Modal::new(Id::unique(("row-mark-editor", list)))
+            .frame(crate::theme::dialog_frame(ui.ctx()))
+            .show(ui.ctx(), |ui| {
+                ui.heading(crate::i18n::format(
+                    "Note for {0}",
+                    std::slice::from_ref(&draft.title),
+                ));
+                let label = crate::i18n::tr("Note");
+                let field = ui.add(
+                    egui::TextEdit::multiline(&mut draft.text)
+                        .char_limit(NOTE_LIMIT)
+                        .desired_rows(3)
+                        .hint_text(crate::i18n::tr("Only on this PC, for your own reference")),
+                );
+                field.widget_info(|| egui::WidgetInfo::labeled(egui::Role::TextInput, true, label));
+                if !field.has_focus() && draft.text.is_empty() {
+                    field.request_focus();
                 }
-                if ui.button(crate::i18n::tr("Cancel")).clicked() {
-                    open = false;
-                }
+                ui.horizontal(|ui| {
+                    if ui.button(crate::i18n::tr("Save")).clicked() {
+                        self.set_note(&draft.key, &draft.text);
+                        saved = true;
+                        open = false;
+                    }
+                    if ui.button(crate::i18n::tr("Cancel")).clicked() {
+                        open = false;
+                    }
+                });
             });
-        });
         if modal.should_close() {
             open = false;
         }

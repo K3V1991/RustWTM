@@ -54,7 +54,9 @@ pub fn window(ctx: &egui::Context, w: &mut FindWindow, data: &Data) -> Option<Fi
     let mut action = None;
     let state = data.find.as_ref();
     let running = state.is_some_and(|s| !s.progress.done);
-    let modal = egui::Modal::new(egui::Id::unique("find_handle_or_dll")).show(ctx, |ui| {
+    let modal = egui::Modal::new(egui::Id::unique("find_handle_or_dll"))
+        .frame(crate::theme::dialog_frame(ctx))
+        .show(ctx, |ui| {
         ui.set_width(ui.available_width().min(720.0));
         ui.heading(crate::i18n::tr("Find handle or DLL"));
         ui.weak(crate::i18n::tr(

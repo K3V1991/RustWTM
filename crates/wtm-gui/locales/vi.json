@@ -1878,5 +1878,10 @@
   "Extra high": "Rất cao",
   "Maximum": "Tối đa",
   "R {0}  W {1}": "Đ {0}  G {1}",
-  "{0}%": "{0}%"
+  "{0}%": "{0}%",
+  "{0} of {1} event": "{0} trên {1} sự kiện",
+  "{0} TCP port listening": "{0} cổng TCP đang lắng nghe",
+  "{0} well-known tool or server running": "{0} công cụ và máy chủ phổ biến đang chạy",
+  "{0} startup app, {1} enabled": "{0} ứng dụng khởi động, {1} đã bật",
+  "{0} window, {1} visible": "{0} cửa sổ, {1} đang hiển thị"
 }

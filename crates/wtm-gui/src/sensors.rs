@@ -518,7 +518,9 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
         &mut view.power,
     ));
     if let Some((channel, profile)) = view.confirm.clone() {
-        let modal=egui::Modal::new(egui::Id::unique("confirm_cooling")).show(ui.ctx(),|ui| {
+        let modal=egui::Modal::new(egui::Id::unique("confirm_cooling"))
+        .frame(crate::theme::dialog_frame(ui.ctx()))
+        .show(ui.ctx(),|ui| {
             ui.heading(crate::i18n::tr("Apply software fan control?"));
             let name=report.channels.iter().find(|c|c.id==channel).map_or(channel.as_str(),|c|c.name.as_str());
             ui.label(crate::i18n::format("Channel: {0}. This changes a physical fan's requested speed. Fan duty and measured RPM are different values.", &[name.to_string()]));

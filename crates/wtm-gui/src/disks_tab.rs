@@ -886,11 +886,44 @@ fn folders(
                             crate::theme::table_cell(ui, |ui| {
                                 ui.add_space(*depth as f32 * 16.0);
                                 let open = index.is_empty() || expanded.contains(index);
+                                // One slot for the expander, kept by leaves too, so
+                                // siblings line up and children sit under them.
+                                const EXPANDER: f32 = 22.0;
                                 if node.children.is_empty() || index.is_empty() {
-                                    ui.add_space(22.0);
-                                } else if ui.small_button(if open { "⏷" } else { "⏵" }).clicked()
-                                {
-                                    toggle = Some(index.clone());
+                                    ui.add_space(EXPANDER + ui.spacing().item_spacing.x);
+                                } else {
+                                    // Drawn into an exact slot: a button paints
+                                    // wider than the space it is given.
+                                    let (rect, response) = ui.allocate_exact_size(
+                                        egui::vec2(EXPANDER, ui.spacing().interact_size.y),
+                                        egui::Sense::click(),
+                                    );
+                                    let visuals = ui.style().interact(&response);
+                                    if response.hovered() {
+                                        ui.painter().rect_filled(
+                                            rect,
+                                            visuals.corner_radius,
+                                            visuals.weak_bg_fill,
+                                        );
+                                    }
+                                    ui.painter().text(
+                                        rect.center(),
+                                        egui::Align2::CENTER_CENTER,
+                                        if open { "⏷" } else { "⏵" },
+                                        egui::FontId::proportional(12.0),
+                                        visuals.fg_stroke.color,
+                                    );
+                                    let label = if open {
+                                        crate::i18n::tr("Collapse")
+                                    } else {
+                                        crate::i18n::tr("Expand")
+                                    };
+                                    response.widget_info(|| {
+                                        egui::WidgetInfo::labeled(egui::Role::Button, true, label)
+                                    });
+                                    if response.clicked() {
+                                        toggle = Some(index.clone());
+                                    }
                                 }
                                 let mut name = RichText::new(&node.name);
                                 if node.denied {
@@ -1455,7 +1488,7 @@ mod tests {
         assert!(h.query_by_label("media").is_some());
         assert!(h.query_by_label("inner").is_none(), "collapsed");
         assert!(h.query_by_label("(files in this folder)").is_some());
-        h.get_by_label("⏵").click();
+        h.get_by_label("Expand").click();
         h.run();
         assert!(h.query_by_label("inner").is_some(), "expanded");
 

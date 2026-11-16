@@ -229,7 +229,9 @@ impl View {
         if let Some(plan) = self.confirm.clone() {
             let mut run = false;
             let mut cancel = false;
-            let modal=egui::Modal::new(egui::Id::unique("package-update-review")).show(ui.ctx(),|ui|{
+            let modal=egui::Modal::new(egui::Id::unique("package-update-review"))
+        .frame(crate::theme::dialog_frame(ui.ctx()))
+        .show(ui.ctx(),|ui|{
     ui.set_max_width(620.0);ui.heading(crate::i18n::tr("Review package updates"));
     ui.label(crate::i18n::tr("Only these package IDs and target versions will be requested. Each package is checked again before its installer starts."));
     egui::ScrollArea::vertical().max_height(280.0).show(ui,|ui|{for p in &plan.packages{ui.label(format!("{} · {}\n{}: {} → {}",p.name,p.source,p.id,p.installed,p.target.as_deref().unwrap_or("—")));crate::theme::divider(ui);}});

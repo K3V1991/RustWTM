@@ -463,6 +463,13 @@ fn captures(template: &str, text: &str) -> Option<Vec<String>> {
     }
     (rest == pattern).then_some(values)
 }
+/// `format` with the singular template when `n` is 1 ("1 startup app"),
+/// the plural one otherwise. Languages without the distinction translate
+/// both alike.
+pub fn format_count(one: &str, many: &str, n: usize, values: &[String]) -> String {
+    format(if n == 1 { one } else { many }, values)
+}
+
 /// A percentage in the window's language: "42%", or "%42" in Turkish,
 /// which puts the sign first. `number` is already formatted ("42", "12.5").
 pub fn percent(number: impl Into<String>) -> String {

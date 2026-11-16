@@ -1374,11 +1374,13 @@ fn process_confirmation_holds_order_with_the_pointer_outside_the_table() {
             |ui, state: &mut (ProcessView, Snapshot, bool)| {
                 state.0.ui(ui, &state.1, &extra(&ManagedMap::new()));
                 if state.2 {
-                    egui::Modal::new(egui::Id::unique("inspection-proof")).show(ui.ctx(), |ui| {
-                        if ui.button("Dismiss inspection").clicked() {
-                            state.2 = false;
-                        }
-                    });
+                    egui::Modal::new(egui::Id::unique("inspection-proof"))
+                        .frame(crate::theme::dialog_frame(ui.ctx()))
+                        .show(ui.ctx(), |ui| {
+                            if ui.button("Dismiss inspection").clicked() {
+                                state.2 = false;
+                            }
+                        });
                 }
             },
             (ProcessView::default(), snapshot(), false),

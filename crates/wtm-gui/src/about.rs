@@ -108,7 +108,7 @@ pub fn about(
                         }
                     },
                 );
-                ui.horizontal_wrapped(|ui| {
+                ui.vertical_centered(|ui| {
                     let status = match update {
                         UpdateState::Unknown => String::new(),
                         UpdateState::Checking => crate::i18n::tr("Checking for updates…").into(),
@@ -133,9 +133,9 @@ pub fn about(
                             crate::i18n::format("Update check failed: {0}", std::slice::from_ref(e))
                         }
                     };
-                    // Centre the button and the status.
-                    let width = 360.0_f32.min(ui.available_width());
-                    ui.add_space((ui.available_width() - width).max(0.0) / 2.0);
+                    // The button centred, its outcome centred below it: a
+                    // fixed guess at their joint width left the button off
+                    // centre whenever there was no status yet.
                     if ui
                         .add_enabled(
                             !matches!(update, UpdateState::Checking | UpdateState::Installing(_)),
@@ -145,7 +145,9 @@ pub fn about(
                     {
                         check = true;
                     }
-                    ui.weak(status);
+                    if !status.is_empty() {
+                        ui.weak(status);
+                    }
                 });
                 ui.add_space(0.0);
 

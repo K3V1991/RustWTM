@@ -1403,8 +1403,10 @@ pub fn startup(
         return command;
     }
     if query.is_empty() && group == 0 {
-        ui.weak(crate::i18n::format(
+        ui.weak(crate::i18n::format_count(
+            "{0} startup app, {1} enabled",
             "{0} startup apps, {1} enabled",
+            rows.len(),
             &[
                 rows.len().to_string(),
                 rows.iter().filter(|e| e.enabled).count().to_string(),
