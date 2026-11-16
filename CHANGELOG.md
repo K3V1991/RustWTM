@@ -49,6 +49,9 @@ so the GUI and the service of 0.34.0 and 0.35.0 work together.
   config.toml and the service keep the point.
 - English counts of one read in the singular ("1 startup app",
   "1 TCP port listening").
+- On a narrow window, Ports' developer tools table drops the Kind column
+  and cuts long tool and program names (shown whole on hover), so Open,
+  End and Show stay in view instead of behind a sideways scroll.
 
 ### Fixed
 

@@ -354,8 +354,11 @@ fn known_ports(ui: &mut Ui, all: &[PortRow<'_>], view: &mut PortsView, intents: 
             return;
         }
         let mut unwatch = None;
-        // Sideways too: on narrow windows the columns go on to the right
-        // instead of widening the page.
+        // A narrow window drops Kind and cuts long tool names (both shown on
+        // hover), so the row's actions stay in view.
+        let narrow = ui.available_width() < NARROW_PORTS;
+        // Sideways too: on narrower windows still, the columns go on to the
+        // right instead of widening the page.
         ui.spacing_mut().scroll = crate::theme::solid_scroll();
         egui::ScrollArea::both()
             .auto_shrink([false, true])
@@ -363,7 +366,7 @@ fn known_ports(ui: &mut Ui, all: &[PortRow<'_>], view: &mut PortsView, intents: 
             .max_height(240.0)
             .show(ui, |ui| {
                 egui::Grid::new("known_ports_grid")
-                    .num_columns(8)
+                    .num_columns(if narrow { 7 } else { 8 })
                     .striped(true)
                     .spacing([8.0, 4.0])
                     .show(ui, |ui| {
@@ -380,6 +383,9 @@ fn known_ports(ui: &mut Ui, all: &[PortRow<'_>], view: &mut PortsView, intents: 
                         .into_iter()
                         .enumerate()
                         {
+                            if narrow && i == 3 {
+                                continue;
+                            }
                             if matches!(i, 1 | 6) {
                                 crate::theme::right(ui, RichText::new(h).strong());
                             } else {
@@ -397,13 +403,53 @@ fn known_ports(ui: &mut Ui, all: &[PortRow<'_>], view: &mut PortsView, intents: 
                                 ui,
                                 RichText::new(port.to_string()).monospace().strong(),
                             );
-                            ui.label(known.map_or(crate::i18n::tr("Watched port"), |k| k.service));
-                            ui.weak(known.map_or("", |k| category_label(k.category)));
+                            let tool = known.map_or(crate::i18n::tr("Watched port"), |k| k.service);
+                            let kind = known.map_or("", |k| category_label(k.category));
+                            if narrow {
+                                ui.scope(|ui| {
+                                    ui.set_max_width(NARROW_TOOL_WIDTH);
+                                    let label = ui.add(
+                                        egui::Label::new(tool)
+                                            .truncate()
+                                            .show_tooltip_when_elided(false),
+                                    );
+                                    if kind.is_empty() {
+                                        label.on_hover_text(tool);
+                                    } else {
+                                        label.on_hover_text(format!("{tool} · {kind}"));
+                                    }
+                                });
+                            } else {
+                                ui.label(tool);
+                                ui.weak(kind);
+                            }
                             match row {
                                 Some(r) => {
-                                    let label = ui.label(r.process_text());
-                                    if let Some(hint) = relay(r) {
-                                        label.on_hover_text(hint);
+                                    let text = r.process_text();
+                                    let label = if narrow {
+                                        ui.scope(|ui| {
+                                            ui.set_max_width(NARROW_TOOL_WIDTH);
+                                            ui.add(
+                                                egui::Label::new(&text)
+                                                    .truncate()
+                                                    .show_tooltip_when_elided(false),
+                                            )
+                                        })
+                                        .inner
+                                    } else {
+                                        ui.label(&text)
+                                    };
+                                    match (relay(r), narrow) {
+                                        (Some(hint), true) => {
+                                            label.on_hover_text(format!("{text}\n{hint}"));
+                                        }
+                                        (Some(hint), false) => {
+                                            label.on_hover_text(hint);
+                                        }
+                                        (None, true) => {
+                                            label.on_hover_text(text);
+                                        }
+                                        (None, false) => {}
                                     }
                                     match r.exposure() {
                                         Some(e) => exposure_label(ui, e),
@@ -474,6 +520,11 @@ fn known_ports(ui: &mut Ui, all: &[PortRow<'_>], view: &mut PortsView, intents: 
         }
     });
 }
+
+/// Below this width the developer-tools table drops Kind and cuts tool names.
+const NARROW_PORTS: f32 = 900.0;
+/// The widest a tool or program name gets on a narrow window.
+const NARROW_TOOL_WIDTH: f32 = 120.0;
 
 /// The order of two rows of the listening-ports table by column `col`.
 fn order(
@@ -835,6 +886,10 @@ mod tests {
     }
 
     fn harness(view: PortsView) -> Harness<'static, State> {
+        harness_sized(view, [1300.0, 900.0])
+    }
+
+    fn harness_sized(view: PortsView, size: [f32; 2]) -> Harness<'static, State> {
         let mut data = crate::ui_tests::data();
         data.connections = Some(Ok(vec![
             listen("0.0.0.0:5173", 100),
@@ -847,7 +902,7 @@ mod tests {
         ]));
         Harness::builder()
             .allow_missing_glyphs()
-            .with_size([1300.0, 900.0])
+            .with_size(size)
             .build_ui_state(
                 |ui, s: &mut State| ports_tab(ui, &s.data, &mut s.view, &mut s.intents),
                 State {
@@ -877,6 +932,32 @@ mod tests {
         let b = (any, Some(&small));
         assert_eq!(order(8, a, b), Ordering::Greater, "Memory");
         assert_eq!(order(9, a, b), Ordering::Less, "Address");
+    }
+
+    #[test]
+    fn a_narrow_window_keeps_the_tool_actions_in_view() {
+        // The kind of tool is a column on a wide window...
+        let mut h = harness(PortsView::default());
+        h.run();
+        assert!(h.query_all_by_label("Dev servers").next().is_some());
+        // ...and only a tooltip on a narrow one, where End stays in view
+        // instead of behind a sideways scroll.
+        let width = 760.0;
+        let mut h = harness_sized(PortsView::default(), [width, 700.0]);
+        h.run();
+        assert!(h.query_all_by_label("Dev servers").next().is_none());
+        // Vite is in both tables; the developer tools come first.
+        let row = h
+            .get_all_by_label("Vite")
+            .map(|n| n.rect())
+            .min_by(|a, b| a.top().total_cmp(&b.top()))
+            .unwrap();
+        let end = h
+            .get_all_by_label("End")
+            .map(|n| n.rect())
+            .find(|r| (r.center().y - row.center().y).abs() < 4.0)
+            .expect("End on Vite's row");
+        assert!(end.right() <= width, "End at {end:?}");
     }
 
     #[test]
