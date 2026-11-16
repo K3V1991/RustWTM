@@ -928,9 +928,11 @@ fn protection(ui: &mut Ui, data: &Data, commands: &mut Vec<UiCommand>) {
         }
         if !admin {
             ui.weak(crate::i18n::tr("Changing it needs administrator rights."));
-            if ui
-                .small_button(crate::i18n::tr("Restart as administrator"))
-                .clicked()
+            // An elevated window would only restart into the same state.
+            if !data.elevated
+                && ui
+                    .small_button(crate::i18n::tr("Restart as administrator"))
+                    .clicked()
             {
                 commands.push(UiCommand::RestartElevated);
             }

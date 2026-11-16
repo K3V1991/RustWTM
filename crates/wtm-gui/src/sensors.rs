@@ -45,6 +45,19 @@ impl SensorsView {
         view
     }
 
+    /// Min and max start again from the current readings; the graphs keep
+    /// their samples (observing the same sample again added it twice).
+    fn reset_extremes(&mut self, report: &HardwareReport) {
+        self.extremes = report
+            .sensors
+            .iter()
+            .filter_map(|s| {
+                let v = s.value.filter(|v| v.is_finite())?;
+                Some((s.id.clone(), (v, v)))
+            })
+            .collect();
+    }
+
     fn observe(&mut self, report: &HardwareReport) {
         if self.observed_at == report.sampled_at_ms {
             return;
@@ -138,9 +151,7 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
             commands.push(UiCommand::Load(Panel::Sensors));
         }
         if ui.button(crate::i18n::tr("Reset min/max")).clicked() {
-            view.extremes.clear();
-            view.observed_at = 0;
-            view.observe(report);
+            view.reset_extremes(report);
         }
     });
     if !report.notice.is_empty() {
@@ -642,6 +653,19 @@ mod tests {
                 },
             )
     }
+    #[test]
+    fn resetting_min_max_keeps_each_sample_once() {
+        let report = fixture();
+        let mut view = SensorsView::default();
+        view.observe(&report);
+        let before: Vec<usize> = view.history.values().map(|v| v.len()).collect();
+        view.reset_extremes(&report);
+        let after: Vec<usize> = view.history.values().map(|v| v.len()).collect();
+        assert_eq!(before, after, "the graphs do not get the same sample twice");
+        assert!(!view.extremes.is_empty());
+        assert!(view.extremes.values().all(|(min, max)| min == max));
+    }
+
     #[test]
     fn sensor_filters_and_confirmed_cooling_profile_flow() {
         let mut h = harness();

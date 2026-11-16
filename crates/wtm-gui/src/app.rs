@@ -10419,7 +10419,8 @@ o-such-folder",
             "c".into(),
             "dry_run = false\n[governor]\nhigh_cpu_percent = 85.0\n".into(),
         )));
-        // The Overview button only, not the one in the status bar.
+        // Already elevated: a restart would change nothing, so none is
+        // offered (the status bar's own button hides too).
         d.elevated = true;
         let (mut h, rx) = overview_app(d);
         assert!(h.query_by_label_contains("Protection is on").is_some());
@@ -10428,8 +10429,15 @@ o-such-folder",
             h.query_by_label("Changing it needs administrator rights.")
                 .is_some()
         );
+        assert!(h.query_by_label("Restart as administrator").is_none());
+        // Not elevated: offered here and in the status bar.
+        h.state().backend.data().elevated = false;
+        h.run_steps(2);
         rx.try_iter().for_each(drop);
-        h.get_by_label("Restart as administrator").click();
+        h.get_all_by_label("Restart as administrator")
+            .next()
+            .unwrap()
+            .click();
         h.run_steps(2);
         assert!(
             rx.try_iter()
