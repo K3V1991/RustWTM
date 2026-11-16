@@ -370,8 +370,23 @@ impl State {
             }
             ui.add_space(8.0);
             let state = crate::i18n::tr(if inspecting { "Inspecting" } else { "Live" });
+            // As wide as the longer of its two words, so switching between
+            // them moves nothing; a fixed 90 points pushed the actions to a
+            // row of their own in narrow German windows.
+            let state_width = ["Inspecting", "Live"]
+                .map(|word| {
+                    egui::WidgetText::from(
+                        RichText::new(format!("● {}", crate::i18n::tr(word))).small(),
+                    )
+                    .into_galley(ui, Some(egui::TextWrapMode::Extend), f32::INFINITY, egui::TextStyle::Body)
+                    .size()
+                    .x
+                })
+                .into_iter()
+                .fold(0.0, f32::max)
+                + 4.0;
             ui.add_sized(
-                [90.0, ui.spacing().interact_size.y],
+                [state_width, ui.spacing().interact_size.y],
                 egui::Label::new(
                     RichText::new(format!("● {state}"))
                         .small()
