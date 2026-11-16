@@ -988,7 +988,8 @@ pub fn gpu(
                             col,
                             view,
                             ENGINE_GRAPH_HEIGHT,
-                            &format!("gpu_{luid}_{engine}"),
+                            // By slot: two graphs may show the same engine.
+                            &format!("gpu_{luid}_{slot}"),
                             times,
                             &[(
                                 engine,

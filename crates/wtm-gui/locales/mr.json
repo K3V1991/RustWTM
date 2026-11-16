@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "समाप्ती सूची टॅबमध्ये प्रोग्राम जोडा, किंवा प्रोसेसवर उजवे-क्लिक करा → समाप्ती सूचीमध्ये जोडा….",
   "Kill-list entry": "समाप्ती-सूची नोंद",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "समाप्त केले जाऊ शकणारे प्रोग्राम. CPU मर्यादा असल्यास, ते सतत तितका वापर करत राहिले आणि सावरले नाहीत तर सेवा त्यांना स्वतः समाप्त करते; आपत्कालीन बटण येथे सूचीबद्ध सर्वकाही एकाच वेळी समाप्त करते.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "काय समाप्त होईल ते आधी दाखवते (कुठूनही Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "काय समाप्त होईल ते आधी दाखवते (Ctrl+Shift+K)",
   "Retry": "पुन्हा प्रयत्न करा",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "ड्राय-रन मोड: स्वयंचलित समाप्ती फक्त लॉग केल्या जातात. आपत्कालीन बटण नेहमी कार्य करते.",
   "Run RustWTM as administrator to change the kill list.": "समाप्ती सूची बदलण्यासाठी RustWTM प्रशासक म्हणून चालवा.",

@@ -342,6 +342,11 @@ pub fn set_kill_entry(
 /// Removes the entry at `index`; unchanged text if there is none.
 pub fn remove_kill_entry(text: &str, index: usize) -> Result<String, String> {
     let mut doc: toml_edit::DocumentMut = text.parse().map_err(|e| format!("{e}"))?;
+    // An inline `kill = [...]` cannot be edited here: say so rather than
+    // report a removal that did not happen.
+    if doc.get("kill").is_some_and(|i| !i.is_array_of_tables()) {
+        return Err("`kill` must be an array of tables ([[kill]])".into());
+    }
     if let Some(list) = doc.get_mut("kill").and_then(|i| i.as_array_of_tables_mut()) {
         if index < list.len() {
             list.remove(index);
@@ -356,6 +361,25 @@ pub fn remove_kill_entry(text: &str, index: usize) -> Result<String, String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn removing_from_an_inline_list_is_refused_not_ignored() {
+        // Written by hand as an inline array: valid, but not editable here.
+        let text = "kill = [{ name = \"a.exe\" }]
+";
+        assert_eq!(crate::Config::from_toml(text).unwrap().kill.len(), 1);
+        assert!(
+            remove_kill_entry(text, 0).is_err(),
+            "nothing removed, so say so"
+        );
+        let limits = "limit = [{ name = \"a.exe\", memory_gb = 1.0 }]
+";
+        assert_eq!(crate::Config::from_toml(limits).unwrap().limits.len(), 1);
+        assert!(
+            crate::limits::remove_app_limit(limits, "a.exe", crate::limits::LimitScope::Group)
+                .is_err()
+        );
+    }
 
     #[test]
     fn an_entry_reads_back_as_stored() {

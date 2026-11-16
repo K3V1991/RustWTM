@@ -65,8 +65,9 @@ pub fn show(ui: &mut Ui, data: &Data, band: crate::preferences::Band) -> Option<
             resource: Resource::Network,
             title: crate::i18n::tr("Network"),
             value: format!("{}/s", format_bytes(s.net_rx_rate + s.net_tx_rate)),
+            // Rates, as the value above them.
             detail: format!(
-                "↓ {} · ↑ {}",
+                "↓ {}/s · ↑ {}/s",
                 format_bytes(s.net_rx_rate),
                 format_bytes(s.net_tx_rate)
             ),

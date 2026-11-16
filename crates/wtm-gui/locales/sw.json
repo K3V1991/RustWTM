@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "Ongeza programu kwenye kichupo cha Orodha ya kukomesha, au bofya kulia mchakato → Ongeza kwenye orodha ya kukomesha….",
   "Kill-list entry": "Kipengee cha orodha ya kukomesha",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "Programu zinazoweza kukomeshwa. Ukiweka kizingiti cha CPU, huduma huzikomesha yenyewe zinapoendelea kutumia kiasi hicho bila kupona; kitufe cha dharura hukomesha kila kilichoorodheshwa hapa mara moja.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "Inaonyesha kitakachokomeshwa kwanza (Ctrl+Shift+K kutoka popote)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "Inaonyesha kitakachokomeshwa kwanza (Ctrl+Shift+K)",
   "Retry": "Jaribu tena",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "Hali ya majaribio: ukomeshaji otomatiki unarekodiwa tu. Kitufe cha dharura hufanya kazi kila wakati.",
   "Run RustWTM as administrator to change the kill list.": "Endesha RustWTM kama msimamizi ili kubadilisha orodha ya kukomesha.",

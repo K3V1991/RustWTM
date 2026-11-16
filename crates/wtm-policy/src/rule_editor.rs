@@ -85,6 +85,11 @@ pub fn set(text: &str, rule: &Rule) -> Result<String, String> {
 }
 pub fn remove(text: &str, name: &str) -> Result<String, String> {
     let mut doc: DocumentMut = text.parse().map_err(|e| format!("{e}"))?;
+    // An inline `rule = [...]` cannot be edited here: say so rather than
+    // report a removal that did not happen.
+    if doc.get("rule").is_some_and(|i| !i.is_array_of_tables()) {
+        return Err("rule must be an array of tables".into());
+    }
     if let Some(list) = doc.get_mut("rule").and_then(Item::as_array_of_tables_mut) {
         list.retain(|t| t.get("name").and_then(Item::as_str) != Some(name));
     }
@@ -100,6 +105,16 @@ pub fn destructive(rule: &Rule) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn removing_from_an_inline_rule_list_is_refused() {
+        let text =
+            "rule = [{ name = \"r\", actions = [\"eco_qos\"], match = { name = \"a.exe\" } }]
+";
+        // Written by hand as an inline array: valid, but not editable here.
+        assert_eq!(Config::from_toml(text).unwrap().rules.len(), 1);
+        assert!(remove(text, "r").is_err(), "nothing removed, so say so");
+    }
+
     #[test]
     fn rule_edits_validate_and_preserve_unrelated_configuration() {
         let original = "# user notes\ndry_run = true # preserve\n";

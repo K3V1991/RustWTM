@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "Magdagdag ng program sa tab na Kill list, o i-right click ang isang proseso → Idagdag sa kill list….",
   "Kill-list entry": "Entry sa kill list",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "Mga program na puwedeng tapusin. Kapag may threshold ng CPU, kusang tatapusin ng service ang mga ito kapag patuloy silang gumagamit nang ganoon kalaki at hindi bumabawi; tinatapos ng panic button ang lahat ng nakalista rito nang sabay-sabay.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "Ipinapakita muna kung ano ang tatapusin (Ctrl+Shift+K kahit saan)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "Ipinapakita muna kung ano ang tatapusin (Ctrl+Shift+K)",
   "Retry": "Subukang muli",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "Dry-run mode: itinatala lang ang mga awtomatikong pagtapos. Laging gumagana ang panic button.",
   "Run RustWTM as administrator to change the kill list.": "Patakbuhin ang RustWTM bilang administrator para baguhin ang kill list.",

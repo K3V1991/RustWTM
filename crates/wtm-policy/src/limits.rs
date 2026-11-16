@@ -313,6 +313,10 @@ pub fn remove_app_limit(text: &str, name: &str, scope: LimitScope) -> Result<Str
         LimitScope::Each => "each",
     };
     let lower = name.to_lowercase();
+    // An inline `limit = [...]` cannot be edited here (see remove_kill_entry).
+    if doc.get("limit").is_some_and(|i| !i.is_array_of_tables()) {
+        return Err("`limit` must be an array of tables ([[limit]])".into());
+    }
     if let Some(limits) = doc
         .get_mut("limit")
         .and_then(|i| i.as_array_of_tables_mut())

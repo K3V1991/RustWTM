@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "முடிக்கும் பட்டியல் தாவலில் நிரல்களைச் சேர்க்கவும், அல்லது ஒரு செயல்முறையை வலது கிளிக் செய்து → முடிக்கும் பட்டியலில் சேர்…",
   "Kill-list entry": "முடிக்கும் பட்டியல் உள்ளீடு",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "முடிக்கக்கூடிய நிரல்கள். CPU வரம்புடன் இருந்தால், அவை தொடர்ந்து அவ்வளவு பயன்படுத்தி மீளாதபோது சேவை தானாகவே அவற்றை முடிக்கும்; அவசரப் பொத்தான் இங்கே உள்ள அனைத்தையும் ஒரே நேரத்தில் முடிக்கும்.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "முதலில் எது முடிக்கப்படும் என்பதைக் காட்டுகிறது (எங்கிருந்தும் Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "முதலில் எது முடிக்கப்படும் என்பதைக் காட்டுகிறது (Ctrl+Shift+K)",
   "Retry": "மீண்டும் முயல்",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "ஒத்திகை பயன்முறை: தானியங்கு முடிப்புகள் பதிவு மட்டுமே செய்யப்படும். அவசரப் பொத்தான் எப்போதும் செயல்படும்.",
   "Run RustWTM as administrator to change the kill list.": "முடிக்கும் பட்டியலை மாற்ற RustWTM ஐ நிர்வாகியாக இயக்கவும்.",

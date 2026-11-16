@@ -538,11 +538,18 @@ impl State {
     /// "Show hidden devices (2)" while some are hidden, and the summary
     /// view switch.
     fn rail_footer(&mut self, ui: &mut Ui) {
-        if !self.hidden.is_empty()
+        // Devices present now: one hidden while plugged in elsewhere (a USB
+        // drive, a docked adapter) stays hidden but is not counted here.
+        let shown_hidden = self
+            .hidden
+            .iter()
+            .filter(|k| self.keys.iter().any(|(_, v)| v == *k))
+            .count();
+        if shown_hidden > 0
             && ui
                 .small_button(crate::i18n::format(
                     "Show hidden devices ({0})",
-                    &[self.hidden.len().to_string()],
+                    &[shown_hidden.to_string()],
                 ))
                 .clicked()
         {

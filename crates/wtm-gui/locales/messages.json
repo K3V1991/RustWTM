@@ -1097,8 +1097,8 @@
     "fr": "Programmes pouvant être arrêtés. Le service les termine si le seuil CPU reste dépassé ; l'urgence termine toute la liste.",
     "es": "Programas que se pueden finalizar. El servicio actúa si se mantiene el exceso de CPU; la emergencia finaliza toda la lista."
   },
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": {
-    "tr": "Önce sonlanacakları gösterir (her yerden Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": {
+    "tr": "Önce sonlanacakları gösterir (Ctrl+Shift+K)",
     "de": "Zeigt zuerst die betroffenen Prozesse (Strg+Umschalt+K)",
     "fr": "Affiche d'abord les processus concernés (Ctrl+Maj+K)",
     "es": "Muestra primero los procesos afectados (Ctrl+Mayús+K)"

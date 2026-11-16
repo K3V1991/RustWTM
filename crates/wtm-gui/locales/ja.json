@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "[強制終了リスト] タブでプログラムを追加するか、プロセスを右クリック → [強制終了リストに追加…] を選択します。",
   "Kill-list entry": "強制終了リストの項目",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "終了してよいプログラムです。CPU のしきい値を設定すると、その使用率が続いて回復しない場合にサービスが自動で終了します。緊急停止ボタンはここにあるすべてを一度に終了します。",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "終了される対象を先に表示します (どこからでも Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "終了される対象を先に表示します (Ctrl+Shift+K)",
   "Retry": "再試行",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "ドライラン モード: 自動終了はログに記録されるだけです。緊急停止ボタンは常に機能します。",
   "Run RustWTM as administrator to change the kill list.": "強制終了リストを変更するには、RustWTM を管理者として実行してください。",

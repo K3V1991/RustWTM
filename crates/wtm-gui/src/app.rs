@@ -1677,6 +1677,7 @@ impl eframe::App for App {
         if let Some(destination) = state.experience.overlays(&ctx) {
             use crate::experience::Destination;
             match destination {
+                Destination::Overview => state.tab = Tab::Overview,
                 Destination::Hardware => {
                     state.tab = Tab::Hardware;
                     state.hardware_devices = true;
@@ -2082,7 +2083,10 @@ impl eframe::App for App {
             Tab::Sensors => Some((Panel::Sensors, Duration::from_secs(2))),
             Tab::Users => Some((Panel::Users, Duration::from_secs(5))),
             Tab::Network | Tab::Ports => Some((Panel::Network, Duration::from_secs(2))),
-            Tab::Disks => Some((Panel::DiskActivity, Duration::from_secs(2))),
+            // Only the drives overview shows it; asking for it during an
+            // analysis or on File owners kept the window's disk trace running.
+            Tab::Disks => (!state.disks_locks && !state.disks.analysis_open())
+                .then_some((Panel::DiskActivity, Duration::from_secs(2))),
             Tab::Services => Some((Panel::Services, Duration::from_secs(5))),
             Tab::History => None,
             Tab::Startup => Some((Panel::Startup, Duration::from_secs(10))),
@@ -6552,6 +6556,13 @@ mod tests {
             h.query_by_role_and_label(Role::Button, "Disk 1 (D: E:) performance view")
                 .is_none()
         );
+        // A device hidden earlier and not plugged in now is not counted.
+        h.state_mut()
+            .state
+            .performance
+            .hidden
+            .push("disk:a-drive-not-plugged-in".into());
+        h.run_steps(2);
         h.get_by_label("Show hidden devices (1)").click();
         h.run_steps(3);
         assert!(
@@ -7857,6 +7868,44 @@ mod tests {
         [[kill]]\nname = \"alpha.exe\"\ncmdline = \"vitest\"\ncpu_above = 50.0\nfor_secs = 60\n\
         [[kill]]\nname = \"beta.exe\"\ncmdline = \"never\"\n";
 
+    #[test]
+    fn the_welcome_guide_continues_to_the_overview() {
+        // Opened again from Settings, as its button there does.
+        let (mut h, _rx) = kill_app(Tab::Settings);
+        h.state_mut().state.experience.guide = true;
+        h.run_steps(2);
+        h.get_by_label("Continue to overview").click();
+        h.run_steps(2);
+        assert_eq!(h.state().state.tab, Tab::Overview);
+        assert!(!h.state().state.experience.guide);
+    }
+
+    #[test]
+    fn disk_activity_is_asked_for_only_where_it_is_shown() {
+        let (mut h, rx) = kill_app(Tab::Disks);
+        let asked = |h: &mut Harness<'_, App>| {
+            // Past the two-second refresh, so a new request would be due.
+            h.state_mut().state.last_load.clear();
+            h.run_steps(2);
+            // All of them: an earlier frame may have sent it twice.
+            let sent: Vec<String> = rx.try_iter().map(describe_command).collect();
+            sent.iter().any(|c| c == "load DiskActivity")
+        };
+        assert!(asked(&mut h), "the drives overview shows it");
+        h.state_mut().state.disks_locks = true;
+        assert!(!asked(&mut h), "File owners does not");
+        h.state_mut().state.disks_locks = false;
+        h.state_mut().state.disks.start(
+            &egui::Context::default(),
+            std::path::Path::new(
+                r"Z:
+o-such-folder",
+            ),
+        );
+        assert!(h.state().state.disks.analysis_open());
+        assert!(!asked(&mut h), "an analysis does not");
+    }
+
     fn kill_app(tab: Tab) -> (Harness<'static, App>, std::sync::mpsc::Receiver<UiCommand>) {
         let mut d = data();
         d.mode = Mode::Service {
@@ -8230,6 +8279,18 @@ mod tests {
         h.get_by_label("Turn it on").click();
         let s = sent(&mut h);
         assert!(s.iter().any(|c| c.starts_with("save config")), "{s:?}");
+        // Not from an invalid file: the button says why instead of doing
+        // nothing.
+        let valid = h.state().backend.data().config.clone();
+        h.state().backend.data().config =
+            Some(Ok(("config.toml".into(), "dry_run = maybe".into())));
+        h.run_steps(2);
+        {
+            use egui_kittest::kittest::NodeT;
+            assert!(h.get_by_label("Turn it on").accesskit_node().is_disabled());
+        }
+        h.state().backend.data().config = valid;
+        h.run_steps(2);
 
         h.get_by_label("Snooze for 1 hour").click();
         assert_eq!(sent(&mut h), ["close alert 3600"]);

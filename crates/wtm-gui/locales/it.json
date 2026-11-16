@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "Aggiungi programmi nella scheda Elenco di terminazione oppure fai clic con il pulsante destro su un processo → Aggiungi all'elenco di terminazione….",
   "Kill-list entry": "Voce dell'elenco di terminazione",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "Programmi che possono essere terminati. Con una soglia CPU il servizio li termina da solo quando continuano a usarne così tanta senza riprendersi; il pulsante di emergenza termina subito tutto ciò che è elencato qui.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "Mostra prima cosa verrà terminato (Ctrl+Maiusc+K da qualsiasi punto)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "Mostra prima cosa verrà terminato (Ctrl+Maiusc+K)",
   "Retry": "Riprova",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "Modalità simulazione: le terminazioni automatiche vengono solo registrate. Il pulsante di emergenza funziona sempre.",
   "Run RustWTM as administrator to change the kill list.": "Esegui RustWTM come amministratore per modificare l'elenco di terminazione.",

@@ -1575,6 +1575,12 @@ impl Worker {
                 if updating(&data) {
                     return;
                 }
+                // A release already found stays offered if this check fails:
+                // being offline for the twice-daily recheck must not hide it.
+                let known = match &data.lock().unwrap_or_else(PoisonError::into_inner).update {
+                    UpdateState::Available(r) => Some(r.clone()),
+                    _ => None,
+                };
                 set_update(&data, UpdateState::Checking);
                 std::thread::spawn(move || {
                     let state = match latest() {
@@ -1582,7 +1588,7 @@ impl Worker {
                             UpdateState::Available(r)
                         }
                         Ok(_) => UpdateState::UpToDate,
-                        Err(e) => UpdateState::Failed(e),
+                        Err(e) => known.map_or(UpdateState::Failed(e), UpdateState::Available),
                     };
                     finish_check(&data, state);
                     ctx.request_repaint();
@@ -3443,6 +3449,14 @@ mod tests {
         w.updater.latest = || Err("offline".into());
         w.handle(UiCommand::CheckUpdate);
         assert_eq!(settled(&w), UpdateState::Failed("offline".into()));
+        // A release already found stays offered when a later check fails:
+        // the twice-daily recheck must not hide it for being offline.
+        w.updater.latest = || Ok(release(99));
+        w.handle(UiCommand::CheckUpdate);
+        assert_eq!(settled(&w), UpdateState::Available(release(99)));
+        w.updater.latest = || Err("offline".into());
+        w.handle(UiCommand::CheckUpdate);
+        assert_eq!(settled(&w), UpdateState::Available(release(99)));
 
         // A failed download is shown and nothing is installed.
         w.updater.download = |_, _| Err("checksum mismatch".into());

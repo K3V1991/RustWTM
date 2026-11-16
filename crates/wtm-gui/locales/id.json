@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "Tambahkan program di tab Daftar penghentian, atau klik kanan proses → Tambahkan ke daftar penghentian….",
   "Kill-list entry": "Entri daftar penghentian",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "Program yang boleh diakhiri. Dengan ambang CPU, layanan mengakhirinya sendiri jika program terus memakai sebanyak itu dan tidak pulih; tombol darurat mengakhiri semua yang tercantum di sini sekaligus.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "Menampilkan dulu apa yang akan diakhiri (Ctrl+Shift+K dari mana saja)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "Menampilkan dulu apa yang akan diakhiri (Ctrl+Shift+K)",
   "Retry": "Coba lagi",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "Mode simulasi: pengakhiran otomatis hanya dicatat. Tombol darurat selalu berfungsi.",
   "Run RustWTM as administrator to change the kill list.": "Jalankan RustWTM sebagai administrator untuk mengubah daftar penghentian.",

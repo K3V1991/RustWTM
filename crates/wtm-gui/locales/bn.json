@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "বন্ধের তালিকা ট্যাবে প্রোগ্রাম যোগ করুন, অথবা একটি প্রসেসে রাইট-ক্লিক করুন → বন্ধের তালিকায় যোগ করুন….",
   "Kill-list entry": "বন্ধের তালিকার এন্ট্রি",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "যে প্রোগ্রামগুলো শেষ করা যেতে পারে। CPU সীমা দেওয়া থাকলে, প্রোগ্রামগুলো সেই পরিমাণ ব্যবহার চালিয়ে গেলে এবং স্বাভাবিক না হলে সার্ভিস নিজেই সেগুলো শেষ করে; প্যানিক বোতাম এখানে তালিকাভুক্ত সবকিছু একসাথে শেষ করে।",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "প্রথমে কী শেষ হবে তা দেখায় (যেকোনো জায়গা থেকে Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "প্রথমে কী শেষ হবে তা দেখায় (Ctrl+Shift+K)",
   "Retry": "আবার চেষ্টা করুন",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "ড্রাই-রান মোড: স্বয়ংক্রিয় সমাপ্তি শুধু লগ করা হয়। প্যানিক বোতাম সবসময় কাজ করে।",
   "Run RustWTM as administrator to change the kill list.": "বন্ধের তালিকা পরিবর্তন করতে RustWTM অ্যাডমিনিস্ট্রেটর হিসেবে চালান।",

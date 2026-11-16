@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "ముగింపు జాబితా ట్యాబ్‌లో ప్రోగ్రామ్‌లను జోడించండి, లేదా ఒక ప్రాసెస్‌పై కుడి-క్లిక్ చేయండి → ముగింపు జాబితాకు జోడించు….",
   "Kill-list entry": "ముగింపు జాబితా ఎంట్రీ",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "ముగించబడే ప్రోగ్రామ్‌లు. CPU థ్రెషోల్డ్ ఉంటే, అవి అంత వినియోగాన్ని కొనసాగించి కోలుకోకపోతే సేవ వాటిని స్వయంగా ముగిస్తుంది; అత్యవసర బటన్ ఇక్కడ జాబితా చేసిన అన్నింటినీ ఒకేసారి ముగిస్తుంది.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "మొదట ఏవి ముగించబడతాయో చూపుతుంది (ఎక్కడి నుండైనా Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "మొదట ఏవి ముగించబడతాయో చూపుతుంది (Ctrl+Shift+K)",
   "Retry": "మళ్లీ ప్రయత్నించు",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "డ్రై-రన్ మోడ్: ఆటోమేటిక్ ముగింపులు లాగ్ మాత్రమే చేయబడతాయి. అత్యవసర బటన్ ఎల్లప్పుడూ పనిచేస్తుంది.",
   "Run RustWTM as administrator to change the kill list.": "ముగింపు జాబితాను మార్చడానికి RustWTMను నిర్వాహకుడిగా అమలు చేయండి.",

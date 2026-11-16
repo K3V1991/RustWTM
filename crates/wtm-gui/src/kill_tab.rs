@@ -281,7 +281,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
     if ui
         .add_enabled(!running.is_empty(), egui::Button::new(panic_text))
         .on_hover_text(crate::i18n::tr(
-            "Shows what will be ended first (Ctrl+Shift+K from anywhere)",
+            "Shows what will be ended first (Ctrl+Shift+K)",
         ))
         .clicked()
     {

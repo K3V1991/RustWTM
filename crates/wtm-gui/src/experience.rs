@@ -37,6 +37,7 @@ impl Default for Preferences {
 }
 #[derive(Clone, Copy)]
 pub enum Destination {
+    Overview,
     Hardware,
     Applications,
     Rules,
@@ -265,7 +266,7 @@ impl View {
    for (title,description,target) in [("Explore devices","Inspect device identity, health and recent readings.",Destination::Hardware),("Manage applications","Review installed apps and choose package updates.",Destination::Applications),("Build a protection rule","Preview the matching programs before saving a policy.",Destination::Rules),("Review recorded activity","Inspect resource history and recorded protection actions.",Destination::History)]{
     crate::theme::panel(ui,|ui|{if ui.button(crate::i18n::tr(title)).clicked(){destination=Some(target);close=true;}ui.weak(crate::i18n::tr(description));});
    }
-   ui.weak(crate::i18n::tr("Start in monitoring mode. Changes and installers require your explicit review."));close|=ui.button(crate::i18n::tr("Continue to overview")).clicked();
+   ui.weak(crate::i18n::tr("Start in monitoring mode. Changes and installers require your explicit review."));if ui.button(crate::i18n::tr("Continue to overview")).clicked(){destination=Some(Destination::Overview);close=true;}
   });
             if close || modal.should_close() {
                 self.guide = false;

@@ -342,13 +342,25 @@ pub fn dialog(
                     ui.horizontal(|ui| {
                         ui.label(crate::i18n::tr("Automatic protection is off."));
                         let admin = matches!(data.mode, Mode::Service { admin: true, .. });
+                        // An invalid file (the service then runs on its
+                        // defaults) cannot be switched from here; say so
+                        // rather than let the click do nothing.
+                        let new = crate::settings::set_dry_run(text, false);
                         if ui
-                            .add_enabled(admin, egui::Button::new(crate::i18n::tr("Turn it on")))
+                            .add_enabled(
+                                admin && new.is_some(),
+                                egui::Button::new(crate::i18n::tr("Turn it on")),
+                            )
                             .on_hover_text(crate::i18n::tr(
                                 "RustWTM then steps in by itself next time",
                             ))
+                            .on_disabled_hover_text(if new.is_none() {
+                                crate::i18n::tr("Fix the errors in config.toml to use this form.")
+                            } else {
+                                ""
+                            })
                             .clicked()
-                            && let Some(new) = crate::settings::set_dry_run(text, false)
+                            && let Some(new) = new
                         {
                             commands.push(UiCommand::save_config(text, new));
                         }

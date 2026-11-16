@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "Thêm chương trình trong tab Danh sách kết thúc, hoặc bấm chuột phải vào tiến trình → Thêm vào danh sách kết thúc….",
   "Kill-list entry": "Mục danh sách kết thúc",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "Các chương trình có thể bị kết thúc. Khi có ngưỡng CPU, dịch vụ sẽ tự kết thúc chúng nếu chúng liên tục dùng mức đó và không hồi phục; nút khẩn cấp kết thúc mọi mục trong danh sách này cùng lúc.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "Hiện trước những gì sẽ bị kết thúc (Ctrl+Shift+K từ bất kỳ đâu)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "Hiện trước những gì sẽ bị kết thúc (Ctrl+Shift+K)",
   "Retry": "Thử lại",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "Chế độ chạy thử: các lần kết thúc tự động chỉ được ghi nhật ký. Nút khẩn cấp luôn hoạt động.",
   "Run RustWTM as administrator to change the kill list.": "Chạy RustWTM với tư cách quản trị viên để thay đổi danh sách kết thúc.",

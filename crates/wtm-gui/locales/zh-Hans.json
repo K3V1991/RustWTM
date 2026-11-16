@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "在“结束列表”选项卡中添加程序，或右键单击进程 → 添加到结束列表…。",
   "Kill-list entry": "结束列表条目",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "可被结束的程序。设置 CPU 阈值后，如果程序持续占用该比例且未恢复，服务会自动将其结束；紧急按钮会立即结束此处列出的所有程序。",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "先显示将要结束的内容（在任意位置按 Ctrl+Shift+K）",
+  "Shows what will be ended first (Ctrl+Shift+K)": "先显示将要结束的内容（Ctrl+Shift+K）",
   "Retry": "重试",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "试运行模式：自动结束操作仅记录到日志。紧急按钮始终有效。",
   "Run RustWTM as administrator to change the kill list.": "以管理员身份运行 RustWTM 才能更改结束列表。",

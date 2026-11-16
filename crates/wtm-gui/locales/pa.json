@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "ਬੰਦ-ਸੂਚੀ ਟੈਬ ਵਿੱਚ ਪ੍ਰੋਗਰਾਮ ਜੋੜੋ, ਜਾਂ ਕਿਸੇ ਪ੍ਰੋਸੈਸ 'ਤੇ ਸੱਜਾ-ਕਲਿੱਕ ਕਰੋ → ਬੰਦ-ਸੂਚੀ ਵਿੱਚ ਜੋੜੋ…।",
   "Kill-list entry": "ਬੰਦ-ਸੂਚੀ ਐਂਟਰੀ",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "ਉਹ ਪ੍ਰੋਗਰਾਮ ਜਿਨ੍ਹਾਂ ਨੂੰ ਸਮਾਪਤ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ। CPU ਹੱਦ ਨਾਲ, ਜਦੋਂ ਉਹ ਲਗਾਤਾਰ ਇੰਨਾ ਵਰਤਦੇ ਰਹਿਣ ਅਤੇ ਠੀਕ ਨਾ ਹੋਣ ਤਾਂ ਸੇਵਾ ਉਹਨਾਂ ਨੂੰ ਆਪੇ ਸਮਾਪਤ ਕਰ ਦਿੰਦੀ ਹੈ; ਐਮਰਜੈਂਸੀ ਬਟਨ ਇੱਥੇ ਸੂਚੀਬੱਧ ਸਭ ਕੁਝ ਇੱਕੋ ਵਾਰ ਸਮਾਪਤ ਕਰ ਦਿੰਦਾ ਹੈ।",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "ਦਿਖਾਉਂਦਾ ਹੈ ਕਿ ਪਹਿਲਾਂ ਕੀ ਸਮਾਪਤ ਹੋਵੇਗਾ (ਕਿਤੋਂ ਵੀ Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "ਦਿਖਾਉਂਦਾ ਹੈ ਕਿ ਪਹਿਲਾਂ ਕੀ ਸਮਾਪਤ ਹੋਵੇਗਾ (Ctrl+Shift+K)",
   "Retry": "ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "ਡ੍ਰਾਈ-ਰਨ ਮੋਡ: ਆਟੋਮੈਟਿਕ ਸਮਾਪਤੀਆਂ ਸਿਰਫ਼ ਲੌਗ ਹੁੰਦੀਆਂ ਹਨ। ਐਮਰਜੈਂਸੀ ਬਟਨ ਹਮੇਸ਼ਾ ਕੰਮ ਕਰਦਾ ਹੈ।",
   "Run RustWTM as administrator to change the kill list.": "ਬੰਦ-ਸੂਚੀ ਬਦਲਣ ਲਈ RustWTM ਨੂੰ ਪ੍ਰਬੰਧਕ ਵਜੋਂ ਚਲਾਓ।",

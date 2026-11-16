@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "Додайте програми на вкладці «Список завершення» або клацніть процес правою кнопкою → Додати до списку завершення….",
   "Kill-list entry": "Запис списку завершення",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "Програми, які можна завершити. Якщо задано поріг CPU, служба сама завершує їх, коли вони стабільно використовують стільки ресурсу й не відновлюються; аварійна кнопка одразу завершує все, що тут перелічено.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "Спершу показує, що буде завершено (Ctrl+Shift+K звідусіль)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "Спершу показує, що буде завершено (Ctrl+Shift+K)",
   "Retry": "Повторити",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "Пробний режим: автоматичні завершення лише записуються в журнал. Аварійна кнопка працює завжди.",
   "Run RustWTM as administrator to change the kill list.": "Запустіть RustWTM від імені адміністратора, щоб змінити список завершення.",

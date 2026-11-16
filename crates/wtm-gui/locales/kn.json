@@ -182,7 +182,7 @@
   "Add programs in the Kill list tab, or right-click a process → Add to kill list….": "ಕೊನೆಗೊಳಿಸುವ ಪಟ್ಟಿ ಟ್ಯಾಬ್‌ನಲ್ಲಿ ಪ್ರೋಗ್ರಾಂಗಳನ್ನು ಸೇರಿಸಿ, ಅಥವಾ ಪ್ರಾಸೆಸ್ ಮೇಲೆ ರೈಟ್-ಕ್ಲಿಕ್ ಮಾಡಿ → ಕೊನೆಗೊಳಿಸುವ ಪಟ್ಟಿಗೆ ಸೇರಿಸಿ….",
   "Kill-list entry": "ಕೊನೆಗೊಳಿಸುವ ಪಟ್ಟಿಯ ನಮೂದು",
   "Programs that may be ended. With a CPU threshold the service ends them by itself once they keep using that much and do not recover; the panic button ends everything listed here at once.": "ಕೊನೆಗೊಳಿಸಬಹುದಾದ ಪ್ರೋಗ್ರಾಂಗಳು. CPU ಮಿತಿ ಇದ್ದರೆ, ಅವು ಅಷ್ಟು ಬಳಸುತ್ತಲೇ ಇದ್ದು ಚೇತರಿಸಿಕೊಳ್ಳದಿದ್ದಾಗ ಸೇವೆ ಸ್ವತಃ ಅವನ್ನು ಕೊನೆಗೊಳಿಸುತ್ತದೆ; ತುರ್ತು ಬಟನ್ ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡಿದ ಎಲ್ಲವನ್ನೂ ಒಮ್ಮೆಗೇ ಕೊನೆಗೊಳಿಸುತ್ತದೆ.",
-  "Shows what will be ended first (Ctrl+Shift+K from anywhere)": "ಮೊದಲು ಏನನ್ನು ಕೊನೆಗೊಳಿಸಲಾಗುವುದು ಎಂದು ತೋರಿಸುತ್ತದೆ (ಎಲ್ಲಿಂದಲಾದರೂ Ctrl+Shift+K)",
+  "Shows what will be ended first (Ctrl+Shift+K)": "ಮೊದಲು ಏನನ್ನು ಕೊನೆಗೊಳಿಸಲಾಗುವುದು ಎಂದು ತೋರಿಸುತ್ತದೆ (Ctrl+Shift+K)",
   "Retry": "ಮರುಪ್ರಯತ್ನಿಸಿ",
   "Dry-run mode: automatic ends are only logged. The panic button always works.": "ಡ್ರೈ-ರನ್ ಮೋಡ್: ಸ್ವಯಂಚಾಲಿತ ಕೊನೆಗೊಳಿಸುವಿಕೆಗಳನ್ನು ಲಾಗ್ ಮಾತ್ರ ಮಾಡಲಾಗುತ್ತದೆ. ತುರ್ತು ಬಟನ್ ಯಾವಾಗಲೂ ಕೆಲಸ ಮಾಡುತ್ತದೆ.",
   "Run RustWTM as administrator to change the kill list.": "ಕೊನೆಗೊಳಿಸುವ ಪಟ್ಟಿಯನ್ನು ಬದಲಾಯಿಸಲು RustWTM ಅನ್ನು ನಿರ್ವಾಹಕರಾಗಿ ಚಲಾಯಿಸಿ.",
