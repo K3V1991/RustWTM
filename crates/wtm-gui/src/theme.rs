@@ -157,6 +157,8 @@ pub mod icon {
     pub const MEMORY: char = '\u{EEA0}';
     pub const GAME: char = '\u{E7FC}';
     pub const KEYBOARD: char = '\u{E765}';
+    pub const EDIT: char = '\u{E70F}';
+    pub const DELETE: char = '\u{E74D}';
 }
 
 /// A small button showing `glyph` from the Windows icon font, named and

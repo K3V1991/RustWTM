@@ -346,15 +346,13 @@ egui::Grid::new("app_limits_grid")
                 usage_cell(ui, cores, r.cpu_fill);
                 usage_cell(ui, format_bytes(r.mem as f64), r.mem_fill);
                 ui.horizontal(|ui| {
-                    if ui
-                        .add_enabled(admin, egui::Button::new(crate::i18n::tr("Edit")))
-                        .clicked()
+                    if crate::theme::icon_button(ui, admin, crate::theme::icon::EDIT, crate::i18n::tr("Edit"))
+.clicked()
                     {
                         view.edit(l);
                     }
-                    if ui
-                        .add_enabled(admin, egui::Button::new(crate::i18n::tr("Remove")))
-                        .clicked()
+                    if crate::theme::icon_button(ui, admin, crate::theme::icon::DELETE, crate::i18n::tr("Remove"))
+.clicked()
                     {
                             match remove_app_limit(text, &l.name, l.scope) {
                                 Ok(new) => commands.push(UiCommand::SaveConfig(new)),
