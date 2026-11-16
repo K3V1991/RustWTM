@@ -156,6 +156,7 @@ pub mod icon {
     pub const SPEED: char = '\u{EC4A}';
     pub const MEMORY: char = '\u{EEA0}';
     pub const GAME: char = '\u{E7FC}';
+    pub const KEYBOARD: char = '\u{E765}';
 }
 
 /// A small button showing `glyph` from the Windows icon font, named and
@@ -625,6 +626,15 @@ pub fn chip_fill(dark: bool) -> Color32 {
 /// Primary actions share a deliberate brand treatment; utility controls stay neutral.
 pub fn primary_action(ui: &mut Ui, enabled: bool, label: &str) -> egui::Response {
     ui.scope(|ui| {
+        // Disabled, it is an ordinary disabled button: egui fades a disabled
+        // widget, and faded brand orange left white text on pale salmon,
+        // barely readable in the light theme.
+        if !enabled {
+            return ui.add_enabled(
+                false,
+                egui::Button::new(RichText::new(label).strong()).min_size(egui::vec2(104.0, 28.0)),
+            );
+        }
         let visuals = ui.visuals_mut();
         for (widget, fill) in [
             (
@@ -1143,9 +1153,17 @@ pub fn more_below<R>(
         egui::FontId::proportional(13.0),
         Color32::WHITE,
     );
-    let size = galley.size() + egui::vec2(10.0, 0.0);
+    // A rounded pill a little above the edge, with room on both sides of
+    // the chevron and the text.
+    const PAD: f32 = 10.0;
+    const CHEVRON: f32 = 8.0;
+    const GAP: f32 = 6.0;
+    let size = egui::vec2(
+        PAD + CHEVRON + GAP + galley.size().x + PAD,
+        galley.size().y + 6.0,
+    );
     let rect = Rect::from_center_size(
-        egui::pos2(view.center().x, view.bottom() - size.y / 2.0),
+        egui::pos2(view.center().x, view.bottom() - 6.0 - size.y / 2.0),
         size,
     );
     let response = ui
@@ -1157,9 +1175,9 @@ pub fn more_below<R>(
     } else {
         ACCENT
     };
-    painter.rect_filled(rect, 0.0, color);
+    painter.rect_filled(rect, size.y / 2.0, color);
     // A chevron pointing down, then the text.
-    let c = egui::pos2(rect.left() + 5.0, rect.center().y);
+    let c = egui::pos2(rect.left() + PAD + CHEVRON / 2.0, rect.center().y);
     painter.add(Shape::line(
         vec![
             c + egui::vec2(-4.0, -2.0),
@@ -1169,7 +1187,10 @@ pub fn more_below<R>(
         Stroke::new(1.6, Color32::WHITE),
     ));
     painter.galley(
-        egui::pos2(rect.left() + 10.0, rect.center().y - galley.size().y / 2.0),
+        egui::pos2(
+            rect.left() + PAD + CHEVRON + GAP,
+            rect.center().y - galley.size().y / 2.0,
+        ),
         galley,
         Color32::WHITE,
     );

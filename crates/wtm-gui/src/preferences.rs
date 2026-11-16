@@ -1,4 +1,5 @@
 //! Local display preferences. These controls never send service commands.
+use crate::i18n::PercentAffix;
 use eframe::egui::{self, Ui};
 
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -78,7 +79,7 @@ pub fn appearance(ui: &mut Ui, display: &mut Display, nav: &mut Option<bool>) {
         crate::i18n::tr("Interface scale"),
         "",
         |ui| {
-            ui.add(egui::Slider::new(&mut display.scale, 75..=150).suffix("%"))
+            ui.add(egui::Slider::new(&mut display.scale, 75..=150).percent_affix())
                 .on_hover_text(crate::i18n::tr("Interface scale"));
         },
     );

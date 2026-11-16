@@ -103,7 +103,7 @@ pub fn users(ui: &mut Ui, data: &Data) -> Option<(u32, String, crate::backend::S
                 }
                 row.col(|ui| {
                     crate::theme::table_cell(ui, |ui| {
-                        ui.weak(crate::i18n::tr("Actions"));
+                        ui.label(crate::i18n::tr("Actions"));
                     })
                 });
             })
@@ -353,7 +353,7 @@ pub fn network(
             ui,
             egui::Id::unique(("search", "network")),
             filter,
-            crate::i18n::tr("process, address or port"),
+            crate::i18n::tr("Process, address or port"),
             240.0,
         );
         let mut kind = ConnectionKind::load(ui);
@@ -645,7 +645,7 @@ pub fn services(
             ui,
             egui::Id::unique(("search", "services")),
             filter,
-            crate::i18n::tr("name, description or PID"),
+            crate::i18n::tr("Name, description or PID"),
             240.0,
         );
         for (value, label) in [(0, "All services"), (1, "Running"), (2, "Stopped")] {

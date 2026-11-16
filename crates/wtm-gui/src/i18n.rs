@@ -476,6 +476,36 @@ pub fn percent(number: impl Into<String>) -> String {
     format("{0}%", &[number.into()])
 }
 
+/// The text before and after a percentage, from the same "{0}%" template as
+/// [`percent`]: Turkish writes %42, so its sign goes before the number.
+pub fn percent_affixes() -> (String, String) {
+    let text = tr("{0}%");
+    match text.split_once("{0}") {
+        Some((before, after)) => (before.to_owned(), after.to_owned()),
+        None => (String::new(), "%".to_owned()),
+    }
+}
+
+/// Puts the percent sign where the language writes it on a slider or a
+/// number field.
+pub trait PercentAffix {
+    fn percent_affix(self) -> Self;
+}
+
+impl PercentAffix for eframe::egui::Slider<'_> {
+    fn percent_affix(self) -> Self {
+        let (before, after) = percent_affixes();
+        self.prefix(before).suffix(after)
+    }
+}
+
+impl PercentAffix for eframe::egui::DragValue<'_> {
+    fn percent_affix(self) -> Self {
+        let (before, after) = percent_affixes();
+        self.prefix(before).suffix(after)
+    }
+}
+
 pub fn format(english: &str, values: &[String]) -> String {
     let text = tr(english);
     let mut result =
@@ -735,9 +765,16 @@ mod tests {
             let _language = scope(Language::German);
             assert_eq!(percent("12.5"), "12.5%");
         }
-        // Turkish puts the sign first.
+        // Turkish puts the sign first, on sliders too.
         let _language = scope(Language::Turkish);
         assert_eq!(percent("42"), "%42");
+        assert_eq!(percent_affixes(), ("%".to_owned(), String::new()));
+    }
+
+    #[test]
+    fn slider_percent_sign_follows_the_language() {
+        let _language = scope(Language::English);
+        assert_eq!(percent_affixes(), (String::new(), "%".to_owned()));
     }
 
     #[test]

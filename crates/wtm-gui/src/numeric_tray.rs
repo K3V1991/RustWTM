@@ -269,7 +269,7 @@ pub fn settings(ui: &mut Ui, prefs: &mut Preferences, data: &crate::backend::Dat
         crate::i18n::tr("Tray numbers refresh"),
         "",
         |ui, id| {
-            ui.add(egui::Slider::new(&mut prefs.seconds, 1..=30).suffix(" s"))
+            ui.add(egui::Slider::new(&mut prefs.seconds, 1..=30).suffix(crate::i18n::tr(" s")))
                 .labelled_by(id);
         },
     );

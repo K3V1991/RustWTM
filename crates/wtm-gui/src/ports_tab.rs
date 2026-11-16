@@ -487,7 +487,7 @@ fn listening_table(
             ui,
             egui::Id::unique("ports_search"),
             &mut view.search,
-            crate::i18n::tr("port, program or tool"),
+            crate::i18n::tr("Port, program or tool"),
             200.0,
         );
         ui.checkbox(&mut view.show_udp, crate::i18n::tr("Include UDP"));

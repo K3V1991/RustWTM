@@ -1,4 +1,5 @@
 //! Original visual policy workspace; preview executes only the pure policy engine.
+use crate::i18n::PercentAffix;
 use eframe::egui::{self, Ui};
 use wtm_policy::{Action, Condition, Config, Matcher, Preset, PriorityLevel, Rule};
 #[derive(Default)]
@@ -35,7 +36,7 @@ fn threshold(ui: &mut Ui, label: &str, value: &mut Option<f32>) {
             *value = enabled.then_some(20.0);
         }
         if let Some(value) = value {
-            ui.add(egui::Slider::new(value, 0.1..=100.0).suffix("%"))
+            ui.add(egui::Slider::new(value, 0.1..=100.0).percent_affix())
                 .labelled_by(label.id);
         }
     });
@@ -188,7 +189,7 @@ impl View {
                         ui.add(
                             egui::DragValue::new(&mut when.for_secs)
                                 .range(1..=86400)
-                                .suffix(" s"),
+                                .suffix(crate::i18n::tr(" s")),
                         )
                         .labelled_by(label.id);
                     });
@@ -200,7 +201,7 @@ impl View {
                         let label = ui.label(action.to_string());
                         match action {
                             Action::CpuCap(v) => {
-                                ui.add(egui::Slider::new(v, 0.1..=100.0).suffix("%"))
+                                ui.add(egui::Slider::new(v, 0.1..=100.0).percent_affix())
                                     .labelled_by(label.id);
                             }
                             Action::CpuCapRelative(v) => {

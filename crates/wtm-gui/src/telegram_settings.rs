@@ -6,6 +6,9 @@ use wtm_policy::{TelegramConfig, parse_chats, token_looks_valid};
 use crate::backend::{Data, Mode, Panel, UiCommand};
 use crate::theme::{BAD, GOOD, WARN, icon};
 
+/// The width of the token and chat ID fields.
+const FIELD_WIDTH: f32 = 300.0;
+
 #[derive(Debug, Default)]
 pub struct TelegramView {
     /// Being edited; `None` until the service's settings arrive.
@@ -120,7 +123,20 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
         );
         let show_token = &mut view.show_token;
         crate::theme::option_labelled(ui, icon::KEY, crate::i18n::tr("Bot token"), "", |ui, id| {
-            ui.add_sized([300.0, ui.spacing().interact_size.y],
+            // The field and its Show button together are as wide as the chat
+            // IDs field below, so both rows line up at both ends.
+            let eye_width = [crate::i18n::tr("Show"), crate::i18n::tr("Hide")]
+                .into_iter()
+                .map(|text| {
+                    egui::WidgetText::from(text)
+                        .into_galley(ui, Some(egui::TextWrapMode::Extend), f32::INFINITY, egui::TextStyle::Button)
+                        .size()
+                        .x
+                })
+                .fold(0.0, f32::max)
+                + 2.0 * ui.spacing().button_padding.x;
+            let height = ui.spacing().interact_size.y;
+            ui.add_sized([FIELD_WIDTH - eye_width - ui.spacing().item_spacing.x, height],
                 egui::TextEdit::singleline(&mut form.token)
                     .password(!*show_token)
                     .hint_text(crate::i18n::tr("123456789:ABC… from @BotFather"))
@@ -132,7 +148,7 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
                 crate::i18n::tr("Show")
             };
             if ui
-                .button(eye)
+                .add_sized([eye_width, height], egui::Button::new(eye))
                 .on_hover_text(crate::i18n::tr("Show or hide the token"))
                 .clicked()
             {
@@ -145,7 +161,7 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
             crate::i18n::tr("Allowed chat IDs"),
             crate::i18n::tr("Only these chats may use the bot; separate several with commas"),
             |ui, id| {
-                ui.add_sized([300.0, ui.spacing().interact_size.y],
+                ui.add_sized([FIELD_WIDTH, ui.spacing().interact_size.y],
                     egui::TextEdit::singleline(&mut view.chats)
                         .hint_text(crate::i18n::tr("e.g. 123456789, 987654321"))
                 )

@@ -1741,7 +1741,7 @@ impl ProcessView {
                 ui,
                 egui::Id::unique(SEARCH_ID),
                 &mut self.search,
-                crate::i18n::tr("name, PID, path or command line"),
+                crate::i18n::tr("Name, PID, path or command line"),
                 // Narrower below 800 points so the toolbar keeps to one row
                 // in longer languages (Turkish, German).
                 if ui.available_width() < 800.0 { 150.0 } else { 240.0 },

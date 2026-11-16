@@ -387,12 +387,28 @@ impl State {
                 ),
                 crate::i18n::tr("Headers and device details show current readings. Values below charts follow the selected sample."),
             ));
-            ui.label(
-                RichText::new(actual.map_or_else(|| "—".into(), timestamp))
-                    .small()
-                    .monospace()
-                    .weak(),
-            );
+            // A narrow window shows the time of day, which keeps the actions on
+            // this row; the date and offset are in the tooltip.
+            let full = actual.map_or_else(|| "—".into(), timestamp);
+            let text = |s: &str| RichText::new(s).small().monospace().weak();
+            let full_width = egui::WidgetText::from(text(&full))
+                .into_galley(ui, Some(egui::TextWrapMode::Extend), f32::INFINITY, egui::TextStyle::Body)
+                .size()
+                .x;
+            let actions_width = ui
+                .data(|d| d.get_temp::<f32>(ui.make_persistent_id("timeline-actions")))
+                .unwrap_or(0.0);
+            let left = ui.max_rect().right() - ui.cursor().left();
+            let shown = match full.split(' ').nth(1) {
+                Some(time) if left < full_width + actions_width + 3.0 * ui.spacing().item_spacing.x => {
+                    time.to_owned()
+                }
+                _ => full.clone(),
+            };
+            let stamp = ui.label(text(&shown));
+            if shown != full {
+                stamp.on_hover_text(full);
+            }
             if self.held_by_ctrl() {
                 ui.label(
                     egui::RichText::new(crate::i18n::tr("Paused while Ctrl is held"))

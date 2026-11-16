@@ -1,4 +1,5 @@
 //! A version-aware, transactional setup for local window preferences.
+use crate::i18n::PercentAffix;
 use crate::{
     experience,
     i18n::{self, Language},
@@ -294,7 +295,7 @@ fn body(ui: &mut Ui, session: &mut Session) {
                 });
             });
             theme::setting_row(ui, i18n::tr("Interface scale"), |ui, label| {
-                ui.add(egui::Slider::new(&mut d.display.scale, 75..=150).suffix("%"))
+                ui.add(egui::Slider::new(&mut d.display.scale, 75..=150).percent_affix())
                     .labelled_by(label);
             });
             theme::setting_row(ui, i18n::tr("Control and row height"), |ui, _| {
@@ -366,7 +367,7 @@ fn body(ui: &mut Ui, session: &mut Session) {
                 ("Tray window refresh", &mut d.experience.tray_seconds, 60),
             ] {
                 theme::setting_row(ui, i18n::tr(label), |ui, id| {
-                    ui.add(egui::Slider::new(value, 1..=max).suffix(" s"))
+                    ui.add(egui::Slider::new(value, 1..=max).suffix(crate::i18n::tr(" s")))
                         .labelled_by(id);
                 });
             }

@@ -1703,11 +1703,11 @@
     "fr": "Recherche :",
     "es": "Buscar:"
   },
-  "port, program or tool": {
-    "tr": "port, program veya araç",
+  "Port, program or tool": {
+    "tr": "Port, program veya araç",
     "de": "Port, Programm oder Tool",
-    "fr": "port, programme ou outil",
-    "es": "puerto, programa o herramienta"
+    "fr": "Port, programme ou outil",
+    "es": "Puerto, programa o herramienta"
   },
   "Include UDP": {
     "tr": "UDP dahil",
@@ -2897,11 +2897,11 @@
     "fr": "Ferme les programmes de l'utilisateur",
     "es": "Cierra los programas del usuario"
   },
-  "process, address or port": {
-    "tr": "işlem, adres veya port",
+  "Process, address or port": {
+    "tr": "İşlem, adres veya port",
     "de": "Prozess, Adresse oder Port",
-    "fr": "processus, adresse ou port",
-    "es": "proceso, dirección o puerto"
+    "fr": "Processus, adresse ou port",
+    "es": "Proceso, dirección o puerto"
   },
   "Local": {
     "tr": "Yerel",
@@ -6779,11 +6779,11 @@
     "fr": "Windows décide",
     "es": "Windows decide"
   },
-  "name, PID, path or command line": {
-    "tr": "ad, PID, yol veya komut satırı",
+  "Name, PID, path or command line": {
+    "tr": "Ad, PID, yol veya komut satırı",
     "de": "Name, PID, Pfad oder Befehlszeile",
-    "fr": "nom, PID, chemin ou ligne de commande",
-    "es": "nombre, PID, ruta o línea de comandos"
+    "fr": "Nom, PID, chemin ou ligne de commande",
+    "es": "Nombre, PID, ruta o línea de comandos"
   },
   "No matching connections": {
     "tr": "Eşleşen bağlantı yok",
@@ -10085,11 +10085,11 @@
     "fr": "Ouvre la console Services de Windows.",
     "es": "Abre la consola Servicios de Windows."
   },
-  "name, description or PID": {
-    "tr": "ad, açıklama veya PID",
+  "Name, description or PID": {
+    "tr": "Ad, açıklama veya PID",
     "de": "Name, Beschreibung oder PID",
-    "fr": "nom, description ou PID",
-    "es": "nombre, descripción o PID"
+    "fr": "Nom, description ou PID",
+    "es": "Nombre, descripción o PID"
   },
   "Always on top": {
     "tr": "Her zaman üstte",
@@ -11308,5 +11308,17 @@
     "de": "{0} Fenster, {1} sichtbar",
     "fr": "{0} fenêtres, {1} visibles",
     "es": "{0} ventanas, {1} visibles"
+  },
+  " s": {
+    "tr": " sn",
+    "de": " s",
+    "fr": " s",
+    "es": " s"
+  },
+  "Process, PID or message": {
+    "tr": "İşlem, PID veya ileti",
+    "de": "Prozess, PID oder Meldung",
+    "fr": "Processus, PID ou message",
+    "es": "Proceso, PID o mensaje"
   }
 }

@@ -1,6 +1,7 @@
 //! Kill list tab and the panic button: processes that may be ended, either
 //! automatically when they keep eating CPU or all at once on demand.
 
+use crate::i18n::PercentAffix;
 use eframe::egui::{self, RichText, Ui};
 use wtm_core::control::ProcessRef;
 use wtm_ipc::Command;
@@ -269,15 +270,14 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
             &[format!("{}", __wtm_i18n_0)],
         )
     };
+    // Red only when it can be pressed: faded, red text was pale pink on
+    // white in the light theme.
+    let mut panic_text = RichText::new(panic_label).strong();
+    if !running.is_empty() {
+        panic_text = panic_text.color(crate::theme::text_color(ui, BAD));
+    }
     if ui
-        .add_enabled(
-            !running.is_empty(),
-            egui::Button::new(
-                RichText::new(panic_label)
-                    .strong()
-                    .color(crate::theme::text_color(ui, BAD)),
-            ),
-        )
+        .add_enabled(!running.is_empty(), egui::Button::new(panic_text))
         .on_hover_text(crate::i18n::tr(
             "Shows what will be ended first (Ctrl+Shift+K from anywhere)",
         ))
@@ -336,11 +336,13 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
     if !data.kill_list.is_empty() {
         crate::theme::panel(ui, |ui| {
             ui.spacing_mut().scroll = crate::theme::solid_scroll();
+            let width = ui.available_width();
             egui::ScrollArea::horizontal()
                 .id_salt("kill_list_columns")
                 .auto_shrink([false, true])
                 .show(ui, |ui| {
-                    ui.set_min_width(960.0);
+                    // As wide as the panel; it scrolls only when the rows need more.
+                    ui.set_min_width(width);
                     egui::Grid::new("kill_list")
                         .num_columns(5)
                         .striped(true)
@@ -491,7 +493,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                 view.automatic,
                 egui::DragValue::new(&mut view.seconds)
                     .range(1..=3600)
-                    .suffix(" s"),
+                    .suffix(crate::i18n::tr(" s")),
             );
             ui.add_space(8.0);
             ui.label(crate::i18n::tr(if view.automatic { "On" } else { "Off" }));
@@ -504,7 +506,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                     view.busy_pc,
                     egui::DragValue::new(&mut view.system_cpu)
                         .range(1.0..=100.0)
-                        .suffix("%"),
+                        .percent_affix(),
                 );
                 ui.add_space(8.0);
                 ui.label(crate::i18n::tr(if view.busy_pc { "On" } else { "Off" }));

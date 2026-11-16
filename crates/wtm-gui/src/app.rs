@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::time::{Duration, Instant, SystemTime};
 
+use crate::i18n::PercentAffix;
 use eframe::egui::{self, Color32, RichText, Ui};
 use egui_extras::Column;
 use egui_plot::{Line, Plot, PlotPoints};
@@ -2386,7 +2387,8 @@ fn window_settings(ui: &mut Ui, state: &mut UiState, data: &Data) -> Option<UiCo
                 ui.add_enabled(
                     a.enabled,
                     egui::Slider::new(&mut a.threshold, 50.0..=100.0)
-                        .suffix("%")
+                        .percent_affix()
+                        .fixed_decimals(0)
                         .text("CPU"),
                 );
                 ui.label(crate::i18n::tr("for"));
@@ -2394,7 +2396,7 @@ fn window_settings(ui: &mut Ui, state: &mut UiState, data: &Data) -> Option<UiCo
                     a.enabled,
                     egui::DragValue::new(&mut a.seconds)
                         .range(1..=120)
-                        .suffix(" s"),
+                        .suffix(crate::i18n::tr(" s")),
                 );
                 ui.add_space(8.0);
                 ui.label(crate::i18n::tr(if a.enabled { "On" } else { "Off" }));
@@ -2508,7 +2510,7 @@ fn window_settings(ui: &mut Ui, state: &mut UiState, data: &Data) -> Option<UiCo
     let title = crate::i18n::tr("Use RustWTM for Ctrl+Shift+Esc");
     crate::theme::option_named_by_control(
         ui,
-        crate::theme::icon::CHART,
+        crate::theme::icon::KEYBOARD,
         title,
         crate::i18n::tr("Open RustWTM whenever Windows starts Task Manager. Applies to all users."),
         |ui| {
@@ -4669,6 +4671,7 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
             let label = ui.label(crate::i18n::tr("Search events"));
             ui.add(
                 egui::TextEdit::singleline(&mut view.search)
+                    .hint_text(crate::i18n::tr("Process, PID or message"))
                     .desired_width((ui.available_width() - 100.0).clamp(100.0, 320.0)),
             )
             .labelled_by(label.id);
@@ -4842,15 +4845,12 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
                             let message = crate::i18n::message(&e.message);
-                            let response = ui
-                                .add(
-                                    egui::Button::selectable(
-                                        view.selected == Some((e.id, e.unix_ms)),
-                                        message.as_ref(),
-                                    )
-                                    .truncate(),
-                                )
-                                .on_hover_text(message.as_ref());
+                            // A label, so the message starts where its header does.
+                            let response = crate::theme::table_name(
+                                ui,
+                                message.as_ref(),
+                                view.selected == Some((e.id, e.unix_ms)),
+                            );
                             let mut open = response.clicked();
                             crate::context_actions::menu(
                                 &response,

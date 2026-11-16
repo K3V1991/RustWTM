@@ -1,6 +1,7 @@
 //! Settings tab: its pages, the service's main settings as a form, and its
 //! `config.toml` as text, with live validation.
 
+use crate::i18n::PercentAffix;
 use eframe::egui::{self, RichText, Ui};
 
 use crate::backend::{Data, UiCommand};
@@ -369,7 +370,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
             |ui, label| {
                 let mut high = g.high_cpu_percent;
                 if ui
-                    .add(egui::Slider::new(&mut high, 50.0..=100.0).suffix("%"))
+                    .add(
+                        egui::Slider::new(&mut high, 50.0..=100.0)
+                            .percent_affix()
+                            .fixed_decimals(0),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -378,7 +383,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                 ui.label(crate::i18n::tr("for"));
                 let mut secs = g.sustain_secs;
                 if ui
-                    .add(egui::DragValue::new(&mut secs).range(1..=300).suffix(" s"))
+                    .add(
+                        egui::DragValue::new(&mut secs)
+                            .range(1..=300)
+                            .suffix(crate::i18n::tr(" s")),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -394,7 +403,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
             |ui, label| {
                 let mut low = g.recover_cpu_percent;
                 if ui
-                    .add(egui::Slider::new(&mut low, 10.0..=99.0).suffix("%"))
+                    .add(
+                        egui::Slider::new(&mut low, 10.0..=99.0)
+                            .percent_affix()
+                            .fixed_decimals(0),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -403,7 +416,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                 ui.label(crate::i18n::tr("for"));
                 let mut secs = g.recover_secs;
                 if ui
-                    .add(egui::DragValue::new(&mut secs).range(1..=600).suffix(" s"))
+                    .add(
+                        egui::DragValue::new(&mut secs)
+                            .range(1..=600)
+                            .suffix(crate::i18n::tr(" s")),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -450,7 +467,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
             |ui, label| {
                 let mut high = m.high_percent;
                 if ui
-                    .add(egui::Slider::new(&mut high, 50.0..=99.0).suffix("%"))
+                    .add(
+                        egui::Slider::new(&mut high, 50.0..=99.0)
+                            .percent_affix()
+                            .fixed_decimals(0),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -459,7 +480,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                 ui.label(crate::i18n::tr("for"));
                 let mut secs = m.sustain_secs;
                 if ui
-                    .add(egui::DragValue::new(&mut secs).range(1..=600).suffix(" s"))
+                    .add(
+                        egui::DragValue::new(&mut secs)
+                            .range(1..=600)
+                            .suffix(crate::i18n::tr(" s")),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -515,7 +540,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                 let mut high = r.trigger_cpu_percent;
                 let range = (r.release_cpu_percent + 1.0).max(50.0)..=100.0;
                 if ui
-                    .add(egui::Slider::new(&mut high, range).suffix("%"))
+                    .add(
+                        egui::Slider::new(&mut high, range)
+                            .percent_affix()
+                            .fixed_decimals(0),
+                    )
                     .labelled_by(label)
                     .changed()
                 {
@@ -524,7 +553,11 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
                 ui.label(crate::i18n::tr("for"));
                 let mut secs = r.sustain_secs;
                 if ui
-                    .add(egui::DragValue::new(&mut secs).range(1..=120).suffix(" s"))
+                    .add(
+                        egui::DragValue::new(&mut secs)
+                            .range(1..=120)
+                            .suffix(crate::i18n::tr(" s")),
+                    )
                     .labelled_by(label)
                     .changed()
                 {

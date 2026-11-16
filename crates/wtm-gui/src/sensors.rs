@@ -1,6 +1,7 @@
 //! Sensors and capability-based cooling. Hardware writes are explicit service
 //! requests; editing a curve, changing tabs or restarting never applies one.
 use crate::backend::{Data, Mode, Panel, UiCommand};
+use crate::i18n::PercentAffix;
 use eframe::egui::{self, RichText, Ui};
 use std::collections::{BTreeMap, HashMap, VecDeque};
 use wtm_core::hardware::{HardwareReport, SensorKind, unix_ms};
@@ -402,7 +403,7 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
                     CoolingMode::Manual(value) => {
                         ui.add(
                             egui::Slider::new(value, channel.min_percent..=channel.max_percent)
-                                .suffix("%")
+                                .percent_affix()
                                 .text(crate::i18n::tr("Requested duty")),
                         );
                     }
@@ -447,7 +448,7 @@ pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiComman
                                 ui.add(
                                     egui::DragValue::new(&mut p.percent)
                                         .range(channel.min_percent..=channel.max_percent)
-                                        .suffix("%"),
+                                        .percent_affix(),
                                 );
                             }
                         });

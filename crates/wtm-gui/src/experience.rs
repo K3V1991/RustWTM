@@ -180,7 +180,7 @@ impl View {
             ("Tray window refresh", &mut self.prefs.tray_seconds, 60),
         ] {
             option_labelled(ui, icon::SYNC, crate::i18n::tr(label), "", |ui, id| {
-                ui.add(egui::Slider::new(value, 1..=max).suffix(" s"))
+                ui.add(egui::Slider::new(value, 1..=max).suffix(crate::i18n::tr(" s")))
                     .labelled_by(id);
             });
         }
