@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} opstart-apps, {1} ingeschakeld",
   "{0} window, {1} visible": "{0} vensters, {1} zichtbaar",
   " s": " s",
-  "Process, PID or message": "Proces, PID of bericht"
+  "Process, PID or message": "Proces, PID of bericht",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Eerdere analyses wachten nog op programma's die niet reageren. Probeer het over een minuut opnieuw.",
+  "The analysis stopped before it finished; these counts are partial.": "De analyse stopte voordat ze klaar was; deze aantallen zijn onvolledig."
 }

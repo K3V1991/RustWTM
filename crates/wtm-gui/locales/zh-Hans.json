@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} 个启动应用，已启用 {1} 个",
   "{0} window, {1} visible": "{0} 个窗口，{1} 个可见",
   " s": " 秒",
-  "Process, PID or message": "进程、PID 或消息"
+  "Process, PID or message": "进程、PID 或消息",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "之前的分析仍在等待无响应的程序。请一分钟后重试。",
+  "The analysis stopped before it finished; these counts are partial.": "分析在完成前停止；这些计数并不完整。"
 }

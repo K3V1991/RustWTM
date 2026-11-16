@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "Programu {0} za kuanza, {1} zimewashwa",
   "{0} window, {1} visible": "Madirisha {0}, yanayoonekana {1}",
   " s": " s",
-  "Process, PID or message": "Mchakato, PID au ujumbe"
+  "Process, PID or message": "Mchakato, PID au ujumbe",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Uchanganuzi wa awali bado unasubiri programu zisizojibu. Jaribu tena baada ya dakika moja.",
+  "The analysis stopped before it finished; these counts are partial.": "Uchanganuzi ulisimama kabla ya kumaliza; hesabu hizi hazijakamilika."
 }

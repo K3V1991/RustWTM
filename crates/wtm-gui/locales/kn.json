@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} ಪ್ರಾರಂಭಿಕ ಆ್ಯಪ್‌ಗಳು, {1} ಸಕ್ರಿಯ",
   "{0} window, {1} visible": "{0} ವಿಂಡೋಗಳು, {1} ಗೋಚರಿಸುತ್ತಿವೆ",
   " s": " s",
-  "Process, PID or message": "ಪ್ರಕ್ರಿಯೆ, PID ಅಥವಾ ಸಂದೇಶ"
+  "Process, PID or message": "ಪ್ರಕ್ರಿಯೆ, PID ಅಥವಾ ಸಂದೇಶ",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "ಹಿಂದಿನ ವಿಶ್ಲೇಷಣೆಗಳು ಪ್ರತಿಕ್ರಿಯಿಸದ ಪ್ರೋಗ್ರಾಂಗಳಿಗಾಗಿ ಇನ್ನೂ ಕಾಯುತ್ತಿವೆ. ಒಂದು ನಿಮಿಷದ ನಂತರ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+  "The analysis stopped before it finished; these counts are partial.": "ವಿಶ್ಲೇಷಣೆ ಮುಗಿಯುವ ಮೊದಲೇ ನಿಂತಿತು; ಈ ಎಣಿಕೆಗಳು ಅಪೂರ್ಣ."
 }

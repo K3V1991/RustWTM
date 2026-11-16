@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0}টি স্টার্টআপ অ্যাপ, {1}টি সক্ষম",
   "{0} window, {1} visible": "{0}টি উইন্ডো, {1}টি দৃশ্যমান",
   " s": " s",
-  "Process, PID or message": "প্রসেস, PID বা বার্তা"
+  "Process, PID or message": "প্রসেস, PID বা বার্তা",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "আগের বিশ্লেষণগুলো এখনও সাড়া না দেওয়া প্রোগ্রামের জন্য অপেক্ষা করছে। এক মিনিট পরে আবার চেষ্টা করুন।",
+  "The analysis stopped before it finished; these counts are partial.": "বিশ্লেষণ শেষ হওয়ার আগেই থেমে গেছে; এই গণনাগুলো আংশিক।"
 }

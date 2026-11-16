@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} ứng dụng khởi động, {1} đã bật",
   "{0} window, {1} visible": "{0} cửa sổ, {1} đang hiển thị",
   " s": " s",
-  "Process, PID or message": "Tiến trình, PID hoặc thông báo"
+  "Process, PID or message": "Tiến trình, PID hoặc thông báo",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Các lần phân tích trước vẫn đang chờ những chương trình không phản hồi. Hãy thử lại sau một phút.",
+  "The analysis stopped before it finished; these counts are partial.": "Phân tích đã dừng trước khi xong; các số này chưa đầy đủ."
 }

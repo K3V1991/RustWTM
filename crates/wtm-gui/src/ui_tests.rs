@@ -1041,7 +1041,7 @@ fn processes_row_click_and_context_menu_produce_intents() {
         ("", "Add to kill list…", "kill list beta.exe"),
         ("Diagnostics", "Create memory dump file", "dump 200"),
         ("Diagnostics", "Notify me when it exits", "watch exit 200"),
-        ("Diagnostics", "Properties", "select 200"),
+        ("Diagnostics", "Properties", "details 200"),
     ] {
         h.get_by_label("beta.exe").click_secondary();
         h.run();

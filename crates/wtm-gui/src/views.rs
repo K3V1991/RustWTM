@@ -630,6 +630,15 @@ fn state_color(ui: &Ui, state: wtm_core::ServiceState) -> Color32 {
         _ => crate::theme::text_color(ui, WARN),
     }
 }
+fn service_state_filter() -> egui::Id {
+    egui::Id::unique("service-state-filter")
+}
+
+/// Turns the Running / Stopped chip back to All services, so a search
+/// or a process's services are not hidden by a chip chosen earlier.
+pub fn show_every_service_state(ctx: &egui::Context) {
+    ctx.data_mut(|d| d.remove::<u8>(service_state_filter()));
+}
 
 /// Returns the service the user right-clicked or clicked, if any.
 pub fn services(
@@ -638,7 +647,7 @@ pub fn services(
     filter: &mut String,
     command: &mut Option<UiCommand>,
 ) -> Option<wtm_core::ServiceEntry> {
-    let group_id = egui::Id::unique("service-state-filter");
+    let group_id = service_state_filter();
     let mut group = ui.data(|d| d.get_temp::<u8>(group_id)).unwrap_or(0);
     ui.horizontal_wrapped(|ui| {
         crate::theme::search_bar(
@@ -724,6 +733,7 @@ pub fn services(
         );
         if ui.button(crate::i18n::tr("Clear search")).clicked() {
             filter.clear();
+            show_every_service_state(ui.ctx());
         }
         return None;
     }

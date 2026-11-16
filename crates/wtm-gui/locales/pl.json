@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "Aplikacje autostartu: {0}, włączone: {1}",
   "{0} window, {1} visible": "Okna: {0}, widoczne: {1}",
   " s": " s",
-  "Process, PID or message": "Proces, PID lub komunikat"
+  "Process, PID or message": "Proces, PID lub komunikat",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Wcześniejsze analizy wciąż czekają na programy, które nie odpowiadają. Spróbuj ponownie za minutę.",
+  "The analysis stopped before it finished; these counts are partial.": "Analiza zatrzymała się przed końcem; te liczby są niepełne."
 }

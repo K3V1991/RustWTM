@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "시작 앱 {0}개, 사용 {1}개",
   "{0} window, {1} visible": "창 {0}개, 표시 {1}개",
   " s": " 초",
-  "Process, PID or message": "프로세스, PID 또는 메시지"
+  "Process, PID or message": "프로세스, PID 또는 메시지",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "이전 분석이 아직 응답하지 않는 프로그램을 기다리고 있습니다. 1분 후에 다시 시도하세요.",
+  "The analysis stopped before it finished; these counts are partial.": "분석이 끝나기 전에 중지되었습니다. 이 수치는 일부입니다."
 }

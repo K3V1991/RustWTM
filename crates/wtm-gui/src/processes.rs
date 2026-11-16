@@ -2520,7 +2520,7 @@ impl ProcessView {
                                 }
                                 crate::context_actions::menu(&response, (menu_id, "process", key), |ui| {
                                         if crate::context_actions::action(ui, crate::i18n::tr("Details")) {
-                                            intents.push(Intent::Select(target.clone()));
+                                            intents.push(Intent::Details(target.clone()));
                                         }
                                         crate::context_actions::copy(ui, crate::i18n::tr("Name"), || p.name.clone());
                                         crate::context_actions::copy(ui, "PID", || p.pid.to_string());
@@ -3352,7 +3352,7 @@ pub fn context_menu(
             ui.close();
         }
         if ui.button(crate::i18n::tr("Properties")).clicked() {
-            intents.push(Intent::Select(t.clone()));
+            intents.push(Intent::Details(t.clone()));
             ui.close();
         }
     });

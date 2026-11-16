@@ -1675,8 +1675,9 @@ impl eframe::App for App {
                 // Only the process that was found: its ID may since belong
                 // to another.
                 if crate::find_view::still_running(&data, &target) {
-                    state.processes.selected = Some(target);
-                    state.tab = Tab::Processes;
+                    // As any other way of showing a process: its details are
+                    // loaded and its row is shown whatever the list filters.
+                    intents.push(Intent::Reveal(target));
                     state.processes.find.open = false;
                     state.processes.find.note = None;
                 } else {
@@ -2126,6 +2127,10 @@ impl eframe::App for App {
                 }
                 Intent::OpenLocation(target) => backend.send(UiCommand::OpenLocation(target)),
                 Intent::Reveal(target) => {
+                    // Asked for by name, so a hidden inspector comes back.
+                    if state.inspector_mode == crate::workspace_inspector::Mode::Hidden {
+                        state.inspector_mode = crate::workspace_inspector::Mode::Auto;
+                    }
                     backend.send(UiCommand::Inspect(target.clone()));
                     state.processes.reveal(target);
                     state.tab = Tab::Processes;
@@ -2143,6 +2148,7 @@ impl eframe::App for App {
                 Intent::ShowServices(pid) => {
                     // A number finds the services of that process.
                     state.services_filter = pid.to_string();
+                    crate::views::show_every_service_state(&ctx);
                     state.selected_service = None;
                     state.tab = Tab::Services;
                 }
@@ -3123,6 +3129,18 @@ fn end_report(ui: &mut Ui, r: &wtm_core::EndReport, elevated: bool) {
 }
 
 fn wait_report(ui: &mut Ui, r: &wtm_core::WaitReport) {
+    // Zero counts from an analysis that never ran would read as "nothing
+    // is blocked", just when a program hangs.
+    if r.busy {
+        crate::theme::colored(
+            ui,
+            WARN,
+            crate::i18n::tr(
+                "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.",
+            ),
+        );
+        return;
+    }
     if r.deadlocked() {
         crate::theme::colored(
             ui,
@@ -3142,6 +3160,10 @@ fn wait_report(ui: &mut Ui, r: &wtm_core::WaitReport) {
         ui.weak(crate::i18n::format(
             "{0} threads could not be analyzed in time",
             &[r.skipped.to_string()],
+        ));
+    } else if !r.complete {
+        ui.weak(crate::i18n::tr(
+            "The analysis stopped before it finished; these counts are partial.",
         ));
     }
     for chain in r.chains.iter().take(12) {
@@ -5296,6 +5318,9 @@ mod tests {
                 services[0].pid = 100;
             }
         }
+        // Services was last left showing only stopped services; this one runs.
+        h.ctx
+            .data_mut(|d| d.insert_temp(egui::Id::unique("service-state-filter"), 2u8));
         h.run_steps(2);
         h.get_by_label_contains("alpha.exe").click_secondary();
         h.run_steps(2);
@@ -5303,8 +5328,22 @@ mod tests {
         h.run_steps(3);
         assert_eq!(h.state().state.tab, Tab::Services);
         assert_eq!(h.state().state.services_filter, "100");
-        assert!(h.query_by_label("Print Spooler").is_some());
+        assert!(
+            h.query_by_label("Print Spooler").is_some(),
+            "shown whatever its state"
+        );
         assert!(h.query_by_label("Fax").is_none());
+        // Clear search on an empty list clears the state chip too.
+        h.state_mut().state.services_filter = "no such service".into();
+        h.ctx
+            .data_mut(|d| d.insert_temp(egui::Id::unique("service-state-filter"), 1u8));
+        h.run_steps(2);
+        h.get_by_label("Clear search").click();
+        h.run_steps(3);
+        assert!(
+            h.query_all_by_label("Fax").next().is_some(),
+            "a stopped service shows again"
+        );
         // Task Manager's "Open Services" link.
         h.get_by_label("Open Services").click();
         h.run_steps(2);
@@ -9227,10 +9266,18 @@ mod tests {
         // The pointer moves there first, away from the last link's tooltip.
         h.get_by_label("alpha.exe (100)").hover();
         h.run_steps(2);
+        let _ = rx.try_iter().count();
         h.get_by_label("alpha.exe (100)").click();
         h.run_steps(2);
         assert_eq!(h.state().state.processes.selected.as_ref(), Some(&alpha));
         assert!(!h.state().state.processes.find.open);
+        // Like every other way of choosing a process, it loads its details.
+        assert!(
+            rx.try_iter()
+                .map(describe_command)
+                .any(|c| c == "inspect 100"),
+            "a Find hit loads the inspector"
+        );
 
         // A search stopped part way never says that nothing matched.
         let none = "No process has a matching handle or DLL.";
@@ -9531,6 +9578,8 @@ mod tests {
                 threads: 12,
                 analyzed: 2,
                 skipped: 1,
+                complete: false,
+                busy: false,
             })),
         ));
         h.run_steps(2);
@@ -9560,6 +9609,36 @@ mod tests {
                 .map(describe_command)
                 .any(|c| c == "wait chain 100")
         );
+
+        // No place was free: that is not "nothing is blocked".
+        let busy = "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.";
+        let partial = "The analysis stopped before it finished; these counts are partial.";
+        let empty = WaitReport {
+            chains: Vec::new(),
+            threads: 0,
+            analyzed: 0,
+            skipped: 0,
+            complete: false,
+            busy: true,
+        };
+        h.state().backend.data().wait_report = Some((alpha.clone(), Some(Ok(empty.clone()))));
+        h.run_steps(2);
+        assert!(h.query_by_label(busy).is_some());
+        assert!(
+            h.query_by_label("0 threads, 0 blocked, 0 with a wait chain")
+                .is_none()
+        );
+        // Cut short before any thread was counted.
+        h.state().backend.data().wait_report = Some((
+            alpha.clone(),
+            Some(Ok(WaitReport {
+                busy: false,
+                ..empty
+            })),
+        ));
+        h.run_steps(2);
+        assert!(h.query_by_label(partial).is_some());
+        assert!(h.query_by_label(busy).is_none());
 
         // While an analysis runs the button waits.
         h.state().backend.data().wait_report = Some((alpha, None));

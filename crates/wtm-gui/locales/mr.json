@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} स्टार्टअप अ‍ॅप्स, {1} सक्षम",
   "{0} window, {1} visible": "{0} विंडो, {1} दृश्यमान",
   " s": " s",
-  "Process, PID or message": "प्रक्रिया, PID किंवा संदेश"
+  "Process, PID or message": "प्रक्रिया, PID किंवा संदेश",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "आधीची विश्लेषणे अजूनही प्रतिसाद न देणाऱ्या प्रोग्रामची वाट पाहत आहेत. एका मिनिटाने पुन्हा प्रयत्न करा.",
+  "The analysis stopped before it finished; these counts are partial.": "विश्लेषण पूर्ण होण्यापूर्वी थांबले; ही संख्या अपूर्ण आहे."
 }

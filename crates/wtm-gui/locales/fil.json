@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} startup app, {1} naka-enable",
   "{0} window, {1} visible": "{0} window, {1} nakikita",
   " s": " s",
-  "Process, PID or message": "Proseso, PID o mensahe"
+  "Process, PID or message": "Proseso, PID o mensahe",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Naghihintay pa ang mga naunang pagsusuri sa mga programang hindi tumutugon. Subukang muli pagkalipas ng isang minuto.",
+  "The analysis stopped before it finished; these counts are partial.": "Huminto ang pagsusuri bago matapos; hindi kumpleto ang mga bilang na ito."
 }

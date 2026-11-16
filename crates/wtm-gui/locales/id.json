@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} aplikasi startup, {1} diaktifkan",
   "{0} window, {1} visible": "{0} jendela, {1} terlihat",
   " s": " s",
-  "Process, PID or message": "Proses, PID, atau pesan"
+  "Process, PID or message": "Proses, PID, atau pesan",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Analisis sebelumnya masih menunggu program yang tidak merespons. Coba lagi dalam satu menit.",
+  "The analysis stopped before it finished; these counts are partial.": "Analisis berhenti sebelum selesai; jumlah ini belum lengkap."
 }

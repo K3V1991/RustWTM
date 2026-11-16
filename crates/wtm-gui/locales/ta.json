@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "{0} தொடக்கப் பயன்பாடுகள், {1} இயக்கப்பட்டவை",
   "{0} window, {1} visible": "{0} சாளரங்கள், {1} தெரிகின்றன",
   " s": " s",
-  "Process, PID or message": "செயல்முறை, PID அல்லது செய்தி"
+  "Process, PID or message": "செயல்முறை, PID அல்லது செய்தி",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "முந்தைய பகுப்பாய்வுகள் பதிலளிக்காத நிரல்களுக்காக இன்னும் காத்திருக்கின்றன. ஒரு நிமிடம் கழித்து மீண்டும் முயலவும்.",
+  "The analysis stopped before it finished; these counts are partial.": "பகுப்பாய்வு முடிவதற்கு முன்பே நின்றுவிட்டது; இந்த எண்ணிக்கைகள் முழுமையற்றவை."
 }

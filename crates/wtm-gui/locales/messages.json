@@ -11320,5 +11320,17 @@
     "de": "Prozess, PID oder Meldung",
     "fr": "Processus, PID ou message",
     "es": "Proceso, PID o mensaje"
+  },
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": {
+    "tr": "Önceki analizler hâlâ yanıt vermeyen programları bekliyor. Bir dakika sonra yeniden deneyin.",
+    "de": "Frühere Analysen warten noch auf Programme, die nicht antworten. Versuchen Sie es in einer Minute erneut.",
+    "fr": "Des analyses précédentes attendent encore des programmes qui ne répondent pas. Réessayez dans une minute.",
+    "es": "Hay análisis anteriores esperando todavía a programas que no responden. Inténtelo de nuevo en un minuto."
+  },
+  "The analysis stopped before it finished; these counts are partial.": {
+    "tr": "Analiz bitmeden durdu; bu sayılar eksik.",
+    "de": "Die Analyse wurde vor dem Ende abgebrochen; diese Zahlen sind unvollständig.",
+    "fr": "L'analyse s'est arrêtée avant la fin ; ces chiffres sont partiels.",
+    "es": "El análisis se detuvo antes de terminar; estos recuentos son parciales."
   }
 }

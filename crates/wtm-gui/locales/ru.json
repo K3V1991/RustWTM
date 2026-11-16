@@ -1885,5 +1885,7 @@
   "{0} startup app, {1} enabled": "Приложений в автозагрузке: {0}, включено: {1}",
   "{0} window, {1} visible": "Окон: {0}, видимых: {1}",
   " s": " с",
-  "Process, PID or message": "Процесс, PID или сообщение"
+  "Process, PID or message": "Процесс, PID или сообщение",
+  "Earlier analyses are still waiting on programs that do not answer. Try again in a minute.": "Предыдущие анализы всё ещё ждут программ, которые не отвечают. Повторите через минуту.",
+  "The analysis stopped before it finished; these counts are partial.": "Анализ остановился, не завершившись; эти числа неполные."
 }

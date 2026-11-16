@@ -101,6 +101,14 @@ pub struct WaitReport {
     pub analyzed: usize,
     /// Threads Windows could not analyze in time.
     pub skipped: usize,
+    /// Every blocked thread was looked at. When false the counts are only
+    /// what was reached before the budget ran out.
+    #[serde(default)]
+    pub complete: bool,
+    /// Nothing was analyzed: earlier walks are still stuck in processes that
+    /// do not answer, and no place was free for this one.
+    #[serde(default)]
+    pub busy: bool,
 }
 
 impl WaitReport {
@@ -164,6 +172,16 @@ unsafe extern "system" fn collect(hwnd: HWND, lparam: LPARAM) -> BOOL {
 /// chain that leads into a process that does not answer, so the analysis
 /// runs on its own thread and gives up after `budget`.
 pub fn wait_chains(pid: u32, budget: Duration) -> crate::Result<WaitReport> {
+    wait_chains_in(pid, budget, &WALKERS)
+}
+
+/// [`wait_chains`] with the count of walk threads alive passed in, so a test
+/// can find every place taken without leaving walks stuck.
+fn wait_chains_in(
+    pid: u32,
+    budget: Duration,
+    walkers: &'static AtomicUsize,
+) -> crate::Result<WaitReport> {
     if pid == std::process::id() {
         return Err(windows::core::Error::new(
             windows::Win32::Foundation::E_INVALIDARG,
@@ -173,8 +191,11 @@ pub fn wait_chains(pid: u32, budget: Duration) -> crate::Result<WaitReport> {
     }
     // A walk stuck in a frozen process holds the next ones forever; past a
     // few of them, no more threads are left waiting behind it.
-    if !take_slot(&WALKERS, MAX_WALKERS) {
-        return Ok(Progress::default().finish(false));
+    if !take_slot(walkers, MAX_WALKERS) {
+        return Ok(WaitReport {
+            busy: true,
+            ..Progress::default().finish(false)
+        });
     }
     let progress = Arc::new(Mutex::new(Progress::default()));
     let (tx, rx) = mpsc::channel();
@@ -183,7 +204,7 @@ pub fn wait_chains(pid: u32, budget: Duration) -> crate::Result<WaitReport> {
     // block forever, and abandoning this thread is how we honour `budget`.
     std::thread::spawn(move || {
         let report = analyze(pid, &worker);
-        WALKERS.fetch_sub(1, Ordering::SeqCst);
+        walkers.fetch_sub(1, Ordering::SeqCst);
         let _ = tx.send(report);
     });
 
@@ -235,6 +256,8 @@ impl Progress {
             threads: self.threads,
             analyzed: self.blocked,
             skipped,
+            complete,
+            busy: false,
         }
     }
 }
@@ -393,6 +416,31 @@ mod tests {
     }
 
     #[test]
+    fn no_free_walk_place_is_not_reported_as_nothing_blocked() {
+        // Every place taken, as by walks stuck in frozen processes. The
+        // check comes before any thread is started.
+        static FULL: AtomicUsize = AtomicUsize::new(MAX_WALKERS);
+        let report = wait_chains_in(u32::MAX, Duration::from_millis(10), &FULL).unwrap();
+        assert!(report.busy, "{report:?}");
+        assert!(!report.complete);
+        assert_eq!(FULL.load(Ordering::SeqCst), MAX_WALKERS, "no place taken");
+    }
+
+    #[test]
+    fn a_partial_walk_says_it_is_partial() {
+        let progress = Progress {
+            threads: 9,
+            blocked: 3,
+            pending: 3,
+            ..Progress::default()
+        };
+        let partial = progress.finish(false);
+        assert!(!partial.complete && !partial.busy);
+        assert_eq!(partial.skipped, 3);
+        assert!(progress.finish(true).complete);
+    }
+
+    #[test]
     fn deadlock_is_reported_when_any_chain_cycles() {
         let thread = |tid| Link::Thread {
             pid: 1,
@@ -407,6 +455,8 @@ mod tests {
             threads: 4,
             analyzed: 1,
             skipped: 0,
+            complete: true,
+            busy: false,
         };
         assert!(!plain.deadlocked());
 
