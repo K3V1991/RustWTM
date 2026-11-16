@@ -22,7 +22,10 @@ All notable changes to this project are documented here. The format follows
   keeps the current page in view; a truncated label shows one tooltip,
   not two.
 - On a narrow window the Performance timeline shows the time of day, with
-  the full date in its tooltip, so its actions stay on one row.
+  the full date in its tooltip, so its actions stay on one row, German
+  included. Overview's Disk card is "Disk & I/O", like the page it opens.
+- Kill list and Limits rows use pencil and bin icons for Edit and Remove;
+  the AI key field lines up with the fields above it.
 - Ports gives spare width to the tool names; App history keeps room for
   its findings; the process inspector's Refresh is an icon; Telegram's
   fields line up; Events messages start under their header and every
@@ -60,6 +63,16 @@ All notable changes to this project are documented here. The format follows
 - Network's empty state could not clear a kind filter; About pointed at
   an update bar that Later had hidden; AI's Forget key saved other
   unsaved edits.
+- A config save built from an older text (two quick removals in the
+  kill list, or an edit made to the file meanwhile) undid the other
+  change; it is now refused with a message and the page reloads.
+- The tray's Notifications choice is remembered; Restart Windows
+  Explorer is offered only on the Explorer showing this desktop, the one
+  it restarts.
+- Changing tray start while administrator startup was set in a window
+  that is not elevated restarted the window and dropped the change.
+- The CPU frequency and fan-control confirmations check again before
+  applying, in case the service, rights or readings changed meanwhile.
 - Limits could show usage as "-0.00 cores".
 - Largest files showed nothing for an unknown modification time, which
   put Show under Modified; it shows a dash.

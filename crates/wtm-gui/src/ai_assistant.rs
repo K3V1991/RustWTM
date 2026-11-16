@@ -247,16 +247,16 @@ pub fn settings(ui: &mut Ui, view: &mut AiSettingsView) {
         });
         let (key, show_key) = (&mut view.key, &mut view.show_key);
         crate::theme::option_labelled(ui, icon::KEY, crate::i18n::tr("API key"), "", |ui, id| {
-            ui.add_sized([256.0, ui.spacing().interact_size.y],
+            // The field and its eye button end where the fields above do.
+            let eye_width = 30.0;
+            ui.add_sized(
+                [300.0 - eye_width - ui.spacing().item_spacing.x, ui.spacing().interact_size.y],
                 egui::TextEdit::singleline(key)
                     .password(!*show_key)
                     .hint_text(key_hint(form)),
             )
             .labelled_by(id);
-            let eye = if *show_key { "🙈" } else { "👁" };
-            if ui
-                .button(eye)
-                .on_hover_text(crate::i18n::tr("Show or hide the key"))
+            if crate::theme::icon_button(ui, true, icon::VIEW, crate::i18n::tr("Show or hide the key"))
                 .clicked()
             {
                 *show_key = !*show_key;
