@@ -272,4 +272,4 @@ for every command.
 | `%ProgramData%\RustWTM\config.toml` | Configuration |
 | `%ProgramData%\RustWTM\telegram.toml` | Telegram bot settings (administrators only) |
 | `%ProgramData%\RustWTM\history.sqlite` | Per-minute usage history |
-| `%ProgramData%\RustWTM\logs\` | Daily rolling service logs |
+| `%ProgramData%\RustWTM\logs\` | Daily service logs; the last 14 days are kept |

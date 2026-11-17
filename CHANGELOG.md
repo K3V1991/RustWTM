@@ -24,6 +24,10 @@ All notable changes to this project are documented here. The format follows
 
 ### Fixed
 
+- The service kept every daily log file for ever (30 files, 33 MB after a
+  month on one PC); it keeps the last 14 and removes older ones when it
+  starts and each new day. A log folder that cannot be opened no longer
+  stops the service from starting; it then runs without its file log.
 - *Copy diagnostic information* wrote the interface scale with the
   window's percent style ("%125" in Turkish) in an otherwise English
   report; it says "125%".
