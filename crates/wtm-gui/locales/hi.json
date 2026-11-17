@@ -1108,7 +1108,6 @@
   "Loading processes…": "प्रोसेस लोड हो रही हैं…",
   "Theme": "थीम",
   "Disk & I/O": "डिस्क और I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "सेवा के निर्णय और इस विंडो से की गई क्रियाएँ यहाँ सूचीबद्ध हैं।",
   "All events": "सभी ईवेंट",
   "Information": "जानकारी",
   "Warnings": "चेतावनियाँ",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "सेंसर: पढ़ना फिर शुरू हुआ",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "कूलिंग {0}: हार्डवेयर स्वचालित पर वापस, इसका तापमान सेंसर गायब है या पुराना है",
   "Cooling {0}: control failed: {1}": "कूलिंग {0}: नियंत्रण विफल: {1}",
-  "Cooling {0}: under software control again": "कूलिंग {0}: फिर से सॉफ़्टवेयर नियंत्रण में"
+  "Cooling {0}: under software control again": "कूलिंग {0}: फिर से सॉफ़्टवेयर नियंत्रण में",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "सेवा के निर्णय, इस विंडो से की गई कार्रवाइयाँ और कंटेनर अलर्ट यहाँ सूचीबद्ध हैं।",
+  "All sources": "सभी स्रोत",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "दिखाए गए समय पर RustWTM सेवा ने लॉग किया, और सेवा चलने तक रखा जाता है।",
+  "Done from this window without the service; kept only until the window closes.": "सेवा के बिना इस विंडो से किया गया; केवल विंडो बंद होने तक रखा जाता है।",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "इस विंडो के Docker रीडर ने देखा, जो हर 10 सेकंड पढ़ता है (कंटेनर या अवलोकन खुला होने पर हर 2 सेकंड), इसलिए बदलाव एक रीडिंग पहले तक हुआ हो सकता है। केवल विंडो बंद होने तक रखा जाता है; रिकॉर्ड की गई घटनाओं में नहीं।",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "सेंसर और कूलिंग बदलाव लगभग छह सेकंड बने रहने के बाद, और केवल सेंसर हेल्पर चलने के दौरान लॉग होते हैं।",
+  "Show in Containers": "कंटेनर में दिखाएँ",
+  "Show sensors": "सेंसर दिखाएँ",
+  "Show process": "प्रोसेस दिखाएँ",
+  "The process is no longer running.": "प्रोसेस अब नहीं चल रहा है।"
 }

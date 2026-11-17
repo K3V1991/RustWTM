@@ -1108,7 +1108,6 @@
   "Loading processes…": "પ્રોસેસ લોડ થઈ રહી છે…",
   "Theme": "થીમ",
   "Disk & I/O": "ડિસ્ક અને I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "સેવાના નિર્ણયો અને આ વિન્ડોમાંથી લેવાયેલી ક્રિયાઓ અહીં સૂચિબદ્ધ છે.",
   "All events": "બધી ઇવેન્ટ",
   "Information": "માહિતી",
   "Warnings": "ચેતવણીઓ",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "સેન્સર: વાંચન ફરી શરૂ થયું",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "કૂલિંગ {0}: હાર્ડવેર ઑટોમેટિક પર પાછું, તેનો તાપમાન સેન્સર ગુમ છે અથવા જૂનો છે",
   "Cooling {0}: control failed: {1}": "કૂલિંગ {0}: નિયંત્રણ નિષ્ફળ: {1}",
-  "Cooling {0}: under software control again": "કૂલિંગ {0}: ફરી સૉફ્ટવેર નિયંત્રણ હેઠળ"
+  "Cooling {0}: under software control again": "કૂલિંગ {0}: ફરી સૉફ્ટવેર નિયંત્રણ હેઠળ",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "સેવાના નિર્ણયો, આ વિન્ડોમાંથી લેવાયેલી ક્રિયાઓ અને કન્ટેનર ચેતવણીઓ અહીં સૂચિબદ્ધ છે.",
+  "All sources": "બધા સ્રોત",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "બતાવેલા સમયે RustWTM સેવાએ નોંધ્યું, અને સેવા ચાલે ત્યાં સુધી રાખવામાં આવે છે.",
+  "Done from this window without the service; kept only until the window closes.": "સેવા વિના આ વિન્ડોમાંથી કરવામાં આવ્યું; ફક્ત વિન્ડો બંધ થાય ત્યાં સુધી રાખવામાં આવે છે.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "આ વિન્ડોના Docker રીડરે નોંધ્યું, જે દર 10 સેકન્ડે વાંચે છે (કન્ટેનર અથવા અવલોકન ખુલ્લું હોય ત્યારે દર 2 સેકન્ડે), તેથી ફેરફાર એક વાંચન જેટલો વહેલો થયો હોઈ શકે. ફક્ત વિન્ડો બંધ થાય ત્યાં સુધી રાખવામાં આવે છે; નોંધાયેલી ઘટનાઓમાં નથી.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "સેન્સર અને કૂલિંગ ફેરફારો લગભગ છ સેકન્ડ ટકે પછી અને ફક્ત સેન્સર હેલ્પર ચાલતું હોય ત્યારે નોંધાય છે.",
+  "Show in Containers": "કન્ટેનરમાં બતાવો",
+  "Show sensors": "સેન્સર બતાવો",
+  "Show process": "પ્રક્રિયા બતાવો",
+  "The process is no longer running.": "પ્રક્રિયા હવે ચાલી રહી નથી."
 }

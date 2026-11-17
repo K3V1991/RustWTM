@@ -623,6 +623,7 @@ fn describe_intent(i: &Intent) -> String {
         Intent::Reveal(t) => format!("reveal {}", t.pid),
         Intent::ConfirmMany(ts, c) => format!("confirm {} processes {c:?}", ts.len()),
         Intent::ShowContainers => "show containers".into(),
+        Intent::ShowSensors => "show sensors".into(),
         Intent::CustomizeOverview => "customize overview".into(),
         Intent::ShowPorts => "show ports".into(),
         Intent::ShowServices(pid) => format!("show services {pid}"),

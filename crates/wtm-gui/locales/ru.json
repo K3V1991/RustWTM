@@ -1108,7 +1108,6 @@
   "Loading processes…": "Загрузка процессов…",
   "Theme": "Тема",
   "Disk & I/O": "Диск и ввод-вывод",
-  "Decisions of the service and actions taken from this window are listed here.": "Здесь перечислены решения службы и действия, выполненные из этого окна.",
   "All events": "Все события",
   "Information": "Сведения",
   "Warnings": "Предупреждения",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "Датчики: чтение возобновлено",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Охлаждение {0}: возврат к автоматике оборудования, датчик температуры отсутствует или устарел",
   "Cooling {0}: control failed: {1}": "Охлаждение {0}: ошибка управления: {1}",
-  "Cooling {0}: under software control again": "Охлаждение {0}: снова под управлением программы"
+  "Cooling {0}: under software control again": "Охлаждение {0}: снова под управлением программы",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "Здесь перечислены решения службы, действия из этого окна и оповещения контейнеров.",
+  "All sources": "Все источники",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "Записано службой RustWTM в указанное время и хранится службой, пока она работает.",
+  "Done from this window without the service; kept only until the window closes.": "Сделано из этого окна без службы; хранится только до закрытия окна.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "Замечено модулем чтения Docker этого окна, который читает каждые 10 с (каждые 2 с, пока открыты «Контейнеры» или «Обзор»), поэтому изменение могло произойти на одно чтение раньше. Хранится только до закрытия окна; не входит в записанные инциденты.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "Изменения датчиков и охлаждения записываются, когда длятся около шести секунд, и только пока работает помощник датчиков.",
+  "Show in Containers": "Показать в контейнерах",
+  "Show sensors": "Показать датчики",
+  "Show process": "Показать процесс",
+  "The process is no longer running.": "Процесс больше не работает."
 }

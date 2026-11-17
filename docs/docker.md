@@ -53,9 +53,13 @@ Settings → This window → *Notify when a container stays above* is off by def
 On, it sends a Windows notification when a running container stays at or above
 a CPU or memory limit for the chosen time (60 s by default), another when it has
 stayed back below for that time (at least 30 s), and one when it stops or is
-removed while over a limit. The Containers page lists the last 50 notices;
-at most three notifications are shown per check, and the tray menu's
-*Notifications* switch silences them all.
+removed while over a limit. The Containers page lists the last 50 notices,
+and Events and the Performance charts' event markers show them too, with
+*Docker* as their source; at most three notifications are shown per check, and
+the tray menu's *Notifications* switch silences them all. Notices live in the
+window only: they are lost when it closes and are not in recorded incidents or
+the support bundle. A notice's time is when the reader noticed the change, up
+to one reading (10 s, or 2 s while Containers or Overview is open) after it.
 
 The limits are shares, whichever convention Docker reports in: CPU is the share
 of all the CPUs a container can use (a Linux container at 200% on 4 cores is at

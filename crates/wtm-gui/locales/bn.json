@@ -1108,7 +1108,6 @@
   "Loading processes…": "প্রসেস লোড হচ্ছে…",
   "Theme": "থিম",
   "Disk & I/O": "ডিস্ক ও I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "সার্ভিসের সিদ্ধান্ত এবং এই উইন্ডো থেকে নেওয়া অ্যাকশনগুলো এখানে তালিকাভুক্ত।",
   "All events": "সব ইভেন্ট",
   "Information": "তথ্য",
   "Warnings": "সতর্কতা",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "সেন্সর: পড়া আবার শুরু হয়েছে",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "কুলিং {0}: হার্ডওয়্যার স্বয়ংক্রিয়তে ফিরেছে, এর তাপমাত্রা সেন্সর নেই বা পুরোনো",
   "Cooling {0}: control failed: {1}": "কুলিং {0}: নিয়ন্ত্রণ ব্যর্থ: {1}",
-  "Cooling {0}: under software control again": "কুলিং {0}: আবার সফটওয়্যার নিয়ন্ত্রণে"
+  "Cooling {0}: under software control again": "কুলিং {0}: আবার সফটওয়্যার নিয়ন্ত্রণে",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "সার্ভিসের সিদ্ধান্ত, এই উইন্ডো থেকে নেওয়া পদক্ষেপ এবং কন্টেইনার সতর্কতা এখানে তালিকাভুক্ত হয়।",
+  "All sources": "সব উৎস",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "দেখানো সময়ে RustWTM সার্ভিস লগ করেছে, এবং সার্ভিস চলাকালীন রাখা হয়।",
+  "Done from this window without the service; kept only until the window closes.": "সার্ভিস ছাড়া এই উইন্ডো থেকে করা হয়েছে; উইন্ডো বন্ধ না হওয়া পর্যন্তই রাখা হয়।",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "এই উইন্ডোর Docker রিডার লক্ষ্য করেছে, যা প্রতি 10 সেকেন্ডে পড়ে (কন্টেইনার বা ওভারভিউ খোলা থাকলে প্রতি 2 সেকেন্ডে), তাই পরিবর্তনটি এক রিডিং আগে হয়ে থাকতে পারে। উইন্ডো বন্ধ না হওয়া পর্যন্তই রাখা হয়; রেকর্ড করা ঘটনায় নেই।",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "সেন্সর ও কুলিং পরিবর্তন প্রায় ছয় সেকেন্ড স্থায়ী হলে এবং কেবল সেন্সর হেল্পার চলাকালীন লগ করা হয়।",
+  "Show in Containers": "কন্টেইনারে দেখান",
+  "Show sensors": "সেন্সর দেখান",
+  "Show process": "প্রসেস দেখান",
+  "The process is no longer running.": "প্রসেসটি আর চলছে না।"
 }

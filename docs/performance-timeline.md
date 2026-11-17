@@ -22,8 +22,12 @@ bounded sample buffer; they do not start another collector.
   page; wheel/drag zoom is not enabled.
 - **Back to live**, or a double-click on a chart, resumes the moving window.
 - **Recent events in view** lists up to 32 recent events in the visible
-  window. Selecting one pins its recorded time; event markers appear on the
-  main charts. A marker indicates timing, not proof of causation.
+  window, each with its source: the service's log (including sensor and
+  cooling changes), actions taken from this window, and container alerts
+  from the window's Docker reader. Selecting one pins its recorded time;
+  event markers appear on the main charts. A marker indicates timing, not
+  proof of causation; a container alert's time can be up to one Docker
+  reading after the change.
 
 The timestamp includes the local date, time and UTC offset. Chart axes use
 local clock time. The values below the charts follow the selected sample;

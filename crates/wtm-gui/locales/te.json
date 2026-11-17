@@ -1108,7 +1108,6 @@
   "Loading processes…": "ప్రాసెస్‌లను లోడ్ చేస్తోంది…",
   "Theme": "థీమ్",
   "Disk & I/O": "డిస్క్ & I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "సేవ నిర్ణయాలు మరియు ఈ విండో నుండి తీసుకున్న చర్యలు ఇక్కడ జాబితా చేయబడతాయి.",
   "All events": "అన్ని ఈవెంట్‌లు",
   "Information": "సమాచారం",
   "Warnings": "హెచ్చరికలు",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "సెన్సార్‌లు: చదవడం మళ్లీ ప్రారంభమైంది",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "కూలింగ్ {0}: హార్డ్‌వేర్ ఆటోమేటిక్‌కు తిరిగి వచ్చింది, దాని ఉష్ణోగ్రత సెన్సార్ లేదు లేదా పాతది",
   "Cooling {0}: control failed: {1}": "కూలింగ్ {0}: నియంత్రణ విఫలమైంది: {1}",
-  "Cooling {0}: under software control again": "కూలింగ్ {0}: మళ్లీ సాఫ్ట్‌వేర్ నియంత్రణలో ఉంది"
+  "Cooling {0}: under software control again": "కూలింగ్ {0}: మళ్లీ సాఫ్ట్‌వేర్ నియంత్రణలో ఉంది",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "సేవ నిర్ణయాలు, ఈ విండో నుండి చేసిన చర్యలు మరియు కంటైనర్ హెచ్చరికలు ఇక్కడ జాబితా చేయబడతాయి.",
+  "All sources": "అన్ని మూలాలు",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "చూపిన సమయంలో RustWTM సేవ నమోదు చేసింది, సేవ నడుస్తున్నంత వరకు ఉంచబడుతుంది.",
+  "Done from this window without the service; kept only until the window closes.": "సేవ లేకుండా ఈ విండో నుండి చేయబడింది; విండో మూసే వరకు మాత్రమే ఉంచబడుతుంది.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "ఈ విండో Docker రీడర్ గమనించింది. ఇది ప్రతి 10 సె.కి చదువుతుంది (కంటైనర్‌లు లేదా అవలోకనం తెరిచి ఉన్నప్పుడు ప్రతి 2 సె.కి), కాబట్టి మార్పు ఒక రీడింగ్ ముందే జరిగి ఉండవచ్చు. విండో మూసే వరకు మాత్రమే ఉంచబడుతుంది; నమోదైన ఘటనలలో లేదు.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "సెన్సార్ మరియు కూలింగ్ మార్పులు సుమారు ఆరు సెకన్లు కొనసాగిన తర్వాత, సెన్సార్ సహాయకం నడుస్తున్నప్పుడు మాత్రమే నమోదవుతాయి.",
+  "Show in Containers": "కంటైనర్‌లలో చూపు",
+  "Show sensors": "సెన్సార్‌లను చూపు",
+  "Show process": "ప్రాసెస్‌ను చూపు",
+  "The process is no longer running.": "ప్రాసెస్ ఇక నడవడం లేదు."
 }

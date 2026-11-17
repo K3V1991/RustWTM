@@ -20,6 +20,7 @@ mod disk_details;
 mod disks_tab;
 mod docker_worker;
 mod environment_view;
+mod event_rows;
 mod experience;
 mod file_locks;
 mod find_view;

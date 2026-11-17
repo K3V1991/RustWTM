@@ -78,6 +78,14 @@ pub struct Notice {
 }
 
 impl Notice {
+    /// A warning while a container is over a limit, information otherwise.
+    pub fn level(&self) -> wtm_ipc::EventLevel {
+        match self.kind {
+            Kind::Above { .. } => wtm_ipc::EventLevel::Warn,
+            _ => wtm_ipc::EventLevel::Info,
+        }
+    }
+
     /// The notice in the current language.
     pub fn text(&self) -> String {
         let name = self.name.clone();

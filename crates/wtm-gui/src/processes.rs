@@ -548,6 +548,8 @@ pub enum Intent {
     /// Open the Services tab with the services this process hosts.
     ShowServices(u32),
     ShowContainers,
+    /// Open Sensors & cooling.
+    ShowSensors,
     /// Open the editor that arranges the Overview cards.
     CustomizeOverview,
     /// Write a full memory dump of the process.

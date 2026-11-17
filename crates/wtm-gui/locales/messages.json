@@ -6653,12 +6653,6 @@
     "fr": "Disque et E/S",
     "es": "Disco y E/S"
   },
-  "Decisions of the service and actions taken from this window are listed here.": {
-    "tr": "Servisin kararları ve bu pencereden yapılan işlemler burada listelenir.",
-    "de": "Hier stehen die Entscheidungen des Dienstes und die Aktionen aus diesem Fenster.",
-    "fr": "Les décisions du service et les actions effectuées depuis cette fenêtre sont listées ici.",
-    "es": "Aquí se muestran las decisiones del servicio y las acciones realizadas desde esta ventana."
-  },
   "All events": {
     "tr": "Tüm olaylar",
     "de": "Alle Ereignisse",
@@ -11668,5 +11662,65 @@
     "de": "Kühlung {0}: wieder unter Softwaresteuerung",
     "fr": "Refroidissement {0} : de nouveau contrôlé par le logiciel",
     "es": "Refrigeración {0}: de nuevo bajo control del software"
+  },
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": {
+    "tr": "Servisin kararları, bu pencereden yapılan işlemler ve konteyner uyarıları burada listelenir.",
+    "de": "Entscheidungen des Dienstes, in diesem Fenster ausgeführte Aktionen und Container-Warnungen werden hier aufgeführt.",
+    "fr": "Les décisions du service, les actions effectuées depuis cette fenêtre et les alertes des conteneurs sont listées ici.",
+    "es": "Aquí se muestran las decisiones del servicio, las acciones realizadas desde esta ventana y las alertas de contenedores."
+  },
+  "All sources": {
+    "tr": "Tüm kaynaklar",
+    "de": "Alle Quellen",
+    "fr": "Toutes les sources",
+    "es": "Todos los orígenes"
+  },
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": {
+    "tr": "RustWTM servisi tarafından gösterilen zamanda kaydedildi; servis çalıştığı sürece saklanır.",
+    "de": "Vom RustWTM-Dienst zur angezeigten Zeit protokolliert und vom Dienst aufbewahrt, solange er läuft.",
+    "fr": "Consigné par le service RustWTM à l'heure indiquée, et conservé par le service tant qu'il fonctionne.",
+    "es": "Registrado por el servicio RustWTM a la hora indicada y conservado por el servicio mientras se ejecuta."
+  },
+  "Done from this window without the service; kept only until the window closes.": {
+    "tr": "Servis olmadan bu pencereden yapıldı; yalnızca pencere kapanana kadar saklanır.",
+    "de": "Ohne den Dienst in diesem Fenster ausgeführt; nur bis zum Schließen des Fensters aufbewahrt.",
+    "fr": "Effectué depuis cette fenêtre sans le service ; conservé seulement jusqu'à la fermeture de la fenêtre.",
+    "es": "Hecho desde esta ventana sin el servicio; se conserva solo hasta que se cierra la ventana."
+  },
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": {
+    "tr": "Bu pencerenin Docker okuyucusu fark etti. Okuyucu 10 sn'de bir okur (Konteynerler veya Genel bakış açıkken 2 sn'de bir), bu yüzden değişiklik bir okuma kadar önce olmuş olabilir. Yalnızca pencere kapanana kadar saklanır; kaydedilen olaylarda yer almaz.",
+    "de": "Vom Docker-Leser dieses Fensters bemerkt, der alle 10 s liest (alle 2 s, während Container oder Übersicht geöffnet ist). Die Änderung kann also bis zu einem Lesevorgang früher erfolgt sein. Nur bis zum Schließen des Fensters aufbewahrt; nicht in aufgezeichneten Vorfällen.",
+    "fr": "Remarqué par le lecteur Docker de cette fenêtre, qui lit toutes les 10 s (toutes les 2 s quand Conteneurs ou la vue d'ensemble est ouvert) : le changement peut dater d'une lecture plus tôt. Conservé seulement jusqu'à la fermeture de la fenêtre ; absent des incidents enregistrés.",
+    "es": "Detectado por el lector de Docker de esta ventana, que lee cada 10 s (cada 2 s mientras Contenedores o el resumen están abiertos), así que el cambio puede ser de hasta una lectura antes. Se conserva solo hasta que se cierra la ventana; no está en los incidentes registrados."
+  },
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": {
+    "tr": "Sensör ve soğutma değişiklikleri yaklaşık altı saniye sürdükten sonra ve yalnızca sensör yardımcısı çalışırken kaydedilir.",
+    "de": "Sensor- und Kühlungsänderungen werden protokolliert, sobald sie etwa sechs Sekunden angedauert haben, und nur, solange der Sensor-Helfer läuft.",
+    "fr": "Les changements des capteurs et du refroidissement sont consignés une fois qu'ils ont duré environ six secondes, et seulement pendant que l'assistant des capteurs fonctionne.",
+    "es": "Los cambios de sensores y refrigeración se registran cuando han durado unos seis segundos, y solo mientras se ejecuta el asistente de sensores."
+  },
+  "Show in Containers": {
+    "tr": "Konteynerlerde göster",
+    "de": "In Containern anzeigen",
+    "fr": "Afficher dans Conteneurs",
+    "es": "Mostrar en Contenedores"
+  },
+  "Show sensors": {
+    "tr": "Sensörleri göster",
+    "de": "Sensoren anzeigen",
+    "fr": "Afficher les capteurs",
+    "es": "Mostrar sensores"
+  },
+  "Show process": {
+    "tr": "İşlemi göster",
+    "de": "Prozess anzeigen",
+    "fr": "Afficher le processus",
+    "es": "Mostrar proceso"
+  },
+  "The process is no longer running.": {
+    "tr": "İşlem artık çalışmıyor.",
+    "de": "Der Prozess läuft nicht mehr.",
+    "fr": "Le processus ne s'exécute plus.",
+    "es": "El proceso ya no se está ejecutando."
   }
 }

@@ -523,8 +523,10 @@ impl State {
         );
         self.markers.clear();
         if let Some(window) = self.bounds() {
-            let events: Vec<_> = data
-                .events
+            // Every source, newest first: the service's log, this window's
+            // actions and its container alerts.
+            let all = crate::event_rows::rows(data);
+            let events: Vec<_> = all
                 .iter()
                 .rev()
                 .filter(|e| e.unix_ms >= window.start && e.unix_ms <= window.end)
@@ -545,12 +547,13 @@ impl State {
                     crate::i18n::format("Recent events in view ({0})", &[events.len().to_string()]),
                     |ui| {
                         for e in events {
-                            let message = crate::i18n::message(&e.message);
+                            let message = e.text();
                             if ui
                                 .add(
                                     egui::Button::new(format!(
-                                        "{} · {}",
+                                        "{} · {} · {}",
                                         timestamp(e.unix_ms),
+                                        e.source.label(),
                                         message.chars().take(100).collect::<String>()
                                     ))
                                     .truncate(),

@@ -1108,7 +1108,6 @@
   "Loading processes…": "ਪ੍ਰੋਸੈਸ ਲੋਡ ਹੋ ਰਹੇ ਹਨ…",
   "Theme": "ਥੀਮ",
   "Disk & I/O": "ਡਿਸਕ ਅਤੇ I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "ਸੇਵਾ ਦੇ ਫ਼ੈਸਲੇ ਅਤੇ ਇਸ ਵਿੰਡੋ ਤੋਂ ਕੀਤੀਆਂ ਕਾਰਵਾਈਆਂ ਇੱਥੇ ਸੂਚੀਬੱਧ ਹਨ।",
   "All events": "ਸਾਰੇ ਇਵੈਂਟ",
   "Information": "ਜਾਣਕਾਰੀ",
   "Warnings": "ਚੇਤਾਵਨੀਆਂ",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "ਸੈਂਸਰ: ਪੜ੍ਹਨਾ ਮੁੜ ਸ਼ੁਰੂ ਹੋਇਆ",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "ਕੂਲਿੰਗ {0}: ਹਾਰਡਵੇਅਰ ਆਟੋਮੈਟਿਕ 'ਤੇ ਵਾਪਸ, ਇਸਦਾ ਤਾਪਮਾਨ ਸੈਂਸਰ ਗੁੰਮ ਹੈ ਜਾਂ ਪੁਰਾਣਾ ਹੈ",
   "Cooling {0}: control failed: {1}": "ਕੂਲਿੰਗ {0}: ਕੰਟਰੋਲ ਅਸਫਲ: {1}",
-  "Cooling {0}: under software control again": "ਕੂਲਿੰਗ {0}: ਮੁੜ ਸਾਫਟਵੇਅਰ ਕੰਟਰੋਲ ਹੇਠ"
+  "Cooling {0}: under software control again": "ਕੂਲਿੰਗ {0}: ਮੁੜ ਸਾਫਟਵੇਅਰ ਕੰਟਰੋਲ ਹੇਠ",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "ਸੇਵਾ ਦੇ ਫ਼ੈਸਲੇ, ਇਸ ਵਿੰਡੋ ਤੋਂ ਕੀਤੀਆਂ ਕਾਰਵਾਈਆਂ ਅਤੇ ਕੰਟੇਨਰ ਚਿਤਾਵਨੀਆਂ ਇੱਥੇ ਸੂਚੀਬੱਧ ਹਨ।",
+  "All sources": "ਸਾਰੇ ਸਰੋਤ",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "ਦਿਖਾਏ ਸਮੇਂ RustWTM ਸੇਵਾ ਨੇ ਦਰਜ ਕੀਤਾ, ਅਤੇ ਸੇਵਾ ਚੱਲਣ ਤੱਕ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ।",
+  "Done from this window without the service; kept only until the window closes.": "ਸੇਵਾ ਤੋਂ ਬਿਨਾਂ ਇਸ ਵਿੰਡੋ ਤੋਂ ਕੀਤਾ; ਸਿਰਫ਼ ਵਿੰਡੋ ਬੰਦ ਹੋਣ ਤੱਕ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ।",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "ਇਸ ਵਿੰਡੋ ਦੇ Docker ਰੀਡਰ ਨੇ ਦੇਖਿਆ, ਜੋ ਹਰ 10 ਸਕਿੰਟ ਪੜ੍ਹਦਾ ਹੈ (ਕੰਟੇਨਰ ਜਾਂ ਝਲਕ ਖੁੱਲ੍ਹੀ ਹੋਣ 'ਤੇ ਹਰ 2 ਸਕਿੰਟ), ਇਸ ਲਈ ਬਦਲਾਅ ਇੱਕ ਪੜ੍ਹਤ ਜਿੰਨਾ ਪਹਿਲਾਂ ਹੋਇਆ ਹੋ ਸਕਦਾ ਹੈ। ਸਿਰਫ਼ ਵਿੰਡੋ ਬੰਦ ਹੋਣ ਤੱਕ ਰੱਖਿਆ ਜਾਂਦਾ ਹੈ; ਦਰਜ ਘਟਨਾਵਾਂ ਵਿੱਚ ਨਹੀਂ।",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "ਸੈਂਸਰ ਅਤੇ ਕੂਲਿੰਗ ਬਦਲਾਅ ਲਗਭਗ ਛੇ ਸਕਿੰਟ ਟਿਕਣ ਤੋਂ ਬਾਅਦ, ਅਤੇ ਸਿਰਫ਼ ਸੈਂਸਰ ਸਹਾਇਕ ਚੱਲਦੇ ਸਮੇਂ ਦਰਜ ਹੁੰਦੇ ਹਨ।",
+  "Show in Containers": "ਕੰਟੇਨਰਾਂ ਵਿੱਚ ਦਿਖਾਓ",
+  "Show sensors": "ਸੈਂਸਰ ਦਿਖਾਓ",
+  "Show process": "ਪ੍ਰਕਿਰਿਆ ਦਿਖਾਓ",
+  "The process is no longer running.": "ਪ੍ਰਕਿਰਿਆ ਹੁਣ ਨਹੀਂ ਚੱਲ ਰਹੀ।"
 }

@@ -1108,7 +1108,6 @@
   "Loading processes…": "Carregando processos…",
   "Theme": "Tema",
   "Disk & I/O": "Disco e E/S",
-  "Decisions of the service and actions taken from this window are listed here.": "As decisões do serviço e as ações tomadas a partir desta janela são listadas aqui.",
   "All events": "Todos os eventos",
   "Information": "Informações",
   "Warnings": "Avisos",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "Sensores: leitura retomada",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Resfriamento {0}: de volta ao automático do hardware, o sensor de temperatura está ausente ou desatualizado",
   "Cooling {0}: control failed: {1}": "Resfriamento {0}: falha no controle: {1}",
-  "Cooling {0}: under software control again": "Resfriamento {0}: novamente sob controle do software"
+  "Cooling {0}: under software control again": "Resfriamento {0}: novamente sob controle do software",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "Aqui aparecem as decisões do serviço, as ações feitas nesta janela e os alertas de contêineres.",
+  "All sources": "Todas as origens",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "Registrado pelo serviço RustWTM no horário mostrado e mantido pelo serviço enquanto ele é executado.",
+  "Done from this window without the service; kept only until the window closes.": "Feito nesta janela sem o serviço; mantido só até a janela fechar.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "Percebido pelo leitor do Docker desta janela, que lê a cada 10 s (a cada 2 s enquanto Contêineres ou a Visão geral está aberta), então a mudança pode ter ocorrido até uma leitura antes. Mantido só até a janela fechar; não está nos incidentes registrados.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "Mudanças de sensores e resfriamento são registradas depois de durarem cerca de seis segundos, e só enquanto o auxiliar de sensores está em execução.",
+  "Show in Containers": "Mostrar em Contêineres",
+  "Show sensors": "Mostrar sensores",
+  "Show process": "Mostrar processo",
+  "The process is no longer running.": "O processo não está mais em execução."
 }

@@ -3003,14 +3003,10 @@ fn container_toast(
 
 /// A container notice as a notification; its text is already translated.
 fn container_event(notice: &crate::container_alerts::Notice) -> Event {
-    let level = match notice.kind {
-        crate::container_alerts::Kind::Above { .. } => EventLevel::Warn,
-        _ => EventLevel::Info,
-    };
     Event {
         id: 0,
         unix_ms: 0,
-        level,
+        level: notice.level(),
         pid: None,
         name: None,
         message: notice.text(),

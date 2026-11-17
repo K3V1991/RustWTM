@@ -54,6 +54,12 @@ All notable changes to this project are documented here. The format follows
   its temperature is missing or stale, fails, or comes back under software
   control. Only changes that last three readings (about six seconds) are
   logged, and only while the sensor helper runs.
+- Events lists container alerts too, and every event has a source (the
+  service, this window or Docker) that can be filtered on. An event's
+  details say where it was recorded, how exact its time is and how long it
+  is kept, and lead to the process it names (only while the same PID and
+  name run), to Containers or to Sensors & cooling. The Performance charts'
+  event markers include container alerts as well.
 
 ### Fixed
 

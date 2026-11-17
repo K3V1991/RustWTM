@@ -1108,7 +1108,6 @@
   "Loading processes…": "ಪ್ರಾಸೆಸ್‌ಗಳನ್ನು ಲೋಡ್ ಮಾಡಲಾಗುತ್ತಿದೆ…",
   "Theme": "ಥೀಮ್",
   "Disk & I/O": "ಡಿಸ್ಕ್ ಮತ್ತು I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "ಸೇವೆಯ ನಿರ್ಧಾರಗಳು ಮತ್ತು ಈ ವಿಂಡೋದಿಂದ ಕೈಗೊಂಡ ಕ್ರಿಯೆಗಳನ್ನು ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡಲಾಗಿದೆ.",
   "All events": "ಎಲ್ಲಾ ಈವೆಂಟ್‌ಗಳು",
   "Information": "ಮಾಹಿತಿ",
   "Warnings": "ಎಚ್ಚರಿಕೆಗಳು",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "ಸೆನ್ಸರ್‌ಗಳು: ಓದುವಿಕೆ ಮತ್ತೆ ಆರಂಭವಾಗಿದೆ",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "ಕೂಲಿಂಗ್ {0}: ಹಾರ್ಡ್‌ವೇರ್ ಸ್ವಯಂಚಾಲಿತಕ್ಕೆ ಮರಳಿದೆ, ಇದರ ತಾಪಮಾನ ಸೆನ್ಸರ್ ಕಾಣೆಯಾಗಿದೆ ಅಥವಾ ಹಳೆಯದಾಗಿದೆ",
   "Cooling {0}: control failed: {1}": "ಕೂಲಿಂಗ್ {0}: ನಿಯಂತ್ರಣ ವಿಫಲವಾಗಿದೆ: {1}",
-  "Cooling {0}: under software control again": "ಕೂಲಿಂಗ್ {0}: ಮತ್ತೆ ಸಾಫ್ಟ್‌ವೇರ್ ನಿಯಂತ್ರಣದಲ್ಲಿದೆ"
+  "Cooling {0}: under software control again": "ಕೂಲಿಂಗ್ {0}: ಮತ್ತೆ ಸಾಫ್ಟ್‌ವೇರ್ ನಿಯಂತ್ರಣದಲ್ಲಿದೆ",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "ಸೇವೆಯ ನಿರ್ಧಾರಗಳು, ಈ ವಿಂಡೋದಿಂದ ಮಾಡಿದ ಕ್ರಿಯೆಗಳು ಮತ್ತು ಕಂಟೇನರ್ ಎಚ್ಚರಿಕೆಗಳು ಇಲ್ಲಿ ಪಟ್ಟಿಯಾಗಿವೆ.",
+  "All sources": "ಎಲ್ಲಾ ಮೂಲಗಳು",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "ತೋರಿಸಿದ ಸಮಯದಲ್ಲಿ RustWTM ಸೇವೆ ದಾಖಲಿಸಿದೆ, ಮತ್ತು ಸೇವೆ ಚಾಲನೆಯಲ್ಲಿರುವವರೆಗೆ ಇರಿಸಲಾಗುತ್ತದೆ.",
+  "Done from this window without the service; kept only until the window closes.": "ಸೇವೆ ಇಲ್ಲದೆ ಈ ವಿಂಡೋದಿಂದ ಮಾಡಲಾಗಿದೆ; ವಿಂಡೋ ಮುಚ್ಚುವವರೆಗೆ ಮಾತ್ರ ಇರಿಸಲಾಗುತ್ತದೆ.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "ಈ ವಿಂಡೋದ Docker ರೀಡರ್ ಗಮನಿಸಿದೆ, ಅದು ಪ್ರತಿ 10 ಸೆ. ಓದುತ್ತದೆ (ಕಂಟೈನರ್‌ಗಳು ಅಥವಾ ಅವಲೋಕನ ತೆರೆದಿರುವಾಗ ಪ್ರತಿ 2 ಸೆ.), ಆದ್ದರಿಂದ ಬದಲಾವಣೆ ಒಂದು ಓದುವಿಕೆಯಷ್ಟು ಮೊದಲೇ ಆಗಿರಬಹುದು. ವಿಂಡೋ ಮುಚ್ಚುವವರೆಗೆ ಮಾತ್ರ ಇರಿಸಲಾಗುತ್ತದೆ; ದಾಖಲಾದ ಘಟನೆಗಳಲ್ಲಿ ಇಲ್ಲ.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "ಸೆನ್ಸರ್ ಮತ್ತು ಕೂಲಿಂಗ್ ಬದಲಾವಣೆಗಳು ಸುಮಾರು ಆರು ಸೆಕೆಂಡು ಉಳಿದ ನಂತರ, ಮತ್ತು ಸೆನ್ಸರ್ ಸಹಾಯಕ ಚಾಲನೆಯಲ್ಲಿರುವಾಗ ಮಾತ್ರ ದಾಖಲಾಗುತ್ತವೆ.",
+  "Show in Containers": "ಕಂಟೈನರ್‌ಗಳಲ್ಲಿ ತೋರಿಸಿ",
+  "Show sensors": "ಸೆನ್ಸರ್‌ಗಳನ್ನು ತೋರಿಸಿ",
+  "Show process": "ಪ್ರಕ್ರಿಯೆಯನ್ನು ತೋರಿಸಿ",
+  "The process is no longer running.": "ಪ್ರಕ್ರಿಯೆ ಇನ್ನು ಚಾಲನೆಯಲ್ಲಿಲ್ಲ."
 }

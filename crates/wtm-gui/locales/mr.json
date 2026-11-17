@@ -1108,7 +1108,6 @@
   "Loading processes…": "प्रोसेस लोड करत आहे…",
   "Theme": "थीम",
   "Disk & I/O": "डिस्क आणि I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "सेवेचे निर्णय आणि या विंडोमधून घेतलेल्या क्रिया येथे सूचीबद्ध आहेत.",
   "All events": "सर्व इव्हेंट",
   "Information": "माहिती",
   "Warnings": "चेतावण्या",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "सेन्सर: वाचन पुन्हा सुरू झाले",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "कूलिंग {0}: हार्डवेअर स्वयंचलितवर परत, त्याचा तापमान सेन्सर गहाळ आहे किंवा जुना आहे",
   "Cooling {0}: control failed: {1}": "कूलिंग {0}: नियंत्रण अयशस्वी: {1}",
-  "Cooling {0}: under software control again": "कूलिंग {0}: पुन्हा सॉफ्टवेअर नियंत्रणाखाली"
+  "Cooling {0}: under software control again": "कूलिंग {0}: पुन्हा सॉफ्टवेअर नियंत्रणाखाली",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "सेवेचे निर्णय, या विंडोमधून केलेल्या क्रिया आणि कंटेनर सूचना येथे सूचीबद्ध आहेत.",
+  "All sources": "सर्व स्रोत",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "दाखवलेल्या वेळी RustWTM सेवेने नोंदवले, आणि सेवा चालू असेपर्यंत ठेवले जाते.",
+  "Done from this window without the service; kept only until the window closes.": "सेवेशिवाय या विंडोमधून केले; विंडो बंद होईपर्यंतच ठेवले जाते.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "या विंडोच्या Docker रीडरने लक्षात घेतले, जो दर 10 सेकंदांनी वाचतो (कंटेनर किंवा विहंगावलोकन उघडे असताना दर 2 सेकंदांनी), त्यामुळे बदल एका वाचनाइतका आधी झाला असू शकतो. विंडो बंद होईपर्यंतच ठेवले जाते; नोंदवलेल्या घटनांमध्ये नाही.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "सेन्सर आणि कूलिंग बदल सुमारे सहा सेकंद टिकल्यानंतर आणि फक्त सेन्सर मदतनीस चालू असताना नोंदवले जातात.",
+  "Show in Containers": "कंटेनरमध्ये दाखवा",
+  "Show sensors": "सेन्सर दाखवा",
+  "Show process": "प्रक्रिया दाखवा",
+  "The process is no longer running.": "प्रक्रिया आता चालू नाही."
 }

@@ -1108,7 +1108,6 @@
   "Loading processes…": "プロセスを読み込んでいます…",
   "Theme": "テーマ",
   "Disk & I/O": "ディスクと I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "サービスの判断と、このウィンドウから実行した操作がここに表示されます。",
   "All events": "すべてのイベント",
   "Information": "情報",
   "Warnings": "警告",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "センサー: 読み取りを再開しました",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "冷却 {0}: ハードウェアの自動制御に戻りました。温度センサーがないか、値が古くなっています",
   "Cooling {0}: control failed: {1}": "冷却 {0}: 制御に失敗しました: {1}",
-  "Cooling {0}: under software control again": "冷却 {0}: 再びソフトウェアで制御しています"
+  "Cooling {0}: under software control again": "冷却 {0}: 再びソフトウェアで制御しています",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "サービスの判断、このウィンドウから行った操作、コンテナーのアラートがここに一覧表示されます。",
+  "All sources": "すべてのソース",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "表示された時刻に RustWTM サービスが記録しました。サービスの実行中は保持されます。",
+  "Done from this window without the service; kept only until the window closes.": "サービスを使わずにこのウィンドウから実行しました。ウィンドウを閉じるまでのみ保持されます。",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "このウィンドウの Docker リーダーが検出しました。10 秒ごと (コンテナーまたは概要を開いている間は 2 秒ごと) に読み取るため、変化は最大 1 回分の読み取り前に起きている可能性があります。ウィンドウを閉じるまでのみ保持され、記録されたインシデントには含まれません。",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "センサーと冷却の変化は、約 6 秒続いた後、センサー ヘルパーの実行中にのみ記録されます。",
+  "Show in Containers": "コンテナーで表示",
+  "Show sensors": "センサーを表示",
+  "Show process": "プロセスを表示",
+  "The process is no longer running.": "プロセスはもう実行されていません。"
 }

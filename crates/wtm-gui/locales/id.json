@@ -1108,7 +1108,6 @@
   "Loading processes…": "Memuat proses…",
   "Theme": "Tema",
   "Disk & I/O": "Disk & I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "Keputusan layanan dan tindakan yang dilakukan dari jendela ini dicantumkan di sini.",
   "All events": "Semua peristiwa",
   "Information": "Informasi",
   "Warnings": "Peringatan",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "Sensor: pembacaan berlanjut",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Pendinginan {0}: kembali ke otomatis perangkat keras, sensor suhunya hilang atau usang",
   "Cooling {0}: control failed: {1}": "Pendinginan {0}: kontrol gagal: {1}",
-  "Cooling {0}: under software control again": "Pendinginan {0}: kembali dikendalikan perangkat lunak"
+  "Cooling {0}: under software control again": "Pendinginan {0}: kembali dikendalikan perangkat lunak",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "Keputusan layanan, tindakan dari jendela ini, dan peringatan kontainer tercantum di sini.",
+  "All sources": "Semua sumber",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "Dicatat oleh layanan RustWTM pada waktu yang ditampilkan, dan disimpan oleh layanan selama berjalan.",
+  "Done from this window without the service; kept only until the window closes.": "Dilakukan dari jendela ini tanpa layanan; disimpan hanya sampai jendela ditutup.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "Diketahui oleh pembaca Docker jendela ini, yang membaca setiap 10 dtk (setiap 2 dtk saat Kontainer atau Ringkasan terbuka), jadi perubahan bisa terjadi hingga satu pembacaan lebih awal. Disimpan hanya sampai jendela ditutup; tidak ada di insiden yang direkam.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "Perubahan sensor dan pendinginan dicatat setelah berlangsung sekitar enam detik, dan hanya saat pembantu sensor berjalan.",
+  "Show in Containers": "Tampilkan di Kontainer",
+  "Show sensors": "Tampilkan sensor",
+  "Show process": "Tampilkan proses",
+  "The process is no longer running.": "Proses sudah tidak berjalan."
 }

@@ -1108,7 +1108,6 @@
   "Loading processes…": "Завантаження процесів…",
   "Theme": "Тема",
   "Disk & I/O": "Диск і введення-виведення",
-  "Decisions of the service and actions taken from this window are listed here.": "Тут наведено рішення служби та дії, виконані з цього вікна.",
   "All events": "Усі події",
   "Information": "Відомості",
   "Warnings": "Попередження",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "Датчики: читання відновлено",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Охолодження {0}: повернуто до автоматики обладнання, датчик температури відсутній або застарів",
   "Cooling {0}: control failed: {1}": "Охолодження {0}: помилка керування: {1}",
-  "Cooling {0}: under software control again": "Охолодження {0}: знову під керуванням програми"
+  "Cooling {0}: under software control again": "Охолодження {0}: знову під керуванням програми",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "Тут перелічено рішення служби, дії з цього вікна та сповіщення контейнерів.",
+  "All sources": "Усі джерела",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "Записано службою RustWTM у вказаний час і зберігається службою, поки вона працює.",
+  "Done from this window without the service; kept only until the window closes.": "Зроблено з цього вікна без служби; зберігається лише до закриття вікна.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "Помічено модулем читання Docker цього вікна, який читає кожні 10 с (кожні 2 с, поки відкрито «Контейнери» або «Огляд»), тож зміна могла статися на одне читання раніше. Зберігається лише до закриття вікна; немає в записаних інцидентах.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "Зміни датчиків і охолодження записуються, коли тривають близько шести секунд, і лише поки працює помічник датчиків.",
+  "Show in Containers": "Показати в контейнерах",
+  "Show sensors": "Показати датчики",
+  "Show process": "Показати процес",
+  "The process is no longer running.": "Процес більше не працює."
 }

@@ -1108,7 +1108,6 @@
   "Loading processes…": "正在加载进程…",
   "Theme": "主题",
   "Disk & I/O": "磁盘和 I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "此处列出服务的决策以及从此窗口执行的操作。",
   "All events": "所有事件",
   "Information": "信息",
   "Warnings": "警告",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "传感器：已恢复读取",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "散热 {0}：已恢复为硬件自动控制，其温度传感器缺失或数据过期",
   "Cooling {0}: control failed: {1}": "散热 {0}：控制失败：{1}",
-  "Cooling {0}: under software control again": "散热 {0}：已重新由软件控制"
+  "Cooling {0}: under software control again": "散热 {0}：已重新由软件控制",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "此处列出服务的决定、从此窗口执行的操作以及容器警报。",
+  "All sources": "所有来源",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "由 RustWTM 服务在所示时间记录，服务运行期间会保留。",
+  "Done from this window without the service; kept only until the window closes.": "未经服务从此窗口执行；仅保留到窗口关闭。",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "由此窗口的 Docker 读取器发现。它每 10 秒读取一次（容器或概览打开时每 2 秒一次），因此变化可能早于记录最多一次读取。仅保留到窗口关闭；不在已记录的事件中。",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "传感器和散热的变化持续约六秒后才会记录，并且仅在传感器助手运行时记录。",
+  "Show in Containers": "在容器中显示",
+  "Show sensors": "显示传感器",
+  "Show process": "显示进程",
+  "The process is no longer running.": "该进程已不再运行。"
 }

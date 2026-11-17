@@ -1108,7 +1108,6 @@
   "Loading processes…": "செயல்முறைகளை ஏற்றுகிறது…",
   "Theme": "தீம்",
   "Disk & I/O": "வட்டு & I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "சேவையின் முடிவுகளும் இந்தச் சாளரத்திலிருந்து எடுக்கப்பட்ட செயல்களும் இங்கே பட்டியலிடப்படும்.",
   "All events": "எல்லா நிகழ்வுகளும்",
   "Information": "தகவல்",
   "Warnings": "எச்சரிக்கைகள்",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "சென்சார்கள்: வாசிப்பு மீண்டும் தொடங்கியது",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "குளிரூட்டல் {0}: வன்பொருள் தானியங்கிக்குத் திரும்பியது, அதன் வெப்பநிலை சென்சார் இல்லை அல்லது பழையது",
   "Cooling {0}: control failed: {1}": "குளிரூட்டல் {0}: கட்டுப்பாடு தோல்வி: {1}",
-  "Cooling {0}: under software control again": "குளிரூட்டல் {0}: மீண்டும் மென்பொருள் கட்டுப்பாட்டில்"
+  "Cooling {0}: under software control again": "குளிரூட்டல் {0}: மீண்டும் மென்பொருள் கட்டுப்பாட்டில்",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "சேவையின் முடிவுகள், இந்தச் சாளரத்திலிருந்து செய்த செயல்கள் மற்றும் கண்டெய்னர் எச்சரிக்கைகள் இங்கே பட்டியலிடப்படும்.",
+  "All sources": "எல்லா மூலங்களும்",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "காட்டப்பட்ட நேரத்தில் RustWTM சேவை பதிவுசெய்தது; சேவை இயங்கும் வரை வைக்கப்படும்.",
+  "Done from this window without the service; kept only until the window closes.": "சேவை இல்லாமல் இந்தச் சாளரத்திலிருந்து செய்யப்பட்டது; சாளரம் மூடும் வரை மட்டுமே வைக்கப்படும்.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "இந்தச் சாளரத்தின் Docker வாசிப்பான் கவனித்தது. அது ஒவ்வொரு 10 வி. வாசிக்கும் (கொள்கலன்கள் அல்லது மேலோட்டம் திறந்திருக்கும்போது ஒவ்வொரு 2 வி.), எனவே மாற்றம் ஒரு வாசிப்பு அளவு முன்பே நடந்திருக்கலாம். சாளரம் மூடும் வரை மட்டுமே வைக்கப்படும்; பதிவுசெய்த நிகழ்வுகளில் இல்லை.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "சென்சார் மற்றும் குளிரூட்டல் மாற்றங்கள் சுமார் ஆறு வினாடிகள் நீடித்த பிறகு, சென்சார் உதவி இயங்கும்போது மட்டுமே பதிவுசெய்யப்படும்.",
+  "Show in Containers": "கொள்கலன்களில் காட்டு",
+  "Show sensors": "சென்சார்களைக் காட்டு",
+  "Show process": "செயல்முறையைக் காட்டு",
+  "The process is no longer running.": "செயல்முறை இனி இயங்கவில்லை."
 }

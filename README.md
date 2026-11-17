@@ -314,8 +314,11 @@ stable identity. [Transfer verification](docs/repository-migration.md).
 - **Workspace inspector**: saved adaptive/always/hidden modes, system facts
   without a selected process and explicit summary copy. Two-level table headers
   retain system totals under process filters. [Behavior and scope](docs/process-workspace.md).
-- Events: search by process, PID or message alongside severity filters; open a
-  message to read and copy the full diagnostic, even in compact windows.
+- Events: the service's decisions, sensor and cooling changes, actions taken
+  from the window and container alerts in one list, filtered by severity and
+  source and searched by process, PID or message; open a message to read and
+  copy the full diagnostic, see where it was recorded and how exact its time
+  is, and go to the process, container or sensors it concerns.
   [Event diagnostics preview](screenshots/events.png).
 - Monitoring data shows its last receipt age on every page. Sampling failures
   and delayed updates display a warning while retaining the last values.

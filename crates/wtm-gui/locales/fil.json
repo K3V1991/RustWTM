@@ -1108,7 +1108,6 @@
   "Loading processes…": "Nilo-load ang mga proseso…",
   "Theme": "Tema",
   "Disk & I/O": "Disk at I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "Nakalista rito ang mga desisyon ng service at ang mga aksyong ginawa mula sa window na ito.",
   "All events": "Lahat ng event",
   "Information": "Impormasyon",
   "Warnings": "Mga babala",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "Mga sensor: nagpatuloy ang pagbasa",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Paglamig {0}: bumalik sa hardware automatic, nawawala o luma ang temperature sensor nito",
   "Cooling {0}: control failed: {1}": "Paglamig {0}: nabigo ang kontrol: {1}",
-  "Cooling {0}: under software control again": "Paglamig {0}: muling kontrolado ng software"
+  "Cooling {0}: under software control again": "Paglamig {0}: muling kontrolado ng software",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "Nakalista rito ang mga desisyon ng serbisyo, mga aksyong ginawa mula sa window na ito at mga alerto ng container.",
+  "All sources": "Lahat ng pinagmulan",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "Itinala ng RustWTM service sa oras na ipinakita, at itinatago ng serbisyo habang tumatakbo ito.",
+  "Done from this window without the service; kept only until the window closes.": "Ginawa mula sa window na ito nang walang serbisyo; itinatago lang hanggang magsara ang window.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "Napansin ng Docker reader ng window na ito, na nagbabasa bawat 10 s (bawat 2 s habang bukas ang Mga container o ang Pangkalahatang-ideya), kaya maaaring nangyari ang pagbabago hanggang isang pagbasa nang mas maaga. Itinatago lang hanggang magsara ang window; wala sa mga naitalang insidente.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "Itinatala ang mga pagbabago sa sensor at paglamig kapag tumagal na ang mga ito nang mga anim na segundo, at habang tumatakbo lang ang sensor helper.",
+  "Show in Containers": "Ipakita sa Mga container",
+  "Show sensors": "Ipakita ang mga sensor",
+  "Show process": "Ipakita ang proseso",
+  "The process is no longer running.": "Hindi na tumatakbo ang proseso."
 }

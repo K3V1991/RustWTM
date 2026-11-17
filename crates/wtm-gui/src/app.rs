@@ -1450,7 +1450,7 @@ impl eframe::App for App {
                             &mut state.containers,
                         )
                     }
-                    Tab::Events => events(ui, &data, &mut state.events),
+                    Tab::Events => intents.extend(events(ui, &data, &mut state.events)),
                     Tab::History => {
                         ui.horizontal_wrapped(|ui| {
                             crate::theme::choice(
@@ -2213,6 +2213,7 @@ impl eframe::App for App {
                     state.tab = Tab::Limits;
                 }
                 Intent::ShowContainers => state.tab = Tab::Containers,
+                Intent::ShowSensors => state.tab = Tab::Sensors,
                 Intent::CustomizeOverview => {
                     state.overview_editor =
                         Some(crate::overview_layout::Editor::new(&state.overview_layout));
@@ -4748,24 +4749,40 @@ fn level_rank(level: EventLevel) -> u8 {
 #[derive(Default)]
 struct EventsView {
     level: Option<EventLevel>,
+    source: Option<crate::event_rows::Source>,
     search: String,
-    selected: Option<(u64, u64)>,
+    selected: Option<(crate::event_rows::Source, u64, u64)>,
 }
 
-fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
+/// The process an event names, if it still runs: its PID alone may have
+/// been reused since.
+fn event_process(data: &Data, pid: Option<u32>, name: Option<&str>) -> Option<ProcessRef> {
+    let (pid, name) = (pid?, name?);
+    let snapshot = data.snapshot.as_ref()?;
+    snapshot
+        .processes
+        .iter()
+        .find(|p| p.pid == pid && p.name.eq_ignore_ascii_case(name))
+        .map(ProcessRef::from)
+}
+
+fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) -> Vec<Intent> {
+    use crate::event_rows::Source;
     use crate::sort::{Sort, header, text};
-    if data.events.is_empty() {
+    let mut intents = Vec::new();
+    let all = crate::event_rows::rows(data);
+    if all.is_empty() {
         view.selected = None;
         crate::theme::panel(ui, |ui| {
             crate::theme::empty_state(
                 ui,
                 crate::i18n::tr("No events yet."),
                 crate::i18n::tr(
-                    "Decisions of the service and actions taken from this window are listed here.",
+                    "Decisions of the service, actions taken from this window and container alerts are listed here.",
                 ),
             );
         });
-        return;
+        return intents;
     }
     crate::theme::panel(ui, |ui| {
         ui.horizontal_wrapped(|ui| {
@@ -4776,6 +4793,12 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
                 (Some(EventLevel::Error), crate::i18n::tr("Errors")),
             ] {
                 crate::theme::choice(ui, &mut view.level, value, label);
+            }
+        });
+        ui.horizontal_wrapped(|ui| {
+            crate::theme::choice(ui, &mut view.source, None, crate::i18n::tr("All sources"));
+            for source in Source::ALL {
+                crate::theme::choice(ui, &mut view.source, Some(source), source.label());
             }
         });
         ui.horizontal_wrapped(|ui| {
@@ -4793,35 +4816,30 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
         });
     });
     let query = view.search.trim().to_lowercase();
-    let mut items: Vec<_> = data
-        .events
+    let mut items: Vec<_> = all
         .iter()
         .rev()
         .filter(|e| view.level.is_none_or(|l| e.level == l))
+        .filter(|e| view.source.is_none_or(|s| e.source == s))
         .filter(|e| {
             query.is_empty()
-                || e.name
-                    .as_deref()
-                    .unwrap_or("")
-                    .to_lowercase()
-                    .contains(&query)
-                || e.message.to_lowercase().contains(&query)
-                || crate::i18n::message(&e.message)
-                    .to_lowercase()
-                    .contains(&query)
+                || e.name.unwrap_or("").to_lowercase().contains(&query)
+                || e.raw().to_lowercase().contains(&query)
+                || e.text().to_lowercase().contains(&query)
+                || e.source.label().to_lowercase().contains(&query)
                 || e.pid.is_some_and(|pid| pid.to_string().contains(&query))
         })
         .collect();
     ui.weak(crate::i18n::format_count(
         "{0} of {1} event",
         "{0} of {1} events",
-        data.events.len(),
-        &[items.len().to_string(), data.events.len().to_string()],
+        all.len(),
+        &[items.len().to_string(), all.len().to_string()],
     ));
     // Filtering keeps an open detail; eviction from the bounded buffer clears it.
     if let Some(event) = view
         .selected
-        .and_then(|key| data.events.iter().find(|e| (e.id, e.unix_ms) == key))
+        .and_then(|key| all.iter().find(|e| e.key == key))
     {
         crate::theme::card(ui, crate::i18n::tr("Event details"), |ui| {
             ui.horizontal_wrapped(|ui| {
@@ -4830,15 +4848,15 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
                     level_color(ui, event.level),
                     crate::i18n::debug(event.level),
                 );
-                if let Some(name) = &event.name {
+                ui.weak(event.source.label());
+                if let Some(name) = event.name {
                     ui.strong(name);
                 }
                 if let Some(pid) = event.pid {
                     ui.monospace(format!("PID {pid}"));
                 }
                 if ui.small_button(crate::i18n::tr("Copy message")).clicked() {
-                    ui.ctx()
-                        .copy_text(crate::i18n::message(&event.message).into_owned());
+                    ui.ctx().copy_text(event.text().into_owned());
                 }
                 if ui.small_button(crate::i18n::tr("Close details")).clicked() {
                     view.selected = None;
@@ -4849,33 +4867,66 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
                 .max_height(96.0)
                 .show(ui, |ui| {
                     ui.add(
-                        egui::Label::new(crate::i18n::message(&event.message).as_ref())
+                        egui::Label::new(event.text().as_ref())
                             .wrap()
                             .selectable(true),
                     );
                 });
+            ui.add(egui::Label::new(RichText::new(event.source.explanation()).weak()).wrap());
+            if event.about_sensors() {
+                ui.add(
+                    egui::Label::new(
+                        RichText::new(crate::i18n::tr(
+                            "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.",
+                        ))
+                        .weak(),
+                    )
+                    .wrap(),
+                );
+            }
+            ui.horizontal_wrapped(|ui| {
+                if event.source == Source::Docker
+                    && ui.button(crate::i18n::tr("Show in Containers")).clicked()
+                {
+                    intents.push(Intent::ShowContainers);
+                }
+                if event.about_sensors() && ui.button(crate::i18n::tr("Show sensors")).clicked() {
+                    intents.push(Intent::ShowSensors);
+                }
+                if event.pid.is_some() && event.name.is_some() {
+                    match event_process(data, event.pid, event.name) {
+                        Some(process) => {
+                            if ui.button(crate::i18n::tr("Show process")).clicked() {
+                                intents.push(Intent::Reveal(process));
+                            }
+                        }
+                        None => {
+                            ui.weak(crate::i18n::tr("The process is no longer running."));
+                        }
+                    }
+                }
+            });
         });
     } else {
         view.selected = None;
     }
     ui.add_space(0.0);
     // Newest first, the order they arrive in.
-    let mut sort = Sort::load(ui, "events", Sort::new(0, true));
+    let mut sort = Sort::load(ui, "event_rows", Sort::new(0, true));
     sort.apply(&mut items, |a, b, col| match col {
         0 => a.unix_ms.cmp(&b.unix_ms),
         1 => level_rank(a.level).cmp(&level_rank(b.level)),
-        2 => a.pid.cmp(&b.pid),
-        3 => text(
-            a.name.as_deref().unwrap_or(""),
-            b.name.as_deref().unwrap_or(""),
-        ),
-        _ => text(&a.message, &b.message),
+        2 => text(a.source.label(), b.source.label()),
+        3 => a.pid.cmp(&b.pid),
+        4 => text(a.name.unwrap_or(""), b.name.unwrap_or("")),
+        _ => text(a.raw(), b.raw()),
     });
     let row_height = ui.spacing().interact_size.y;
     // Every header fits at first; narrow windows scroll sideways.
     let widths: Vec<f32> = [
         ("Time", 80.0),
         ("Level", 90.0),
+        ("Source", 100.0),
         ("PID", 64.0),
         ("Process", 160.0),
     ]
@@ -4898,13 +4949,15 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
             .cell_layout(egui::Layout::left_to_right(egui::Align::Center))
             .column(Column::initial(widths[0]))
             .column(Column::initial(widths[1]))
-            .column(Column::initial(widths[2]))
-            .column(Column::initial(widths[3]).clip(true))
+            .column(Column::initial(widths[2]).clip(true))
+            .column(Column::initial(widths[3]))
+            .column(Column::initial(widths[4]).clip(true))
             .column(Column::remainder().clip(true))
             .header(row_height, |mut h| {
                 for (col, (label, numeric)) in [
                     (crate::i18n::tr("Time"), false),
                     (crate::i18n::tr("Level"), false),
+                    (crate::i18n::tr("Source"), false),
                     ("PID", true),
                     (crate::i18n::tr("Process"), false),
                     (crate::i18n::tr("Message"), false),
@@ -4942,6 +4995,11 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
+                            ui.label(e.source.label());
+                        })
+                    });
+                    row.col(|ui| {
+                        crate::theme::table_cell(ui, |ui| {
                             crate::theme::right(
                                 ui,
                                 e.pid.map(|p| p.to_string()).unwrap_or_default(),
@@ -4950,44 +5008,39 @@ fn events(ui: &mut Ui, data: &Data, view: &mut EventsView) {
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            ui.label(e.name.clone().unwrap_or_default());
+                            ui.label(e.name.unwrap_or_default());
                         })
                     });
                     row.col(|ui| {
                         crate::theme::table_cell(ui, |ui| {
-                            let message = crate::i18n::message(&e.message);
+                            let message = e.text();
                             // A label, so the message starts where its header does.
                             let response = crate::theme::table_name(
                                 ui,
                                 message.as_ref(),
-                                view.selected == Some((e.id, e.unix_ms)),
+                                view.selected == Some(e.key),
                             );
                             let mut open = response.clicked();
-                            crate::context_actions::menu(
-                                &response,
-                                ("event", e.id, e.unix_ms),
-                                |ui| {
-                                    if crate::context_actions::action(
-                                        ui,
-                                        crate::i18n::tr("Copy message"),
-                                    ) {
-                                        ui.ctx().copy_text(message.to_string());
-                                    }
-                                    open |= crate::context_actions::action(
-                                        ui,
-                                        crate::i18n::tr("Details"),
-                                    );
-                                },
-                            );
+                            crate::context_actions::menu(&response, ("event", e.key), |ui| {
+                                if crate::context_actions::action(
+                                    ui,
+                                    crate::i18n::tr("Copy message"),
+                                ) {
+                                    ui.ctx().copy_text(message.to_string());
+                                }
+                                open |=
+                                    crate::context_actions::action(ui, crate::i18n::tr("Details"));
+                            });
                             if open {
-                                view.selected = Some((e.id, e.unix_ms));
+                                view.selected = Some(e.key);
                             }
                         })
                     });
                 });
             });
     });
-    sort.store(ui, "events");
+    sort.store(ui, "event_rows");
+    intents
 }
 
 /// A change asked about before it is made: stopping or disabling a service
@@ -7499,7 +7552,7 @@ mod tests {
                         Some(None),
                     );
                     performance(&mut cols[1], &d);
-                    events(&mut cols[1], &d, &mut EventsView::default());
+                    let _ = events(&mut cols[1], &d, &mut EventsView::default());
                 });
             });
         h.run_steps(3);
@@ -7520,7 +7573,7 @@ mod tests {
         d.snapshot = None;
         let mut h = Harness::builder().allow_missing_glyphs().build_ui(|ui| {
             governor(ui, &d, &mut Vec::new());
-            events(ui, &d, &mut EventsView::default());
+            let _ = events(ui, &d, &mut EventsView::default());
             performance(ui, &d);
         });
         h.run_steps(2);
@@ -10862,6 +10915,7 @@ o-such-folder",
 
     #[test]
     fn event_search_and_full_message_details_work_in_compact_and_wide_themes() {
+        use crate::event_rows::Source::Service;
         for theme in [egui::Theme::Dark, egui::Theme::Light] {
             for size in [[820.0, 500.0], [1440.0, 1000.0]] {
                 let mut d = data();
@@ -10876,7 +10930,7 @@ o-such-folder",
                         |ui, (d, view): &mut (Data, EventsView)| {
                             crate::theme::apply(ui.ctx());
                             ui.ctx().set_theme(theme);
-                            events(ui, d, view);
+                            let _ = events(ui, d, view);
                         },
                         (d, EventsView::default()),
                     );
@@ -10896,7 +10950,7 @@ o-such-folder",
                 h.run();
                 h.key_press(egui::Key::Enter);
                 h.run();
-                assert_eq!(h.state().1.selected, Some((1, 1_700_000_000_000)));
+                assert_eq!(h.state().1.selected, Some((Service, 1, 1_700_000_000_000)));
                 assert!(h.query_by_label("Event details").is_some());
                 h.get_by_label("Copy message").click();
                 h.run_steps(1);
@@ -10916,7 +10970,7 @@ o-such-folder",
                 h.get_by_label("Close details").click();
                 h.run();
                 assert_eq!(h.state().1.selected, None);
-                h.state_mut().1.selected = Some((1, 1_700_000_000_000));
+                h.state_mut().1.selected = Some((Service, 1, 1_700_000_000_000));
                 h.state_mut().0.events[0].id = 2;
                 h.run();
                 assert_eq!(
@@ -10924,7 +10978,7 @@ o-such-folder",
                     None,
                     "eviction also clears details in a nonempty buffer"
                 );
-                h.state_mut().1.selected = Some((2, 1_700_000_000_000));
+                h.state_mut().1.selected = Some((Service, 2, 1_700_000_000_000));
                 h.state_mut().0.events[0].unix_ms += 1;
                 h.run();
                 assert_eq!(
@@ -10932,7 +10986,7 @@ o-such-folder",
                     None,
                     "reused IDs after a restart cannot replace an open diagnostic"
                 );
-                h.state_mut().1.selected = Some((2, 1_700_000_000_001));
+                h.state_mut().1.selected = Some((Service, 2, 1_700_000_000_001));
                 h.state_mut().0.events.clear();
                 h.run();
                 assert_eq!(
@@ -10945,6 +10999,142 @@ o-such-folder",
         }
     }
 
+    /// The Events page with the intents it asked for, as text.
+    fn events_page(d: Data) -> Harness<'static, (Data, EventsView, Vec<String>)> {
+        Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1100.0, 700.0])
+            .build_ui_state(
+                |ui, (d, view, asked): &mut (Data, EventsView, Vec<String>)| {
+                    for intent in events(ui, d, view) {
+                        asked.push(match intent {
+                            Intent::ShowContainers => "containers".into(),
+                            Intent::ShowSensors => "sensors".into(),
+                            Intent::Reveal(p) => format!("reveal {} {}", p.pid, p.name),
+                            _ => "other".into(),
+                        });
+                    }
+                },
+                (d, EventsView::default(), Vec::new()),
+            )
+    }
+
+    #[test]
+    fn events_list_container_alerts_and_sensor_changes_with_their_source() {
+        use crate::container_alerts::{Kind, Notice, Resource};
+        use crate::event_rows::Source;
+        let mut d = data();
+        d.events.push_back(wtm_ipc::Event {
+            id: 2,
+            unix_ms: 1_700_000_000_500,
+            level: EventLevel::Warn,
+            pid: None,
+            name: None,
+            message: "Cooling CPU Fan: back on hardware automatic, its temperature sensor is missing or stale".into(),
+            notify: false,
+        });
+        d.container_alerts.notices.push_back(Notice {
+            at: std::time::UNIX_EPOCH + Duration::from_millis(1_700_000_000_200),
+            name: "web-0".into(),
+            kind: Kind::Above {
+                resource: Resource::Memory,
+                share: 95.0,
+                docker: None,
+                lasted: Duration::from_secs(60),
+            },
+        });
+        let mut h = events_page(d);
+        h.run();
+        assert!(h.query_by_label("3 of 3 events").is_some());
+        h.get_by_role_and_label(egui::accesskit::Role::Button, "Docker")
+            .click();
+        h.run();
+        assert_eq!(h.state().1.source, Some(Source::Docker));
+        assert!(h.query_by_label("1 of 3 events").is_some());
+        let notice = h.state().0.container_alerts.notices[0].text();
+        h.get_by_label(&notice).click();
+        h.run();
+        assert!(
+            h.query_by_label_contains("Noticed by this window's Docker reader")
+                .is_some()
+        );
+        h.get_by_label("Show in Containers").click();
+        h.run();
+        assert_eq!(h.state().2, ["containers"]);
+        assert!(h.query_by_label("Show process").is_none());
+
+        // A cooling change from the service opens Sensors & cooling.
+        h.get_by_role_and_label(egui::accesskit::Role::Button, "Service")
+            .click();
+        h.run();
+        assert!(h.query_by_label("2 of 3 events").is_some());
+        assert!(
+            h.query_by_label("Event details").is_some(),
+            "filtering keeps the open detail"
+        );
+        h.get_by_label_contains("Cooling CPU Fan").click();
+        h.run();
+        assert!(
+            h.query_by_label_contains("lasted about six seconds")
+                .is_some()
+        );
+        assert!(
+            h.query_by_label_contains("Logged by the RustWTM service")
+                .is_some()
+        );
+        h.get_by_label("Show sensors").click();
+        h.run();
+        assert_eq!(h.state().2, ["containers", "sensors"]);
+
+        // A governor decision about a process that still runs.
+        h.get_by_label("Governor: priority BelowNormal").click();
+        h.run();
+        h.get_by_label("Show process").click();
+        h.run();
+        assert_eq!(h.state().2.last().unwrap(), "reveal 100 alpha.exe");
+        assert!(h.query_by_label("Show sensors").is_none());
+    }
+
+    #[test]
+    fn an_event_about_an_ended_process_does_not_reveal_a_new_one_with_its_pid() {
+        let mut d = data();
+        d.events[0].name = Some("ended.exe".into());
+        let mut h = events_page(d);
+        h.run();
+        h.get_by_label("Governor: priority BelowNormal").click();
+        h.run();
+        assert!(h.query_by_label("Show process").is_none());
+        assert!(
+            h.query_by_label("The process is no longer running.")
+                .is_some()
+        );
+    }
+
+    #[test]
+    fn container_alerts_alone_fill_the_events_page_and_the_chart_markers() {
+        let mut d = timeline_fixture(true);
+        d.container_alerts
+            .notices
+            .push_back(crate::container_alerts::Notice {
+                at: std::time::UNIX_EPOCH + Duration::from_millis(1_700_000_250_000),
+                name: "web-0".into(),
+                kind: crate::container_alerts::Kind::Stopped,
+            });
+        let text = d.container_alerts.notices[0].text();
+        let (mut h, _) = overview_app(d);
+        h.state_mut().state.tab = Tab::Performance;
+        h.run_steps(3);
+        h.get_by_label("Recent events in view (1)").click();
+        h.run_steps(2);
+        h.get_by_label_contains(&format!("Docker · {text}")).click();
+        h.run_steps(2);
+        assert_eq!(h.state().state.charts.cursor, Some(1_700_000_250_000));
+        h.state_mut().state.tab = Tab::Events;
+        h.run_steps(2);
+        assert!(h.query_by_label("No events yet.").is_none());
+        assert!(h.query_by_label(&text).is_some());
+    }
+
     #[test]
     fn event_search_matches_the_displayed_translation() {
         let _language = crate::i18n::scope(crate::i18n::Language::Turkish);
@@ -10955,7 +11145,9 @@ o-such-folder",
             .allow_missing_glyphs()
             .with_size([820.0, 500.0])
             .build_ui_state(
-                |ui, (d, view): &mut (Data, EventsView)| events(ui, d, view),
+                |ui, (d, view): &mut (Data, EventsView)| {
+                    let _ = events(ui, d, view);
+                },
                 (d, EventsView::default()),
             );
         let translated = crate::i18n::message(&h.state().0.events[0].message).into_owned();
@@ -12463,7 +12655,8 @@ o-such-folder",
                                 let mut data = h.state().backend.data();
                                 data.events[0].message = "CPU protection: the application exceeded its configured budget. The service reduced background priority and will restore it after recovery. ".repeat(3);
                             }
-                            h.state_mut().state.events.selected = Some((1, 1_700_000_000_000));
+                            h.state_mut().state.events.selected =
+                                Some((crate::event_rows::Source::Service, 1, 1_700_000_000_000));
                             h.state_mut().state.events.search = "protection".into();
                             h.run_steps(3);
                             assert!(h.query_by_label(crate::i18n::tr("Event details")).is_some());
@@ -12471,6 +12664,49 @@ o-such-folder",
                                 out.join(format!("{theme_name}-{size_name}-EventDetails.png"));
                             capture(&mut h, &path);
                             println!("Rendered {}", path.display());
+                            // Every source in one list, a container alert open.
+                            let key = {
+                                let mut data = h.state().backend.data();
+                                data.events.push_back(wtm_ipc::Event {
+                                    id: 2,
+                                    unix_ms: 1_700_000_030_000,
+                                    level: EventLevel::Warn,
+                                    pid: None,
+                                    name: None,
+                                    message: "Cooling CPU Fan: back on hardware automatic, its temperature sensor is missing or stale".into(),
+                                    notify: false,
+                                });
+                                data.container_alerts.notices.push_back(
+                                    crate::container_alerts::Notice {
+                                        at: std::time::UNIX_EPOCH
+                                            + Duration::from_millis(1_700_000_060_000),
+                                        name: "web-0".into(),
+                                        kind: crate::container_alerts::Kind::Above {
+                                            resource: crate::container_alerts::Resource::Memory,
+                                            share: 94.0,
+                                            docker: None,
+                                            lasted: Duration::from_secs(60),
+                                        },
+                                    },
+                                );
+                                crate::event_rows::rows(&data)
+                                    .iter()
+                                    .find(|r| r.source == crate::event_rows::Source::Docker)
+                                    .map(|r| r.key)
+                            };
+                            h.state_mut().state.events.selected = key;
+                            h.state_mut().state.events.search.clear();
+                            h.run_steps(3);
+                            let path =
+                                out.join(format!("{theme_name}-{size_name}-EventSources.png"));
+                            capture(&mut h, &path);
+                            println!("Rendered {}", path.display());
+                            {
+                                let mut data = h.state().backend.data();
+                                data.events.pop_back();
+                                data.container_alerts.notices.clear();
+                            }
+                            h.state_mut().state.events.selected = None;
                         }
                         if tab == Tab::Users {
                             {

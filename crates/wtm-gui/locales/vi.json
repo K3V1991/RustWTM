@@ -1108,7 +1108,6 @@
   "Loading processes…": "Đang tải tiến trình…",
   "Theme": "Chủ đề",
   "Disk & I/O": "Đĩa và I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "Các quyết định của dịch vụ và thao tác thực hiện từ cửa sổ này được liệt kê ở đây.",
   "All events": "Tất cả sự kiện",
   "Information": "Thông tin",
   "Warnings": "Cảnh báo",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "Cảm biến: đã đọc lại",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Làm mát {0}: trở về tự động của phần cứng, cảm biến nhiệt độ bị thiếu hoặc đã cũ",
   "Cooling {0}: control failed: {1}": "Làm mát {0}: điều khiển thất bại: {1}",
-  "Cooling {0}: under software control again": "Làm mát {0}: lại do phần mềm điều khiển"
+  "Cooling {0}: under software control again": "Làm mát {0}: lại do phần mềm điều khiển",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "Các quyết định của dịch vụ, thao tác từ cửa sổ này và cảnh báo vùng chứa được liệt kê ở đây.",
+  "All sources": "Mọi nguồn",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "Được dịch vụ RustWTM ghi lại vào thời điểm hiển thị và được dịch vụ giữ trong khi chạy.",
+  "Done from this window without the service; kept only until the window closes.": "Thực hiện từ cửa sổ này mà không qua dịch vụ; chỉ được giữ đến khi đóng cửa sổ.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "Được trình đọc Docker của cửa sổ này phát hiện. Trình đọc đọc mỗi 10 giây (mỗi 2 giây khi Vùng chứa hoặc Tổng quan đang mở), nên thay đổi có thể xảy ra sớm hơn tối đa một lần đọc. Chỉ được giữ đến khi đóng cửa sổ; không có trong sự cố đã ghi.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "Thay đổi cảm biến và làm mát được ghi lại khi đã kéo dài khoảng sáu giây, và chỉ khi trình trợ giúp cảm biến đang chạy.",
+  "Show in Containers": "Hiện trong Vùng chứa",
+  "Show sensors": "Hiện cảm biến",
+  "Show process": "Hiện tiến trình",
+  "The process is no longer running.": "Tiến trình không còn chạy."
 }

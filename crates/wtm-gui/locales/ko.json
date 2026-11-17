@@ -1108,7 +1108,6 @@
   "Loading processes…": "프로세스를 불러오는 중…",
   "Theme": "테마",
   "Disk & I/O": "디스크 및 I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "서비스의 결정 사항과 이 창에서 수행한 작업이 여기에 나열됩니다.",
   "All events": "모든 이벤트",
   "Information": "정보",
   "Warnings": "경고",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "센서: 읽기 재개됨",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "냉각 {0}: 하드웨어 자동으로 돌아감, 온도 센서가 없거나 오래됨",
   "Cooling {0}: control failed: {1}": "냉각 {0}: 제어 실패: {1}",
-  "Cooling {0}: under software control again": "냉각 {0}: 다시 소프트웨어가 제어함"
+  "Cooling {0}: under software control again": "냉각 {0}: 다시 소프트웨어가 제어함",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "서비스의 결정, 이 창에서 한 작업, 컨테이너 알림이 여기에 표시됩니다.",
+  "All sources": "모든 출처",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "표시된 시각에 RustWTM 서비스가 기록했으며, 서비스가 실행되는 동안 보관됩니다.",
+  "Done from this window without the service; kept only until the window closes.": "서비스 없이 이 창에서 수행했습니다. 창을 닫을 때까지만 보관됩니다.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "이 창의 Docker 리더가 감지했습니다. 10초마다(컨테이너 또는 개요가 열려 있으면 2초마다) 읽으므로 변경은 최대 한 번의 읽기만큼 더 일찍 일어났을 수 있습니다. 창을 닫을 때까지만 보관되며 기록된 사건에는 없습니다.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "센서 및 냉각 변경은 약 6초 동안 지속된 뒤에, 그리고 센서 도우미가 실행 중일 때만 기록됩니다.",
+  "Show in Containers": "컨테이너에서 보기",
+  "Show sensors": "센서 보기",
+  "Show process": "프로세스 보기",
+  "The process is no longer running.": "프로세스가 더 이상 실행되고 있지 않습니다."
 }

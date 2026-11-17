@@ -1108,7 +1108,6 @@
   "Loading processes…": "Processen laden…",
   "Theme": "Thema",
   "Disk & I/O": "Schijf en I/O",
-  "Decisions of the service and actions taken from this window are listed here.": "Beslissingen van de service en acties vanuit dit venster worden hier weergegeven.",
   "All events": "Alle gebeurtenissen",
   "Information": "Informatie",
   "Warnings": "Waarschuwingen",
@@ -1943,5 +1942,15 @@
   "Sensors: readings resumed": "Sensoren: lezen hervat",
   "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Koeling {0}: terug naar hardware-automatisch, de temperatuursensor ontbreekt of is verouderd",
   "Cooling {0}: control failed: {1}": "Koeling {0}: besturing mislukt: {1}",
-  "Cooling {0}: under software control again": "Koeling {0}: weer onder softwarebesturing"
+  "Cooling {0}: under software control again": "Koeling {0}: weer onder softwarebesturing",
+  "Decisions of the service, actions taken from this window and container alerts are listed here.": "Beslissingen van de service, acties vanuit dit venster en containerwaarschuwingen staan hier.",
+  "All sources": "Alle bronnen",
+  "Logged by the RustWTM service at the time shown, and kept by the service while it runs.": "Vastgelegd door de RustWTM-service op de getoonde tijd en bewaard door de service zolang die draait.",
+  "Done from this window without the service; kept only until the window closes.": "Vanuit dit venster gedaan zonder de service; alleen bewaard tot het venster sluit.",
+  "Noticed by this window's Docker reader, which reads every 10 s (every 2 s while Containers or Overview is open), so the change can be up to one reading earlier. Kept only until the window closes; not in recorded incidents.": "Opgemerkt door de Docker-lezer van dit venster, die elke 10 s leest (elke 2 s terwijl Containers of het Overzicht open is), dus de wijziging kan tot één lezing eerder zijn gebeurd. Alleen bewaard tot het venster sluit; niet in vastgelegde incidenten.",
+  "Sensor and cooling changes are logged once they have lasted about six seconds, and only while the sensor helper runs.": "Wijzigingen van sensoren en koeling worden vastgelegd zodra ze ongeveer zes seconden duren, en alleen terwijl de sensorhelper draait.",
+  "Show in Containers": "Tonen in Containers",
+  "Show sensors": "Sensoren tonen",
+  "Show process": "Proces tonen",
+  "The process is no longer running.": "Het proces draait niet meer."
 }
