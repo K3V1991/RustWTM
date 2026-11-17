@@ -183,7 +183,9 @@ impl Redaction<'_> {
             text = paths(&text);
             text = exe_names(&text);
             for name in self.names.iter().filter(|n| n.chars().count() >= 3) {
-                text = replace_word_ignore_case(&text, name, "<process>");
+                // Anywhere, not only as a word: a name glued to other text
+                // is still hidden, at the cost of some log targets.
+                text = replace_ignore_case(&text, name, "<process>");
             }
         }
         text
@@ -283,7 +285,19 @@ fn paths(text: &str) -> String {
             && chars[i] == '\\'
             && chars[i + 1] == '\\'
             && !chars[i + 2].is_whitespace();
-        if drive || unc {
+        // `%USERPROFILE%\Documents\…`, as the profile was written above.
+        let variable = chars[i] == '%'
+            && (i == 0 || !chars[i - 1].is_alphanumeric())
+            && chars[i + 1..]
+                .iter()
+                .position(|&c| c == '%')
+                .is_some_and(|end| {
+                    let name = &chars[i + 1..i + 1 + end];
+                    !name.is_empty()
+                        && name.iter().all(|c| c.is_ascii_alphanumeric() || *c == '_')
+                        && matches!(chars.get(i + 2 + end), Some('\\' | '/'))
+                });
+        if drive || unc || variable {
             let quoted = i > 0 && chars[i - 1] == '"';
             let ends = |c: char| c.is_whitespace() || matches!(c, '"' | '\'' | ',' | ';' | ')');
             let mut j = i;
@@ -374,23 +388,6 @@ fn replace_ignore_case(text: &str, needle: &str, with: &str) -> String {
         out.push_str(&rest[..at]);
         out.push_str(with);
         rest = &rest[at + needle.len()..];
-    }
-    out.push_str(rest);
-    out
-}
-
-/// Like [`replace_ignore_case`], but only where `needle` is a whole word:
-/// the name `System` leaves `wtm_service::system_info` alone.
-fn replace_word_ignore_case(text: &str, needle: &str, with: &str) -> String {
-    let word = |c: Option<char>| c.is_some_and(|c| c.is_alphanumeric() || c == '_');
-    let mut out = String::with_capacity(text.len());
-    let mut rest = text;
-    while let Some(at) = find_ignore_case(rest, needle) {
-        let end = at + needle.len();
-        let whole = !word(rest[..at].chars().next_back()) && !word(rest[end..].chars().next());
-        out.push_str(&rest[..at]);
-        out.push_str(if whole { with } else { &rest[at..end] });
-        rest = &rest[end..];
     }
     out.push_str(rest);
     out
@@ -820,6 +817,8 @@ mod tests {
         r"Corp\",
         "budget.xlsx",
         "vitest",
+        "Documents",
+        "notes.txt",
     ];
 
     fn planted_bundle(options: Options) -> String {
@@ -919,22 +918,14 @@ mod tests {
             paths(r"saved C:\Users\Kaan Ersoy\my notes.txt and left"),
             "saved <path> and left"
         );
+        assert_eq!(
+            paths(r"%USERPROFILE%\My Files\a.txt locked, 100% sure"),
+            "<path> locked, 100% sure"
+        );
         // Not a path: no drive, or a letter inside a word.
         for same in ["ratio 3:2 and https://x.test/a", "abc:\\ no"] {
             assert_eq!(paths(same), same);
         }
-    }
-
-    #[test]
-    fn known_names_are_hidden_as_words_only() {
-        assert_eq!(
-            replace_word_ignore_case(
-                "System holds it; wtm_service::system_info and Subsystem stay; (system)",
-                "System",
-                "<process>"
-            ),
-            "<process> holds it; wtm_service::system_info and Subsystem stay; (<process>)"
-        );
     }
 
     #[test]
