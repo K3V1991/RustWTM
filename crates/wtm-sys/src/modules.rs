@@ -16,8 +16,9 @@ use windows::Win32::Security::Cryptography::Catalog::{
     CryptCATAdminReleaseContext, CryptCATCatalogInfoFromContext,
 };
 use windows::Win32::Security::Cryptography::{
-    BCRYPT_SHA1_ALGORITHM, BCRYPT_SHA256_ALGORITHM, CERT_NAME_SIMPLE_DISPLAY_TYPE,
-    CertGetNameStringW,
+    BCRYPT_SHA1_ALGORITHM, BCRYPT_SHA256_ALGORITHM, CERT_CONTEXT, CERT_NAME_SIMPLE_DISPLAY_TYPE,
+    CERT_NAME_STR_REVERSE_FLAG, CERT_STRING_TYPE, CERT_X500_NAME_STR, CertGetNameStringW,
+    CertNameToStrW, X509_ASN_ENCODING,
 };
 use windows::Win32::Security::WinTrust::{
     DRIVER_ACTION_VERIFY, WINTRUST_ACTION_GENERIC_VERIFY_V2, WINTRUST_CATALOG_INFO, WINTRUST_DATA,
@@ -148,6 +149,40 @@ pub fn signature(path: &str) -> Signature {
     }
 }
 
+/// Who signed a file inside it (not through a catalog), offline.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Signer {
+    /// The certificate's simple display name, such as `Microsoft Corporation`.
+    pub name: String,
+    /// The certificate's whole subject as X.500 text, such as
+    /// `CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, …`:
+    /// the identity a certificate authority validated.
+    pub subject: String,
+}
+
+/// The signer of the embedded Authenticode signature of the file at
+/// `path`, offline. `Ok(None)`: no embedded signature; `Err`: one that does
+/// not hold, or whose signer cannot be read.
+pub fn embedded_signer(path: &str) -> Result<Option<Signer>, String> {
+    let wide = to_wide(path);
+    let mut file = WINTRUST_FILE_INFO {
+        cbStruct: size_of::<WINTRUST_FILE_INFO>() as u32,
+        pcwszFilePath: PCWSTR(wide.as_ptr()),
+        ..Default::default()
+    };
+    let mut data = trust_data(WINTRUST_DATA_0 { pFile: &mut file }, false);
+    let (status, signer) = trust_reading(&mut data, signer_of);
+    if status.is_ok() {
+        signer
+            .map(Some)
+            .ok_or_else(|| "the signer cannot be read".to_owned())
+    } else if is_missing_signature(status) {
+        Ok(None)
+    } else {
+        Err(describe(status))
+    }
+}
+
 /// What one WinVerifyTrust call concluded.
 #[derive(Debug, PartialEq, Eq)]
 enum Verdict {
@@ -207,6 +242,13 @@ fn trust_data(choice: WINTRUST_DATA_0, catalog: bool) -> WINTRUST_DATA {
 /// Runs the generic Authenticode policy over `data`, reads the signer while
 /// the state is open, then releases the state.
 fn run_trust(data: &mut WINTRUST_DATA) -> Verdict {
+    let (status, signer) = trust_reading(data, signer_name);
+    Verdict::from_status(status, || signer)
+}
+
+/// Runs the generic Authenticode policy over `data`, `read`s the open
+/// state, then releases it.
+fn trust_reading<T>(data: &mut WINTRUST_DATA, read: impl FnOnce(HANDLE) -> T) -> (HRESULT, T) {
     let mut action = WINTRUST_ACTION_GENERIC_VERIFY_V2;
     // SAFETY: `data` and everything its union points at outlive the call.
     let status = HRESULT(unsafe {
@@ -216,7 +258,7 @@ fn run_trust(data: &mut WINTRUST_DATA) -> Verdict {
             (data as *mut WINTRUST_DATA).cast(),
         )
     });
-    let verdict = Verdict::from_status(status, || signer_name(data.hWVTStateData));
+    let read = read(data.hWVTStateData);
     data.dwStateAction = WTD_STATEACTION_CLOSE;
     // SAFETY: closing the state the verify call opened; same inputs.
     unsafe {
@@ -226,7 +268,7 @@ fn run_trust(data: &mut WINTRUST_DATA) -> Verdict {
             (data as *mut WINTRUST_DATA).cast(),
         );
     }
-    verdict
+    (status, read)
 }
 
 fn verify_embedded(wide: &[u16]) -> Verdict {
@@ -354,13 +396,16 @@ fn hex_upper(bytes: &[u8]) -> String {
     })
 }
 
-/// The display name on the leaf certificate of the first signer.
-fn signer_name(state: HANDLE) -> Option<String> {
+/// The leaf certificate of the first signer in an open WinVerifyTrust state.
+///
+/// # Safety
+/// `state` must be open; the certificate lives until it is closed.
+unsafe fn leaf_certificate(state: HANDLE) -> Option<*const CERT_CONTEXT> {
     if state.is_invalid() {
         return None;
     }
-    // SAFETY: `state` is the open WinVerifyTrust state; every pointer read
-    // below is checked for null and lives until the state is closed.
+    // SAFETY: every pointer read is checked for null and lives as long as
+    // the open state.
     unsafe {
         let provider = WTHelperProvDataFromStateData(state);
         if provider.is_null() {
@@ -371,9 +416,40 @@ fn signer_name(state: HANDLE) -> Option<String> {
             return None;
         }
         let cert = (*(*signer).pasCertChain).pCert;
-        if cert.is_null() {
+        (!cert.is_null()).then_some(cert)
+    }
+}
+
+/// The display name and X.500 subject of the first signer's certificate.
+fn signer_of(state: HANDLE) -> Option<Signer> {
+    let name = signer_name(state)?;
+    // SAFETY: the state is open while WinVerifyTrust's reader runs; the
+    // certificate and its info outlive these calls.
+    unsafe {
+        let cert = leaf_certificate(state)?;
+        let info = (*cert).pCertInfo;
+        if info.is_null() {
             return None;
         }
+        let subject = &(*info).Subject;
+        let kind = CERT_STRING_TYPE(CERT_X500_NAME_STR.0 | CERT_NAME_STR_REVERSE_FLAG);
+        let len = CertNameToStrW(X509_ASN_ENCODING, subject, kind, None);
+        if len <= 1 {
+            return None;
+        }
+        let mut buf = vec![0u16; len as usize];
+        CertNameToStrW(X509_ASN_ENCODING, subject, kind, Some(&mut buf));
+        let subject = from_wide(&buf);
+        (!subject.is_empty()).then_some(Signer { name, subject })
+    }
+}
+
+/// The display name on the leaf certificate of the first signer.
+fn signer_name(state: HANDLE) -> Option<String> {
+    // SAFETY: `state` is the open WinVerifyTrust state; the certificate
+    // lives until it is closed.
+    unsafe {
+        let cert = leaf_certificate(state)?;
         let len = CertGetNameStringW(cert, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0, None, None);
         if len <= 1 {
             return None;

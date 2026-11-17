@@ -142,12 +142,14 @@ downloaded MSI (offline, through `WinVerifyTrust`):
   the SHA-256 published in the same release, which catches a corrupted or
   swapped download but not a compromised release.
 - **This build is signed:** the installer must carry a valid embedded
-  Authenticode signature (not a catalog signature) whose certificate's simple
-  name is exactly the same; an unsigned installer or another publisher is
-  refused before Windows asks for administrator rights. The name is compared,
-  not the certificate thumbprint, because Trusted Signing certificates are
-  short-lived; it is the same comparison `verify-signatures.ps1` makes
-  (`GetNameInfo('SimpleName', $false)`, ordinal).
+  Authenticode signature (not a catalog signature) whose certificate has
+  exactly the same whole subject (`CN`, `O`, `L`, `S`, `C`: the identity the
+  certificate authority validated) as this build's; an unsigned installer or
+  another publisher, including another company of the same name, is refused
+  before Windows asks for administrator rights. The subject is compared, not
+  the certificate thumbprint or key, because Trusted Signing certificates are
+  renewed every few days. The issuing authority is not compared: a public
+  authority that validated the same subject for someone else would pass.
 - **This build's own signature cannot be checked** (it does not hold, or is
   only a catalog signature): the update is refused rather than unchecked.
 
@@ -155,8 +157,11 @@ Unsigned to signed is therefore allowed once, with the first signed release;
 from then on, signed to unsigned or to another publisher is refused. The
 elevated step checks again on the copy it installs, in a folder only SYSTEM
 and administrators can write to: first the SHA-256, then, when a publisher is
-pinned, `Get-AuthenticodeSignature` (status `Valid`, type `Authenticode`, the
-same simple name). A mismatch exits before `msiexec` runs.
+pinned, `Get-AuthenticodeSignature` on the copy and on the running RustWTM
+(both `Valid`, the copy's type `Authenticode`, the same `Subject`). A mismatch
+exits before `msiexec` runs. That step uses Windows PowerShell's own modules,
+whatever module path it inherits (from a PowerShell 7 terminal, it would not
+load the signature cmdlet).
 
 What became of the update is written by the launcher, as the user, to
 `%TEMP%\RustWTM-update\outcome.txt`, and told by the RustWTM it starts again,
@@ -167,5 +172,7 @@ publisher, the installer's error code, or the Windows error that kept the
 installer from starting. The file is the user's to write, so only a version
 and one of these words are believed, it is ignored when older than an hour,
 and it is removed once read. The relaunch happens whatever the outcome. The
-updater does not roll back: a failed Windows Installer transaction is undone
-by Windows Installer itself, as for any MSI.
+updater does not roll back anything itself, and what a failed upgrade leaves
+of the previous version is unverified until the upgrade-durability gate (a
+disposable VM) has run. Messages refusing an installer before the prompt are
+in English.

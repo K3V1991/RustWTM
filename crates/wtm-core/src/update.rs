@@ -207,42 +207,44 @@ fn same_dir(install_dir: &Path, exe: &Path) -> bool {
 /// Who signed a file, as far as the updater cares.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Publisher {
-    /// An embedded Authenticode signature that holds, by this signer (the
-    /// certificate's simple name, as `GetNameInfo('SimpleName')` gives it).
-    Signed(String),
+    /// An embedded Authenticode signature that holds. `subject` is the
+    /// certificate's whole subject (name, organization, place, country):
+    /// what the certificate authority validated, and what is compared;
+    /// `name` is for messages.
+    Signed {
+        name: String,
+        subject: String,
+    },
     Unsigned,
-    /// Signed through a catalog, signed without a readable signer, or a
-    /// signature that does not hold.
+    /// A signature that does not hold, or whose signer cannot be read.
     Unusable(String),
 }
 
-/// The publisher of the file at `path`.
+/// The publisher of the file at `path`, from its embedded signature only:
+/// a catalog signature cannot travel with an installer.
 pub fn publisher(path: &Path) -> Publisher {
-    match wtm_sys::modules::signature(&path.to_string_lossy()) {
-        wtm_sys::modules::Signature::Signed {
-            signer: Some(signer),
-            catalog: false,
-        } => Publisher::Signed(signer),
-        wtm_sys::modules::Signature::Signed { catalog: true, .. } => {
-            Publisher::Unusable("signed only through a Windows catalog".into())
-        }
-        wtm_sys::modules::Signature::Signed { signer: None, .. } => {
-            Publisher::Unusable("the signer cannot be read".into())
-        }
-        wtm_sys::modules::Signature::Unsigned => Publisher::Unsigned,
-        wtm_sys::modules::Signature::Invalid(e) => Publisher::Unusable(e),
+    match wtm_sys::modules::embedded_signer(&path.to_string_lossy()) {
+        Ok(Some(s)) => Publisher::Signed {
+            name: s.name,
+            subject: s.subject,
+        },
+        Ok(None) => Publisher::Unsigned,
+        Err(e) => Publisher::Unusable(e),
     }
 }
 
 /// Whether an installer by `update` may replace a build by `current`, and
-/// the publisher the elevated step checks again (`None`: no pin).
+/// whether the elevated step must check the publisher again.
 ///
 /// An unsigned build (every release before the first signed one, and
 /// developer builds) takes an unsigned or signed installer: it has no
 /// publisher to hold the update to. A signed build takes only an installer
-/// with a valid embedded signature by the same publisher. A build whose own
-/// signature cannot be read takes nothing, rather than nothing checked.
-pub fn publisher_policy(current: &Publisher, update: &Publisher) -> Result<Option<String>, String> {
+/// with a valid embedded signature whose certificate has the same whole
+/// subject: the same validated name, organization, place and country, so
+/// another company of the same name cannot pass. Thumbprints are not
+/// compared: signing certificates are renewed every few days. A build whose
+/// own signature cannot be read takes nothing, rather than nothing checked.
+pub fn publisher_policy(current: &Publisher, update: &Publisher) -> Result<bool, String> {
     match (current, update) {
         (_, Publisher::Unusable(e)) => Err(format!(
             "the installer's signature does not hold ({e}); nothing was installed"
@@ -252,15 +254,27 @@ pub fn publisher_policy(current: &Publisher, update: &Publisher) -> Result<Optio
              publisher cannot be either; nothing was installed. Download the release from \
              its page instead"
         )),
-        (Publisher::Unsigned, _) => Ok(None),
-        (Publisher::Signed(ours), Publisher::Signed(theirs)) if ours == theirs => {
-            Ok(Some(ours.clone()))
-        }
-        (Publisher::Signed(ours), Publisher::Signed(theirs)) => Err(format!(
-            "the installer is signed by {theirs}, not by {ours} like this RustWTM; nothing \
+        (Publisher::Unsigned, _) => Ok(false),
+        (
+            Publisher::Signed { subject: ours, .. },
+            Publisher::Signed {
+                subject: theirs, ..
+            },
+        ) if ours == theirs => Ok(true),
+        (Publisher::Signed { name: ours, .. }, Publisher::Signed { name: theirs, .. })
+            if ours != theirs =>
+        {
+            Err(format!(
+                "the installer is signed by {theirs}, not by {ours} like this RustWTM; nothing \
              was installed. Download the release from its page instead"
+            ))
+        }
+        (Publisher::Signed { name, .. }, Publisher::Signed { subject, .. }) => Err(format!(
+            "the installer is signed by a certificate of {name} with other details ({subject}) \
+             than this RustWTM's; nothing was installed. Download the release from its page \
+             instead"
         )),
-        (Publisher::Signed(ours), Publisher::Unsigned) => Err(format!(
+        (Publisher::Signed { name: ours, .. }, Publisher::Unsigned) => Err(format!(
             "the installer is not signed, while this RustWTM is signed by {ours}; nothing was \
              installed. Download the release from its page instead"
         )),
@@ -358,7 +372,7 @@ pub fn install(msi: &Download, relaunch: &Path, version: Version) -> Result<(), 
     let dir = msi.path.parent().unwrap_or(Path::new("."));
     let outcome = dir.join(OUTCOME_FILE);
     let _ = std::fs::remove_file(&outcome);
-    let elevate = elevate(&elevated_install(msi, pin.as_deref()));
+    let elevate = elevate(&elevated_install(msi, pin.then_some(relaunch)));
     let start = format!(
         "Start-Process -FilePath {}",
         ps_quote(&relaunch.to_string_lossy())
@@ -407,24 +421,36 @@ fn launcher(elevate: &str, outcome: &Path, version: Version, relaunch: &str) -> 
     )
 }
 
+/// Exits with [`WRONG_PUBLISHER`] unless the file `$msi` has a valid
+/// embedded signature whose certificate has the same whole subject as the
+/// valid signature of `own`, the running RustWTM. Both are read the same
+/// way, so their text can be compared as it is.
+fn publisher_check(own: &Path) -> String {
+    // Neither certificate is read unless both signatures hold: under
+    // 'Stop' a missing one would throw and exit 1 for the wrong reason.
+    // Windows PowerShell's own modules only: a module path inherited from
+    // PowerShell 7 (RustWTM started from its terminal) makes the
+    // Microsoft.PowerShell.Security module, and this cmdlet, fail to load.
+    format!(
+        "$env:PSModulePath = Join-Path $PSHOME 'Modules'\n\
+         $own = Get-AuthenticodeSignature -LiteralPath {}\n\
+         $s = Get-AuthenticodeSignature -LiteralPath $msi\n\
+         if ($own.Status -ne 'Valid' -or $null -eq $own.SignerCertificate -or $s.Status -ne 'Valid' -or $s.SignatureType -ne 'Authenticode' -or $null -eq $s.SignerCertificate) {{ exit {WRONG_PUBLISHER} }}\n\
+         if ($s.SignerCertificate.Subject -cne $own.SignerCertificate.Subject) {{ exit {WRONG_PUBLISHER} }}\n",
+        ps_quote(&own.to_string_lossy())
+    )
+}
+
 /// Copies the installer to a fresh folder under the system's temp folder
 /// that only SYSTEM and administrators can reach, checks it (and, with
-/// `publisher`, that a valid embedded signature by it is on the copy) and
-/// installs it.
-fn elevated_install(msi: &Download, publisher: Option<&str>) -> String {
+/// `own`, that the copy is signed by the publisher of that file, the
+/// running RustWTM) and installs it.
+fn elevated_install(msi: &Download, own: Option<&Path>) -> String {
     let hash: String = msi.sha256.iter().map(|b| format!("{b:02X}")).collect();
-    // An unsigned file never reaches GetNameInfo: under 'Stop' it would
-    // throw and exit 1 for the wrong reason.
-    let signed = publisher.map_or_else(String::new, |p| {
-        format!(
-            "$s = Get-AuthenticodeSignature -LiteralPath $msi\n\
-             if ($s.Status -ne 'Valid' -or $s.SignatureType -ne 'Authenticode' -or $null -eq $s.SignerCertificate) {{ exit {WRONG_PUBLISHER} }}\n\
-             if ($s.SignerCertificate.GetNameInfo('SimpleName', $false) -cne {}) {{ exit {WRONG_PUBLISHER} }}\n",
-            ps_quote(p)
-        )
-    });
+    let signed = own.map_or_else(String::new, publisher_check);
     format!(
         "$ErrorActionPreference = 'Stop'\n\
+         $env:PSModulePath = Join-Path $PSHOME 'Modules'\n\
          $dir = Join-Path $env:SystemRoot ('Temp\\rustwtm-update-' + [Guid]::NewGuid().ToString('N'))\n\
          New-Item -ItemType Directory -Path $dir | Out-Null\n\
          try {{\n\
@@ -646,7 +672,10 @@ mod tests {
         );
         // The copy is installed, never the download.
         assert!(unpinned.contains("'/i', ('\"' + $msi + '\"')"));
-        let pinned = elevated_install(&msi, Some("OXOGNET OÜ"));
+        let pinned = elevated_install(
+            &msi,
+            Some(Path::new(r"C:\Program Files\RustWTM\rustwtm.exe")),
+        );
         let check = pinned
             .find("Get-AuthenticodeSignature -LiteralPath $msi")
             .unwrap();
@@ -659,9 +688,12 @@ mod tests {
             "before installing"
         );
         assert!(pinned.contains("$s.Status -ne 'Valid' -or $s.SignatureType -ne 'Authenticode'"));
-        assert!(
-            pinned.contains("GetNameInfo('SimpleName', $false) -cne 'OXOGNET OÜ') { exit 9002 }")
-        );
+        assert!(pinned.contains(
+            r"$own = Get-AuthenticodeSignature -LiteralPath 'C:\Program Files\RustWTM\rustwtm.exe'"
+        ));
+        assert!(pinned.contains(
+            "$s.SignerCertificate.Subject -cne $own.SignerCertificate.Subject) { exit 9002 }"
+        ));
 
         let launcher = launcher(
             "Start-Elevated",
@@ -694,17 +726,22 @@ mod tests {
     #[test]
     fn only_a_signed_build_holds_an_update_to_its_publisher() {
         use Publisher::*;
-        let ours = Signed("OXOGNET OÜ".into());
-        let other = Signed("Someone Else".into());
+        let signed = |name: &str, place: &str| Signed {
+            name: name.into(),
+            subject: format!("CN={name}, O={name}, L={place}, C=EE"),
+        };
+        let ours = signed("OXOGNET OÜ", "Tallinn");
+        let other = signed("Someone Else", "Tallinn");
+        // Another company of the same name, validated elsewhere.
+        let namesake = signed("OXOGNET OÜ", "Tartu");
         let broken = Unusable("tampered".into());
         // Unsigned builds take what the checksum allows, as before.
-        assert_eq!(publisher_policy(&Unsigned, &Unsigned), Ok(None));
-        assert_eq!(publisher_policy(&Unsigned, &ours), Ok(None));
+        assert_eq!(publisher_policy(&Unsigned, &Unsigned), Ok(false));
+        assert_eq!(publisher_policy(&Unsigned, &ours), Ok(false));
         // A signed build takes only its own publisher, and says so.
-        assert_eq!(
-            publisher_policy(&ours, &ours),
-            Ok(Some("OXOGNET OÜ".into()))
-        );
+        assert_eq!(publisher_policy(&ours, &ours.clone()), Ok(true));
+        let refused = publisher_policy(&ours, &namesake).unwrap_err();
+        assert!(refused.contains("L=Tartu"), "{refused}");
         let refused = publisher_policy(&ours, &other).unwrap_err();
         assert!(
             refused.contains("signed by Someone Else, not by OXOGNET OÜ"),
@@ -742,6 +779,73 @@ mod tests {
             publisher(&file),
             Publisher::Unsigned | Publisher::Unusable(_)
         ));
+        // A real, empty installer database, as every release so far ships
+        // unsigned: it must read as unsigned, or no update would install.
+        // Only a file is written; nothing is installed.
+        let msi = dir.join("empty.msi");
+        let make = format!(
+            "$i = New-Object -ComObject WindowsInstaller.Installer; \
+             $db = $i.OpenDatabase({}, 3); $db.Commit()",
+            ps_quote(&msi.to_string_lossy())
+        );
+        let status = std::process::Command::new("powershell.exe")
+            .args(["-NoProfile", "-NonInteractive", "-EncodedCommand"])
+            .arg(encode_command(&make))
+            .status()
+            .unwrap();
+        assert!(status.success() && msi.exists());
+        assert_eq!(publisher(&msi), Publisher::Unsigned);
+        assert_eq!(
+            publisher_policy(&Publisher::Unsigned, &publisher(&msi)),
+            Ok(false)
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_elevated_publisher_check_runs_and_refuses_cleanly() {
+        // The check alone, run in PowerShell on files that exist: nothing
+        // is elevated or installed. A refusal must be its own exit code,
+        // never an error reading a certificate that is not there.
+        let dir = std::env::temp_dir().join(format!("wtm-pubcheck-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let unsigned = dir.join("plain.exe");
+        std::fs::write(&unsigned, b"MZ").unwrap();
+        let run = |own: &Path, msi: &Path| -> i32 {
+            let script = format!(
+                "$ErrorActionPreference = 'Stop'\n$msi = {}\n{}exit 0\n",
+                ps_quote(&msi.to_string_lossy()),
+                publisher_check(own)
+            );
+            std::process::Command::new("powershell.exe")
+                .args(["-NoProfile", "-NonInteractive", "-EncodedCommand"])
+                .arg(encode_command(&script))
+                .status()
+                .unwrap()
+                .code()
+                .unwrap()
+        };
+        assert_eq!(run(&unsigned, &unsigned), 9002);
+        // Microsoft Edge carries an embedded signature, where installed.
+        let edge = PathBuf::from(
+            std::env::var("ProgramFiles(x86)").unwrap_or_else(|_| r"C:\Program Files (x86)".into()),
+        )
+        .join(r"Microsoft\Edge\Application\msedge.exe");
+        if edge.exists() {
+            let Publisher::Signed { name, subject } = publisher(&edge) else {
+                panic!("Edge is signed inside the file: {:?}", publisher(&edge));
+            };
+            assert!(subject.contains(&format!("CN={name}")), "{subject}");
+            assert_eq!(run(&edge, &edge), 0, "the same publisher passes");
+            assert_eq!(run(&edge, &unsigned), 9002);
+            assert_eq!(
+                run(&unsigned, &edge),
+                9002,
+                "this build unsigned: no pin to hold"
+            );
+            let same = publisher(&edge);
+            assert_eq!(publisher_policy(&same, &publisher(&edge)), Ok(true));
+        }
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -841,6 +945,16 @@ mod tests {
                  'Exception calling \"Start\"', [ComponentModel.Win32Exception]::new(1223))"
                     .to_owned(),
                 Outcome::Cancelled,
+            ),
+            // A real process started the same way (hidden, no prompt): its
+            // exit code is read once it has ended.
+            (
+                "& { $i = New-Object Diagnostics.ProcessStartInfo 'cmd.exe'; \
+                 $i.UseShellExecute = $true; $i.WindowStyle = 'Hidden'; \
+                 $i.Arguments = '/d /c exit 1603'; \
+                 $q = [Diagnostics.Process]::Start($i); $q.WaitForExit(); $q }"
+                    .to_owned(),
+                Outcome::InstallerFailed(1603),
             ),
             // A real Process.Start failure (no prompt: the file is missing),
             // unwrapped the same way.

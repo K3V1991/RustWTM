@@ -80,8 +80,9 @@ refuse each other, as before.
   average and the peak of each measure, minutes not recorded left empty,
   and how much of the period was recorded.
 - The updater holds an update to the publisher of the RustWTM that runs it:
-  a signed build installs only an MSI with a valid embedded signature by
-  the same publisher, checked before Windows asks for administrator rights
+  a signed build installs only an MSI with a valid embedded signature whose
+  certificate names the same validated publisher (name, organization,
+  place and country), checked before Windows asks for administrator rights
   and again on the copy only administrators can reach. Every release so far
   is unsigned, so for now updates still rely on the release's SHA-256;
   pinning starts with the first signed build installed.
