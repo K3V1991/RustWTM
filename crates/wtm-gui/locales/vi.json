@@ -1909,5 +1909,13 @@
   "Show in folder": "Hiện trong thư mục",
   "Could not save the support bundle: {0}": "Không thể lưu gói hỗ trợ: {0}",
   "Save support bundle": "Lưu gói hỗ trợ",
-  "Text file": "Tệp văn bản"
+  "Text file": "Tệp văn bản",
+  "Customize Overview": "Tùy chỉnh Tổng quan",
+  "Customize Overview…": "Tùy chỉnh Tổng quan…",
+  "Choose the cards and their order": "Chọn các thẻ và thứ tự của chúng",
+  "Warnings, such as programs not responding, always show.": "Cảnh báo, như chương trình không phản hồi, luôn được hiển thị.",
+  "Resource cards": "Thẻ tài nguyên",
+  "Sections": "Mục",
+  "Restore default layout": "Khôi phục bố cục mặc định",
+  "Every Overview card is hidden.": "Tất cả thẻ Tổng quan đều bị ẩn."
 }

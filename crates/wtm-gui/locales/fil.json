@@ -1909,5 +1909,13 @@
   "Show in folder": "Ipakita sa folder",
   "Could not save the support bundle: {0}": "Hindi ma-save ang support bundle: {0}",
   "Save support bundle": "I-save ang support bundle",
-  "Text file": "Text file"
+  "Text file": "Text file",
+  "Customize Overview": "I-customize ang Pangkalahatang-ideya",
+  "Customize Overview…": "I-customize ang Pangkalahatang-ideya…",
+  "Choose the cards and their order": "Piliin ang mga card at ang pagkakasunod-sunod nila",
+  "Warnings, such as programs not responding, always show.": "Laging ipinapakita ang mga babala, gaya ng mga programang hindi tumutugon.",
+  "Resource cards": "Mga card ng resource",
+  "Sections": "Mga seksyon",
+  "Restore default layout": "Ibalik ang default na layout",
+  "Every Overview card is hidden.": "Nakatago ang lahat ng card ng Pangkalahatang-ideya."
 }

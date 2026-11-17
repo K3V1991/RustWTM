@@ -21,6 +21,16 @@ All notable changes to this project are documented here. The format follows
   and paths* is ticked. config.toml, telegram.toml, ai.toml, environment
   variables, window titles and container logs are never read for it,
   nor are processes' command lines, and nothing is uploaded.
+- *Customize Overview…* (at the end of the Overview, and in Settings →
+  Appearance) hides any of the five resource cards and the Docker,
+  protection, busiest apps, recent actions and hardware sections, and
+  moves them up or down within their group, from the mouse or the
+  keyboard. Changes apply on *Apply*, *Restore default layout* brings
+  every card back in its first order, and the choice is remembered.
+  Warnings (programs not responding, swarms, the verdict, the rescue core
+  and game mode) always show. A card added by a later version shows until
+  it is hidden, and a card this version does not know is dropped without
+  resetting the other window preferences.
 
 ### Fixed
 

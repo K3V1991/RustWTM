@@ -1909,5 +1909,13 @@
   "Show in folder": "ਫੋਲਡਰ ਵਿੱਚ ਦਿਖਾਓ",
   "Could not save the support bundle: {0}": "ਸਹਾਇਤਾ ਬੰਡਲ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ: {0}",
   "Save support bundle": "ਸਹਾਇਤਾ ਬੰਡਲ ਸੰਭਾਲੋ",
-  "Text file": "ਟੈਕਸਟ ਫ਼ਾਈਲ"
+  "Text file": "ਟੈਕਸਟ ਫ਼ਾਈਲ",
+  "Customize Overview": "ਝਲਕ ਨੂੰ ਕਸਟਮਾਈਜ਼ ਕਰੋ",
+  "Customize Overview…": "ਝਲਕ ਨੂੰ ਕਸਟਮਾਈਜ਼ ਕਰੋ…",
+  "Choose the cards and their order": "ਕਾਰਡ ਅਤੇ ਉਹਨਾਂ ਦਾ ਕ੍ਰਮ ਚੁਣੋ",
+  "Warnings, such as programs not responding, always show.": "ਜਵਾਬ ਨਾ ਦੇ ਰਹੇ ਪ੍ਰੋਗਰਾਮਾਂ ਵਰਗੀਆਂ ਚੇਤਾਵਨੀਆਂ ਹਮੇਸ਼ਾਂ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ।",
+  "Resource cards": "ਰਿਸੋਰਸ ਕਾਰਡ",
+  "Sections": "ਭਾਗ",
+  "Restore default layout": "ਡਿਫੌਲਟ ਲੇਆਉਟ ਬਹਾਲ ਕਰੋ",
+  "Every Overview card is hidden.": "ਝਲਕ ਦੇ ਸਾਰੇ ਕਾਰਡ ਲੁਕੇ ਹੋਏ ਹਨ।"
 }

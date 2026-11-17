@@ -1909,5 +1909,13 @@
   "Show in folder": "ಫೋಲ್ಡರ್‌ನಲ್ಲಿ ತೋರಿಸಿ",
   "Could not save the support bundle: {0}": "ಬೆಂಬಲ ಬಂಡಲ್ ಉಳಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ: {0}",
   "Save support bundle": "ಬೆಂಬಲ ಬಂಡಲ್ ಉಳಿಸಿ",
-  "Text file": "ಪಠ್ಯ ಫೈಲ್"
+  "Text file": "ಪಠ್ಯ ಫೈಲ್",
+  "Customize Overview": "ಅವಲೋಕನ ಕಸ್ಟಮೈಸ್ ಮಾಡಿ",
+  "Customize Overview…": "ಅವಲೋಕನ ಕಸ್ಟಮೈಸ್ ಮಾಡಿ…",
+  "Choose the cards and their order": "ಕಾರ್ಡ್‌ಗಳು ಮತ್ತು ಅವುಗಳ ಕ್ರಮವನ್ನು ಆರಿಸಿ",
+  "Warnings, such as programs not responding, always show.": "ಪ್ರತಿಕ್ರಿಯಿಸದ ಪ್ರೋಗ್ರಾಂಗಳಂತಹ ಎಚ್ಚರಿಕೆಗಳು ಯಾವಾಗಲೂ ತೋರಿಸಲ್ಪಡುತ್ತವೆ.",
+  "Resource cards": "ರಿಸೋರ್ಸ್ ಕಾರ್ಡ್‌ಗಳು",
+  "Sections": "ವಿಭಾಗಗಳು",
+  "Restore default layout": "ಡೀಫಾಲ್ಟ್ ಲೇಔಟ್ ಮರುಸ್ಥಾಪಿಸಿ",
+  "Every Overview card is hidden.": "ಅವಲೋಕನದ ಎಲ್ಲಾ ಕಾರ್ಡ್‌ಗಳು ಮರೆಯಾಗಿವೆ."
 }

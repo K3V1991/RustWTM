@@ -276,7 +276,8 @@ stable identity. [Transfer verification](docs/repository-migration.md).
   [Container monitor preview](screenshots/containers.png).
 
 - Overview start page: load at a glance, one-click protection on/off and
-  protection levels, the busiest apps with quick actions.
+  protection levels, the busiest apps with quick actions. *Customize
+  Overview…* hides cards and changes their order; warnings always show.
 
 - Processes: list, tree or Apps view (one row per app, acting on all of its
   processes), program icons, optional descriptive titles with muted executable

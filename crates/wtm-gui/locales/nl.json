@@ -1909,5 +1909,13 @@
   "Show in folder": "Weergeven in map",
   "Could not save the support bundle: {0}": "Kan het ondersteuningspakket niet opslaan: {0}",
   "Save support bundle": "Ondersteuningspakket opslaan",
-  "Text file": "Tekstbestand"
+  "Text file": "Tekstbestand",
+  "Customize Overview": "Overzicht aanpassen",
+  "Customize Overview…": "Overzicht aanpassen…",
+  "Choose the cards and their order": "Kies de kaarten en hun volgorde",
+  "Warnings, such as programs not responding, always show.": "Waarschuwingen, zoals programma's die niet reageren, worden altijd getoond.",
+  "Resource cards": "Bronkaarten",
+  "Sections": "Secties",
+  "Restore default layout": "Standaardindeling herstellen",
+  "Every Overview card is hidden.": "Alle kaarten van het overzicht zijn verborgen."
 }

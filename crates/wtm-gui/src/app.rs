@@ -462,6 +462,8 @@ struct UiState {
     nav_collapsed: Option<bool>,
     /// The Run new task dialog: command line and "as administrator".
     run_task: Option<(String, bool)>,
+    overview_layout: crate::overview_layout::Layout,
+    overview_editor: Option<crate::overview_layout::Editor>,
     /// The support bundle window, while open.
     support_bundle: Option<crate::support_bundle::View>,
     /// When to pop up on CPU overload.
@@ -610,6 +612,8 @@ struct Prefs {
     skip_version: Option<String>,
     /// Ports always listed in the Ports tab.
     watched_ports: Vec<u16>,
+    /// The Overview cards shown and their order.
+    overview: crate::overview_layout::Layout,
 }
 
 impl Default for Prefs {
@@ -711,6 +715,7 @@ impl UiState {
             check_updates: self.check_updates,
             skip_version: self.skip_version.clone(),
             watched_ports: self.ports.watched.clone(),
+            overview: self.overview_layout.clone(),
         }
     }
 
@@ -767,6 +772,8 @@ impl UiState {
         self.check_updates = prefs.check_updates;
         self.skip_version = prefs.skip_version;
         self.ports.watched = prefs.watched_ports;
+        self.overview_layout = prefs.overview;
+        self.overview_layout.normalize();
     }
 }
 
@@ -828,6 +835,8 @@ impl Default for UiState {
             panic: false,
             nav_collapsed: None,
             run_task: None,
+            overview_layout: Default::default(),
+            overview_editor: None,
             support_bundle: None,
             alerts: crate::alert::AlertSettings::default(),
             notifications: true,
@@ -1480,7 +1489,8 @@ impl eframe::App for App {
                         }
                     }
                     Tab::Overview => {
-                        let (cmds, more) = crate::overview::overview(ui, &data);
+                        let (cmds, more) =
+                            crate::overview::overview(ui, &data, &state.overview_layout);
                         service_cmds.extend(cmds);
                         intents.extend(more);
                     }
@@ -1539,6 +1549,16 @@ impl eframe::App for App {
                                 &mut state.display,
                                 &mut state.nav_collapsed,
                             );
+                            crate::theme::option_group(ui, crate::i18n::tr("Overview"));
+                            if ui
+                                .button(crate::i18n::tr("Customize Overview…"))
+                                .on_hover_text(crate::i18n::tr("Choose the cards and their order"))
+                                .clicked()
+                            {
+                                state.overview_editor = Some(crate::overview_layout::Editor::new(
+                                    &state.overview_layout,
+                                ));
+                            }
                         }
                         crate::settings::Page::Processes => {
                             if crate::preferences::processes(
@@ -1886,6 +1906,10 @@ impl eframe::App for App {
         );
         crate::kill_tab::panic_dialog(&ctx, &data, &mut state.panic, &mut intents);
 
+        if let Some(layout) = crate::overview_layout::show_editor(&ctx, &mut state.overview_editor)
+        {
+            state.overview_layout = layout;
+        }
         if let Some(view) = &mut state.support_bundle {
             // Made when opened and when the choice changes, not each frame:
             // what is saved is what was shown.
@@ -2174,6 +2198,10 @@ impl eframe::App for App {
                     state.tab = Tab::Limits;
                 }
                 Intent::ShowContainers => state.tab = Tab::Containers,
+                Intent::CustomizeOverview => {
+                    state.overview_editor =
+                        Some(crate::overview_layout::Editor::new(&state.overview_layout));
+                }
                 Intent::ShowPorts => state.tab = Tab::Ports,
                 Intent::ShowServices(pid) => {
                     // A number finds the services of that process.
@@ -7753,6 +7781,181 @@ mod tests {
     }
 
     #[test]
+    fn overview_cards_are_arranged_by_keyboard_and_kept_after_a_restart() {
+        use crate::overview_layout::Card;
+        use egui::accesskit::Role;
+        let (mut h, _rx) = overview_app(data());
+        let open = h.get_by_label("Customize Overview…");
+        open.scroll_to_me();
+        h.run_steps(2);
+        h.get_by_label("Customize Overview…").click();
+        h.run_steps(3);
+        // Hide Memory, move Network before Disk & I/O by keyboard and the
+        // recent actions before the busiest apps by mouse.
+        h.get_by_role_and_label(Role::CheckBox, "Memory").click();
+        h.run_steps(2);
+        h.get_by_label("Move Network up").focus();
+        h.run_steps(2);
+        h.key_press(egui::Key::Enter);
+        h.run_steps(2);
+        h.get_by_label("Move Recent automatic actions up").click();
+        h.run_steps(2);
+        // Nothing changes before Apply.
+        assert_eq!(
+            h.state().state.overview_layout,
+            crate::overview_layout::Layout::default()
+        );
+        h.get_by_label("Apply").click();
+        h.run_steps(5);
+        let layout = h.state().state.overview_layout.clone();
+        assert!(h.state().state.overview_editor.is_none());
+        assert_eq!(layout.hidden, [Card::Memory]);
+        assert_eq!(
+            layout.resources(),
+            [Card::Cpu, Card::Gpu, Card::Network, Card::Disk]
+        );
+        assert_eq!(
+            layout.sections(),
+            [
+                Card::Containers,
+                Card::Protection,
+                Card::Recent,
+                Card::Busiest,
+                Card::Hardware
+            ]
+        );
+        // The Overview follows it.
+        assert!(h.query_by_label_contains("Memory:").is_none());
+        let network = h.get_by_label_contains("Network:").rect();
+        let disk = h.get_by_label_contains("Disk & I/O:").rect();
+        assert!(network.max.x <= disk.min.x, "{network:?} {disk:?}");
+        let recent = h.get_by_label("Recent automatic actions").rect();
+        let busiest = h.get_by_label("Busiest apps right now").rect();
+        assert!(recent.max.x <= busiest.min.x, "{recent:?} {busiest:?}");
+        // A moved card still opens its own graph from the keyboard.
+        h.get_by_label_contains("Network:").focus();
+        h.run_steps(2);
+        h.key_press(egui::Key::Enter);
+        h.run_steps(10);
+        assert_eq!(h.state().state.tab, Tab::Performance);
+        assert_eq!(
+            h.state().state.performance.page,
+            crate::performance_view::Page::Network
+        );
+        // And the layout is remembered.
+        let mut storage = MemStorage::default();
+        eframe::set_value(&mut storage, PREFS_KEY, &h.state().state.prefs());
+        assert_eq!(UiState::restored(Some(&storage)).overview_layout, layout);
+    }
+
+    #[test]
+    fn a_fully_hidden_overview_offers_the_default_back() {
+        use crate::overview_layout::{Card, Layout, RESOURCES, SECTIONS};
+        let (mut h, _rx) = overview_app(data());
+        h.state_mut().state.overview_layout = Layout {
+            hidden: RESOURCES.iter().chain(&SECTIONS).copied().collect(),
+            ..Layout::default()
+        };
+        h.run_steps(3);
+        assert!(h.query_by_label("Every Overview card is hidden.").is_some());
+        assert!(h.query_by_label_contains("CPU:").is_none());
+        // Cancel keeps the hidden layout; Restore default layout then Apply
+        // shows every card again.
+        for (button, hidden) in [("Cancel", true), ("Apply", false)] {
+            h.get_by_label("Customize Overview…").click();
+            h.run_steps(3);
+            h.get_by_label("Restore default layout").click();
+            h.run_steps(2);
+            h.get_by_label(button).click();
+            h.run_steps(5);
+            assert_eq!(
+                h.state().state.overview_layout.shows(Card::Cpu),
+                !hidden,
+                "{button}"
+            );
+        }
+        assert_eq!(h.state().state.overview_layout, Layout::default());
+        assert!(h.query_by_label("Every Overview card is hidden.").is_none());
+        assert!(h.query_by_label_contains("CPU:").is_some());
+    }
+
+    #[test]
+    fn the_overview_editor_scrolls_on_a_short_window_and_keeps_its_buttons() {
+        use crate::overview_layout::Card;
+        let (backend, _rx) = Backend::offline(data());
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([820.0, 500.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState::default(),
+                tray: None,
+                frames: Default::default(),
+            });
+        h.run_steps(2);
+        h.state_mut().state.overview_editor = Some(crate::overview_layout::Editor::new(
+            &crate::overview_layout::Layout::default(),
+        ));
+        h.run_steps(3);
+        for label in [
+            "Customize Overview",
+            "Apply",
+            "Cancel",
+            "Restore default layout",
+        ] {
+            let rect = h.get_by_label(label).rect();
+            assert!(
+                rect.min.y >= 0.0 && rect.max.y <= 500.0,
+                "{label} in view: {rect:?}"
+            );
+        }
+        let last = h.get_by_label("Move Hardware details up");
+        last.scroll_to_me();
+        h.run_steps(3);
+        h.get_by_label("Move Hardware details up").click();
+        h.run_steps(2);
+        h.get_by_label("Apply").click();
+        h.run_steps(3);
+        assert_eq!(
+            h.state().state.overview_layout.sections(),
+            [
+                Card::Containers,
+                Card::Protection,
+                Card::Busiest,
+                Card::Hardware,
+                Card::Recent
+            ]
+        );
+    }
+
+    #[test]
+    fn future_overview_cards_do_not_discard_other_window_preferences() {
+        use crate::overview_layout::{Card, Layout};
+        use eframe::Storage as _;
+        let mut storage = MemStorage::default();
+        storage.set_string(
+            PREFS_KEY,
+            "(tab: About, language: German, overview: (order: [Network, FutureCard, Cpu, Cpu], hidden: [FutureCard, Gpu]))"
+                .into(),
+        );
+        let restored = UiState::restored(Some(&storage));
+        assert_eq!(restored.tab, Tab::About);
+        assert_eq!(restored.language, crate::i18n::Language::German);
+        let layout = &restored.overview_layout;
+        assert_eq!(
+            layout.resources(),
+            [Card::Network, Card::Cpu, Card::Memory, Card::Disk]
+        );
+        assert_eq!(layout.hidden, [Card::Gpu]);
+        // Preferences saved before the Overview could be arranged.
+        storage.set_string(PREFS_KEY, "(tab: About)".into());
+        assert_eq!(
+            UiState::restored(Some(&storage)).overview_layout,
+            Layout::default()
+        );
+    }
+
+    #[test]
     fn future_process_columns_do_not_discard_other_window_preferences() {
         use eframe::Storage as _;
         let mut storage = MemStorage::default();
@@ -10462,7 +10665,7 @@ o-such-folder",
         d.elevated = true;
         let (mut h, rx) = overview_app(d);
         assert!(h.query_by_label_contains("Protection is on").is_some());
-        assert!(h.query_by_label_contains("Custom").is_some());
+        assert!(h.query_by_label("Custom (edited in Settings)").is_some());
         assert!(
             h.query_by_label("Changing it needs administrator rights.")
                 .is_some()
@@ -11787,6 +11990,18 @@ o-such-folder",
                                 )),
                             );
                             h.get_by_label(crate::i18n::tr("Cancel")).click();
+                            h.run_steps(2);
+                        }
+                        if tab == Tab::Overview {
+                            let layout = h.state().state.overview_layout.clone();
+                            h.state_mut().state.overview_editor =
+                                Some(crate::overview_layout::Editor::new(&layout));
+                            h.run_steps(3);
+                            capture(
+                                &mut h,
+                                &out.join(format!("{theme_name}-{size_name}-OverviewLayout.png")),
+                            );
+                            h.state_mut().state.overview_editor = None;
                             h.run_steps(2);
                         }
                         if tab == Tab::About {

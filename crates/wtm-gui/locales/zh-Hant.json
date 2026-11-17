@@ -1909,5 +1909,13 @@
   "Show in folder": "在資料夾中顯示",
   "Could not save the support bundle: {0}": "無法儲存支援套件：{0}",
   "Save support bundle": "儲存支援套件",
-  "Text file": "文字檔"
+  "Text file": "文字檔",
+  "Customize Overview": "自訂概觀",
+  "Customize Overview…": "自訂概觀…",
+  "Choose the cards and their order": "選擇卡片及其順序",
+  "Warnings, such as programs not responding, always show.": "警告（例如程式沒有回應）一律顯示。",
+  "Resource cards": "資源卡片",
+  "Sections": "區段",
+  "Restore default layout": "還原預設版面配置",
+  "Every Overview card is hidden.": "概觀中的所有卡片皆已隱藏。"
 }

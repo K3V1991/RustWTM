@@ -1909,5 +1909,13 @@
   "Show in folder": "Mostra nella cartella",
   "Could not save the support bundle: {0}": "Impossibile salvare il pacchetto di supporto: {0}",
   "Save support bundle": "Salva pacchetto di supporto",
-  "Text file": "File di testo"
+  "Text file": "File di testo",
+  "Customize Overview": "Personalizza panoramica",
+  "Customize Overview…": "Personalizza panoramica…",
+  "Choose the cards and their order": "Scegli le schede e il loro ordine",
+  "Warnings, such as programs not responding, always show.": "Gli avvisi, come i programmi che non rispondono, sono sempre visibili.",
+  "Resource cards": "Schede delle risorse",
+  "Sections": "Sezioni",
+  "Restore default layout": "Ripristina layout predefinito",
+  "Every Overview card is hidden.": "Tutte le schede della panoramica sono nascoste."
 }

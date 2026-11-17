@@ -1909,5 +1909,13 @@
   "Show in folder": "கோப்புறையில் காட்டு",
   "Could not save the support bundle: {0}": "உதவித் தொகுப்பைச் சேமிக்க முடியவில்லை: {0}",
   "Save support bundle": "உதவித் தொகுப்பைச் சேமி",
-  "Text file": "உரைக் கோப்பு"
+  "Text file": "உரைக் கோப்பு",
+  "Customize Overview": "மேலோட்டத்தைத் தனிப்பயனாக்கு",
+  "Customize Overview…": "மேலோட்டத்தைத் தனிப்பயனாக்கு…",
+  "Choose the cards and their order": "கார்டுகளையும் அவற்றின் வரிசையையும் தேர்வுசெய்",
+  "Warnings, such as programs not responding, always show.": "பதிலளிக்காத நிரல்கள் போன்ற எச்சரிக்கைகள் எப்போதும் காட்டப்படும்.",
+  "Resource cards": "ரிசோர்ஸ் கார்டுகள்",
+  "Sections": "பிரிவுகள்",
+  "Restore default layout": "இயல்புநிலை தளவமைப்பை மீட்டமை",
+  "Every Overview card is hidden.": "மேலோட்டத்தின் எல்லா கார்டுகளும் மறைக்கப்பட்டுள்ளன."
 }

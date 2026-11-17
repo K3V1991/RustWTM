@@ -11464,5 +11464,53 @@
     "de": "Textdatei",
     "fr": "Fichier texte",
     "es": "Archivo de texto"
+  },
+  "Customize Overview": {
+    "tr": "Genel bakışı özelleştir",
+    "de": "Übersicht anpassen",
+    "fr": "Personnaliser la vue d'ensemble",
+    "es": "Personalizar resumen"
+  },
+  "Customize Overview…": {
+    "tr": "Genel bakışı özelleştir…",
+    "de": "Übersicht anpassen…",
+    "fr": "Personnaliser la vue d'ensemble…",
+    "es": "Personalizar resumen…"
+  },
+  "Choose the cards and their order": {
+    "tr": "Kartları ve sıralarını seçin",
+    "de": "Karten und ihre Reihenfolge wählen",
+    "fr": "Choisir les cartes et leur ordre",
+    "es": "Elegir las tarjetas y su orden"
+  },
+  "Warnings, such as programs not responding, always show.": {
+    "tr": "Yanıt vermeyen programlar gibi uyarılar her zaman gösterilir.",
+    "de": "Warnungen, etwa zu Programmen, die nicht reagieren, werden immer angezeigt.",
+    "fr": "Les avertissements, comme les programmes qui ne répondent pas, s'affichent toujours.",
+    "es": "Las advertencias, como los programas que no responden, siempre se muestran."
+  },
+  "Resource cards": {
+    "tr": "Kaynak kartları",
+    "de": "Ressourcenkarten",
+    "fr": "Cartes des ressources",
+    "es": "Tarjetas de recursos"
+  },
+  "Sections": {
+    "tr": "Bölümler",
+    "de": "Abschnitte",
+    "fr": "Sections",
+    "es": "Secciones"
+  },
+  "Restore default layout": {
+    "tr": "Varsayılan düzeni geri yükle",
+    "de": "Standardlayout wiederherstellen",
+    "fr": "Rétablir la disposition par défaut",
+    "es": "Restaurar diseño predeterminado"
+  },
+  "Every Overview card is hidden.": {
+    "tr": "Genel bakıştaki tüm kartlar gizli.",
+    "de": "Alle Karten der Übersicht sind ausgeblendet.",
+    "fr": "Toutes les cartes de la vue d'ensemble sont masquées.",
+    "es": "Todas las tarjetas del resumen están ocultas."
   }
 }

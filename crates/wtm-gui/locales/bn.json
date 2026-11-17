@@ -1909,5 +1909,13 @@
   "Show in folder": "ফোল্ডারে দেখান",
   "Could not save the support bundle: {0}": "সহায়তা বান্ডেল সংরক্ষণ করা যায়নি: {0}",
   "Save support bundle": "সহায়তা বান্ডেল সংরক্ষণ করুন",
-  "Text file": "টেক্সট ফাইল"
+  "Text file": "টেক্সট ফাইল",
+  "Customize Overview": "ওভারভিউ কাস্টমাইজ করুন",
+  "Customize Overview…": "ওভারভিউ কাস্টমাইজ করুন…",
+  "Choose the cards and their order": "কার্ড এবং তাদের ক্রম বেছে নিন",
+  "Warnings, such as programs not responding, always show.": "সাড়া দিচ্ছে না এমন প্রোগ্রামের মতো সতর্কতা সবসময় দেখানো হয়।",
+  "Resource cards": "রিসোর্স কার্ড",
+  "Sections": "বিভাগ",
+  "Restore default layout": "ডিফল্ট লেআউট পুনরুদ্ধার করুন",
+  "Every Overview card is hidden.": "ওভারভিউয়ের সব কার্ড লুকানো আছে।"
 }

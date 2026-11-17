@@ -1909,5 +1909,13 @@
   "Show in folder": "Onyesha kwenye folda",
   "Could not save the support bundle: {0}": "Haikuweza kuhifadhi kifurushi cha usaidizi: {0}",
   "Save support bundle": "Hifadhi kifurushi cha usaidizi",
-  "Text file": "Faili ya maandishi"
+  "Text file": "Faili ya maandishi",
+  "Customize Overview": "Badilisha Muhtasari",
+  "Customize Overview…": "Badilisha Muhtasari…",
+  "Choose the cards and their order": "Chagua kadi na mpangilio wake",
+  "Warnings, such as programs not responding, always show.": "Maonyo, kama programu zisizojibu, huonyeshwa kila wakati.",
+  "Resource cards": "Kadi za rasilimali",
+  "Sections": "Sehemu",
+  "Restore default layout": "Rejesha mpangilio chaguomsingi",
+  "Every Overview card is hidden.": "Kadi zote za Muhtasari zimefichwa."
 }

@@ -1909,5 +1909,13 @@
   "Show in folder": "フォルダーに表示",
   "Could not save the support bundle: {0}": "サポート用バンドルを保存できませんでした: {0}",
   "Save support bundle": "サポート用バンドルを保存",
-  "Text file": "テキスト ファイル"
+  "Text file": "テキスト ファイル",
+  "Customize Overview": "概要のカスタマイズ",
+  "Customize Overview…": "概要のカスタマイズ…",
+  "Choose the cards and their order": "表示するカードと順序を選択",
+  "Warnings, such as programs not responding, always show.": "応答しないプログラムなどの警告は常に表示されます。",
+  "Resource cards": "リソース カード",
+  "Sections": "セクション",
+  "Restore default layout": "既定のレイアウトに戻す",
+  "Every Overview card is hidden.": "概要のカードがすべて非表示です。"
 }

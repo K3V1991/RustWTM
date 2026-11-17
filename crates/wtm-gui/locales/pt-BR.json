@@ -1909,5 +1909,13 @@
   "Show in folder": "Mostrar na pasta",
   "Could not save the support bundle: {0}": "Não foi possível salvar o pacote de suporte: {0}",
   "Save support bundle": "Salvar pacote de suporte",
-  "Text file": "Arquivo de texto"
+  "Text file": "Arquivo de texto",
+  "Customize Overview": "Personalizar visão geral",
+  "Customize Overview…": "Personalizar visão geral…",
+  "Choose the cards and their order": "Escolha os cartões e a ordem deles",
+  "Warnings, such as programs not responding, always show.": "Avisos, como programas que não respondem, sempre aparecem.",
+  "Resource cards": "Cartões de recursos",
+  "Sections": "Seções",
+  "Restore default layout": "Restaurar layout padrão",
+  "Every Overview card is hidden.": "Todos os cartões da visão geral estão ocultos."
 }

@@ -39,6 +39,7 @@ mod navigation;
 mod numeric_tray;
 mod onboarding;
 mod overview;
+mod overview_layout;
 mod packages;
 mod perf_pages;
 mod performance_view;

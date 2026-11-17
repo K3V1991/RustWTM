@@ -1909,5 +1909,13 @@
   "Show in folder": "Pokaż w folderze",
   "Could not save the support bundle: {0}": "Nie można zapisać pakietu pomocy technicznej: {0}",
   "Save support bundle": "Zapisz pakiet pomocy technicznej",
-  "Text file": "Plik tekstowy"
+  "Text file": "Plik tekstowy",
+  "Customize Overview": "Dostosuj przegląd",
+  "Customize Overview…": "Dostosuj przegląd…",
+  "Choose the cards and their order": "Wybierz karty i ich kolejność",
+  "Warnings, such as programs not responding, always show.": "Ostrzeżenia, np. o programach, które nie odpowiadają, są zawsze widoczne.",
+  "Resource cards": "Karty zasobów",
+  "Sections": "Sekcje",
+  "Restore default layout": "Przywróć domyślny układ",
+  "Every Overview card is hidden.": "Wszystkie karty przeglądu są ukryte."
 }

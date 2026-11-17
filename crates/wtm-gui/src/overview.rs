@@ -12,6 +12,7 @@ use wtm_ipc::Command;
 use wtm_policy::{Config, Preset, set_preset};
 
 use crate::backend::{Data, Mode, UiCommand};
+use crate::overview_layout::Card;
 use crate::processes::Intent;
 
 use crate::theme::{BAD, GOOD, WARN, load_color};
@@ -32,7 +33,7 @@ fn app_color(cpu: f32, logical_cpus: u32) -> Option<Color32> {
 const TWO_CARDS: f32 = 1100.0;
 
 /// A resource card opens the corresponding performance section.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Resource {
     Cpu,
     Memory,
@@ -221,7 +222,8 @@ fn stat_row(ui: &mut Ui, stats: &[Stat<'_>], intents: &mut Vec<Intent>) {
         for chunk in stats.chunks(per_row.max(1)) {
             ui.columns(chunk.len(), |cols| {
                 for (col, s) in cols.iter_mut().zip(chunk) {
-                    let response = stat_card(col, s);
+                    // Keyed by resource, so focus and menus follow a moved card.
+                    let response = col.push_id(s.resource, |ui| stat_card(ui, s)).inner;
                     let mut open = response.clicked();
                     crate::context_actions::menu(
                         &response,
@@ -558,8 +560,13 @@ fn swarms(
     }
 }
 
-/// Returns commands for the backend and intents for the app.
-pub fn overview(ui: &mut Ui, data: &Data) -> (Vec<UiCommand>, Vec<Intent>) {
+/// Returns commands for the backend and intents for the app. `layout` says
+/// which cards show and in what order; warnings always show.
+pub fn overview(
+    ui: &mut Ui,
+    data: &Data,
+    layout: &crate::overview_layout::Layout,
+) -> (Vec<UiCommand>, Vec<Intent>) {
     let mut commands = Vec::new();
     let mut intents = Vec::new();
     // Found once per frame: the verdict, the swarm cards and the table share them.
@@ -575,7 +582,7 @@ pub fn overview(ui: &mut Ui, data: &Data) -> (Vec<UiCommand>, Vec<Intent>) {
         };
         let h = &data.history;
         use crate::theme::{CPU, DISK_READ, DISK_WRITE, GPU, MEMORY, NET_RX, NET_TX};
-        let stats = [
+        let mut stats = vec![
             Stat {
                 resource: Resource::Cpu,
                 title: "CPU",
@@ -646,7 +653,19 @@ pub fn overview(ui: &mut Ui, data: &Data) -> (Vec<UiCommand>, Vec<Intent>) {
                 max: None,
             },
         ];
-        stat_row(ui, &stats, &mut intents);
+        let shown: Vec<Stat<'_>> = layout
+            .resources()
+            .into_iter()
+            .filter_map(|card| {
+                let at = stats
+                    .iter()
+                    .position(|s| Some(s.resource) == card.resource())?;
+                Some(stats.swap_remove(at))
+            })
+            .collect();
+        if !shown.is_empty() {
+            stat_row(ui, &shown, &mut intents);
+        }
         if let Some((color, text)) = verdict_of(data, &apps, &swarm_list) {
             ui.add_space(0.0);
             banner(ui, color, &text);
@@ -665,35 +684,69 @@ pub fn overview(ui: &mut Ui, data: &Data) -> (Vec<UiCommand>, Vec<Intent>) {
         crate::theme::loading(ui, crate::i18n::tr("Waiting for monitoring data…"));
     }
     ui.add_space(0.0);
-    if crate::containers::overview(ui, &data.docker) {
-        intents.push(Intent::ShowContainers);
-    }
-    crate::theme::card(ui, crate::i18n::tr("Automatic protection"), |ui| {
-        protection(ui, data, &mut commands);
-    });
-    ui.add_space(0.0);
-
-    let busiest = |ui: &mut Ui, intents: &mut Vec<Intent>| {
-        crate::theme::card(ui, crate::i18n::tr("Busiest apps right now"), |ui| {
-            busiest_table(ui, data, &apps, intents);
+    let mut section = |ui: &mut Ui, card: Card| {
+        ui.push_id(card, |ui| match card {
+            Card::Containers => {
+                if crate::containers::overview(ui, &data.docker) {
+                    intents.push(Intent::ShowContainers);
+                }
+            }
+            Card::Protection => {
+                crate::theme::card(ui, crate::i18n::tr("Automatic protection"), |ui| {
+                    protection(ui, data, &mut commands);
+                });
+            }
+            Card::Busiest => {
+                crate::theme::card(ui, crate::i18n::tr("Busiest apps right now"), |ui| {
+                    busiest_table(ui, data, &apps, &mut intents);
+                });
+            }
+            Card::Recent => {
+                crate::theme::card(ui, crate::i18n::tr("Recent automatic actions"), |ui| {
+                    recent_actions(ui, data);
+                });
+            }
+            Card::Hardware => {
+                ui.collapsing(crate::i18n::tr("Hardware details"), crate::inventory::show);
+            }
+            _ => {}
         });
     };
-    let recent = |ui: &mut Ui| {
-        crate::theme::card(ui, crate::i18n::tr("Recent automatic actions"), |ui| {
-            recent_actions(ui, data);
+    let sections = layout.sections();
+    let mut i = 0;
+    while i < sections.len() {
+        let card = sections[i];
+        // The two tables sit side by side on a wide window when next to each other.
+        let pair = sections.get(i + 1).copied().filter(|next| {
+            matches!(
+                (card, *next),
+                (Card::Busiest, Card::Recent) | (Card::Recent, Card::Busiest)
+            )
         });
-    };
-    if ui.available_width() >= TWO_CARDS {
-        ui.columns(2, |cols| {
-            busiest(&mut cols[0], &mut intents);
-            recent(&mut cols[1]);
-        });
-    } else {
-        busiest(ui, &mut intents);
-        ui.add_space(0.0);
-        recent(ui);
+        match pair {
+            Some(next) if ui.available_width() >= TWO_CARDS => {
+                ui.columns(2, |cols| {
+                    section(&mut cols[0], card);
+                    section(&mut cols[1], next);
+                });
+                i += 2;
+            }
+            _ => {
+                section(ui, card);
+                i += 1;
+            }
+        }
     }
-    ui.collapsing(crate::i18n::tr("Hardware details"), crate::inventory::show);
+    if layout.everything_hidden() {
+        ui.weak(crate::i18n::tr("Every Overview card is hidden."));
+    }
+    if ui
+        .small_button(crate::i18n::tr("Customize Overview…"))
+        .on_hover_text(crate::i18n::tr("Choose the cards and their order"))
+        .clicked()
+    {
+        intents.push(Intent::CustomizeOverview);
+    }
     (commands, intents)
 }
 
@@ -1089,7 +1142,9 @@ mod tests {
                 .allow_missing_glyphs()
                 .with_size([1200.0, 1400.0])
                 .build_ui_state(
-                    |ui, s: &mut (Data, Vec<UiCommand>)| s.1.extend(overview(ui, &s.0).0),
+                    |ui, s: &mut (Data, Vec<UiCommand>)| {
+                        s.1.extend(overview(ui, &s.0, &Default::default()).0)
+                    },
                     (d, Vec::new()),
                 );
             h.run();
@@ -1106,6 +1161,68 @@ mod tests {
                 .expect("mode switch sends a config save");
             assert!(!wtm_policy::Config::from_toml(saved).unwrap().dry_run);
         }
+    }
+
+    #[test]
+    fn an_arranged_overview_fits_every_width() {
+        use crate::overview_layout::{Card, Layout};
+        use egui_kittest::kittest::Queryable;
+        let mut layout = Layout {
+            hidden: vec![Card::Memory, Card::Gpu],
+            ..Layout::default()
+        };
+        // The recent actions after the hardware details: no longer next to
+        // the busiest apps, so never beside them.
+        layout.order.retain(|c| *c != Card::Recent);
+        layout.order.push(Card::Recent);
+        for width in [0.0_f32, 300.0, 700.0, 1300.0] {
+            let mut h = egui_kittest::Harness::builder()
+                .allow_missing_glyphs()
+                .with_size([width.max(1.0), 1600.0])
+                .build_ui_state(
+                    |ui, (d, l): &mut (Data, Layout)| {
+                        overview(ui, d, l);
+                    },
+                    (crate::ui_tests::data(), layout.clone()),
+                );
+            h.run();
+            if width == 0.0 {
+                continue;
+            }
+            for shown in ["CPU:", "Disk & I/O:", "Network:"] {
+                assert!(
+                    h.query_by_label_contains(shown).is_some(),
+                    "{shown} at {width}"
+                );
+            }
+            for hidden in ["Memory:", "GPU:"] {
+                assert!(
+                    h.query_by_label_contains(hidden).is_none(),
+                    "{hidden} at {width}"
+                );
+            }
+            let busiest = h.get_by_label("Busiest apps right now").rect();
+            let hardware = h.get_by_label("Hardware details").rect();
+            let recent = h.get_by_label("Recent automatic actions").rect();
+            assert!(
+                busiest.max.y < hardware.min.y && hardware.max.y < recent.min.y,
+                "{width}: {busiest:?} {hardware:?} {recent:?}"
+            );
+        }
+        // Next to each other, the two tables share a wide window.
+        let mut h = egui_kittest::Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1300.0, 1600.0])
+            .build_ui_state(
+                |ui, d: &mut Data| {
+                    overview(ui, d, &Layout::default());
+                },
+                crate::ui_tests::data(),
+            );
+        h.run();
+        let busiest = h.get_by_label("Busiest apps right now").rect();
+        let recent = h.get_by_label("Recent automatic actions").rect();
+        assert!(busiest.max.x <= recent.min.x, "{busiest:?} {recent:?}");
     }
 
     #[test]
@@ -1126,7 +1243,9 @@ mod tests {
             .allow_missing_glyphs()
             .with_size([1100.0, 1200.0])
             .build_ui_state(
-                |ui, (d, out): &mut (Data, Vec<Intent>)| out.extend(overview(ui, d).1),
+                |ui, (d, out): &mut (Data, Vec<Intent>)| {
+                    out.extend(overview(ui, d, &Default::default()).1)
+                },
                 (d, Vec::new()),
             );
         h.run();

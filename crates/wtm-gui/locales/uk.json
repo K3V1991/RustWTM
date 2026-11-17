@@ -1909,5 +1909,13 @@
   "Show in folder": "Показати в папці",
   "Could not save the support bundle: {0}": "Не вдалося зберегти пакет для підтримки: {0}",
   "Save support bundle": "Зберегти пакет для підтримки",
-  "Text file": "Текстовий файл"
+  "Text file": "Текстовий файл",
+  "Customize Overview": "Налаштувати огляд",
+  "Customize Overview…": "Налаштувати огляд…",
+  "Choose the cards and their order": "Виберіть картки та їх порядок",
+  "Warnings, such as programs not responding, always show.": "Попередження, наприклад про програми, що не відповідають, показуються завжди.",
+  "Resource cards": "Картки ресурсів",
+  "Sections": "Розділи",
+  "Restore default layout": "Відновити стандартний макет",
+  "Every Overview card is hidden.": "Усі картки огляду приховано."
 }

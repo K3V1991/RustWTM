@@ -1909,5 +1909,13 @@
   "Show in folder": "ఫోల్డర్‌లో చూపు",
   "Could not save the support bundle: {0}": "సహాయ బండిల్‌ను సేవ్ చేయలేకపోయాము: {0}",
   "Save support bundle": "సహాయ బండిల్‌ను సేవ్ చేయి",
-  "Text file": "టెక్స్ట్ ఫైల్"
+  "Text file": "టెక్స్ట్ ఫైల్",
+  "Customize Overview": "అవలోకనాన్ని అనుకూలీకరించు",
+  "Customize Overview…": "అవలోకనాన్ని అనుకూలీకరించు…",
+  "Choose the cards and their order": "కార్డ్‌లను, వాటి క్రమాన్ని ఎంచుకోండి",
+  "Warnings, such as programs not responding, always show.": "స్పందించని ప్రోగ్రామ్‌ల వంటి హెచ్చరికలు ఎల్లప్పుడూ చూపబడతాయి.",
+  "Resource cards": "రిసోర్స్ కార్డ్‌లు",
+  "Sections": "విభాగాలు",
+  "Restore default layout": "డిఫాల్ట్ లేఅవుట్‌ను పునరుద్ధరించు",
+  "Every Overview card is hidden.": "అవలోకనంలోని అన్ని కార్డ్‌లు దాచబడ్డాయి."
 }

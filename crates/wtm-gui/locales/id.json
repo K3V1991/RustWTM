@@ -1909,5 +1909,13 @@
   "Show in folder": "Tampilkan di folder",
   "Could not save the support bundle: {0}": "Paket dukungan tidak dapat disimpan: {0}",
   "Save support bundle": "Simpan paket dukungan",
-  "Text file": "File teks"
+  "Text file": "File teks",
+  "Customize Overview": "Sesuaikan Ikhtisar",
+  "Customize Overview…": "Sesuaikan Ikhtisar…",
+  "Choose the cards and their order": "Pilih kartu dan urutannya",
+  "Warnings, such as programs not responding, always show.": "Peringatan, seperti program yang tidak merespons, selalu ditampilkan.",
+  "Resource cards": "Kartu sumber daya",
+  "Sections": "Bagian",
+  "Restore default layout": "Pulihkan tata letak default",
+  "Every Overview card is hidden.": "Semua kartu Ikhtisar disembunyikan."
 }

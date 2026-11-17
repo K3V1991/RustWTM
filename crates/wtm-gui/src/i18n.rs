@@ -911,6 +911,8 @@ mod tests {
             include_str!("kill_tab.rs"),
             include_str!("limits_tab.rs"),
             include_str!("overview.rs"),
+            include_str!("overview_layout.rs"),
+            include_str!("support_bundle.rs"),
             include_str!("ports_tab.rs"),
             include_str!("power_controls.rs"),
             include_str!("processes.rs"),

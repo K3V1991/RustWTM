@@ -1909,5 +1909,13 @@
   "Show in folder": "폴더에서 보기",
   "Could not save the support bundle: {0}": "지원 번들을 저장할 수 없습니다: {0}",
   "Save support bundle": "지원 번들 저장",
-  "Text file": "텍스트 파일"
+  "Text file": "텍스트 파일",
+  "Customize Overview": "개요 사용자 지정",
+  "Customize Overview…": "개요 사용자 지정…",
+  "Choose the cards and their order": "카드와 순서 선택",
+  "Warnings, such as programs not responding, always show.": "응답하지 않는 프로그램 같은 경고는 항상 표시됩니다.",
+  "Resource cards": "리소스 카드",
+  "Sections": "섹션",
+  "Restore default layout": "기본 레이아웃 복원",
+  "Every Overview card is hidden.": "개요의 모든 카드가 숨겨져 있습니다."
 }
