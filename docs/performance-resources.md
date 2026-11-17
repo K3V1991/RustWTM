@@ -53,6 +53,33 @@ leaves a gap there, never a guessed value; series that hold only gaps are
 dropped, and at most 512 are kept. The service's backfill has no device
 history, so device graphs start when the window connects.
 
+Longer device history is kept by the service. Every second it adds each
+disk's active time and read and write rates, each network adapter's receive
+and send rates and each GPU's load and dedicated and shared memory to that
+minute's average and peak, and writes the minute to `history.sqlite` when the
+next one starts (a minute written twice, after a restart within it, is
+merged by sample count). Minutes are kept for a week, and none dated after
+the current minute survive the hourly prune after a clock change. A device
+keeps its history across restarts under a lasting name: disks by model and
+GPUs by name, each with an ordinal among equal ones, and network adapters by
+the NET_LUID Windows keeps. Disk numbers and GPU LUIDs are only what the
+window asks by: the service maps them to the lasting names from its latest
+sample. The model of a disk is read with the storage identity queries only
+(never SMART, which could wake it), and GPU names by listing the DXGI
+adapters, without creating a Direct3D device; both are read once and again
+only for a device not seen for a minute, or after ten minutes for one that
+could not be named. A device without a readable model or name is not
+recorded, and at most 32 devices are, which bounds a full week to about
+22 MB.
+
+The Disk, Network and GPU page of a device shows that history in *Recorded
+history* under its live graphs, for the last hour, 24 hours or 7 days: the
+average as a line and the peak as a fainter one, a minute not recorded left
+empty, and how much of the period was recorded. It is asked for when the
+page opens or the range changes, and again every minute while it stays
+open. Without the service the card says the history is kept by the
+service.
+
 Every page lists Task Manager's details under its graphs: live readings as
 large values, fixed facts beside them, and a Copy details button.
 
@@ -103,7 +130,7 @@ changes. None of them needs administrator rights, and all lists are bounded.
 
 ## Remaining scope
 
-Persistent system and device history (M4), user-selectable GPU engine graphs,
+Persistent system history (M4; device history is kept, see above), user-selectable GPU engine graphs,
 NPU pages and a choice of network units remain pending (the Network page
 shows bits beside bytes). Rate graphs keep a steady live scale; see the
 [timeline](performance-timeline.md).

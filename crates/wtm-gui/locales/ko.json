@@ -1952,5 +1952,10 @@
   "Show in Containers": "컨테이너에서 보기",
   "Show sensors": "센서 보기",
   "Show process": "프로세스 보기",
-  "The process is no longer running.": "프로세스가 더 이상 실행되고 있지 않습니다."
+  "The process is no longer running.": "프로세스가 더 이상 실행되고 있지 않습니다.",
+  "Recorded history": "저장된 기록",
+  "Loading…": "불러오는 중…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "서비스에 이 장치의 기록이 없습니다. 서비스는 장치의 모델이나 이름을 읽은 뒤, 실행 중일 때만 기록합니다.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "이 기간에는 기록된 것이 없습니다. 서비스는 각 장치의 지난 1주일을 1분 단위로 보관합니다.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "이 기간에 {0} 기록되었습니다. 서비스는 각 장치의 지난 1주일을 1분 단위로 보관하며, 실행되지 않은 분은 비어 있습니다."
 }

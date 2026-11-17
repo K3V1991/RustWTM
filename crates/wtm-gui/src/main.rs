@@ -14,6 +14,7 @@ mod container_history;
 mod containers;
 mod context_actions;
 mod device_facts;
+mod device_history;
 mod devices;
 mod diagnostics;
 mod disk_details;

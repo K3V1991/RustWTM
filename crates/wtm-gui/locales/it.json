@@ -1952,5 +1952,10 @@
   "Show in Containers": "Mostra in Contenitori",
   "Show sensors": "Mostra sensori",
   "Show process": "Mostra processo",
-  "The process is no longer running.": "Il processo non è più in esecuzione."
+  "The process is no longer running.": "Il processo non è più in esecuzione.",
+  "Recorded history": "Cronologia registrata",
+  "Loading…": "Caricamento…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Il servizio non ha una cronologia di questo dispositivo. Registra un dispositivo dopo averne letto il modello o il nome, e solo mentre è in esecuzione.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Nulla registrato in questo periodo. Il servizio conserva l'ultima settimana di ogni dispositivo, minuto per minuto.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Registrati {0} in questo periodo. Il servizio conserva l'ultima settimana di ogni dispositivo, minuto per minuto; i minuti in cui non era in esecuzione restano vuoti."
 }

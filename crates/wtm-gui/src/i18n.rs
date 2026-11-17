@@ -918,6 +918,7 @@ mod tests {
             include_str!("containers.rs"),
             include_str!("container_alerts.rs"),
             include_str!("container_history.rs"),
+            include_str!("device_history.rs"),
             include_str!("event_rows.rs"),
             include_str!("backend.rs"),
             include_str!("kill_tab.rs"),

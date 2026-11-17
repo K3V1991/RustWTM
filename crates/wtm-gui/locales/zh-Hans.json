@@ -1952,5 +1952,10 @@
   "Show in Containers": "在容器中显示",
   "Show sensors": "显示传感器",
   "Show process": "显示进程",
-  "The process is no longer running.": "该进程已不再运行。"
+  "The process is no longer running.": "该进程已不再运行。",
+  "Recorded history": "已记录的历史",
+  "Loading…": "正在加载…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "服务没有此设备的历史记录。服务在读取到设备的型号或名称后才会记录，且仅在运行时记录。",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "此期间没有任何记录。服务按分钟保留每个设备最近一周的数据。",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "此期间已记录 {0}。服务按分钟保留每个设备最近一周的数据；服务未运行的分钟留空。"
 }

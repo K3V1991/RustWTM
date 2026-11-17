@@ -1952,5 +1952,10 @@
   "Show in Containers": "コンテナーで表示",
   "Show sensors": "センサーを表示",
   "Show process": "プロセスを表示",
-  "The process is no longer running.": "プロセスはもう実行されていません。"
+  "The process is no longer running.": "プロセスはもう実行されていません。",
+  "Recorded history": "記録された履歴",
+  "Loading…": "読み込み中…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "サービスにはこのデバイスの履歴がありません。サービスはデバイスのモデルまたは名前を読み取った後、実行中のみ記録します。",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "この期間には何も記録されていません。サービスは各デバイスの直近 1 週間を 1 分ごとに保持します。",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "この期間に {0} 記録されました。サービスは各デバイスの直近 1 週間を 1 分ごとに保持します。実行していなかった分は空のままです。"
 }

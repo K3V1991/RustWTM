@@ -354,14 +354,21 @@ pub fn show(ui: &mut egui::Ui, series: Option<&Series>, wall: SystemTime) -> boo
         } else {
             "CPU"
         };
-        chart(&mut columns[0], title, &cpu, now, crate::theme::CPU, &|v| {
-            crate::i18n::percent(format!("{v:.1}"))
-        });
-        chart(
+        minute_chart(
+            &mut columns[0],
+            title,
+            &cpu,
+            now,
+            KEEP_MINUTES,
+            crate::theme::CPU,
+            &|v| crate::i18n::percent(format!("{v:.1}")),
+        );
+        minute_chart(
             &mut columns[1],
             crate::i18n::tr("Memory"),
             &memory,
             now,
+            KEEP_MINUTES,
             crate::theme::MEMORY,
             &|v| crate::i18n::bytes(f64::from(v)),
         );
@@ -369,16 +376,19 @@ pub fn show(ui: &mut egui::Ui, series: Option<&Series>, wall: SystemTime) -> boo
     clear
 }
 
-/// One resource over the last 24 hours: `points` are (minute, average,
-/// peak), oldest first.
-fn chart(
+/// One measure over the `span` minutes up to `now`: `points` are (minute,
+/// average, peak), oldest first. The average is a line, the peak a faint
+/// one behind it; a minute not recorded breaks both.
+pub fn minute_chart(
     ui: &mut egui::Ui,
     title: &str,
     points: &[(i64, f32, f32)],
     now: i64,
+    span: i64,
     color: egui::Color32,
     format: &dyn Fn(f32) -> String,
 ) {
+    let span = span.max(1);
     ui.label(title);
     let (rect, response) =
         ui.allocate_exact_size(egui::vec2(ui.available_width(), 60.0), egui::Sense::hover());
@@ -393,9 +403,8 @@ fn chart(
     if points.is_empty() || top <= 0.0 {
         return;
     }
-    let start = now - KEEP_MINUTES;
-    let x =
-        |minute: i64| rect.left() + (minute - start) as f32 / KEEP_MINUTES as f32 * rect.width();
+    let start = now - span;
+    let x = |minute: i64| rect.left() + (minute - start) as f32 / span as f32 * rect.width();
     let y = |v: f32| rect.bottom() - 2.0 - v / top * (rect.height() - 4.0);
     // Runs of consecutive minutes; a missing minute breaks the line.
     let mut runs: Vec<&[(i64, f32, f32)]> = Vec::new();
@@ -426,21 +435,40 @@ fn chart(
         }
     }
     if let Some(pointer) = response.hover_pos() {
-        let minute =
-            start + ((pointer.x - rect.left()) / rect.width() * KEEP_MINUTES as f32) as i64;
+        let minute = start + ((pointer.x - rect.left()) / rect.width() * span as f32) as i64;
+        // Within a pixel or two, however many minutes a pixel holds.
+        let reach = (span as f32 / rect.width() * 2.0).ceil().max(2.0) as i64;
         let near = points
             .iter()
             .min_by_key(|p| (p.0 - minute).abs())
-            .filter(|p| (p.0 - minute).abs() <= 2);
+            .filter(|p| (p.0 - minute).abs() <= reach);
+        let when = |m: i64| {
+            if span > KEEP_MINUTES {
+                day_clock(m)
+            } else {
+                clock(m)
+            }
+        };
         let text = match near {
             Some(&(m, avg, peak)) => crate::i18n::format(
                 "{0}: average {1}, peak {2}",
-                &[clock(m), format(avg), format(peak)],
+                &[when(m), format(avg), format(peak)],
             ),
-            None => crate::i18n::format("{0}: not recorded", &[clock(minute)]),
+            None => crate::i18n::format("{0}: not recorded", &[when(minute)]),
         };
         response.on_hover_text(text);
     }
+}
+
+/// `YYYY-MM-DD HH:MM` in local time, for ranges longer than a day.
+fn day_clock(minute: i64) -> String {
+    chrono::DateTime::from_timestamp(minute * 60, 0)
+        .map(|t| {
+            t.with_timezone(&chrono::Local)
+                .format("%Y-%m-%d %H:%M")
+                .to_string()
+        })
+        .unwrap_or_default()
 }
 
 /// `HH:MM` in local time.

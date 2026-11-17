@@ -2092,6 +2092,16 @@ impl eframe::App for App {
         } else if state.container_alerts.enabled {
             backend.watch_containers();
         }
+        if state.tab == Tab::Performance {
+            let device = crate::device_history::wanted(&state.performance).map(str::to_owned);
+            if let Some((device, hours)) = state
+                .performance
+                .history
+                .due(device.as_deref(), Instant::now())
+            {
+                backend.send(UiCommand::LoadDeviceHistory { device, hours });
+            }
+        }
         if state.tab == Tab::History {
             let stale = state
                 .last_load
@@ -4124,6 +4134,9 @@ fn performance_content(
         ui.add_space(0.0);
         if selection.page != Page::All {
             show_section(ui, selection.page);
+            if let Some(device) = crate::device_history::wanted(selection).map(str::to_owned) {
+                crate::device_history::show(ui, data, &device, &mut selection.history);
+            }
             match selection.page {
                 Page::Disk if !device.is_some_and(|d| d.starts_with("disk:")) => {
                     crate::perf_pages::top_processes(ui, data, false)
@@ -6602,6 +6615,68 @@ mod tests {
     }
 
     #[test]
+    fn a_device_page_asks_the_service_for_its_recorded_history() {
+        use egui::accesskit::Role;
+        let (mut h, rx) = overview_app(crate::ui_tests::device_data());
+        h.state_mut().state.tab = Tab::Performance;
+        h.run_steps(3);
+        let asked = |rx: &std::sync::mpsc::Receiver<UiCommand>| -> Vec<String> {
+            rx.try_iter()
+                .filter_map(|c| match c {
+                    UiCommand::LoadDeviceHistory { device, hours } => {
+                        Some(format!("{device} {hours}"))
+                    }
+                    _ => None,
+                })
+                .collect()
+        };
+        assert!(asked(&rx).is_empty(), "no device page yet");
+        h.get_by_role_and_label(Role::Button, "Disk 1 (D: E:) performance view")
+            .click();
+        h.run_steps(3);
+        assert_eq!(asked(&rx), ["disk:1 24"], "once, not every frame");
+        let now = std::time::SystemTime::now();
+        let minute = now.duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as i64 / 60;
+        h.state().backend.data().device_history = Some(crate::device_history::Loaded {
+            device: "disk:1".into(),
+            hours: 24,
+            result: Ok(Some(wtm_ipc::DeviceHistory {
+                label: "Example Desktop HDD 4TB".into(),
+                minutes: (minute - 90..minute)
+                    .map(|m| wtm_ipc::DeviceMinute {
+                        minute: m,
+                        values: [Some((5.0, 20.0)), Some((1e6, 4e6)), Some((2e6, 8e6))],
+                    })
+                    .collect(),
+            })),
+            at: now,
+        });
+        h.run_steps(2);
+        assert!(h.query_by_label("Recorded history").is_some());
+        assert!(
+            h.query_by_label_contains("Recorded 1h 30m in this period")
+                .is_some()
+        );
+        // Below the graphs: scrolled to, and the scroll let finish.
+        h.get_by_label("7 days").scroll_to_me();
+        h.run_steps(10);
+        h.get_by_label("7 days").click();
+        h.run_steps(2);
+        assert_eq!(h.state().state.performance.history.hours, 168);
+        assert_eq!(asked(&rx), ["disk:1 168"]);
+        // A network adapter's page asks for that adapter.
+        h.get_by_role_and_label(Role::Button, "Wi-Fi performance view")
+            .click();
+        h.run_steps(2);
+        let wifi = asked(&rx);
+        assert_eq!(wifi.len(), 1);
+        assert!(
+            wifi[0].starts_with("net:") && wifi[0].ends_with(" 168"),
+            "{wifi:?}"
+        );
+    }
+
+    #[test]
     fn saved_device_choices_survive_a_new_gpu_luid() {
         use crate::performance_view::{Page, gpu_id};
         use egui::accesskit::Role;
@@ -8170,6 +8245,9 @@ mod tests {
                 format!("startup {} {enabled}", entry.name)
             }
             UiCommand::LoadSeries { app, hours } => format!("series {app} {hours}"),
+            UiCommand::LoadDeviceHistory { device, hours } => {
+                format!("device history {device} {hours}")
+            }
             UiCommand::Service { name, op } => format!("service {name} {op:?}"),
             UiCommand::SaveConfig { toml, .. } => format!("save config {}", toml.len()),
             UiCommand::SaveTelegram(c) => format!("save telegram {}", c.enabled),
@@ -12242,6 +12320,61 @@ o-such-folder",
                                 &mut h,
                                 &out.join(format!("{theme_name}-{size_name}-PerformanceCpu.png")),
                             );
+                            // A disk's recorded day: a rhythm, and three hours
+                            // the service did not run.
+                            let disk = h.state().backend.data().snapshot.as_ref().and_then(|s| {
+                                s.system.disks.iter().find_map(wtm_core::DiskUsage::number)
+                            });
+                            if let Some(number) = disk {
+                                let device = crate::performance_view::disk_id(number);
+                                let now = std::time::SystemTime::now();
+                                let minute =
+                                    now.duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()
+                                        as i64
+                                        / 60;
+                                let minutes = (minute - 1440..minute)
+                                    .filter(|m| !(minute - 600..minute - 420).contains(m))
+                                    .map(|m| {
+                                        let phase =
+                                            (m % 1440) as f32 / 1440.0 * std::f32::consts::TAU;
+                                        let busy = 20.0 + 15.0 * phase.sin();
+                                        let spike = if m % 45 == 0 { 3.0 } else { 1.4 };
+                                        wtm_ipc::DeviceMinute {
+                                            minute: m,
+                                            values: [
+                                                Some((busy, (busy * spike).min(100.0))),
+                                                Some((busy * 2e5, busy * 2e5 * spike)),
+                                                Some((busy * 1e5, busy * 1e5 * spike)),
+                                            ],
+                                        }
+                                    })
+                                    .collect();
+                                h.state().backend.data().device_history =
+                                    Some(crate::device_history::Loaded {
+                                        device: device.clone(),
+                                        hours: 24,
+                                        result: Ok(Some(wtm_ipc::DeviceHistory {
+                                            label: "Example NVMe SSD 2TB".into(),
+                                            minutes,
+                                        })),
+                                        at: now,
+                                    });
+                                h.state_mut().state.performance.page =
+                                    crate::performance_view::Page::Disk;
+                                h.state_mut().state.performance.device = Some(device);
+                                h.run_steps(3);
+                                h.get_by_label(crate::i18n::tr("Recorded history"))
+                                    .scroll_to_me();
+                                h.run_steps(10);
+                                capture(
+                                    &mut h,
+                                    &out.join(format!(
+                                        "{theme_name}-{size_name}-PerformanceDiskHistory.png"
+                                    )),
+                                );
+                                h.state().backend.data().device_history = None;
+                                h.state_mut().state.performance.device = None;
+                            }
                             h.state_mut().state.performance.page =
                                 crate::performance_view::Page::All;
                         }

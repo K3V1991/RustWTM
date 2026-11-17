@@ -53,6 +53,8 @@ pub struct State {
     pub restore: Option<(String, Option<std::time::Instant>)>,
     /// Stable key of each listed device id, from the last arrangement.
     keys: Vec<(String, String)>,
+    /// The range of the shown device's recorded history.
+    pub history: crate::device_history::View,
 }
 
 /// A change the user asked for in the rail's menu.

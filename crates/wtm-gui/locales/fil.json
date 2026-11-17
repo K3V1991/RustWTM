@@ -1952,5 +1952,10 @@
   "Show in Containers": "Ipakita sa Mga container",
   "Show sensors": "Ipakita ang mga sensor",
   "Show process": "Ipakita ang proseso",
-  "The process is no longer running.": "Hindi na tumatakbo ang proseso."
+  "The process is no longer running.": "Hindi na tumatakbo ang proseso.",
+  "Recorded history": "Naitalang history",
+  "Loading…": "Naglo-load…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Walang history ang serbisyo ng device na ito. Itinatala nito ang isang device kapag nabasa na nito ang model o pangalan nito, at habang tumatakbo lang ito.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Walang naitala sa panahong ito. Itinatago ng serbisyo ang huling linggo ng bawat device, bawat minuto.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Naitala ang {0} sa panahong ito. Itinatago ng serbisyo ang huling linggo ng bawat device, bawat minuto; nananatiling walang laman ang mga minutong hindi ito tumatakbo."
 }

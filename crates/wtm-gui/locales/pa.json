@@ -1952,5 +1952,10 @@
   "Show in Containers": "ਕੰਟੇਨਰਾਂ ਵਿੱਚ ਦਿਖਾਓ",
   "Show sensors": "ਸੈਂਸਰ ਦਿਖਾਓ",
   "Show process": "ਪ੍ਰਕਿਰਿਆ ਦਿਖਾਓ",
-  "The process is no longer running.": "ਪ੍ਰਕਿਰਿਆ ਹੁਣ ਨਹੀਂ ਚੱਲ ਰਹੀ।"
+  "The process is no longer running.": "ਪ੍ਰਕਿਰਿਆ ਹੁਣ ਨਹੀਂ ਚੱਲ ਰਹੀ।",
+  "Recorded history": "ਦਰਜ ਇਤਿਹਾਸ",
+  "Loading…": "ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "ਸੇਵਾ ਕੋਲ ਇਸ ਡਿਵਾਈਸ ਦਾ ਕੋਈ ਇਤਿਹਾਸ ਨਹੀਂ ਹੈ। ਇਹ ਡਿਵਾਈਸ ਦਾ ਮਾਡਲ ਜਾਂ ਨਾਮ ਪੜ੍ਹਨ ਤੋਂ ਬਾਅਦ, ਅਤੇ ਸਿਰਫ਼ ਚੱਲਦੇ ਸਮੇਂ ਦਰਜ ਕਰਦੀ ਹੈ।",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "ਇਸ ਸਮੇਂ ਵਿੱਚ ਕੁਝ ਦਰਜ ਨਹੀਂ ਹੋਇਆ। ਸੇਵਾ ਹਰ ਡਿਵਾਈਸ ਦਾ ਪਿਛਲਾ ਹਫ਼ਤਾ ਮਿੰਟ-ਦਰ-ਮਿੰਟ ਰੱਖਦੀ ਹੈ।",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "ਇਸ ਸਮੇਂ ਵਿੱਚ {0} ਦਰਜ ਹੋਇਆ। ਸੇਵਾ ਹਰ ਡਿਵਾਈਸ ਦਾ ਪਿਛਲਾ ਹਫ਼ਤਾ ਮਿੰਟ-ਦਰ-ਮਿੰਟ ਰੱਖਦੀ ਹੈ; ਜਿਨ੍ਹਾਂ ਮਿੰਟਾਂ ਵਿੱਚ ਇਹ ਨਹੀਂ ਚੱਲੀ ਉਹ ਖਾਲੀ ਰਹਿੰਦੇ ਹਨ।"
 }

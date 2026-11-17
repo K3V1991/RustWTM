@@ -1952,5 +1952,10 @@
   "Show in Containers": "在容器中顯示",
   "Show sensors": "顯示感測器",
   "Show process": "顯示處理程序",
-  "The process is no longer running.": "該處理程序已不再執行。"
+  "The process is no longer running.": "該處理程序已不再執行。",
+  "Recorded history": "已記錄的歷史",
+  "Loading…": "正在載入…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "服務沒有此裝置的歷史記錄。服務在讀取到裝置的型號或名稱後才會記錄，且僅在執行時記錄。",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "此期間沒有任何記錄。服務按分鐘保留每個裝置最近一週的資料。",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "此期間已記錄 {0}。服務按分鐘保留每個裝置最近一週的資料；服務未執行的分鐘留空。"
 }

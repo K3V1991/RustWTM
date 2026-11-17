@@ -1952,5 +1952,10 @@
   "Show in Containers": "ಕಂಟೈನರ್‌ಗಳಲ್ಲಿ ತೋರಿಸಿ",
   "Show sensors": "ಸೆನ್ಸರ್‌ಗಳನ್ನು ತೋರಿಸಿ",
   "Show process": "ಪ್ರಕ್ರಿಯೆಯನ್ನು ತೋರಿಸಿ",
-  "The process is no longer running.": "ಪ್ರಕ್ರಿಯೆ ಇನ್ನು ಚಾಲನೆಯಲ್ಲಿಲ್ಲ."
+  "The process is no longer running.": "ಪ್ರಕ್ರಿಯೆ ಇನ್ನು ಚಾಲನೆಯಲ್ಲಿಲ್ಲ.",
+  "Recorded history": "ದಾಖಲಾದ ಇತಿಹಾಸ",
+  "Loading…": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "ಸೇವೆಯ ಬಳಿ ಈ ಸಾಧನದ ಇತಿಹಾಸವಿಲ್ಲ. ಸಾಧನದ ಮಾದರಿ ಅಥವಾ ಹೆಸರನ್ನು ಓದಿದ ನಂತರ, ಮತ್ತು ಚಾಲನೆಯಲ್ಲಿರುವಾಗ ಮಾತ್ರ ಅದು ದಾಖಲಿಸುತ್ತದೆ.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "ಈ ಅವಧಿಯಲ್ಲಿ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ. ಸೇವೆ ಪ್ರತಿ ಸಾಧನದ ಕೊನೆಯ ವಾರವನ್ನು ನಿಮಿಷ ನಿಮಿಷಕ್ಕೆ ಇರಿಸುತ್ತದೆ.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "ಈ ಅವಧಿಯಲ್ಲಿ {0} ದಾಖಲಾಗಿದೆ. ಸೇವೆ ಪ್ರತಿ ಸಾಧನದ ಕೊನೆಯ ವಾರವನ್ನು ನಿಮಿಷ ನಿಮಿಷಕ್ಕೆ ಇರಿಸುತ್ತದೆ; ಅದು ಚಾಲನೆಯಲ್ಲಿರದ ನಿಮಿಷಗಳು ಖಾಲಿ ಉಳಿಯುತ್ತವೆ."
 }

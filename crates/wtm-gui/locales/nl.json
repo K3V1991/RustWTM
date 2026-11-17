@@ -1952,5 +1952,10 @@
   "Show in Containers": "Tonen in Containers",
   "Show sensors": "Sensoren tonen",
   "Show process": "Proces tonen",
-  "The process is no longer running.": "Het proces draait niet meer."
+  "The process is no longer running.": "Het proces draait niet meer.",
+  "Recorded history": "Vastgelegde geschiedenis",
+  "Loading…": "Laden…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "De service heeft geen geschiedenis van dit apparaat. Ze legt een apparaat vast zodra ze het model of de naam heeft gelezen, en alleen terwijl ze draait.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Niets vastgelegd in deze periode. De service bewaart de laatste week van elk apparaat, per minuut.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "{0} vastgelegd in deze periode. De service bewaart de laatste week van elk apparaat, per minuut; minuten waarin ze niet draaide blijven leeg."
 }

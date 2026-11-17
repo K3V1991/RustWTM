@@ -1952,5 +1952,10 @@
   "Show in Containers": "கொள்கலன்களில் காட்டு",
   "Show sensors": "சென்சார்களைக் காட்டு",
   "Show process": "செயல்முறையைக் காட்டு",
-  "The process is no longer running.": "செயல்முறை இனி இயங்கவில்லை."
+  "The process is no longer running.": "செயல்முறை இனி இயங்கவில்லை.",
+  "Recorded history": "பதிவுசெய்த வரலாறு",
+  "Loading…": "ஏற்றுகிறது…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "சேவையிடம் இந்தச் சாதனத்தின் வரலாறு இல்லை. சாதனத்தின் மாதிரி அல்லது பெயரைப் படித்த பிறகு, இயங்கும்போது மட்டுமே அது பதிவுசெய்யும்.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "இந்தக் காலத்தில் எதுவும் பதிவாகவில்லை. சேவை ஒவ்வொரு சாதனத்தின் கடந்த வாரத்தையும் நிமிடம் நிமிடமாக வைத்திருக்கும்.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "இந்தக் காலத்தில் {0} பதிவானது. சேவை ஒவ்வொரு சாதனத்தின் கடந்த வாரத்தையும் நிமிடம் நிமிடமாக வைத்திருக்கும்; அது இயங்காத நிமிடங்கள் காலியாக இருக்கும்."
 }

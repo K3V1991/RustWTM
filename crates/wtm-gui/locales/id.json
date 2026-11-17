@@ -1952,5 +1952,10 @@
   "Show in Containers": "Tampilkan di Kontainer",
   "Show sensors": "Tampilkan sensor",
   "Show process": "Tampilkan proses",
-  "The process is no longer running.": "Proses sudah tidak berjalan."
+  "The process is no longer running.": "Proses sudah tidak berjalan.",
+  "Recorded history": "Riwayat yang direkam",
+  "Loading…": "Memuat…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Layanan tidak punya riwayat perangkat ini. Layanan merekam perangkat setelah membaca model atau namanya, dan hanya saat berjalan.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Tidak ada yang direkam dalam periode ini. Layanan menyimpan seminggu terakhir setiap perangkat, per menit.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Terekam {0} dalam periode ini. Layanan menyimpan seminggu terakhir setiap perangkat, per menit; menit saat layanan tidak berjalan tetap kosong."
 }

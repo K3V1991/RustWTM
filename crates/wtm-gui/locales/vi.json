@@ -1952,5 +1952,10 @@
   "Show in Containers": "Hiện trong Vùng chứa",
   "Show sensors": "Hiện cảm biến",
   "Show process": "Hiện tiến trình",
-  "The process is no longer running.": "Tiến trình không còn chạy."
+  "The process is no longer running.": "Tiến trình không còn chạy.",
+  "Recorded history": "Lịch sử đã ghi",
+  "Loading…": "Đang tải…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Dịch vụ không có lịch sử của thiết bị này. Dịch vụ ghi một thiết bị sau khi đọc được kiểu máy hoặc tên của nó, và chỉ khi đang chạy.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Không có gì được ghi trong khoảng thời gian này. Dịch vụ giữ tuần gần nhất của mỗi thiết bị, theo từng phút.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Đã ghi {0} trong khoảng thời gian này. Dịch vụ giữ tuần gần nhất của mỗi thiết bị, theo từng phút; những phút dịch vụ không chạy để trống."
 }

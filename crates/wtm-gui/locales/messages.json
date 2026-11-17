@@ -11722,5 +11722,35 @@
     "de": "Der Prozess läuft nicht mehr.",
     "fr": "Le processus ne s'exécute plus.",
     "es": "El proceso ya no se está ejecutando."
+  },
+  "Recorded history": {
+    "tr": "Kaydedilen geçmiş",
+    "de": "Aufgezeichneter Verlauf",
+    "fr": "Historique enregistré",
+    "es": "Historial registrado"
+  },
+  "Loading…": {
+    "tr": "Yükleniyor…",
+    "de": "Wird geladen…",
+    "fr": "Chargement…",
+    "es": "Cargando…"
+  },
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": {
+    "tr": "Servisin bu aygıtın geçmişi yok. Servis bir aygıtı modelini veya adını okuduktan sonra ve yalnızca çalışırken kaydeder.",
+    "de": "Der Dienst hat keinen Verlauf dieses Geräts. Er zeichnet ein Gerät auf, sobald er dessen Modell oder Namen gelesen hat, und nur, solange er läuft.",
+    "fr": "Le service n'a pas d'historique de cet appareil. Il enregistre un appareil une fois son modèle ou son nom lu, et seulement pendant qu'il fonctionne.",
+    "es": "El servicio no tiene historial de este dispositivo. Registra un dispositivo cuando ha leído su modelo o nombre, y solo mientras se ejecuta."
+  },
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": {
+    "tr": "Bu dönemde kayıt yok. Servis her aygıtın son haftasını dakika dakika saklar.",
+    "de": "In diesem Zeitraum nichts aufgezeichnet. Der Dienst bewahrt die letzte Woche jedes Geräts minutenweise auf.",
+    "fr": "Rien d'enregistré sur cette période. Le service conserve la dernière semaine de chaque appareil, minute par minute.",
+    "es": "No hay nada registrado en este periodo. El servicio guarda la última semana de cada dispositivo, minuto a minuto."
+  },
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": {
+    "tr": "Bu dönemde {0} kaydedildi. Servis her aygıtın son haftasını dakika dakika saklar; çalışmadığı dakikalar boş kalır.",
+    "de": "{0} in diesem Zeitraum aufgezeichnet. Der Dienst bewahrt die letzte Woche jedes Geräts minutenweise auf; Minuten, in denen er nicht lief, bleiben leer.",
+    "fr": "{0} enregistrées sur cette période. Le service conserve la dernière semaine de chaque appareil, minute par minute ; les minutes où il ne fonctionnait pas restent vides.",
+    "es": "Registrado {0} en este periodo. El servicio guarda la última semana de cada dispositivo, minuto a minuto; los minutos en que no se ejecutó quedan vacíos."
   }
 }

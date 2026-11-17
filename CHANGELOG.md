@@ -75,7 +75,10 @@ refuse each other, as before.
   restarts: disks by model, GPUs by name (each with an ordinal among equal
   ones), adapters by the ID Windows keeps for them. A device whose model or
   name cannot be read is not recorded. At most 32 devices are recorded,
-  which bounds a full week to about 22 MB.
+  which bounds a full week to about 22 MB. A device's Performance page shows
+  it under *Recorded history*, for the last hour, 24 hours or 7 days: the
+  average and the peak of each measure, minutes not recorded left empty,
+  and how much of the period was recorded.
 
 ### Fixed
 

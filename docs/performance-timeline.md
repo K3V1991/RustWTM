@@ -63,7 +63,9 @@ to describe stale data independently of timeline selection.
 This is the initial chart-interaction portion of M3. [Focused resource
 views](performance-resources.md) are now available. Physical device selection,
 device-selection persistence, alternative network units (the Network page
-shows bits beside bytes) and persistent system history remain pending. Interaction state is
+shows bits beside bytes) and persistent system history remain pending; a
+device's last week is shown on its page (see [resource
+views](performance-resources.md)). Interaction state is
 transient; it does not change service configuration or protocol contracts.
 
 Local validation on 2026-11-09:

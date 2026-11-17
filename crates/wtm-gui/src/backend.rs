@@ -377,6 +377,9 @@ pub struct Data {
     /// The per-minute usage of one app over `hours`, or why it could not be
     /// read: the page tells loading, empty and failed apart.
     pub series: Option<(String, u32, Result<Vec<MinuteRow>, String>)>,
+    /// The service's per-minute history of the device a Performance page
+    /// shows.
+    pub device_history: Option<crate::device_history::Loaded>,
     /// Command lines per process instance, read with this window's own
     /// rights (empty when not readable). The service never sends them.
     pub command_lines: CommandLines,
@@ -530,6 +533,11 @@ pub enum UiCommand {
     },
     LoadSeries {
         app: String,
+        hours: u32,
+    },
+    /// A device's per-minute history, by the id it has now (`disk:0`).
+    LoadDeviceHistory {
+        device: String,
         hours: u32,
     },
     Service {
@@ -1318,6 +1326,26 @@ impl Worker {
                     },
                 };
                 self.data().series = Some((app, hours, rows));
+            }
+            UiCommand::LoadDeviceHistory { device, hours } => {
+                let result = match self.client.as_mut() {
+                    None => Err(without_service(&self.data, NO_SERVICE)),
+                    Some(c) => match c.call(&Request::DeviceHistory {
+                        device: device.clone(),
+                        hours,
+                    }) {
+                        Ok(Response::DeviceHistory(history)) => Ok(history),
+                        Ok(Response::Error(e)) => Err(e),
+                        Ok(other) => Err(unexpected(other).to_string()),
+                        Err(e) => Err(e.to_string()),
+                    },
+                };
+                self.data().device_history = Some(crate::device_history::Loaded {
+                    device,
+                    hours,
+                    result,
+                    at: SystemTime::now(),
+                });
             }
             UiCommand::Service {
                 name,
@@ -3791,6 +3819,15 @@ mod tests {
         });
         // Said, not dropped: a dropped reply left the chart loading forever.
         assert!(matches!(&w.data().series, Some((_, 1, Err(e))) if e.starts_with(NO_SERVICE)));
+        w.handle(UiCommand::LoadDeviceHistory {
+            device: "disk:0".into(),
+            hours: 24,
+        });
+        assert!(matches!(
+            &w.data().device_history,
+            Some(crate::device_history::Loaded { device, hours: 24, result: Err(e), .. })
+                if device == "disk:0" && e.starts_with(NO_SERVICE)
+        ));
 
         let child = spawn();
         w.tick();

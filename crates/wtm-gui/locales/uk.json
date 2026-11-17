@@ -1952,5 +1952,10 @@
   "Show in Containers": "Показати в контейнерах",
   "Show sensors": "Показати датчики",
   "Show process": "Показати процес",
-  "The process is no longer running.": "Процес більше не працює."
+  "The process is no longer running.": "Процес більше не працює.",
+  "Recorded history": "Записана історія",
+  "Loading…": "Завантаження…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Служба не має історії цього пристрою. Вона записує пристрій, коли прочитає його модель або назву, і лише поки працює.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "За цей період нічого не записано. Служба зберігає останній тиждень кожного пристрою похвилинно.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "За цей період записано {0}. Служба зберігає останній тиждень кожного пристрою похвилинно; хвилини, коли вона не працювала, лишаються порожніми."
 }

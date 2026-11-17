@@ -1952,5 +1952,10 @@
   "Show in Containers": "కంటైనర్‌లలో చూపు",
   "Show sensors": "సెన్సార్‌లను చూపు",
   "Show process": "ప్రాసెస్‌ను చూపు",
-  "The process is no longer running.": "ప్రాసెస్ ఇక నడవడం లేదు."
+  "The process is no longer running.": "ప్రాసెస్ ఇక నడవడం లేదు.",
+  "Recorded history": "నమోదైన చరిత్ర",
+  "Loading…": "లోడ్ అవుతోంది…",
+  "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "సేవ వద్ద ఈ పరికరం చరిత్ర లేదు. పరికరం మోడల్ లేదా పేరును చదివిన తర్వాత, నడుస్తున్నప్పుడు మాత్రమే అది నమోదు చేస్తుంది.",
+  "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "ఈ వ్యవధిలో ఏమీ నమోదు కాలేదు. సేవ ప్రతి పరికరం గత వారాన్ని నిమిషం నిమిషంగా ఉంచుతుంది.",
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "ఈ వ్యవధిలో {0} నమోదైంది. సేవ ప్రతి పరికరం గత వారాన్ని నిమిషం నిమిషంగా ఉంచుతుంది; అది నడవని నిమిషాలు ఖాళీగా ఉంటాయి."
 }
