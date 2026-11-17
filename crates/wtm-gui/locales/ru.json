@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "Вкл.: CPU выше {0} или память выше {1} в течение {2}.",
   "Off. Turn them on in Settings.": "Выкл. Включите их в параметрах.",
   "No container has stayed above a limit.": "Ни один контейнер не превышал лимит.",
-  "Clear": "Очистить"
+  "Clear": "Очистить",
+  "Last 24 hours": "Последние 24 часа",
+  "Recorded {0} of the last 24 hours.": "Записано {0} из последних 24 часов.",
+  "Clear history": "Очистить историю",
+  "Forgets the recorded history of every container": "Удаляет записанную историю всех контейнеров",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Пока ничего не записано. История заполняется, пока Docker опрашивается: когда открыта эта страница или обзор либо включены оповещения контейнеров.",
+  "CPU (100% per core)": "CPU (100% на ядро)",
+  "{0}: average {1}, peak {2}": "{0}: среднее {1}, пик {2}",
+  "{0}: not recorded": "{0}: не записано"
 }

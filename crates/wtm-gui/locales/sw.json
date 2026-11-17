@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "Imewashwa: CPU juu ya {0} au kumbukumbu juu ya {1} kwa {2}.",
   "Off. Turn them on in Settings.": "Imezimwa. Iwashe katika Mipangilio.",
   "No container has stayed above a limit.": "Hakuna kontena lililobaki juu ya kikomo.",
-  "Clear": "Futa"
+  "Clear": "Futa",
+  "Last 24 hours": "Saa 24 zilizopita",
+  "Recorded {0} of the last 24 hours.": "Imerekodiwa {0} ya saa 24 zilizopita.",
+  "Clear history": "Futa historia",
+  "Forgets the recorded history of every container": "Husahau historia iliyorekodiwa ya kontena zote",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Bado hakuna kilichorekodiwa. Historia hujaa Docker inaposomwa: ukurasa huu au Muhtasari ukiwa wazi, au arifa za kontena zikiwa zimewashwa.",
+  "CPU (100% per core)": "CPU (100% kwa kila kiini)",
+  "{0}: average {1}, peak {2}": "{0}: wastani {1}, kilele {2}",
+  "{0}: not recorded": "{0}: haijarekodiwa"
 }

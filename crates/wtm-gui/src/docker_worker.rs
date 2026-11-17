@@ -3,10 +3,13 @@
 //! while container alerts are on, which it checks after each reading.
 use crate::backend::Data;
 use crate::container_alerts::Notice;
+use crate::container_history::History;
+use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{self, SyncSender};
 use std::sync::{Arc, Mutex, PoisonError, Weak};
 use std::thread::JoinHandle;
+use std::time::SystemTime;
 use std::time::{Duration, Instant};
 
 /// Time between readings while only container alerts need them.
@@ -114,6 +117,7 @@ impl DockerWorker {
                         ctx,
                         move |selected, stop| sampler.sample(selected, stop),
                         move |notice| toast(notice),
+                        crate::container_history::path(),
                     );
                 }) {
                 Ok(worker) => {
@@ -139,6 +143,8 @@ impl DockerWorker {
         control
     }
 }
+// The reader's inputs and outputs, each a seam the tests replace.
+#[allow(clippy::too_many_arguments)]
 fn run(
     receiver: mpsc::Receiver<()>,
     requests: Arc<Mutex<Request>>,
@@ -147,10 +153,18 @@ fn run(
     ctx: eframe::egui::Context,
     mut sample: impl FnMut(Option<&str>, &AtomicBool) -> Result<wtm_core::docker::Report, String>,
     toast: impl Fn(&Notice),
+    store: Option<PathBuf>,
 ) {
     let mut next = Instant::now();
     let mut selected = None;
     let mut was_shown = false;
+    let mut saved = Instant::now();
+    if let (Some(path), Some(data)) = (&store, data.upgrade()) {
+        let loaded = History::load(path, SystemTime::now());
+        data.lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .container_history = loaded;
+    }
     while !stopping.load(Ordering::Relaxed) {
         if matches!(
             receiver.recv_timeout(Duration::from_millis(200)),
@@ -191,12 +205,17 @@ fn run(
         let notices = {
             let mut data = data.lock().unwrap_or_else(PoisonError::into_inner);
             let mut state = (*data.docker).clone();
+            let read = report.is_ok();
             match report {
                 Ok(report) => {
                     state.report = Some(report);
                     state.error = None;
                 }
                 Err(error) => state.error = Some(error),
+            }
+            if let Some(report) = state.report.as_ref().filter(|_| read) {
+                data.container_history
+                    .record(Instant::now(), SystemTime::now(), report);
             }
             let notices = data.container_alerts.update(Instant::now(), &state);
             data.docker = Arc::new(state);
@@ -210,6 +229,43 @@ fn run(
             .for_each(&toast);
         ctx.request_repaint();
         next = Instant::now() + if shown { SHOWN } else { BACKGROUND };
+        if saved.elapsed() >= crate::container_history::SAVE_EVERY {
+            save(&store, &data, false);
+            saved = Instant::now();
+        } else {
+            // A cleared history is forgotten on disk right away.
+            save(&store, &data, true);
+        }
+    }
+    // Minutes recorded since the last save are lost if the window process
+    // ends before this runs.
+    if let Some(data) = data.upgrade() {
+        save(&store, &data, false);
+    }
+}
+
+/// Writes the history when it changed (only once it was emptied, with
+/// `cleared_only`). It is copied under the lock and written after it, so a
+/// slow disk never holds up the window.
+fn save(store: &Option<PathBuf>, data: &Mutex<Data>, cleared_only: bool) {
+    let Some(path) = store else {
+        return;
+    };
+    let copy = {
+        let mut data = data.lock().unwrap_or_else(PoisonError::into_inner);
+        let history = &mut data.container_history;
+        if !history.dirty || (cleared_only && !history.is_empty()) {
+            return;
+        }
+        history.dirty = false;
+        history.clone()
+    };
+    if copy.save(path).is_err() {
+        // Tried again at the next save.
+        data.lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .container_history
+            .dirty = true;
     }
 }
 
@@ -239,7 +295,12 @@ mod tests {
     /// Runs the reader with no page asking for Docker, alerts `on` or off
     /// with a CPU limit of `cpu`, until it has read once or `wait` has
     /// passed. Returns the readings, the notifications and the notices kept.
-    fn background(on: bool, cpu: f32, wait: Duration) -> (Vec<Option<String>>, Vec<String>, usize) {
+    fn background(
+        on: bool,
+        cpu: f32,
+        wait: Duration,
+        store: Option<PathBuf>,
+    ) -> (Vec<Option<String>>, Vec<String>, usize) {
         let data = Arc::new(Mutex::new(Data::default()));
         {
             let mut d = data.lock().unwrap();
@@ -272,6 +333,7 @@ mod tests {
                     Ok(crate::containers::fixture().report.unwrap())
                 },
                 move |notice| shown.send(notice.text()).unwrap(),
+                store,
             )
         });
         let first = reads.recv_timeout(wait).ok();
@@ -297,7 +359,7 @@ mod tests {
     fn alerts_keep_docker_read_in_the_background_and_notify() {
         // Of the fixture's running containers only database-3 is above 15%:
         // 72.5% in Docker's count, 18% of its 4 cores.
-        let (reads, toasts, kept) = background(true, 15.0, Duration::from_secs(3));
+        let (reads, toasts, kept) = background(true, 15.0, Duration::from_secs(3), None);
         // Read without a page asking, and without the details only a page shows.
         assert_eq!(reads, [None]);
         // database-4 is busier but has exited: it is not followed.
@@ -306,7 +368,7 @@ mod tests {
             toasts[0].starts_with("database-3 has used 18% of its CPUs for 0s. Docker shows 7"),
             "{toasts:?}"
         );
-        let (reads, toasts, _) = background(false, 15.0, Duration::from_millis(600));
+        let (reads, toasts, _) = background(false, 15.0, Duration::from_millis(600), None);
         assert!(
             reads.is_empty(),
             "alerts off and no page: Docker is not read"
@@ -317,13 +379,34 @@ mod tests {
     #[test]
     fn many_containers_crossing_together_give_three_notifications() {
         // All four running fixture containers are above 1%.
-        let (_, toasts, kept) = background(true, 1.0, Duration::from_secs(3));
+        let (_, toasts, kept) = background(true, 1.0, Duration::from_secs(3), None);
         assert_eq!(kept, 4, "every notice is listed");
         assert_eq!(
             toasts.len(),
             crate::container_alerts::TOASTS_PER_CHECK,
             "{toasts:?}"
         );
+    }
+
+    #[test]
+    fn readings_are_recorded_and_saved_when_the_reader_stops() {
+        let dir = std::env::temp_dir().join(format!("wtm-docker-history-{}", std::process::id()));
+        let path = dir.join("container-history.json");
+        let (_, _, kept) = background(true, 1.0, Duration::from_secs(3), Some(path.clone()));
+        assert_eq!(kept, 4);
+        let saved = History::load(&path, SystemTime::now());
+        for name in ["web-0", "web-1", "web-2", "database-3"] {
+            assert_eq!(
+                saved.series("desktop-linux", name).map(|s| s.minutes.len()),
+                Some(1),
+                "{name}"
+            );
+        }
+        assert!(
+            saved.series("desktop-linux", "database-4").is_none(),
+            "an exited container is not recorded"
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
     }
 
     #[test]
@@ -351,6 +434,7 @@ mod tests {
                     Ok(crate::containers::fixture().report.unwrap())
                 },
                 |_| {},
+                None,
             )
         });
         signal.send(()).unwrap();

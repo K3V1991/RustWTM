@@ -273,7 +273,7 @@ stable identity. [Transfer verification](docs/repository-migration.md).
   disk rates, recent graphs, port mappings, health, restart count and bounded logs.
   Overview shows running containers and the busiest sampled workloads. Optional
   container alerts notify when a container stays above a CPU or memory limit and
-  when it recovers. Docker is optional; engine failures never block the process
+  when it recovers; each container's details show its last 24 hours. Docker is optional; engine failures never block the process
   sampler. [Setup and limits](docs/docker.md).
   [Container monitor preview](screenshots/containers.png).
 

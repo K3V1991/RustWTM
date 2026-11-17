@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "ఆన్: {2} పాటు CPU {0} లేదా మెమరీ {1} కంటే ఎక్కువ.",
   "Off. Turn them on in Settings.": "ఆఫ్. సెట్టింగ్‌లలో ఆన్ చేయండి.",
   "No container has stayed above a limit.": "ఏ కంటైనర్ కూడా పరిమితిని మించి ఉండలేదు.",
-  "Clear": "క్లియర్ చేయి"
+  "Clear": "క్లియర్ చేయి",
+  "Last 24 hours": "గత 24 గంటలు",
+  "Recorded {0} of the last 24 hours.": "గత 24 గంటల్లో {0} నమోదైంది.",
+  "Clear history": "చరిత్రను క్లియర్ చేయి",
+  "Forgets the recorded history of every container": "అన్ని కంటైనర్‌ల నమోదైన చరిత్రను మరచిపోతుంది",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "ఇంకా ఏదీ నమోదు కాలేదు. Docker చదవబడుతున్నప్పుడు చరిత్ర నిండుతుంది: ఈ పేజీ లేదా అవలోకనం తెరిచి ఉన్నప్పుడు, లేదా కంటైనర్ హెచ్చరికలు ఆన్‌లో ఉన్నప్పుడు.",
+  "CPU (100% per core)": "CPU (ఒక్కో కోర్‌కు 100%)",
+  "{0}: average {1}, peak {2}": "{0}: సగటు {1}, గరిష్ఠం {2}",
+  "{0}: not recorded": "{0}: నమోదు కాలేదు"
 }

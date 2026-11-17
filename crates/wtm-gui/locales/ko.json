@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "켜짐: {2} 동안 CPU {0} 초과 또는 메모리 {1} 초과.",
   "Off. Turn them on in Settings.": "꺼짐. 설정에서 켜세요.",
   "No container has stayed above a limit.": "제한을 계속 넘은 컨테이너가 없습니다.",
-  "Clear": "지우기"
+  "Clear": "지우기",
+  "Last 24 hours": "최근 24시간",
+  "Recorded {0} of the last 24 hours.": "최근 24시간 중 {0} 기록됨.",
+  "Clear history": "기록 지우기",
+  "Forgets the recorded history of every container": "모든 컨테이너의 기록을 지웁니다",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "아직 기록이 없습니다. 기록은 Docker를 읽는 동안 쌓입니다: 이 페이지나 개요가 열려 있거나 컨테이너 알림이 켜져 있는 동안입니다.",
+  "CPU (100% per core)": "CPU (코어당 100%)",
+  "{0}: average {1}, peak {2}": "{0}: 평균 {1}, 최고 {2}",
+  "{0}: not recorded": "{0}: 기록 없음"
 }

@@ -42,6 +42,13 @@ All notable changes to this project are documented here. The format follows
   Docker being unreachable, a cut listing or another context never raise or
   end an alert, and an ended alert stays quiet for five minutes. While on,
   Docker is read every 10 s in the background, without details or logs.
+- A container's details show its last 24 hours, a minute at a time: CPU
+  and memory averages with peaks, gaps where Docker was not read, and how
+  much of the day was recorded. It is kept by Docker context and name, so a
+  restarted or re-created container goes on with its line, and saved to
+  `%LOCALAPPDATA%\RustWTM\container-history.json` (names and figures only;
+  at most 64 containers; *Clear history* forgets it). It fills while
+  Containers or Overview is open, or while container alerts are on.
 
 ### Fixed
 

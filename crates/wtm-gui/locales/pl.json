@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "Włączone: CPU powyżej {0} lub pamięć powyżej {1} przez {2}.",
   "Off. Turn them on in Settings.": "Wyłączone. Włącz je w Ustawieniach.",
   "No container has stayed above a limit.": "Żaden kontener nie przekraczał stale limitu.",
-  "Clear": "Wyczyść"
+  "Clear": "Wyczyść",
+  "Last 24 hours": "Ostatnie 24 godziny",
+  "Recorded {0} of the last 24 hours.": "Zapisano {0} z ostatnich 24 godzin.",
+  "Clear history": "Wyczyść historię",
+  "Forgets the recorded history of every container": "Usuwa zapisaną historię wszystkich kontenerów",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Nic jeszcze nie zapisano. Historia zapełnia się, gdy Docker jest odczytywany: gdy ta strona lub przegląd jest otwarty albo gdy alerty kontenerów są włączone.",
+  "CPU (100% per core)": "CPU (100% na rdzeń)",
+  "{0}: average {1}, peak {2}": "{0}: średnio {1}, szczyt {2}",
+  "{0}: not recorded": "{0}: brak zapisu"
 }

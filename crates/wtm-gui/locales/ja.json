@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "オン: CPU {0} 超またはメモリ {1} 超が {2} 続いた場合。",
   "Off. Turn them on in Settings.": "オフ。設定でオンにできます。",
   "No container has stayed above a limit.": "上限を超え続けたコンテナーはありません。",
-  "Clear": "クリア"
+  "Clear": "クリア",
+  "Last 24 hours": "過去 24 時間",
+  "Recorded {0} of the last 24 hours.": "過去 24 時間のうち {0} を記録しました。",
+  "Clear history": "履歴をクリア",
+  "Forgets the recorded history of every container": "すべてのコンテナーの記録済み履歴を消去します",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "まだ記録はありません。履歴は Docker を読み取っている間に記録されます: このページか概要を開いている間、またはコンテナーの通知がオンの間です。",
+  "CPU (100% per core)": "CPU (1 コアあたり 100%)",
+  "{0}: average {1}, peak {2}": "{0}: 平均 {1}、ピーク {2}",
+  "{0}: not recorded": "{0}: 記録なし"
 }

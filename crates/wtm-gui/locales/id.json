@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "Aktif: CPU di atas {0} atau memori di atas {1} selama {2}.",
   "Off. Turn them on in Settings.": "Nonaktif. Aktifkan di Pengaturan.",
   "No container has stayed above a limit.": "Tidak ada kontainer yang tetap di atas batas.",
-  "Clear": "Hapus"
+  "Clear": "Hapus",
+  "Last 24 hours": "24 jam terakhir",
+  "Recorded {0} of the last 24 hours.": "Terekam {0} dari 24 jam terakhir.",
+  "Clear history": "Hapus riwayat",
+  "Forgets the recorded history of every container": "Melupakan riwayat terekam semua kontainer",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Belum ada yang terekam. Riwayat terisi saat Docker dibaca: saat halaman ini atau Ikhtisar terbuka, atau saat peringatan kontainer aktif.",
+  "CPU (100% per core)": "CPU (100% per core)",
+  "{0}: average {1}, peak {2}": "{0}: rata-rata {1}, puncak {2}",
+  "{0}: not recorded": "{0}: tidak terekam"
 }

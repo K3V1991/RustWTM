@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "Bật: CPU trên {0} hoặc bộ nhớ trên {1} trong {2}.",
   "Off. Turn them on in Settings.": "Tắt. Bật trong Cài đặt.",
   "No container has stayed above a limit.": "Không có vùng chứa nào duy trì trên giới hạn.",
-  "Clear": "Xóa"
+  "Clear": "Xóa",
+  "Last 24 hours": "24 giờ qua",
+  "Recorded {0} of the last 24 hours.": "Đã ghi {0} trong 24 giờ qua.",
+  "Clear history": "Xóa lịch sử",
+  "Forgets the recorded history of every container": "Quên lịch sử đã ghi của mọi vùng chứa",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Chưa ghi gì. Lịch sử được ghi khi Docker được đọc: khi trang này hoặc Tổng quan đang mở, hoặc khi cảnh báo vùng chứa đang bật.",
+  "CPU (100% per core)": "CPU (100% mỗi lõi)",
+  "{0}: average {1}, peak {2}": "{0}: trung bình {1}, đỉnh {2}",
+  "{0}: not recorded": "{0}: không có dữ liệu"
 }

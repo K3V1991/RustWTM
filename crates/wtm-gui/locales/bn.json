@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "চালু: {2} ধরে CPU {0} বা মেমরি {1}-এর উপরে।",
   "Off. Turn them on in Settings.": "বন্ধ। সেটিংসে চালু করুন।",
   "No container has stayed above a limit.": "কোনো কন্টেইনার কোনো সীমার উপরে থাকেনি।",
-  "Clear": "মুছুন"
+  "Clear": "মুছুন",
+  "Last 24 hours": "গত 24 ঘণ্টা",
+  "Recorded {0} of the last 24 hours.": "গত 24 ঘণ্টার {0} রেকর্ড হয়েছে।",
+  "Clear history": "ইতিহাস মুছুন",
+  "Forgets the recorded history of every container": "সব কন্টেইনারের রেকর্ড করা ইতিহাস মুছে দেয়",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "এখনও কিছু রেকর্ড হয়নি। Docker পড়ার সময় ইতিহাস ভরে: এই পৃষ্ঠা বা ওভারভিউ খোলা থাকলে, অথবা কন্টেইনার সতর্কতা চালু থাকলে।",
+  "CPU (100% per core)": "CPU (প্রতি কোরে 100%)",
+  "{0}: average {1}, peak {2}": "{0}: গড় {1}, সর্বোচ্চ {2}",
+  "{0}: not recorded": "{0}: রেকর্ড হয়নি"
 }

@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "开启：CPU 高于 {0} 或内存高于 {1}，持续 {2}。",
   "Off. Turn them on in Settings.": "已关闭。可在设置中开启。",
   "No container has stayed above a limit.": "没有容器持续高于限制。",
-  "Clear": "清除"
+  "Clear": "清除",
+  "Last 24 hours": "过去 24 小时",
+  "Recorded {0} of the last 24 hours.": "已记录过去 24 小时中的 {0}。",
+  "Clear history": "清除历史",
+  "Forgets the recorded history of every container": "清除所有容器的已记录历史",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "尚无记录。历史在读取 Docker 时记录：此页面或概览打开时，或容器警报开启时。",
+  "CPU (100% per core)": "CPU（每个核心 100%）",
+  "{0}: average {1}, peak {2}": "{0}：平均 {1}，峰值 {2}",
+  "{0}: not recorded": "{0}：无记录"
 }

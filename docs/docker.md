@@ -73,6 +73,28 @@ resource stay quiet for five minutes.
 The alerts run in the RustWTM window, also while it waits in the tray, and stop
 when it exits; the service does not read Docker.
 
+## Last 24 hours
+
+A container's details show its last 24 hours, a minute at a time: CPU (Docker's
+figure, 100% per core for Linux containers) and memory, the average as a line
+and the peak behind it. Hovering shows the time, average and peak of a minute.
+Only readings RustWTM already makes are recorded: while Containers or Overview
+is open, or while container alerts are on (every 10 s). Minutes without a
+reading stay empty, never filled in, and the caption says how much of the day
+was recorded. Each measurement counts once, however often Docker repeats it.
+
+The history is kept by Docker context and container name, so a restarted or
+re-created container goes on with its line. It is saved by the Docker reader,
+never the window, to `%LOCALAPPDATA%\RustWTM\container-history.json`: every
+five minutes while it changes, at once after *Clear history*, and when the
+window closes (minutes since the last save can be lost if it does not close
+cleanly). The file holds container names and contexts, minute times and the
+CPU and memory figures; nothing else. Minutes older than 24 hours, or dated
+after the current minute after a clock change, are dropped; at most 64
+containers are kept, the one seen longest ago going first. A file larger than
+8 MiB, unreadable or written by a newer version is ignored and replaced. No
+file is created until Docker has been read.
+
 ## Resource and privacy limits
 
 A single lazy worker polls when Overview or Containers requests data; it becomes
@@ -95,9 +117,10 @@ selected container.
 All Engine requests are GET: version, container list, statistics, inspection and
 logs. The integration does not start, stop, restart, remove, exec into or alter
 containers. Container data and logs are held in bounded window memory; they are
-not written to the history database or saved preferences. Container alerts put
-a container's name and its CPU or memory share in a Windows notification;
-only the alert settings are saved.
+not written to the service's history database or saved preferences. Container
+alerts put a container's name and its CPU or memory share in a Windows
+notification, and the last 24 hours file above holds names and per-minute CPU
+and memory figures; logs, ports, images and details are never written.
 
 ## Validation
 

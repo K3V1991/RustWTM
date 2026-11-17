@@ -10,6 +10,7 @@ mod backend;
 mod background;
 mod charts;
 mod container_alerts;
+mod container_history;
 mod containers;
 mod context_actions;
 mod device_facts;

@@ -96,7 +96,19 @@ pub fn overview(ui: &mut Ui, state: &State) -> bool {
     open
 }
 
+#[cfg(test)]
 pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
+    show_with(ui, state, None, view);
+}
+
+/// The page, with each container's last 24 hours in its details when
+/// `history` is given.
+pub fn show_with(
+    ui: &mut Ui,
+    state: &State,
+    mut history: Option<&mut crate::container_history::History>,
+    view: &mut View,
+) {
     let now = Instant::now();
     let Some(report) = &state.report else {
         theme::card(ui, "Docker", |ui| {
@@ -479,6 +491,13 @@ pub fn show(ui: &mut Ui, state: &State, view: &mut View) {
                                 theme::MEMORY,
                             );
                         });
+                    }
+                    if let Some(history) = history.as_mut() {
+                        let series = history.series(&report.endpoint.context, &c.name);
+                        if crate::container_history::show(ui, series, std::time::SystemTime::now())
+                        {
+                            history.clear();
+                        }
                     }
                     if !c.ports.is_empty() {
                         ui.label(crate::i18n::tr("Ports"));

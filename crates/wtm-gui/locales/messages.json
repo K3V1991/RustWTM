@@ -11590,5 +11590,53 @@
     "de": "Leeren",
     "fr": "Effacer",
     "es": "Borrar"
+  },
+  "Last 24 hours": {
+    "tr": "Son 24 saat",
+    "de": "Letzte 24 Stunden",
+    "fr": "Dernières 24 heures",
+    "es": "Últimas 24 horas"
+  },
+  "Recorded {0} of the last 24 hours.": {
+    "tr": "Son 24 saatin {0} kadarı kaydedildi.",
+    "de": "{0} der letzten 24 Stunden aufgezeichnet.",
+    "fr": "{0} enregistrées sur les dernières 24 heures.",
+    "es": "Registrado {0} de las últimas 24 horas."
+  },
+  "Clear history": {
+    "tr": "Geçmişi temizle",
+    "de": "Verlauf löschen",
+    "fr": "Effacer l'historique",
+    "es": "Borrar historial"
+  },
+  "Forgets the recorded history of every container": {
+    "tr": "Tüm konteynerlerin kaydedilen geçmişini siler",
+    "de": "Löscht den aufgezeichneten Verlauf aller Container",
+    "fr": "Oublie l'historique enregistré de tous les conteneurs",
+    "es": "Olvida el historial registrado de todos los contenedores"
+  },
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": {
+    "tr": "Henüz kayıt yok. Geçmiş, Docker okunurken dolar: bu sayfa veya Genel bakış açıkken ya da konteyner uyarıları açıkken.",
+    "de": "Noch nichts aufgezeichnet. Der Verlauf füllt sich, während Docker gelesen wird: solange diese Seite oder die Übersicht geöffnet ist oder Container-Warnungen eingeschaltet sind.",
+    "fr": "Rien d'enregistré pour l'instant. L'historique se remplit pendant que Docker est lu : tant que cette page ou la vue d'ensemble est ouverte, ou que les alertes des conteneurs sont activées.",
+    "es": "Aún no hay nada registrado. El historial se llena mientras se lee Docker: mientras esta página o el resumen están abiertos, o mientras las alertas de contenedores están activadas."
+  },
+  "CPU (100% per core)": {
+    "tr": "CPU (çekirdek başına %100)",
+    "de": "CPU (100 % pro Kern)",
+    "fr": "CPU (100 % par cœur)",
+    "es": "CPU (100 % por núcleo)"
+  },
+  "{0}: average {1}, peak {2}": {
+    "tr": "{0}: ortalama {1}, en yüksek {2}",
+    "de": "{0}: Durchschnitt {1}, Spitze {2}",
+    "fr": "{0} : moyenne {1}, pic {2}",
+    "es": "{0}: media {1}, pico {2}"
+  },
+  "{0}: not recorded": {
+    "tr": "{0}: kaydedilmedi",
+    "de": "{0}: nicht aufgezeichnet",
+    "fr": "{0} : non enregistré",
+    "es": "{0}: sin registro"
   }
 }

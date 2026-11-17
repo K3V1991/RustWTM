@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "Aan: CPU boven {0} of geheugen boven {1} gedurende {2}.",
   "Off. Turn them on in Settings.": "Uit. Zet ze aan in Instellingen.",
   "No container has stayed above a limit.": "Geen container is boven een limiet gebleven.",
-  "Clear": "Wissen"
+  "Clear": "Wissen",
+  "Last 24 hours": "Laatste 24 uur",
+  "Recorded {0} of the last 24 hours.": "{0} van de laatste 24 uur vastgelegd.",
+  "Clear history": "Geschiedenis wissen",
+  "Forgets the recorded history of every container": "Vergeet de vastgelegde geschiedenis van alle containers",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Nog niets vastgelegd. De geschiedenis vult zich terwijl Docker wordt gelezen: zolang deze pagina of het overzicht open is, of containermeldingen aan staan.",
+  "CPU (100% per core)": "CPU (100% per kern)",
+  "{0}: average {1}, peak {2}": "{0}: gemiddeld {1}, piek {2}",
+  "{0}: not recorded": "{0}: niet vastgelegd"
 }

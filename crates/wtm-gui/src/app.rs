@@ -1442,7 +1442,13 @@ impl eframe::App for App {
                     }
                     Tab::Containers => {
                         crate::container_alerts::notices(ui, &mut data.container_alerts);
-                        crate::containers::show(ui, &data.docker, &mut state.containers)
+                        let data = &mut *data;
+                        crate::containers::show_with(
+                            ui,
+                            &data.docker,
+                            Some(&mut data.container_history),
+                            &mut state.containers,
+                        )
                     }
                     Tab::Events => events(ui, &data, &mut state.events),
                     Tab::History => {
@@ -12108,6 +12114,22 @@ o-such-folder",
                             );
                             h.state().backend.data().container_alerts.notices.clear();
                             h.state_mut().state.container_alerts.enabled = false;
+                            h.run_steps(2);
+                        }
+                        if tab == Tab::Containers {
+                            h.state().backend.data().container_history =
+                                crate::container_history::fixture(std::time::SystemTime::now());
+                            h.state_mut().state.containers.selected = Some(format!("{:064x}", 0));
+                            h.run_steps(3);
+                            h.get_by_label(crate::i18n::tr("Last 24 hours"))
+                                .scroll_to_me();
+                            h.run_steps(3);
+                            capture(
+                                &mut h,
+                                &out.join(format!("{theme_name}-{size_name}-ContainerHistory.png")),
+                            );
+                            h.state().backend.data().container_history = Default::default();
+                            h.state_mut().state.containers.selected = None;
                             h.run_steps(2);
                         }
                         if tab == Tab::Settings {

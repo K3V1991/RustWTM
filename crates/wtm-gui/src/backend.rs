@@ -406,6 +406,8 @@ pub struct Data {
     pub alert_watch: crate::alert::AlertWatch,
     /// Notices when a container stays over a CPU or memory limit.
     pub container_alerts: crate::container_alerts::Watch,
+    /// Each container's last 24 hours, kept by the Docker reader.
+    pub container_history: crate::container_history::History,
     /// The service's kill list, from the last configuration loaded.
     pub kill_list: Vec<wtm_policy::KillEntry>,
     /// When many copies of one program count as a swarm (the service's

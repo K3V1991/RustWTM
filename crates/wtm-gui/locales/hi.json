@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "चालू: {2} तक CPU {0} या मेमोरी {1} से ऊपर।",
   "Off. Turn them on in Settings.": "बंद। इन्हें सेटिंग्स में चालू करें।",
   "No container has stayed above a limit.": "कोई कंटेनर किसी सीमा से ऊपर नहीं रहा।",
-  "Clear": "साफ़ करें"
+  "Clear": "साफ़ करें",
+  "Last 24 hours": "पिछले 24 घंटे",
+  "Recorded {0} of the last 24 hours.": "पिछले 24 घंटों में से {0} रिकॉर्ड हुआ।",
+  "Clear history": "इतिहास साफ़ करें",
+  "Forgets the recorded history of every container": "सभी कंटेनरों का रिकॉर्ड किया गया इतिहास भूल जाता है",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "अभी कुछ रिकॉर्ड नहीं हुआ। इतिहास तब भरता है जब Docker पढ़ा जाता है: जब यह पेज या अवलोकन खुला हो, या कंटेनर अलर्ट चालू हों।",
+  "CPU (100% per core)": "CPU (प्रति कोर 100%)",
+  "{0}: average {1}, peak {2}": "{0}: औसत {1}, शिखर {2}",
+  "{0}: not recorded": "{0}: रिकॉर्ड नहीं हुआ"
 }

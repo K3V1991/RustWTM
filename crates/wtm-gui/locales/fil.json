@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "Naka-on: CPU lampas sa {0} o memory lampas sa {1} sa loob ng {2}.",
   "Off. Turn them on in Settings.": "Naka-off. I-on ang mga ito sa Mga Setting.",
   "No container has stayed above a limit.": "Walang container na nanatiling lampas sa isang limitasyon.",
-  "Clear": "I-clear"
+  "Clear": "I-clear",
+  "Last 24 hours": "Huling 24 oras",
+  "Recorded {0} of the last 24 hours.": "Naitala ang {0} ng huling 24 oras.",
+  "Clear history": "I-clear ang history",
+  "Forgets the recorded history of every container": "Kinakalimutan ang naitalang history ng lahat ng container",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Wala pang naitala. Napupuno ang history habang binabasa ang Docker: habang bukas ang pahinang ito o ang Pangkalahatang-ideya, o habang naka-on ang mga alerto ng container.",
+  "CPU (100% per core)": "CPU (100% bawat core)",
+  "{0}: average {1}, peak {2}": "{0}: average {1}, pinakamataas {2}",
+  "{0}: not recorded": "{0}: hindi naitala"
 }

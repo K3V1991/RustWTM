@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "இயக்கத்தில்: {2} நேரம் CPU {0} அல்லது நினைவகம் {1}-க்கு மேல்.",
   "Off. Turn them on in Settings.": "முடக்கத்தில். அமைப்புகளில் இயக்கவும்.",
   "No container has stayed above a limit.": "எந்தக் கொள்கலனும் வரம்புக்கு மேல் தொடரவில்லை.",
-  "Clear": "அழி"
+  "Clear": "அழி",
+  "Last 24 hours": "கடந்த 24 மணிநேரம்",
+  "Recorded {0} of the last 24 hours.": "கடந்த 24 மணிநேரத்தில் {0} பதிவானது.",
+  "Clear history": "வரலாற்றை அழி",
+  "Forgets the recorded history of every container": "எல்லாக் கொள்கலன்களின் பதிவான வரலாற்றையும் மறக்கும்",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "இன்னும் எதுவும் பதிவாகவில்லை. Docker படிக்கப்படும்போது வரலாறு நிரம்பும்: இந்தப் பக்கம் அல்லது மேலோட்டம் திறந்திருக்கும்போது, அல்லது கொள்கலன் எச்சரிக்கைகள் இயக்கத்தில் இருக்கும்போது.",
+  "CPU (100% per core)": "CPU (ஒரு கோருக்கு 100%)",
+  "{0}: average {1}, peak {2}": "{0}: சராசரி {1}, உச்சம் {2}",
+  "{0}: not recorded": "{0}: பதிவாகவில்லை"
 }

@@ -1930,5 +1930,13 @@
   "On: CPU above {0} or memory above {1} for {2}.": "ಆನ್: {2} ಕಾಲ CPU {0} ಅಥವಾ ಮೆಮೊರಿ {1} ಮೀರಿದರೆ.",
   "Off. Turn them on in Settings.": "ಆಫ್. ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಆನ್ ಮಾಡಿ.",
   "No container has stayed above a limit.": "ಯಾವ ಕಂಟೈನರ್ ಕೂಡ ಮಿತಿಯನ್ನು ಮೀರಿ ಉಳಿದಿಲ್ಲ.",
-  "Clear": "ತೆರವುಗೊಳಿಸಿ"
+  "Clear": "ತೆರವುಗೊಳಿಸಿ",
+  "Last 24 hours": "ಕಳೆದ 24 ಗಂಟೆಗಳು",
+  "Recorded {0} of the last 24 hours.": "ಕಳೆದ 24 ಗಂಟೆಗಳಲ್ಲಿ {0} ದಾಖಲಾಗಿದೆ.",
+  "Clear history": "ಇತಿಹಾಸ ತೆರವುಗೊಳಿಸಿ",
+  "Forgets the recorded history of every container": "ಎಲ್ಲಾ ಕಂಟೈನರ್‌ಗಳ ದಾಖಲಾದ ಇತಿಹಾಸವನ್ನು ಮರೆಯುತ್ತದೆ",
+  "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ. Docker ಓದುತ್ತಿರುವಾಗ ಇತಿಹಾಸ ತುಂಬುತ್ತದೆ: ಈ ಪುಟ ಅಥವಾ ಅವಲೋಕನ ತೆರೆದಿರುವಾಗ, ಅಥವಾ ಕಂಟೈನರ್ ಎಚ್ಚರಿಕೆಗಳು ಆನ್ ಇರುವಾಗ.",
+  "CPU (100% per core)": "CPU (ಪ್ರತಿ ಕೋರ್‌ಗೆ 100%)",
+  "{0}: average {1}, peak {2}": "{0}: ಸರಾಸರಿ {1}, ಗರಿಷ್ಠ {2}",
+  "{0}: not recorded": "{0}: ದಾಖಲಾಗಿಲ್ಲ"
 }
