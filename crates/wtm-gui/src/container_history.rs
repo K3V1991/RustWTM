@@ -137,6 +137,7 @@ impl History {
         self.series.get(&(context.to_owned(), name.to_owned()))
     }
 
+    #[cfg(test)]
     pub fn is_empty(&self) -> bool {
         self.series.is_empty()
     }
