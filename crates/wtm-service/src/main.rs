@@ -13,6 +13,7 @@ macro_rules! expect_reply {
 
 mod app_limits;
 mod blocker;
+mod device_keys;
 mod engine;
 mod events;
 mod executor;

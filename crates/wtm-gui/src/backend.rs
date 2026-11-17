@@ -3978,6 +3978,7 @@ mod tests {
             Request::CloseConnection { .. } => Response::Done,
             Request::Incidents { .. } => Response::Incidents(Default::default()),
             Request::StartupImpact => Response::StartupImpact(Vec::new()),
+            Request::DeviceHistory { .. } => Response::DeviceHistory(None),
             Request::Firewall { .. } => Response::Done,
             Request::FirewallBlocked => Response::Blocked(Vec::new()),
             Request::DiskActivity => Response::DiskActivity {
@@ -4327,6 +4328,7 @@ mod tests {
             Request::CloseConnection { .. } => Response::Done,
             Request::Incidents { .. } => Response::Incidents(Default::default()),
             Request::StartupImpact => Response::StartupImpact(Vec::new()),
+            Request::DeviceHistory { .. } => Response::DeviceHistory(None),
             Request::Firewall { .. } => Response::Done,
             Request::FirewallBlocked => Response::Blocked(Vec::new()),
             Request::DiskActivity => Response::DiskActivity {

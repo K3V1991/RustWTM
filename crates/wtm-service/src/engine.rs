@@ -302,6 +302,7 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         config.dry_run,
         shared.events.clone(),
     );
+    let mut device_keys = crate::device_keys::Keys::new(crate::device_keys::Windows);
     let mut history = match History::open(&paths.history) {
         Ok(h) => {
             *shared
@@ -529,6 +530,17 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
             let unix = unix_now();
             if let Err(e) = h.record(&snap, unix) {
                 warn!(error = %e, "history write failed");
+            }
+            if snap.interval.is_some() {
+                let (readings, ids) = device_keys.readings(&snap.system, Instant::now());
+                h.record_devices(&readings);
+                let mut known = shared
+                    .device_keys
+                    .write()
+                    .unwrap_or_else(PoisonError::into_inner);
+                if *known != ids {
+                    *known = ids;
+                }
             }
             let events = shared.events.after(h.last_incident_event());
             if !events.is_empty()

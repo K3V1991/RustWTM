@@ -3,7 +3,23 @@
 use std::collections::HashMap;
 use std::path::Path;
 
-use rusqlite::{Connection, params};
+use rusqlite::{Connection, OptionalExtension, params};
+
+use crate::device_keys::{Kind, Reading};
+
+/// Days of per-minute device history kept.
+pub const DEVICE_DAYS: i64 = 7;
+
+/// One device's current minute.
+#[derive(Debug)]
+struct DeviceAcc {
+    kind: Kind,
+    label: String,
+    sum: [f64; 3],
+    peak: [f64; 3],
+    count: [u32; 3],
+    samples: u32,
+}
 use wtm_core::Snapshot;
 use wtm_policy::{AppStats, MinuteRow, summarize};
 
@@ -52,6 +68,8 @@ pub struct History {
     lower: String,
     /// Samples taken in the current minute, whichever apps they saw.
     minute_samples: u32,
+    /// The current minute's devices, by lasting name.
+    devices: HashMap<String, DeviceAcc>,
 }
 
 const SCHEMA: &str = "
@@ -82,6 +100,23 @@ const SCHEMA: &str = "
         PRIMARY KEY (app, minute)
     ) WITHOUT ROWID;
     CREATE INDEX IF NOT EXISTS app_minute_time ON app_minute (minute);
+    CREATE TABLE IF NOT EXISTS device (
+        id INTEGER PRIMARY KEY,
+        key TEXT NOT NULL UNIQUE,
+        kind TEXT NOT NULL,
+        label TEXT NOT NULL,
+        seen INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS device_minute (
+        device INTEGER NOT NULL,
+        minute INTEGER NOT NULL,
+        samples INTEGER NOT NULL,
+        a_avg REAL, a_peak REAL,
+        b_avg REAL, b_peak REAL,
+        c_avg REAL, c_peak REAL,
+        PRIMARY KEY (device, minute)
+    ) WITHOUT ROWID;
+    CREATE INDEX IF NOT EXISTS device_minute_time ON device_minute (minute);
 ";
 
 impl History {
@@ -127,6 +162,7 @@ impl History {
             apps: HashMap::new(),
             lower: String::new(),
             minute_samples: 0,
+            devices: HashMap::new(),
         })
     }
 
@@ -249,6 +285,35 @@ impl History {
         Ok(())
     }
 
+    /// Adds the devices of the sample [`History::record`] just took. A
+    /// sample it skipped (the first, without rates) adds nothing.
+    pub fn record_devices(&mut self, readings: &[Reading]) {
+        if self.minute.is_none() || self.minute_samples == 0 {
+            return;
+        }
+        for r in readings {
+            let acc = self
+                .devices
+                .entry(r.key.clone())
+                .or_insert_with(|| DeviceAcc {
+                    kind: r.kind,
+                    label: r.label.clone(),
+                    sum: [0.0; 3],
+                    peak: [0.0; 3],
+                    count: [0; 3],
+                    samples: 0,
+                });
+            for (i, value) in r.values.iter().enumerate() {
+                if let Some(v) = value.filter(|v| v.is_finite() && *v >= 0.0) {
+                    acc.sum[i] += v;
+                    acc.peak[i] = acc.peak[i].max(v);
+                    acc.count[i] += 1;
+                }
+            }
+            acc.samples += 1;
+        }
+    }
+
     /// Writes the current minute's aggregates. A minute already in the
     /// database (the service restarted within it, or the clock went back)
     /// is merged with them, weighted by sample count, not replaced.
@@ -256,6 +321,15 @@ impl History {
         let Some(minute) = self.minute else {
             return Ok(());
         };
+        // Devices are written on their own: a failure there keeps the
+        // minute's apps, and the other way round.
+        let devices = std::mem::take(&mut self.devices);
+        let apps = self.flush_apps(minute);
+        let devices = self.flush_devices(minute, devices);
+        apps.and(devices)
+    }
+
+    fn flush_apps(&mut self, minute: i64) -> rusqlite::Result<()> {
         let tx = self.conn.transaction()?;
         {
             let mut stmt = tx.prepare(
@@ -311,6 +385,60 @@ impl History {
         tx.commit()
     }
 
+    /// Writes each device's minute, merged with one already written (the
+    /// service restarted within it, or the clock went back) by sample count.
+    fn flush_devices(
+        &mut self,
+        minute: i64,
+        devices: HashMap<String, DeviceAcc>,
+    ) -> rusqlite::Result<()> {
+        if devices.is_empty() {
+            return Ok(());
+        }
+        let tx = self.conn.transaction()?;
+        {
+            let mut device = tx.prepare(
+                "INSERT INTO device (key, kind, label, seen) VALUES (?1, ?2, ?3, ?4)
+                 ON CONFLICT (key) DO UPDATE SET label = excluded.label, seen = excluded.seen",
+            )?;
+            let mut id = tx.prepare("SELECT id FROM device WHERE key = ?1")?;
+            let mut row = tx.prepare(
+                "INSERT INTO device_minute
+                 (device, minute, samples, a_avg, a_peak, b_avg, b_peak, c_avg, c_peak)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)
+                 ON CONFLICT (device, minute) DO UPDATE SET
+                  a_avg = coalesce((a_avg * samples + excluded.a_avg * excluded.samples)
+                          / (samples + excluded.samples), a_avg, excluded.a_avg),
+                  a_peak = MAX(coalesce(a_peak, excluded.a_peak), coalesce(excluded.a_peak, a_peak)),
+                  b_avg = coalesce((b_avg * samples + excluded.b_avg * excluded.samples)
+                          / (samples + excluded.samples), b_avg, excluded.b_avg),
+                  b_peak = MAX(coalesce(b_peak, excluded.b_peak), coalesce(excluded.b_peak, b_peak)),
+                  c_avg = coalesce((c_avg * samples + excluded.c_avg * excluded.samples)
+                          / (samples + excluded.samples), c_avg, excluded.c_avg),
+                  c_peak = MAX(coalesce(c_peak, excluded.c_peak), coalesce(excluded.c_peak, c_peak)),
+                  samples = samples + excluded.samples",
+            )?;
+            for (key, d) in devices {
+                device.execute(params![key, d.kind.as_str(), d.label, minute])?;
+                let device: i64 = id.query_row([&key], |r| r.get(0))?;
+                let avg = |i: usize| (d.count[i] > 0).then(|| d.sum[i] / f64::from(d.count[i]));
+                let peak = |i: usize| (d.count[i] > 0).then_some(d.peak[i]);
+                row.execute(params![
+                    device,
+                    minute,
+                    d.samples.max(1),
+                    avg(0),
+                    peak(0),
+                    avg(1),
+                    peak(1),
+                    avg(2),
+                    peak(2),
+                ])?;
+            }
+        }
+        tx.commit()
+    }
+
     pub fn prune(&self, keep_days: u32, now_secs: i64) -> rusqlite::Result<usize> {
         self.conn.execute(
             "DELETE FROM incident_action WHERE at < ?1",
@@ -326,7 +454,19 @@ impl History {
             |r| r.get(0),
         )?);
 
-        let cutoff = now_secs.div_euclid(60) - i64::from(keep_days) * 24 * 60;
+        // Device minutes: a week, and none dated after now (the clock was
+        // set back); devices left without minutes are forgotten.
+        let now_minute = now_secs.div_euclid(60);
+        self.conn.execute(
+            "DELETE FROM device_minute WHERE minute < ?1 OR minute > ?2",
+            params![now_minute - DEVICE_DAYS * 24 * 60, now_minute + 1],
+        )?;
+        self.conn.execute(
+            "DELETE FROM device WHERE id NOT IN (SELECT DISTINCT device FROM device_minute)",
+            [],
+        )?;
+
+        let cutoff = now_minute - i64::from(keep_days) * 24 * 60;
         self.conn
             .execute("DELETE FROM app_minute WHERE minute < ?1", params![cutoff])
     }
@@ -390,6 +530,42 @@ pub fn stats(
 }
 
 /// Minute rows of one app since `since_minute`, oldest first.
+/// The minutes of the device named `key` from `since` to `until`
+/// (inclusive), oldest first; `None` if it was never recorded.
+pub fn device_series(
+    conn: &Connection,
+    key: &str,
+    since: i64,
+    until: i64,
+) -> rusqlite::Result<Option<wtm_ipc::DeviceHistory>> {
+    let Some((id, label)) = conn
+        .query_row("SELECT id, label FROM device WHERE key = ?1", [key], |r| {
+            Ok((r.get::<_, i64>(0)?, r.get::<_, String>(1)?))
+        })
+        .optional()?
+    else {
+        return Ok(None);
+    };
+    let mut stmt = conn.prepare(
+        "SELECT minute, a_avg, a_peak, b_avg, b_peak, c_avg, c_peak FROM device_minute
+         WHERE device = ?1 AND minute >= ?2 AND minute <= ?3 ORDER BY minute",
+    )?;
+    let minutes = stmt
+        .query_map(params![id, since, until], |r| {
+            let pair = |i: usize| -> rusqlite::Result<Option<(f32, f32)>> {
+                let avg: Option<f64> = r.get(i)?;
+                let peak: Option<f64> = r.get(i + 1)?;
+                Ok(avg.zip(peak).map(|(a, p)| (a as f32, p as f32)))
+            };
+            Ok(wtm_ipc::DeviceMinute {
+                minute: r.get(0)?,
+                values: [pair(1)?, pair(3)?, pair(5)?],
+            })
+        })?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+    Ok(Some(wtm_ipc::DeviceHistory { label, minutes }))
+}
+
 pub fn series(conn: &Connection, app: &str, since_minute: i64) -> rusqlite::Result<Vec<MinuteRow>> {
     let mut stmt = conn.prepare(
         "SELECT minute, cpu_avg, cpu_peak, mem_avg, mem_peak, processes, gpu_avg,
@@ -756,6 +932,12 @@ mod tests {
         let h = History::with(conn).unwrap();
         let rows = series(h.connection(), "old.exe", 0).unwrap();
         assert_eq!(rows.len(), 1);
+        // The device tables are added beside the old rows.
+        assert!(
+            device_series(h.connection(), "disk:any#0", 0, i64::MAX)
+                .unwrap()
+                .is_none()
+        );
         assert_eq!(rows[0].gpu_avg, 0.0);
         assert_eq!((rows[0].handles_avg, rows[0].threads_avg), (0, 0));
         assert_eq!(rows[0].net, wtm_policy::NetBytes::default());
@@ -788,6 +970,138 @@ mod tests {
         assert!(History::with(ro).is_err());
         assert!(History::open(&path).is_ok(), "writable: migrated");
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    fn disk(key: &str, active: f64) -> Reading {
+        Reading {
+            key: key.into(),
+            kind: Kind::Disk,
+            label: "SSD A".into(),
+            values: [Some(active), Some(active * 1000.0), None],
+        }
+    }
+
+    #[test]
+    fn device_minutes_are_averaged_and_merged_after_a_restart() {
+        let mut h = History::with(Connection::open_in_memory().unwrap()).unwrap();
+        let base = 3_000 * 60;
+        // The first sample has no rates and is not counted.
+        let mut first = snap(vec![]);
+        first.interval = None;
+        h.record(&first, base).unwrap();
+        h.record_devices(&[disk("disk:SSD A#0", 99.0)]);
+        for (s, active) in [10.0, 30.0].into_iter().enumerate() {
+            h.record(&snap(vec![]), base + 1 + s as i64).unwrap();
+            h.record_devices(&[disk("disk:SSD A#0", active)]);
+        }
+        h.flush().unwrap();
+        // The service restarts within the minute: two more samples.
+        let mut h = History::with(h.conn).unwrap();
+        for s in 0..2 {
+            h.record(&snap(vec![]), base + 30 + s).unwrap();
+            h.record_devices(&[disk("disk:SSD A#0", 50.0)]);
+        }
+        h.record(&snap(vec![]), base + 60).unwrap();
+        let history = device_series(h.connection(), "disk:SSD A#0", 0, i64::MAX)
+            .unwrap()
+            .unwrap();
+        assert_eq!(history.label, "SSD A");
+        assert_eq!(history.minutes.len(), 1);
+        let m = &history.minutes[0];
+        assert_eq!(m.minute, 3_000);
+        // (10 + 30 + 50 + 50) / 4 and the busiest; the third measure absent.
+        assert_eq!(
+            m.values,
+            [Some((35.0, 50.0)), Some((35_000.0, 50_000.0)), None]
+        );
+        assert!(
+            device_series(h.connection(), "disk:other#0", 0, i64::MAX)
+                .unwrap()
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn device_history_keeps_a_week_and_drops_minutes_dated_after_now() {
+        let mut h = History::with(Connection::open_in_memory().unwrap()).unwrap();
+        let now = 1_000_000 * 60;
+        for minute in [
+            now / 60 - DEVICE_DAYS * 1440 - 1,
+            now / 60 - 10,
+            now / 60 + 30,
+        ] {
+            h.record(&snap(vec![]), minute * 60).unwrap();
+            h.record_devices(&[disk("disk:SSD A#0", 1.0)]);
+            h.flush().unwrap();
+            h.minute = None;
+        }
+        h.record(&snap(vec![]), now).unwrap();
+        h.record_devices(&[disk("net:gone", 1.0)]);
+        h.flush().unwrap();
+        h.prune(30, now + 120).unwrap();
+        let kept = device_series(h.connection(), "disk:SSD A#0", 0, i64::MAX)
+            .unwrap()
+            .unwrap();
+        let minutes: Vec<_> = kept.minutes.iter().map(|m| m.minute).collect();
+        assert_eq!(minutes, [now / 60 - 10]);
+        // A device without minutes left is forgotten.
+        h.conn
+            .execute("DELETE FROM device_minute WHERE minute = ?1", [now / 60])
+            .unwrap();
+        h.prune(30, now + 120).unwrap();
+        assert!(
+            device_series(h.connection(), "net:gone", 0, i64::MAX)
+                .unwrap()
+                .is_none()
+        );
+    }
+
+    #[test]
+    fn a_failed_device_write_keeps_the_minute_of_the_apps() {
+        let mut h = History::with(Connection::open_in_memory().unwrap()).unwrap();
+        h.conn.execute_batch("DROP TABLE device_minute").unwrap();
+        let base = 4_000 * 60;
+        h.record(&snap(vec![proc(1, "a.exe", 10.0, 100)]), base)
+            .unwrap();
+        h.record_devices(&[disk("disk:SSD A#0", 1.0)]);
+        assert!(h.flush().is_err());
+        assert_eq!(series(h.connection(), "a.exe", 0).unwrap().len(), 1);
+        // The next minute starts clean.
+        assert!(h.devices.is_empty());
+    }
+
+    #[test]
+    fn a_full_week_of_the_most_devices_stays_small() {
+        // A day of one device, measured; a week of the most devices from it.
+        let mut h = History::with(Connection::open_in_memory().unwrap()).unwrap();
+        let pages = |h: &History| -> i64 {
+            h.connection()
+                .query_row("PRAGMA page_count", [], |r| r.get(0))
+                .unwrap()
+        };
+        let before = pages(&h);
+        let key = format!("gpu:{}#0", "N".repeat(120));
+        // Device rows only: no incident frames or apps.
+        for minute in 0..1440_i64 {
+            h.minute = Some(5_000_000 + minute);
+            h.minute_samples = 60;
+            for _ in 0..60 {
+                h.record_devices(&[Reading {
+                    key: key.clone(),
+                    kind: Kind::Gpu,
+                    label: "N".repeat(120),
+                    values: [Some(97.123_456), Some(8.5e9), Some(1.25e9)],
+                }]);
+            }
+            h.flush().unwrap();
+        }
+        let page_size: i64 = h
+            .connection()
+            .query_row("PRAGMA page_size", [], |r| r.get(0))
+            .unwrap();
+        let day = (pages(&h) - before) * page_size;
+        let week = day * DEVICE_DAYS * crate::device_keys::MAX_DEVICES as i64;
+        assert!(week < 32 * 1024 * 1024, "{week} bytes for a full week");
     }
 
     #[test]

@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+IPC moves to protocol 18 (a device's history can be asked for): update the
+GUI, CLI and service together; a window and service of different protocols
+refuse each other, as before.
+
 ### Added
 
 - About has *Export support bundle…*: one text file to send with a
@@ -64,6 +68,14 @@ All notable changes to this project are documented here. The format follows
   the moment a burst scrolls out of view: while following live, the scale
   grows at once and shrinks only after the lower step has been enough for
   ten seconds. An inspected range is still scaled to fit exactly.
+- The service keeps a week of per-minute history for each disk, network
+  adapter and GPU in `history.sqlite`: the average and peak of a disk's
+  active time, read and write rates, an adapter's receive and send rates,
+  and a GPU's load and memory in use. Devices keep their history across
+  restarts: disks by model, GPUs by name (each with an ordinal among equal
+  ones), adapters by the ID Windows keeps for them. A device whose model or
+  name cannot be read is not recorded. At most 32 devices are recorded,
+  which bounds a full week to about 22 MB.
 
 ### Fixed
 

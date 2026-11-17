@@ -19,7 +19,7 @@ logical processor busy). On a 16-thread CPU one fully busy core is 6.25%.
 |---|---|---|
 | `dry_run` | `true` | Log what would be done without touching processes. Manual commands from the GUI/CLI are always executed. |
 | `sample_interval_ms` | `1000` | Sampling period (minimum 100). |
-| `history_days` | `30` | Days of per-minute usage history kept. |
+| `history_days` | `30` | Days of per-minute program history kept. Device history is kept for a week whatever this says. |
 | `block` | `[]` | Programs prevented from starting, see below. |
 
 ## Blocking programs
@@ -271,6 +271,6 @@ for every command.
 |---|---|
 | `%ProgramData%\RustWTM\config.toml` | Configuration |
 | `%ProgramData%\RustWTM\telegram.toml` | Telegram bot settings (administrators only) |
-| `%ProgramData%\RustWTM\history.sqlite` | Per-minute usage history |
+| `%ProgramData%\RustWTM\history.sqlite` | Per-minute usage history: per program (kept `history_days`), per disk, network adapter and GPU (a week; the devices' models, names and network adapter IDs with their per-minute averages and peaks), and incident frames (a week) |
 | `%ProgramData%\RustWTM\logs\` | Daily service logs; the last 14 days are kept |
 | `%LOCALAPPDATA%\RustWTM\container-history.json` | Each Docker container's last 24 hours (names, per-minute CPU and memory), written by the window; *Clear history* in a container's details forgets it. See [Docker](docker.md) |

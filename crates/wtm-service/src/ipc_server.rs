@@ -39,6 +39,9 @@ pub struct Shared {
     pub config: RwLock<wtm_policy::Config>,
     /// History database, opened read-only per request.
     pub history_path: RwLock<Option<std::path::PathBuf>>,
+    /// Each device of the latest sample by the id clients know it by now,
+    /// to the lasting name its history is kept under.
+    pub device_keys: RwLock<std::collections::HashMap<String, String>>,
     /// Per-file disk tracing while clients ask for it.
     pub disk_trace: std::sync::Mutex<Option<DiskTrace>>,
 }
@@ -373,6 +376,29 @@ fn serve(mut conn: PipeConnection, shared: &Shared, engine: &Sender<EngineMsg>) 
                     Err(e) => Response::Error(e),
                 }
             }
+            Request::DeviceHistory { device, hours } => {
+                let hours = hours.clamp(1, 168);
+                let key = shared
+                    .device_keys
+                    .read()
+                    .unwrap_or_else(PoisonError::into_inner)
+                    .get(&device)
+                    .cloned();
+                match key {
+                    None => Response::DeviceHistory(None),
+                    Some(key) => match history_query(shared, hours, |conn, since, _| {
+                        crate::history::device_series(
+                            conn,
+                            &key,
+                            since,
+                            since + i64::from(hours) * 60,
+                        )
+                    }) {
+                        Ok(history) => Response::DeviceHistory(history),
+                        Err(e) => Response::Error(e),
+                    },
+                }
+            }
             Request::AppSeries { app, hours } => {
                 match history_query(shared, hours, |conn, since, _| {
                     crate::history::series(conn, &app, since)
@@ -672,6 +698,70 @@ mod tests {
 
     fn error(r: Response) -> String {
         expect_reply!(r, Response::Error)
+    }
+
+    #[test]
+    fn a_device_history_is_found_by_the_id_the_client_knows() {
+        let dir = std::env::temp_dir().join(format!("wtm-ipc-devices-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("history.sqlite");
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as i64
+            / 60;
+        {
+            let h = crate::history::History::open(&path).unwrap();
+            h.connection()
+                .execute_batch(&format!(
+                    "INSERT INTO device (id, key, kind, label, seen)
+                     VALUES (1, 'disk:SSD A#0', 'disk', 'SSD A', {now});
+                     INSERT INTO device_minute (device, minute, samples, a_avg, a_peak)
+                     VALUES (1, {}, 60, 5, 9), (1, {}, 60, 7, 8), (1, {}, 60, 1, 1);",
+                    now - 30,
+                    now - 2 * 60 - 1,
+                    now + 60,
+                ))
+                .unwrap();
+        }
+        let shared = Arc::new(Shared::default());
+        *shared.history_path.write().unwrap() = Some(path);
+        shared
+            .device_keys
+            .write()
+            .unwrap()
+            .insert("disk:3".into(), "disk:SSD A#0".into());
+        let pipe = format!(r"\\.\pipe\wtm-ipc-devices-{}", std::process::id());
+        let (tx, _rx) = mpsc::channel();
+        let server = start(shared, tx, &pipe).unwrap();
+        let (mut f, _) = hello(&pipe);
+        let ask = |device: &str, hours| Request::DeviceHistory {
+            device: device.into(),
+            hours,
+        };
+        let history = expect_reply!(
+            call(&mut f, &ask("disk:3", 1)).unwrap(),
+            Response::DeviceHistory
+        )
+        .expect("recorded");
+        assert_eq!(history.label, "SSD A");
+        // The last hour only: not the minute before it, nor one dated ahead.
+        let minutes: Vec<_> = history.minutes.iter().map(|m| m.minute).collect();
+        assert_eq!(minutes, [now - 30]);
+        assert_eq!(history.minutes[0].values, [Some((5.0, 9.0)), None, None]);
+        let three = expect_reply!(
+            call(&mut f, &ask("disk:3", 3)).unwrap(),
+            Response::DeviceHistory
+        )
+        .unwrap();
+        assert_eq!(three.minutes.len(), 2);
+        // A device not in the latest sample.
+        let unknown = call(&mut f, &ask("disk:0", 1)).unwrap();
+        assert!(expect_reply!(unknown, Response::DeviceHistory).is_none());
+        drop(f);
+        drop(server);
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

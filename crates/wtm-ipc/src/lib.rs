@@ -30,7 +30,7 @@ pub const SERVICE_NAME: &str = "RustWTM";
 /// nobody else can serve its name alongside the service.
 pub const PIPE_SDDL: &str = "D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;OW)(A;;0x12008b;;;IU)";
 
-pub const PROTOCOL_VERSION: u32 = 17;
+pub const PROTOCOL_VERSION: u32 = 18;
 
 const MAX_FRAME: usize = 32 * 1024 * 1024;
 
@@ -113,6 +113,13 @@ pub enum Request {
     /// Manager's Startup impact). The account comes from the connection,
     /// never from the request: a client sees only its own.
     StartupImpact,
+    /// The per-minute history of a device in the latest sample, by the id
+    /// the client knows it by now (`disk:0`, `net:{luid:016x}`,
+    /// `gpu:{luid}`); introduced with protocol 18.
+    DeviceHistory {
+        device: String,
+        hours: u32,
+    },
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -171,6 +178,28 @@ pub enum Response {
     /// Usage per program (lower-case image path); empty when Windows
     /// measured nothing.
     StartupImpact(Vec<(String, wtm_core::startup_impact::BootUsage)>),
+    /// `None` when the device is not recorded: not in the latest sample, or
+    /// its model or name could not be read.
+    DeviceHistory(Option<DeviceHistory>),
+}
+
+/// One minute of a device's history: the average and peak of each of its
+/// three measures (disk: active %, read and write bytes per second;
+/// network: received and sent bytes per second; GPU: load %, dedicated and
+/// shared memory bytes), `None` when not measured.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DeviceMinute {
+    /// Minutes since the Unix epoch.
+    pub minute: i64,
+    pub values: [Option<(f32, f32)>; 3],
+}
+
+/// What the service recorded of one device, oldest minute first.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DeviceHistory {
+    /// The device's model or name, as last recorded.
+    pub label: String,
+    pub minutes: Vec<DeviceMinute>,
 }
 
 /// System-wide load at one sample, for history graphs.
