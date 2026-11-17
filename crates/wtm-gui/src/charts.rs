@@ -124,6 +124,44 @@ impl Default for Options {
     }
 }
 
+/// How long a lower rate scale must be enough before a live graph shrinks
+/// to it, so the scale does not drop the moment a burst scrolls out of view.
+const SHRINK_AFTER: f64 = 10.0;
+
+/// A live rate graph's scale: it grows at once and shrinks only after the
+/// lower scale has been enough for [`SHRINK_AFTER`] seconds.
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Scale {
+    ceiling: f64,
+    /// Since when (`egui` time, seconds) a lower scale has been enough.
+    lower_since: Option<f64>,
+}
+
+impl Scale {
+    /// The scale to draw with `target` the busiest sample's scale at `now`.
+    fn next(previous: Option<Scale>, target: f64, now: f64) -> Scale {
+        let fresh = Scale {
+            ceiling: target,
+            lower_since: None,
+        };
+        let Some(previous) = previous.filter(|p| p.ceiling.is_finite()) else {
+            return fresh;
+        };
+        if target >= previous.ceiling {
+            return fresh;
+        }
+        let since = previous.lower_since.unwrap_or(now);
+        if now - since >= SHRINK_AFTER || now < since {
+            fresh
+        } else {
+            Scale {
+                ceiling: previous.ceiling,
+                lower_since: Some(since),
+            }
+        }
+    }
+}
+
 pub struct State {
     pub plot_height: f32,
     pub options: Options,
@@ -138,6 +176,8 @@ pub struct State {
     /// The graph being drawn is a small one: no time span or sample line
     /// under it (see [`State::plot_small`]).
     small: bool,
+    /// Each live rate graph's scale, by graph id.
+    scales: std::collections::HashMap<String, Scale>,
 }
 
 impl Default for State {
@@ -152,6 +192,7 @@ impl Default for State {
             markers: Vec::new(),
             ctrl_hold: None,
             small: false,
+            scales: std::collections::HashMap::new(),
         }
     }
 }
@@ -636,9 +677,21 @@ impl State {
         };
         let ceiling = match unit {
             Unit::Percent => 100.0,
-            Unit::Rate => crate::theme::rate_ceiling(peak()),
             Unit::Bytes(capacity) if capacity > 0.0 => capacity.max(peak()),
-            Unit::Bytes(_) => crate::theme::rate_ceiling(peak()),
+            Unit::Rate | Unit::Bytes(_) => {
+                let target = crate::theme::rate_ceiling(peak());
+                if self.window.is_none() {
+                    // Live: steady, so a burst leaving the view does not
+                    // make the graph jump.
+                    let now = ui.input(|i| i.time);
+                    let scale = Scale::next(self.scales.get(id).copied(), target, now);
+                    self.scales.insert(id.to_owned(), scale);
+                    scale.ceiling
+                } else {
+                    // Inspecting a fixed range: exactly its busiest sample.
+                    target
+                }
+            }
         };
         crate::theme::chart_scale(
             ui,
@@ -858,6 +911,101 @@ fn segments(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_live_rate_scale_grows_at_once_and_shrinks_only_after_a_while() {
+        let mib = 1024.0 * 1024.0;
+        let mut scale = Scale::next(None, mib, 0.0);
+        assert_eq!(scale.ceiling, mib);
+        // A burst: up at once.
+        scale = Scale::next(Some(scale), 50.0 * mib, 1.0);
+        assert_eq!(scale.ceiling, 50.0 * mib);
+        // The burst leaves the view: the scale holds for ten seconds...
+        for t in [2.0, 5.0, 11.9] {
+            scale = Scale::next(Some(scale), mib, t);
+            assert_eq!(scale.ceiling, 50.0 * mib, "at {t}");
+        }
+        // ...and a new burst meanwhile restarts the wait.
+        scale = Scale::next(Some(scale), 50.0 * mib, 12.0);
+        assert_eq!(scale.lower_since, None);
+        scale = Scale::next(Some(scale), 2.0 * mib, 13.0);
+        scale = Scale::next(Some(scale), 2.0 * mib, 22.9);
+        assert_eq!(scale.ceiling, 50.0 * mib);
+        scale = Scale::next(Some(scale), 2.0 * mib, 23.0);
+        assert_eq!(scale.ceiling, 2.0 * mib, "ten seconds lower");
+        // A clock that went back does not hold the scale for ever.
+        let held = Scale {
+            ceiling: 50.0 * mib,
+            lower_since: Some(100.0),
+        };
+        assert_eq!(Scale::next(Some(held), mib, 5.0).ceiling, mib);
+    }
+
+    #[test]
+    fn a_live_graph_keeps_its_scale_after_a_burst_and_an_inspected_one_is_exact() {
+        use egui_kittest::{Harness, kittest::Queryable};
+        let mib = 1024.0 * 1024.0;
+        type Graph = (State, VecDeque<u64>, VecDeque<f32>);
+        // Five minutes a second apart, idle at half a MiB/s but for a burst.
+        let samples = |from: u64, burst: Option<u64>| {
+            let times: VecDeque<u64> = (from..from + 300).map(|s| s * 1000).collect();
+            let values = (from..from + 300)
+                .map(|s| {
+                    if Some(s) == burst {
+                        40.0 * mib
+                    } else {
+                        0.5 * mib
+                    }
+                })
+                .collect();
+            (times, values)
+        };
+        let (times, values) = samples(1_000, Some(1_010));
+        let state = State {
+            timeline: Timeline::read(&times),
+            ..State::default()
+        };
+        let mut h = Harness::builder().with_size([600.0, 300.0]).build_ui_state(
+            |ui, (state, times, values): &mut Graph| {
+                state.plot(
+                    ui,
+                    "net",
+                    times,
+                    &[("Receive", values, crate::theme::NET_RX)],
+                    Unit::Rate,
+                );
+            },
+            (state, times, values),
+        );
+        h.run();
+        assert!(h.query_by_label("50.0 MiB/s").is_some());
+        // The burst scrolls out of view.
+        let show = |h: &mut Harness<'_, Graph>, from: u64, burst: Option<u64>| {
+            let (times, values) = samples(from, burst);
+            let graph = h.state_mut();
+            graph.0.timeline = Timeline::read(&times);
+            graph.1 = times;
+            graph.2 = values;
+        };
+        show(&mut h, 1_020, None);
+        h.run_steps(8);
+        assert!(h.query_by_label("50.0 MiB/s").is_some(), "held");
+        h.run_steps(40);
+        assert!(
+            h.query_by_label("1.0 MiB/s").is_some(),
+            "lower after a while"
+        );
+        // A burst again, then inspecting a range without it: exact at once.
+        show(&mut h, 1_020, Some(1_200));
+        h.run();
+        assert!(h.query_by_label("50.0 MiB/s").is_some());
+        h.state_mut().0.window = Some(Window {
+            start: 1_030_000,
+            end: 1_100_000,
+        });
+        h.run();
+        assert!(h.query_by_label("1.0 MiB/s").is_some(), "inspected range");
+    }
 
     #[test]
     fn holding_ctrl_freezes_a_live_chart_until_it_is_released() {

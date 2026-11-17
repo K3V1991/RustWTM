@@ -29,6 +29,14 @@ bounded sample buffer; they do not start another collector.
   proof of causation; a container alert's time can be up to one Docker
   reading after the change.
 
+Transfer-rate graphs (disk, network, GPU memory without a known capacity)
+scale to a calm 1-2-5 step above the busiest sample in view. While following
+live, the scale grows at once but shrinks only after the lower step has been
+enough for ten seconds, so it does not drop the moment a burst scrolls out of
+view; the scale above the graph always names its current top. While a range
+is inspected (selected, zoomed or frozen with Ctrl), the scale fits that range
+exactly.
+
 The timestamp includes the local date, time and UTC offset. Chart axes use
 local clock time. The values below the charts follow the selected sample;
 chart headers, per-core tiles and device details continue showing current
@@ -54,8 +62,8 @@ to describe stale data independently of timeline selection.
 
 This is the initial chart-interaction portion of M3. [Focused resource
 views](performance-resources.md) are now available. Physical device selection,
-device-selection persistence, rate-axis hysteresis, alternative network
-units and persistent system history remain pending. Interaction state is
+device-selection persistence, alternative network units (the Network page
+shows bits beside bytes) and persistent system history remain pending. Interaction state is
 transient; it does not change service configuration or protocol contracts.
 
 Local validation on 2026-11-09:

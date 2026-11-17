@@ -104,7 +104,9 @@ changes. None of them needs administrator rights, and all lists are bounded.
 ## Remaining scope
 
 Persistent system and device history (M4), user-selectable GPU engine graphs,
-NPU pages, rate-axis hysteresis and a choice of network units remain pending.
+NPU pages and a choice of network units remain pending (the Network page
+shows bits beside bytes). Rate graphs keep a steady live scale; see the
+[timeline](performance-timeline.md).
 Battery and motherboard sensor readings stay on the Sensors and Devices pages.
 
 ## Local validation

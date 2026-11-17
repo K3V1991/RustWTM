@@ -60,6 +60,10 @@ All notable changes to this project are documented here. The format follows
   is kept, and lead to the process it names (only while the same PID and
   name run), to Containers or to Sensors & cooling. The Performance charts'
   event markers include container alerts as well.
+- Disk, network and other transfer-rate graphs no longer drop their scale
+  the moment a burst scrolls out of view: while following live, the scale
+  grows at once and shrinks only after the lower step has been enough for
+  ten seconds. An inspected range is still scaled to fit exactly.
 
 ### Fixed
 
