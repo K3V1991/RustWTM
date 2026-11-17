@@ -5293,6 +5293,23 @@ mod tests {
     use crate::ui_tests::data;
 
     #[test]
+    fn settings_appearance_opens_the_overview_editor() {
+        let (mut h, _rx) = kill_app(Tab::Settings);
+        h.state_mut().state.config.page = crate::settings::Page::Appearance;
+        h.run_steps(3);
+        h.get_by_label("Customize Overview…").scroll_to_me();
+        h.run_steps(3);
+        h.get_by_label("Customize Overview…").click();
+        h.run_steps(3);
+        assert!(h.state().state.overview_editor.is_some());
+        assert!(h.query_by_label("Customize Overview").is_some());
+        assert_eq!(h.state().state.tab, Tab::Settings, "stays on Settings");
+        h.get_by_label("Cancel").click();
+        h.run_steps(3);
+        assert!(h.state().state.overview_editor.is_none());
+    }
+
+    #[test]
     fn settings_use_the_workspace_width_without_a_page_header() {
         use egui::accesskit::Role;
         let (mut h, _rx) = kill_app(Tab::Settings);
