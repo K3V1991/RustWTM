@@ -236,17 +236,16 @@ impl Drop for DockerWorker {
 #[cfg(test)]
 mod tests {
     use super::*;
-    /// Runs the reader with no page asking for Docker, alerts `on` or off,
-    /// until it has read once or `wait` has passed.
-    fn background(on: bool, wait: Duration) -> (Vec<Option<String>>, Vec<String>) {
+    /// Runs the reader with no page asking for Docker, alerts `on` or off
+    /// with a CPU limit of `cpu`, until it has read once or `wait` has
+    /// passed. Returns the readings, the notifications and the notices kept.
+    fn background(on: bool, cpu: f32, wait: Duration) -> (Vec<Option<String>>, Vec<String>, usize) {
         let data = Arc::new(Mutex::new(Data::default()));
         {
             let mut d = data.lock().unwrap();
             d.container_alerts.settings = crate::container_alerts::Settings {
                 enabled: on,
-                // Of the fixture's running containers only database-3 is
-                // above: 72.5% in Docker's count, 18% of its 4 cores.
-                cpu: 15.0,
+                cpu,
                 seconds: 0,
                 ..Default::default()
             };
@@ -285,31 +284,46 @@ mod tests {
         stop.store(true, Ordering::Relaxed);
         worker.join().unwrap();
         let toasts: Vec<String> = notified.into_iter().chain(toasts.try_iter()).collect();
-        if on {
-            let d = data.lock().unwrap();
-            assert!(d.docker.report.is_some(), "the reading is published");
-            assert_eq!(d.container_alerts.notices.len(), toasts.len());
-        }
-        (first.into_iter().collect(), toasts)
+        let d = data.lock().unwrap();
+        assert_eq!(d.docker.report.is_some(), on, "the reading is published");
+        (
+            first.into_iter().collect(),
+            toasts,
+            d.container_alerts.notices.len(),
+        )
     }
 
     #[test]
     fn alerts_keep_docker_read_in_the_background_and_notify() {
-        let (reads, toasts) = background(true, Duration::from_secs(3));
+        // Of the fixture's running containers only database-3 is above 15%:
+        // 72.5% in Docker's count, 18% of its 4 cores.
+        let (reads, toasts, kept) = background(true, 15.0, Duration::from_secs(3));
         // Read without a page asking, and without the details only a page shows.
         assert_eq!(reads, [None]);
         // database-4 is busier but has exited: it is not followed.
-        assert_eq!(toasts.len(), 1, "{toasts:?}");
+        assert_eq!((toasts.len(), kept), (1, 1), "{toasts:?}");
         assert!(
             toasts[0].starts_with("database-3 has used 18% of its CPUs for 0s. Docker shows 7"),
             "{toasts:?}"
         );
-        let (reads, toasts) = background(false, Duration::from_millis(600));
+        let (reads, toasts, _) = background(false, 15.0, Duration::from_millis(600));
         assert!(
             reads.is_empty(),
             "alerts off and no page: Docker is not read"
         );
         assert!(toasts.is_empty());
+    }
+
+    #[test]
+    fn many_containers_crossing_together_give_three_notifications() {
+        // All four running fixture containers are above 1%.
+        let (_, toasts, kept) = background(true, 1.0, Duration::from_secs(3));
+        assert_eq!(kept, 4, "every notice is listed");
+        assert_eq!(
+            toasts.len(),
+            crate::container_alerts::TOASTS_PER_CHECK,
+            "{toasts:?}"
+        );
     }
 
     #[test]

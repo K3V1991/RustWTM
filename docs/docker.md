@@ -70,6 +70,9 @@ listing cut at 512 containers or a change of Docker context restarts the wait
 and never raises or ends an alert. After an alert ends, the same container and
 resource stay quiet for five minutes.
 
+The alerts run in the RustWTM window, also while it waits in the tray, and stop
+when it exits; the service does not read Docker.
+
 ## Resource and privacy limits
 
 A single lazy worker polls when Overview or Containers requests data; it becomes

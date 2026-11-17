@@ -7956,6 +7956,31 @@ mod tests {
     }
 
     #[test]
+    fn container_alert_settings_reach_the_docker_reader_from_any_page() {
+        // Offline: no sampler and no Docker reader run on this PC.
+        let (backend, _rx) = Backend::offline(data());
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Processes,
+                    ..UiState::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.run_steps(2);
+        assert!(!h.state().backend.data().container_alerts.settings.enabled);
+        h.state_mut().state.container_alerts.enabled = true;
+        h.state_mut().state.container_alerts.cpu = 42.0;
+        h.run_steps(2);
+        let settings = h.state().backend.data().container_alerts.settings;
+        assert!(settings.enabled);
+        assert_eq!(settings.cpu, 42.0);
+    }
+
+    #[test]
     fn container_alert_settings_are_kept_and_start_off() {
         use eframe::Storage as _;
         let mut storage = MemStorage::default();

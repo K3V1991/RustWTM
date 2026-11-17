@@ -707,14 +707,11 @@ impl Backend {
         let (tx, rx) = mpsc::channel();
         let notifications = Arc::new(AtomicBool::new(true));
         let window = Arc::new(AtomicIsize::new(0));
-        let docker = crate::docker_worker::DockerWorker::new(&data, ctx.clone(), {
-            let notifications = notifications.clone();
-            move |notice: &crate::container_alerts::Notice| {
-                if notifications.load(Ordering::Relaxed) {
-                    notify(&container_event(notice));
-                }
-            }
-        });
+        let docker = crate::docker_worker::DockerWorker::new(
+            &data,
+            ctx.clone(),
+            container_toast(notifications.clone(), notify),
+        );
         let mut worker = Worker {
             local_hardware: None,
             startup_impact_at: None,
@@ -2990,6 +2987,18 @@ fn notify(e: &Event) {
     let _ = notification(e).show();
 }
 
+/// Shows container notices while the tray menu's Notifications is checked.
+fn container_toast(
+    notifications: Arc<AtomicBool>,
+    notify: fn(&Event),
+) -> impl Fn(&crate::container_alerts::Notice) + Send + Sync + 'static {
+    move |notice| {
+        if notifications.load(Ordering::Relaxed) {
+            notify(&container_event(notice));
+        }
+    }
+}
+
 /// A container notice as a notification; its text is already translated.
 fn container_event(notice: &crate::container_alerts::Notice) -> Event {
     let level = match notice.kind {
@@ -3425,6 +3434,27 @@ mod tests {
         w.data().sample_measured_at = Some(Instant::now());
         w.watch_cpu();
         assert!(w.data().alert_watch.active.is_some());
+    }
+
+    #[test]
+    fn container_notifications_follow_the_tray_switch() {
+        static SHOWN: AtomicIsize = AtomicIsize::new(0);
+        fn count(e: &Event) {
+            assert_eq!(e.message, "web: CPU use is back below the limit.");
+            SHOWN.fetch_add(1, Ordering::SeqCst);
+        }
+        let notifications = Arc::new(AtomicBool::new(false));
+        let toast = container_toast(notifications.clone(), count);
+        let notice = crate::container_alerts::Notice {
+            at: std::time::SystemTime::now(),
+            name: "web".into(),
+            kind: crate::container_alerts::Kind::Back(crate::container_alerts::Resource::Cpu),
+        };
+        toast(&notice);
+        assert_eq!(SHOWN.load(Ordering::SeqCst), 0, "silenced from the tray");
+        notifications.store(true, Ordering::Relaxed);
+        toast(&notice);
+        assert_eq!(SHOWN.load(Ordering::SeqCst), 1);
     }
 
     #[test]
