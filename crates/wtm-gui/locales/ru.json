@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Пока ничего не записано. История заполняется, пока Docker опрашивается: когда открыта эта страница или обзор либо включены оповещения контейнеров.",
   "CPU (100% per core)": "CPU (100% на ядро)",
   "{0}: average {1}, peak {2}": "{0}: среднее {1}, пик {2}",
-  "{0}: not recorded": "{0}: не записано"
+  "{0}: not recorded": "{0}: не записано",
+  "Sensors: reading failed: {0}": "Датчики: ошибка чтения: {0}",
+  "Sensors: readings resumed": "Датчики: чтение возобновлено",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Охлаждение {0}: возврат к автоматике оборудования, датчик температуры отсутствует или устарел",
+  "Cooling {0}: control failed: {1}": "Охлаждение {0}: ошибка управления: {1}",
+  "Cooling {0}: under software control again": "Охлаждение {0}: снова под управлением программы"
 }

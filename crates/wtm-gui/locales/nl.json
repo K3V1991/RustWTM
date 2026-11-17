@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Nog niets vastgelegd. De geschiedenis vult zich terwijl Docker wordt gelezen: zolang deze pagina of het overzicht open is, of containermeldingen aan staan.",
   "CPU (100% per core)": "CPU (100% per kern)",
   "{0}: average {1}, peak {2}": "{0}: gemiddeld {1}, piek {2}",
-  "{0}: not recorded": "{0}: niet vastgelegd"
+  "{0}: not recorded": "{0}: niet vastgelegd",
+  "Sensors: reading failed: {0}": "Sensoren: lezen mislukt: {0}",
+  "Sensors: readings resumed": "Sensoren: lezen hervat",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Koeling {0}: terug naar hardware-automatisch, de temperatuursensor ontbreekt of is verouderd",
+  "Cooling {0}: control failed: {1}": "Koeling {0}: besturing mislukt: {1}",
+  "Cooling {0}: under software control again": "Koeling {0}: weer onder softwarebesturing"
 }

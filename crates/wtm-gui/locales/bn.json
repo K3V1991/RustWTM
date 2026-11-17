@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "এখনও কিছু রেকর্ড হয়নি। Docker পড়ার সময় ইতিহাস ভরে: এই পৃষ্ঠা বা ওভারভিউ খোলা থাকলে, অথবা কন্টেইনার সতর্কতা চালু থাকলে।",
   "CPU (100% per core)": "CPU (প্রতি কোরে 100%)",
   "{0}: average {1}, peak {2}": "{0}: গড় {1}, সর্বোচ্চ {2}",
-  "{0}: not recorded": "{0}: রেকর্ড হয়নি"
+  "{0}: not recorded": "{0}: রেকর্ড হয়নি",
+  "Sensors: reading failed: {0}": "সেন্সর: পড়া ব্যর্থ: {0}",
+  "Sensors: readings resumed": "সেন্সর: পড়া আবার শুরু হয়েছে",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "কুলিং {0}: হার্ডওয়্যার স্বয়ংক্রিয়তে ফিরেছে, এর তাপমাত্রা সেন্সর নেই বা পুরোনো",
+  "Cooling {0}: control failed: {1}": "কুলিং {0}: নিয়ন্ত্রণ ব্যর্থ: {1}",
+  "Cooling {0}: under software control again": "কুলিং {0}: আবার সফটওয়্যার নিয়ন্ত্রণে"
 }

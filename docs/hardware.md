@@ -57,6 +57,16 @@ points per second. At the selected critical temperature (60–95 °C), both manu
 and curve modes request 100%. Missing, nonfinite or stale temperature requests
 hardware defaults. Explicit profile requests and errors appear in Events.
 
+While the helper runs (the Sensors page is open or a fan is controlled), the
+service also logs lasting changes in Events and in recorded incidents: sensor
+reading failing and resuming, and a controlled fan going back to hardware
+automatic because its temperature is missing or stale, failing, or coming back
+under software control. A change is logged once it has lasted three readings
+(about six seconds), so the logged time is up to that much after the change; a
+change shorter than that is not logged. A restarted helper starts without a
+known state, so its first normal reading logs nothing. Nothing is logged while
+the helper is stopped.
+
 The provider records a rollback lease before writing to a device, renews it on
 each accepted duty request and attempts defaults after eight seconds without
 renewal. It retries failed expiry restores while running, and also attempts

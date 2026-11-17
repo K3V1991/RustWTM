@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Wala pang naitala. Napupuno ang history habang binabasa ang Docker: habang bukas ang pahinang ito o ang Pangkalahatang-ideya, o habang naka-on ang mga alerto ng container.",
   "CPU (100% per core)": "CPU (100% bawat core)",
   "{0}: average {1}, peak {2}": "{0}: average {1}, pinakamataas {2}",
-  "{0}: not recorded": "{0}: hindi naitala"
+  "{0}: not recorded": "{0}: hindi naitala",
+  "Sensors: reading failed: {0}": "Mga sensor: nabigo ang pagbasa: {0}",
+  "Sensors: readings resumed": "Mga sensor: nagpatuloy ang pagbasa",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Paglamig {0}: bumalik sa hardware automatic, nawawala o luma ang temperature sensor nito",
+  "Cooling {0}: control failed: {1}": "Paglamig {0}: nabigo ang kontrol: {1}",
+  "Cooling {0}: under software control again": "Paglamig {0}: muling kontrolado ng software"
 }

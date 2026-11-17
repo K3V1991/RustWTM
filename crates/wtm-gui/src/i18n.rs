@@ -839,6 +839,15 @@ mod tests {
             message("Rule: kill (rule 'Idle')"),
             "Kural: sonlandır (kural 'Idle')"
         );
+        // A provider's error stays as it came.
+        assert_eq!(
+            message("Cooling CPU Fan: control failed: access denied"),
+            "Soğutma CPU Fan: kontrol başarısız: access denied"
+        );
+        assert_eq!(
+            message("Sensors: readings resumed"),
+            "Sensörler: okuma yeniden başladı"
+        );
     }
     #[test]
     fn percentages_follow_the_language() {

@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "ಇನ್ನೂ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ. Docker ಓದುತ್ತಿರುವಾಗ ಇತಿಹಾಸ ತುಂಬುತ್ತದೆ: ಈ ಪುಟ ಅಥವಾ ಅವಲೋಕನ ತೆರೆದಿರುವಾಗ, ಅಥವಾ ಕಂಟೈನರ್ ಎಚ್ಚರಿಕೆಗಳು ಆನ್ ಇರುವಾಗ.",
   "CPU (100% per core)": "CPU (ಪ್ರತಿ ಕೋರ್‌ಗೆ 100%)",
   "{0}: average {1}, peak {2}": "{0}: ಸರಾಸರಿ {1}, ಗರಿಷ್ಠ {2}",
-  "{0}: not recorded": "{0}: ದಾಖಲಾಗಿಲ್ಲ"
+  "{0}: not recorded": "{0}: ದಾಖಲಾಗಿಲ್ಲ",
+  "Sensors: reading failed: {0}": "ಸೆನ್ಸರ್‌ಗಳು: ಓದುವಿಕೆ ವಿಫಲವಾಗಿದೆ: {0}",
+  "Sensors: readings resumed": "ಸೆನ್ಸರ್‌ಗಳು: ಓದುವಿಕೆ ಮತ್ತೆ ಆರಂಭವಾಗಿದೆ",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "ಕೂಲಿಂಗ್ {0}: ಹಾರ್ಡ್‌ವೇರ್ ಸ್ವಯಂಚಾಲಿತಕ್ಕೆ ಮರಳಿದೆ, ಇದರ ತಾಪಮಾನ ಸೆನ್ಸರ್ ಕಾಣೆಯಾಗಿದೆ ಅಥವಾ ಹಳೆಯದಾಗಿದೆ",
+  "Cooling {0}: control failed: {1}": "ಕೂಲಿಂಗ್ {0}: ನಿಯಂತ್ರಣ ವಿಫಲವಾಗಿದೆ: {1}",
+  "Cooling {0}: under software control again": "ಕೂಲಿಂಗ್ {0}: ಮತ್ತೆ ಸಾಫ್ಟ್‌ವೇರ್ ನಿಯಂತ್ರಣದಲ್ಲಿದೆ"
 }

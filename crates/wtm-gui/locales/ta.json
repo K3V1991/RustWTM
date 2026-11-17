@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "இன்னும் எதுவும் பதிவாகவில்லை. Docker படிக்கப்படும்போது வரலாறு நிரம்பும்: இந்தப் பக்கம் அல்லது மேலோட்டம் திறந்திருக்கும்போது, அல்லது கொள்கலன் எச்சரிக்கைகள் இயக்கத்தில் இருக்கும்போது.",
   "CPU (100% per core)": "CPU (ஒரு கோருக்கு 100%)",
   "{0}: average {1}, peak {2}": "{0}: சராசரி {1}, உச்சம் {2}",
-  "{0}: not recorded": "{0}: பதிவாகவில்லை"
+  "{0}: not recorded": "{0}: பதிவாகவில்லை",
+  "Sensors: reading failed: {0}": "சென்சார்கள்: வாசிப்பு தோல்வி: {0}",
+  "Sensors: readings resumed": "சென்சார்கள்: வாசிப்பு மீண்டும் தொடங்கியது",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "குளிரூட்டல் {0}: வன்பொருள் தானியங்கிக்குத் திரும்பியது, அதன் வெப்பநிலை சென்சார் இல்லை அல்லது பழையது",
+  "Cooling {0}: control failed: {1}": "குளிரூட்டல் {0}: கட்டுப்பாடு தோல்வி: {1}",
+  "Cooling {0}: under software control again": "குளிரூட்டல் {0}: மீண்டும் மென்பொருள் கட்டுப்பாட்டில்"
 }

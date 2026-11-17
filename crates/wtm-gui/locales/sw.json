@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Bado hakuna kilichorekodiwa. Historia hujaa Docker inaposomwa: ukurasa huu au Muhtasari ukiwa wazi, au arifa za kontena zikiwa zimewashwa.",
   "CPU (100% per core)": "CPU (100% kwa kila kiini)",
   "{0}: average {1}, peak {2}": "{0}: wastani {1}, kilele {2}",
-  "{0}: not recorded": "{0}: haijarekodiwa"
+  "{0}: not recorded": "{0}: haijarekodiwa",
+  "Sensors: reading failed: {0}": "Vihisi: usomaji umeshindwa: {0}",
+  "Sensors: readings resumed": "Vihisi: usomaji umeendelea",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Upozaji {0}: umerudi kwenye otomatiki ya maunzi, kihisi chake cha joto kinakosekana au kimepitwa na wakati",
+  "Cooling {0}: control failed: {1}": "Upozaji {0}: udhibiti umeshindwa: {1}",
+  "Cooling {0}: under software control again": "Upozaji {0}: umedhibitiwa na programu tena"
 }

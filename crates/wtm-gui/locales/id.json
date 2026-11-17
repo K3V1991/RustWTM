@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Belum ada yang terekam. Riwayat terisi saat Docker dibaca: saat halaman ini atau Ikhtisar terbuka, atau saat peringatan kontainer aktif.",
   "CPU (100% per core)": "CPU (100% per core)",
   "{0}: average {1}, peak {2}": "{0}: rata-rata {1}, puncak {2}",
-  "{0}: not recorded": "{0}: tidak terekam"
+  "{0}: not recorded": "{0}: tidak terekam",
+  "Sensors: reading failed: {0}": "Sensor: pembacaan gagal: {0}",
+  "Sensors: readings resumed": "Sensor: pembacaan berlanjut",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Pendinginan {0}: kembali ke otomatis perangkat keras, sensor suhunya hilang atau usang",
+  "Cooling {0}: control failed: {1}": "Pendinginan {0}: kontrol gagal: {1}",
+  "Cooling {0}: under software control again": "Pendinginan {0}: kembali dikendalikan perangkat lunak"
 }

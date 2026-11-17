@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Chưa ghi gì. Lịch sử được ghi khi Docker được đọc: khi trang này hoặc Tổng quan đang mở, hoặc khi cảnh báo vùng chứa đang bật.",
   "CPU (100% per core)": "CPU (100% mỗi lõi)",
   "{0}: average {1}, peak {2}": "{0}: trung bình {1}, đỉnh {2}",
-  "{0}: not recorded": "{0}: không có dữ liệu"
+  "{0}: not recorded": "{0}: không có dữ liệu",
+  "Sensors: reading failed: {0}": "Cảm biến: đọc thất bại: {0}",
+  "Sensors: readings resumed": "Cảm biến: đã đọc lại",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Làm mát {0}: trở về tự động của phần cứng, cảm biến nhiệt độ bị thiếu hoặc đã cũ",
+  "Cooling {0}: control failed: {1}": "Làm mát {0}: điều khiển thất bại: {1}",
+  "Cooling {0}: under software control again": "Làm mát {0}: lại do phần mềm điều khiển"
 }

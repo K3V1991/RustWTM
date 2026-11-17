@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "Ancora nulla di registrato. La cronologia si riempie mentre Docker viene letto: mentre questa pagina o la panoramica sono aperte, o mentre gli avvisi dei contenitori sono attivi.",
   "CPU (100% per core)": "CPU (100% per core)",
   "{0}: average {1}, peak {2}": "{0}: media {1}, picco {2}",
-  "{0}: not recorded": "{0}: non registrato"
+  "{0}: not recorded": "{0}: non registrato",
+  "Sensors: reading failed: {0}": "Sensori: lettura non riuscita: {0}",
+  "Sensors: readings resumed": "Sensori: lettura ripresa",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "Raffreddamento {0}: tornato all'automatico dell'hardware, il suo sensore di temperatura manca o non è aggiornato",
+  "Cooling {0}: control failed: {1}": "Raffreddamento {0}: controllo non riuscito: {1}",
+  "Cooling {0}: under software control again": "Raffreddamento {0}: di nuovo sotto il controllo del software"
 }

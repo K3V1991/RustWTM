@@ -254,6 +254,7 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         );
     }
     shared.hardware.dry_run(config.dry_run);
+    shared.hardware.log_to(shared.events.clone());
     *shared
         .config
         .write()

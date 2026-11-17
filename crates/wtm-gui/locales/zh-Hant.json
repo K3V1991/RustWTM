@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "尚無記錄。歷史會在讀取 Docker 時記錄：此頁面或概觀開啟時，或容器警示開啟時。",
   "CPU (100% per core)": "CPU（每個核心 100%）",
   "{0}: average {1}, peak {2}": "{0}：平均 {1}，峰值 {2}",
-  "{0}: not recorded": "{0}：無記錄"
+  "{0}: not recorded": "{0}：無記錄",
+  "Sensors: reading failed: {0}": "感測器：讀取失敗：{0}",
+  "Sensors: readings resumed": "感測器：已恢復讀取",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "散熱 {0}：已恢復為硬體自動控制，其溫度感測器遺失或資料過期",
+  "Cooling {0}: control failed: {1}": "散熱 {0}：控制失敗：{1}",
+  "Cooling {0}: under software control again": "散熱 {0}：已重新由軟體控制"
 }

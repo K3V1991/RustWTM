@@ -3,10 +3,17 @@
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{self, Sender};
-use std::sync::{Arc, Mutex, PoisonError, RwLock};
+use std::sync::{Arc, Mutex, OnceLock, PoisonError, RwLock};
 use std::time::{Duration, Instant};
 use wtm_core::hardware::{HardwareReader, HardwareReport, unix_ms};
 use wtm_policy::{CoolingMode, CoolingProfile, smooth_duty};
+
+use crate::events::EventLog;
+use wtm_ipc::EventLevel;
+
+/// Readings a change must last before it is logged (about six seconds), so
+/// a sensor missing from one reading does not fill the event log.
+const SETTLE: u8 = 3;
 
 enum Message {
     Set(String, CoolingProfile, Instant, Sender<Result<(), String>>),
@@ -22,6 +29,8 @@ pub struct HardwareHub {
     last_request: Mutex<Instant>,
     /// The worker is holding a fan profile, which must keep being renewed.
     controlling: Arc<AtomicBool>,
+    /// Where lasting sensor and cooling changes are logged.
+    events: OnceLock<EventLog>,
 }
 impl Default for HardwareHub {
     fn default() -> Self {
@@ -31,6 +40,123 @@ impl Default for HardwareHub {
             worker: Mutex::new(None),
             last_request: Mutex::new(Instant::now()),
             controlling: Arc::new(AtomicBool::new(false)),
+            events: OnceLock::new(),
+        }
+    }
+}
+
+/// How a controlled fan channel is driven, as far as the event log cares.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum Cooling {
+    Software,
+    /// Left to the hardware: the profile's temperature sensor is missing or
+    /// stale.
+    Automatic,
+    Failed,
+}
+
+/// A state that is logged when it changes and the change lasts.
+#[derive(Debug)]
+struct Track<T> {
+    /// The state last settled on; `None` until one has.
+    settled: Option<T>,
+    /// A different state and the readings it has lasted.
+    pending: Option<(T, u8)>,
+}
+
+impl<T> Default for Track<T> {
+    fn default() -> Self {
+        Self {
+            settled: None,
+            pending: None,
+        }
+    }
+}
+
+impl<T: Copy + PartialEq> Track<T> {
+    /// The previous and new state once `now` has lasted `SETTLE` readings.
+    fn observe(&mut self, now: T) -> Option<(Option<T>, T)> {
+        if self.settled == Some(now) {
+            self.pending = None;
+            return None;
+        }
+        let count = match self.pending {
+            Some((state, count)) if state == now => count + 1,
+            _ => 1,
+        };
+        if count < SETTLE {
+            self.pending = Some((now, count));
+            return None;
+        }
+        self.pending = None;
+        let before = self.settled.replace(now);
+        Some((before, now))
+    }
+}
+
+/// Turns the worker's readings into log lines: sensor reading failing and
+/// resuming, and a controlled fan falling back to the hardware, failing or
+/// returning to software control. Kept by the worker only, so a restarted
+/// helper starts from "unknown" and logs nothing for a normal first reading.
+#[derive(Debug, Default)]
+struct Changes {
+    reading: Track<bool>,
+    channels: HashMap<String, Track<Cooling>>,
+}
+
+impl Changes {
+    /// A reading failed with `error`.
+    fn failed(&mut self, error: &str) -> Vec<(EventLevel, String)> {
+        match self.reading.observe(false) {
+            Some((_, false)) => vec![(
+                EventLevel::Warn,
+                format!("Sensors: reading failed: {error}"),
+            )],
+            _ => Vec::new(),
+        }
+    }
+
+    /// A reading succeeded and each controlled channel (`id`, `name`) is in
+    /// the given state. Channels no longer controlled are forgotten.
+    fn read(
+        &mut self,
+        channels: &[(String, String, Cooling, String)],
+    ) -> Vec<(EventLevel, String)> {
+        let mut lines = Vec::new();
+        if let Some((Some(false), true)) = self.reading.observe(true) {
+            lines.push((EventLevel::Info, "Sensors: readings resumed".to_owned()));
+        }
+        self.channels
+            .retain(|id, _| channels.iter().any(|(c, ..)| c == id));
+        for (id, name, state, error) in channels {
+            let change = self.channels.entry(id.clone()).or_default().observe(*state);
+            match change {
+                Some((_, Cooling::Automatic)) => lines.push((
+                    EventLevel::Warn,
+                    format!(
+                        "Cooling {name}: back on hardware automatic, its temperature sensor \
+                         is missing or stale"
+                    ),
+                )),
+                Some((_, Cooling::Failed)) => lines.push((
+                    EventLevel::Warn,
+                    format!("Cooling {name}: control failed: {error}"),
+                )),
+                Some((Some(_), Cooling::Software)) => lines.push((
+                    EventLevel::Info,
+                    format!("Cooling {name}: under software control again"),
+                )),
+                _ => {}
+            }
+        }
+        lines
+    }
+}
+
+fn log(events: Option<&EventLog>, lines: Vec<(EventLevel, String)>) {
+    if let Some(events) = events {
+        for (level, message) in lines {
+            events.push(level, None, message);
         }
     }
 }
@@ -44,14 +170,21 @@ impl HardwareHub {
     pub fn dry_run(&self, dry: bool) {
         self.dry_run.store(dry, Ordering::Relaxed);
     }
+    /// Logs lasting sensor and cooling changes to `events` from the next
+    /// start of the helper on.
+    pub fn log_to(&self, events: EventLog) {
+        let _ = self.events.set(events);
+    }
     fn sender(&self) -> Sender<Message> {
         let mut worker = self.worker.lock().unwrap_or_else(PoisonError::into_inner);
         worker.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
             let (report, dry_run) = (self.report.clone(), self.dry_run.clone());
             let controlling = self.controlling.clone();
+            let events = self.events.get().cloned();
             std::thread::spawn(move || {
                 let mut reader = HardwareReader::new(true);
+                let mut changes = Changes::default();
                 let mut profiles: HashMap<String, CoolingProfile> = HashMap::new();
                 let mut applied: HashMap<String, (f32, Instant)> = HashMap::new();
                 loop {
@@ -92,18 +225,24 @@ impl HardwareHub {
                     match reader.sample() {
                         Ok(mut snapshot) => {
                             let now = unix_ms();
+                            let mut states = Vec::new();
                             for (id, profile) in &profiles {
                                 let requested = if dry_run.load(Ordering::Relaxed) { None } else { profile.duty(&snapshot, now) };
                                 let duty = requested.map(|v| applied.get(id).map_or(v, |(old, at)| smooth_duty(*old, v, at.elapsed().as_secs_f32())));
                                 let result = reader.set(id, duty);
+                                let (state, error) = match &result { Ok(()) if duty.is_some() => (Cooling::Software, String::new()), Ok(()) => (Cooling::Automatic, String::new()), Err(e) => (Cooling::Failed, e.clone()) };
                                 let label = match (result, duty) {
                                     (Ok(()), Some(v)) => { applied.insert(id.clone(), (v, Instant::now())); format!("Software · {v:.0}%") },
                                     (Ok(()), None) => { applied.remove(id); "Hardware automatic · sensor unavailable or monitoring only".into() },
                                     (Err(e), _) => format!("Control failed: {e}"),
                                 };
                                 snapshot.cooling.push((id.clone(),label));
+                                let name = snapshot.channels.iter().find(|c| &c.id == id).map_or_else(|| id.clone(), |c| c.name.clone());
+                                states.push((id.clone(), name, state, error));
                             }
-                            if dry_run.load(Ordering::Relaxed) {profiles.clear();applied.clear();}
+                            // Monitoring mode releases every fan: not a fault.
+                            if dry_run.load(Ordering::Relaxed) {profiles.clear();applied.clear();states.clear();}
+                            log(events.as_ref(), changes.read(&states));
                             controlling.store(!profiles.is_empty(), Ordering::Relaxed);
                             *report.write().unwrap_or_else(PoisonError::into_inner) = snapshot;
                         }
@@ -112,6 +251,7 @@ impl HardwareHub {
                             // lease deadline to retry if communication itself is broken.
                             for id in profiles.keys() { let _ = reader.set(id,None); }
                             applied.clear();
+                            log(events.as_ref(), changes.failed(&e.to_string()));
                             report.write().unwrap_or_else(PoisonError::into_inner).notice = format!("Sensor collection failed: {e}");
                         }
                     }
@@ -210,6 +350,128 @@ mod tests {
                 .contains("monitoring")
         );
         assert!(hub.worker.lock().unwrap().is_none());
+    }
+
+    fn channel(state: Cooling) -> Vec<(String, String, Cooling, String)> {
+        vec![(
+            "/lpc/0/control/1".into(),
+            "CPU Fan".into(),
+            state,
+            "denied".into(),
+        )]
+    }
+
+    fn messages(lines: Vec<(EventLevel, String)>) -> Vec<String> {
+        lines.into_iter().map(|(_, m)| m).collect()
+    }
+
+    #[test]
+    fn a_first_normal_reading_logs_nothing() {
+        let mut changes = Changes::default();
+        for _ in 0..10 {
+            assert!(changes.read(&channel(Cooling::Software)).is_empty());
+        }
+    }
+
+    #[test]
+    fn a_sensor_missing_from_a_few_readings_is_not_logged() {
+        let mut changes = Changes::default();
+        for _ in 0..5 {
+            changes.read(&channel(Cooling::Software));
+        }
+        // Gone for two readings, back, gone for two again: never three.
+        for state in [
+            Cooling::Automatic,
+            Cooling::Automatic,
+            Cooling::Software,
+            Cooling::Automatic,
+            Cooling::Automatic,
+            Cooling::Software,
+        ] {
+            assert!(changes.read(&channel(state)).is_empty(), "{state:?}");
+        }
+    }
+
+    #[test]
+    fn a_lasting_fallback_and_its_recovery_are_logged_once() {
+        let mut changes = Changes::default();
+        for _ in 0..3 {
+            changes.read(&channel(Cooling::Software));
+        }
+        let mut logged = Vec::new();
+        for _ in 0..6 {
+            logged.extend(changes.read(&channel(Cooling::Automatic)));
+        }
+        assert_eq!(
+            messages(logged),
+            [
+                "Cooling CPU Fan: back on hardware automatic, its temperature sensor is missing or stale"
+            ]
+        );
+        let mut logged = Vec::new();
+        for _ in 0..6 {
+            logged.extend(changes.read(&channel(Cooling::Software)));
+        }
+        assert_eq!(
+            logged,
+            [(
+                EventLevel::Info,
+                "Cooling CPU Fan: under software control again".to_owned()
+            )]
+        );
+        let mut logged = Vec::new();
+        for _ in 0..3 {
+            logged.extend(changes.read(&channel(Cooling::Failed)));
+        }
+        assert_eq!(
+            messages(logged),
+            ["Cooling CPU Fan: control failed: denied"]
+        );
+    }
+
+    #[test]
+    fn a_fallback_from_the_start_is_logged_and_released_channels_are_forgotten() {
+        let mut changes = Changes::default();
+        let mut logged = Vec::new();
+        for _ in 0..3 {
+            logged.extend(changes.read(&channel(Cooling::Automatic)));
+        }
+        assert_eq!(logged.len(), 1);
+        // Released, then controlled again: a fresh start, not a recovery.
+        changes.read(&[]);
+        for _ in 0..5 {
+            assert!(changes.read(&channel(Cooling::Software)).is_empty());
+        }
+    }
+
+    #[test]
+    fn failed_readings_are_logged_once_and_their_end_too() {
+        let mut changes = Changes::default();
+        // A helper that never read: the failure is still worth a line.
+        let mut logged = Vec::new();
+        for _ in 0..5 {
+            logged.extend(changes.failed("pipe closed"));
+        }
+        assert_eq!(
+            logged,
+            [(
+                EventLevel::Warn,
+                "Sensors: reading failed: pipe closed".to_owned()
+            )]
+        );
+        // One good reading between failures is not a recovery.
+        assert!(changes.read(&[]).is_empty());
+        assert!(changes.failed("pipe closed").is_empty());
+        let mut logged = Vec::new();
+        for _ in 0..4 {
+            logged.extend(changes.read(&[]));
+        }
+        assert_eq!(messages(logged), ["Sensors: readings resumed"]);
+        // A new helper starts unknown: its first readings are silent.
+        let mut changes = Changes::default();
+        for _ in 0..4 {
+            assert!(changes.read(&[]).is_empty());
+        }
     }
 
     #[test]

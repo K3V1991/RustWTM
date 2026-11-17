@@ -49,6 +49,11 @@ All notable changes to this project are documented here. The format follows
   `%LOCALAPPDATA%\RustWTM\container-history.json` (names and figures only;
   at most 64 containers; *Clear history* forgets it). It fills while
   Containers or Overview is open, or while container alerts are on.
+- Events (and recorded incidents) show when sensor reading fails and
+  resumes, and when a controlled fan goes back to hardware automatic because
+  its temperature is missing or stale, fails, or comes back under software
+  control. Only changes that last three readings (about six seconds) are
+  logged, and only while the sensor helper runs.
 
 ### Fixed
 

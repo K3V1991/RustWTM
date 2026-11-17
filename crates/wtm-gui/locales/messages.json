@@ -11638,5 +11638,35 @@
     "de": "{0}: nicht aufgezeichnet",
     "fr": "{0} : non enregistré",
     "es": "{0}: sin registro"
+  },
+  "Sensors: reading failed: {0}": {
+    "tr": "Sensörler: okuma başarısız: {0}",
+    "de": "Sensoren: Lesen fehlgeschlagen: {0}",
+    "fr": "Capteurs : échec de la lecture : {0}",
+    "es": "Sensores: error de lectura: {0}"
+  },
+  "Sensors: readings resumed": {
+    "tr": "Sensörler: okuma yeniden başladı",
+    "de": "Sensoren: Werte werden wieder gelesen",
+    "fr": "Capteurs : lecture reprise",
+    "es": "Sensores: lectura reanudada"
+  },
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": {
+    "tr": "Soğutma {0}: donanım otomatiğine döndü, sıcaklık sensörü yok veya güncel değil",
+    "de": "Kühlung {0}: zurück auf Hardware-Automatik, ihr Temperatursensor fehlt oder ist veraltet",
+    "fr": "Refroidissement {0} : retour au mode automatique du matériel, sa sonde de température est absente ou périmée",
+    "es": "Refrigeración {0}: de vuelta al modo automático del hardware, su sensor de temperatura falta o no está actualizado"
+  },
+  "Cooling {0}: control failed: {1}": {
+    "tr": "Soğutma {0}: kontrol başarısız: {1}",
+    "de": "Kühlung {0}: Steuerung fehlgeschlagen: {1}",
+    "fr": "Refroidissement {0} : échec du contrôle : {1}",
+    "es": "Refrigeración {0}: error de control: {1}"
+  },
+  "Cooling {0}: under software control again": {
+    "tr": "Soğutma {0}: yeniden yazılım kontrolünde",
+    "de": "Kühlung {0}: wieder unter Softwaresteuerung",
+    "fr": "Refroidissement {0} : de nouveau contrôlé par le logiciel",
+    "es": "Refrigeración {0}: de nuevo bajo control del software"
   }
 }

@@ -1938,5 +1938,10 @@
   "Nothing recorded yet. History fills while Docker is read: while this page or the Overview is open, or while container alerts are on.": "아직 기록이 없습니다. 기록은 Docker를 읽는 동안 쌓입니다: 이 페이지나 개요가 열려 있거나 컨테이너 알림이 켜져 있는 동안입니다.",
   "CPU (100% per core)": "CPU (코어당 100%)",
   "{0}: average {1}, peak {2}": "{0}: 평균 {1}, 최고 {2}",
-  "{0}: not recorded": "{0}: 기록 없음"
+  "{0}: not recorded": "{0}: 기록 없음",
+  "Sensors: reading failed: {0}": "센서: 읽기 실패: {0}",
+  "Sensors: readings resumed": "센서: 읽기 재개됨",
+  "Cooling {0}: back on hardware automatic, its temperature sensor is missing or stale": "냉각 {0}: 하드웨어 자동으로 돌아감, 온도 센서가 없거나 오래됨",
+  "Cooling {0}: control failed: {1}": "냉각 {0}: 제어 실패: {1}",
+  "Cooling {0}: under software control again": "냉각 {0}: 다시 소프트웨어가 제어함"
 }
