@@ -406,26 +406,25 @@ pub fn minute_chart(
     let start = now - span;
     let x = |minute: i64| rect.left() + (minute - start) as f32 / span as f32 * rect.width();
     let y = |v: f32| rect.bottom() - 2.0 - v / top * (rect.height() - 4.0);
-    // Runs of consecutive minutes; a missing minute breaks the line.
-    let mut runs: Vec<&[(i64, f32, f32)]> = Vec::new();
+    // At most a point per pixel; runs of consecutive slots, a slot without
+    // a recorded minute breaking the line.
+    let slots = condense(points, start, span, rect.width().max(1.0) as usize);
+    let mut runs: Vec<&[Slot]> = Vec::new();
     let mut from = 0;
-    for i in 1..=points.len() {
-        if i == points.len() || points[i].0 != points[i - 1].0 + 1 {
-            runs.push(&points[from..i]);
+    for i in 1..=slots.len() {
+        if i == slots.len() || slots[i].slot != slots[i - 1].slot + 1 {
+            runs.push(&slots[from..i]);
             from = i;
         }
     }
     for run in runs {
-        for (value, stroke) in [
-            (2usize, egui::Stroke::new(1.0, color.gamma_multiply(0.35))),
-            (1usize, egui::Stroke::new(1.5, color)),
+        for (peak, stroke) in [
+            (true, egui::Stroke::new(1.0, color.gamma_multiply(0.35))),
+            (false, egui::Stroke::new(1.5, color)),
         ] {
             let line: Vec<egui::Pos2> = run
                 .iter()
-                .map(|p| {
-                    let v = if value == 1 { p.1 } else { p.2 };
-                    egui::pos2(x(p.0), y(v))
-                })
+                .map(|p| egui::pos2(x(p.minute), y(if peak { p.peak } else { p.avg })))
                 .collect();
             if line.len() == 1 {
                 painter.circle_filled(line[0], 1.5, stroke.color);
@@ -458,6 +457,56 @@ pub fn minute_chart(
         };
         response.on_hover_text(text);
     }
+}
+
+/// The points of a chart slot: its first minute, the average of the
+/// averages and the highest peak.
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct Slot {
+    slot: i64,
+    minute: i64,
+    avg: f32,
+    peak: f32,
+}
+
+/// `points` (minute, average, peak) as at most `width` slots of the `span`
+/// minutes from `start`: one per minute when they fit, otherwise one per
+/// pixel, so a week of minutes draws as fast as an hour. Consecutive slots
+/// continue a line; a slot with no minute in it is left out, as a gap.
+fn condense(points: &[(i64, f32, f32)], start: i64, span: i64, width: usize) -> Vec<Slot> {
+    let per_minute = span <= width as i64;
+    let mut out: Vec<Slot> = Vec::new();
+    let mut count = 0u32;
+    for &(minute, avg, peak) in points {
+        let slot = if per_minute {
+            minute
+        } else {
+            ((minute - start) as f64 / span as f64 * width as f64).floor() as i64
+        };
+        match out.last_mut() {
+            Some(last) if last.slot == slot => {
+                last.avg += avg;
+                last.peak = last.peak.max(peak);
+                count += 1;
+            }
+            _ => {
+                if let Some(last) = out.last_mut() {
+                    last.avg /= count as f32;
+                }
+                out.push(Slot {
+                    slot,
+                    minute,
+                    avg,
+                    peak,
+                });
+                count = 1;
+            }
+        }
+    }
+    if let Some(last) = out.last_mut() {
+        last.avg /= count as f32;
+    }
+    out
 }
 
 /// `YYYY-MM-DD HH:MM` in local time, for ranges longer than a day.
@@ -670,6 +719,31 @@ mod tests {
         }
         assert!(History::load(&dir.join("missing.json"), wall).is_empty());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn a_week_is_drawn_a_pixel_at_a_time_and_keeps_its_gaps() {
+        // A day fits 1440 pixels a minute each.
+        let day: Vec<(i64, f32, f32)> = (0..1440).map(|m| (m, 1.0, 2.0)).collect();
+        assert_eq!(condense(&day, 0, 1440, 1440).len(), 1440);
+        // A week in 700 pixels: about 14 minutes each.
+        let week: Vec<(i64, f32, f32)> = (0..10_080)
+            .filter(|m| !(5_000..6_000).contains(m))
+            .map(|m| (m, (m % 2) as f32 * 10.0, (m % 7) as f32))
+            .collect();
+        let slots = condense(&week, 0, 10_080, 700);
+        assert!(slots.len() <= 700, "{}", slots.len());
+        assert_eq!(slots[0].slot, 0);
+        assert_eq!(slots[0].minute, 0);
+        // The average of averages and the highest peak of a slot.
+        assert!((slots[0].avg - 5.0).abs() < 1.0, "{}", slots[0].avg);
+        assert_eq!(slots[0].peak, 6.0);
+        // The thousand minutes not recorded still break the line.
+        let breaks = slots
+            .windows(2)
+            .filter(|w| w[1].slot != w[0].slot + 1)
+            .count();
+        assert_eq!(breaks, 1);
     }
 
     #[test]

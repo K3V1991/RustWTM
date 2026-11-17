@@ -66,9 +66,12 @@ the NET_LUID Windows keeps. Disk numbers and GPU LUIDs are only what the
 window asks by: the service maps them to the lasting names from its latest
 sample. The model of a disk is read with the storage identity queries only
 (never SMART, which could wake it), and GPU names by listing the DXGI
-adapters, without creating a Direct3D device; both are read once and again
-only for a device not seen for a minute, or after ten minutes for one that
-could not be named. A device without a readable model or name is not
+adapters, without creating a Direct3D device. Both are read on a thread of
+their own, never in the sample loop that also protects the machine, so a
+disk that hangs cannot hold it up; a device is recorded from the first
+sample after its name has arrived. A name is read once, and again only for
+a device not seen for a minute, or after ten minutes for one that could not
+be named. A device without a readable model or name is not
 recorded, and at most 32 devices are, which bounds a full week to about
 22 MB.
 

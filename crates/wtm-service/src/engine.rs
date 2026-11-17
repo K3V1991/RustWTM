@@ -302,7 +302,8 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         config.dry_run,
         shared.events.clone(),
     );
-    let mut device_keys = crate::device_keys::Keys::new(crate::device_keys::Windows);
+    let mut device_keys =
+        crate::device_keys::Keys::new(crate::device_keys::Worker::new(crate::device_keys::Windows));
     let mut history = match History::open(&paths.history) {
         Ok(h) => {
             *shared
