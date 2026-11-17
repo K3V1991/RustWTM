@@ -273,3 +273,4 @@ for every command.
 | `%ProgramData%\RustWTM\telegram.toml` | Telegram bot settings (administrators only) |
 | `%ProgramData%\RustWTM\history.sqlite` | Per-minute usage history |
 | `%ProgramData%\RustWTM\logs\` | Daily service logs; the last 14 days are kept |
+| `%LOCALAPPDATA%\RustWTM\container-history.json` | Each Docker container's last 24 hours (names, per-minute CPU and memory), written by the window; *Clear history* in a container's details forgets it. See [Docker](docker.md) |

@@ -20,8 +20,9 @@ pub const KEEP_MINUTES: i64 = 24 * 60;
 pub const NAMES_KEPT: usize = 64;
 /// Time between saves while something changed.
 pub const SAVE_EVERY: Duration = Duration::from_secs(5 * 60);
-/// A larger file is not read.
-const FILE_BYTES: u64 = 8 * 1024 * 1024;
+/// A larger file is not read; a full one (every container, every minute)
+/// stays well below it.
+const FILE_BYTES: u64 = 16 * 1024 * 1024;
 const VERSION: u32 = 1;
 
 /// `%LOCALAPPDATA%\RustWTM\container-history.json`; none in tests.
@@ -104,6 +105,9 @@ pub struct History {
     series: BTreeMap<(String, String), Series>,
     /// Changed since the last save.
     pub dirty: bool,
+    /// Cleared since the last save: the file is rewritten at once, even if
+    /// new readings came in meanwhile.
+    pub cleared: bool,
 }
 
 #[derive(serde::Serialize, serde::Deserialize)]
@@ -140,6 +144,7 @@ impl History {
     pub fn clear(&mut self) {
         self.series.clear();
         self.dirty = true;
+        self.cleared = true;
     }
 
     /// Adds the fresh measurements of running containers; `now` and `wall`
@@ -227,7 +232,17 @@ impl History {
                     context: context.clone(),
                     name: name.clone(),
                     per_core: s.per_core,
-                    minutes: s.minutes.iter().copied().collect(),
+                    // Sums rounded: hundredths of a percent and whole bytes
+                    // are all the averages need, and keep the file small.
+                    minutes: s
+                        .minutes
+                        .iter()
+                        .map(|m| Minute {
+                            cpu_sum: (m.cpu_sum * 100.0).round() / 100.0,
+                            memory_sum: m.memory_sum.round(),
+                            ..*m
+                        })
+                        .collect(),
                 })
                 .collect(),
         }
@@ -626,6 +641,42 @@ mod tests {
         }
         assert!(History::load(&dir.join("missing.json"), wall).is_empty());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn a_full_history_fits_the_file_limit() {
+        // The largest minute: 30 readings (every 2 s) of a 64-core container
+        // at full load with 64 GiB, and long sums.
+        let minute = Minute {
+            minute: 99_999_999,
+            cpu_sum: 30.0 * 6400.0 + 0.123_456_789,
+            cpu_count: 30,
+            cpu_peak: 6400.123,
+            memory_sum: 30.0 * 68_719_476_736.0 + 0.123_456_789,
+            memory_count: 30,
+            memory_peak: 68_719_476_736,
+        };
+        let mut history = History::default();
+        history.series.insert(
+            ("c".repeat(64), "n".repeat(255)),
+            Series {
+                minutes: [minute].into(),
+                ..Series::default()
+            },
+        );
+        let one = serde_json::to_string(&history.to_file()).unwrap().len();
+        let empty = serde_json::to_string(&History::default().to_file())
+            .unwrap()
+            .len();
+        let per_minute = serde_json::to_string(&history.to_file().containers[0].minutes[0])
+            .unwrap()
+            .len()
+            + 1;
+        let full = empty + NAMES_KEPT * (one - empty + per_minute * (KEEP_MINUTES as usize - 1));
+        assert!(
+            (full as u64) < FILE_BYTES * 3 / 4,
+            "{full} bytes for a full file"
+        );
     }
 
     #[test]

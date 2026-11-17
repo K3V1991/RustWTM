@@ -92,7 +92,8 @@ cleanly). The file holds container names and contexts, minute times and the
 CPU and memory figures; nothing else. Minutes older than 24 hours, or dated
 after the current minute after a clock change, are dropped; at most 64
 containers are kept, the one seen longest ago going first. A file larger than
-8 MiB, unreadable or written by a newer version is ignored and replaced. No
+16 MiB (a full one stays far below), unreadable or written by a newer version
+is ignored and replaced. No
 file is created until Docker has been read.
 
 ## Resource and privacy limits

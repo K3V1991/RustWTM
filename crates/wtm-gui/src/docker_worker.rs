@@ -254,10 +254,11 @@ fn save(store: &Option<PathBuf>, data: &Mutex<Data>, cleared_only: bool) {
     let copy = {
         let mut data = data.lock().unwrap_or_else(PoisonError::into_inner);
         let history = &mut data.container_history;
-        if !history.dirty || (cleared_only && !history.is_empty()) {
+        if !history.dirty || (cleared_only && !history.cleared) {
             return;
         }
         history.dirty = false;
+        history.cleared = false;
         history.clone()
     };
     if copy.save(path).is_err() {
@@ -405,6 +406,68 @@ mod tests {
         assert!(
             saved.series("desktop-linux", "database-4").is_none(),
             "an exited container is not recorded"
+        );
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn clearing_the_history_reaches_the_file_before_the_next_reading_is_kept() {
+        use wtm_core::docker::{Container, Endpoint, Metrics, Report};
+        let dir = std::env::temp_dir().join(format!("wtm-docker-clear-{}", std::process::id()));
+        let path = dir.join("container-history.json");
+        let store = Some(path.clone());
+        let report = |name: &str| Report {
+            endpoint: Endpoint {
+                context: "desktop".into(),
+                pipe: r"\\.\pipe\docker_engine".into(),
+            },
+            containers: vec![Container {
+                name: name.into(),
+                state: "running".into(),
+                metrics: Metrics {
+                    cpu: Some(5.0),
+                    measured: Some(Instant::now()),
+                    ..Metrics::default()
+                },
+                ..Container::default()
+            }],
+            detail: None,
+            detail_id: None,
+            sampled: Instant::now(),
+            truncated: false,
+        };
+        let data = Mutex::new(Data::default());
+        let record = |name: &str| {
+            data.lock().unwrap().container_history.record(
+                Instant::now(),
+                SystemTime::now(),
+                &report(name),
+            )
+        };
+        record("old");
+        save(&store, &data, false);
+        assert!(
+            History::load(&path, SystemTime::now())
+                .series("desktop", "old")
+                .is_some()
+        );
+        data.lock().unwrap().container_history.clear();
+        // The next reading comes in before the save that follows it.
+        record("new");
+        save(&store, &data, true);
+        let saved = History::load(&path, SystemTime::now());
+        assert!(
+            saved.series("desktop", "old").is_none(),
+            "forgotten on disk"
+        );
+        assert!(saved.series("desktop", "new").is_some());
+        // Nothing cleared since: no early save.
+        record("later");
+        save(&store, &data, true);
+        assert!(
+            History::load(&path, SystemTime::now())
+                .series("desktop", "later")
+                .is_none()
         );
         std::fs::remove_dir_all(&dir).unwrap();
     }
