@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "開いている間に設定が変わったため、今は適用できません。",
   "Not running": "実行中でない",
   "Blocked programs could not be read: {0}": "ブロックされたプログラムを読み取れませんでした: {0}",
-  "Nothing matches the filter.": "フィルターに一致するものはありません。"
+  "Nothing matches the filter.": "フィルターに一致するものはありません。",
+  "Export support bundle…": "サポート用バンドルをエクスポート…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "問題レポートに添えて送るテキスト ファイルです。診断情報、サービスの状態、最近の警告とエラーを含みます。保存する前にすべての内容を確認できます。",
+  "Support bundle": "サポート用バンドル",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "以下がそのまま保存される内容です。シークレットとアカウント名は常に伏せられます。プロセス名とパスも、含めることを選ばない限り伏せられます。",
+  "Include process names and paths": "プロセス名とパスを含める",
+  "Save…": "保存…",
+  "Saved to {0}": "{0} に保存しました",
+  "Show in folder": "フォルダーに表示",
+  "Could not save the support bundle: {0}": "サポート用バンドルを保存できませんでした: {0}",
+  "Save support bundle": "サポート用バンドルを保存",
+  "Text file": "テキスト ファイル"
 }

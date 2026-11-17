@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "Настройки изменились, пока это окно было открыто; применить сейчас нельзя.",
   "Not running": "Не запущены",
   "Blocked programs could not be read: {0}": "Не удалось прочитать заблокированные программы: {0}",
-  "Nothing matches the filter.": "Ничего не соответствует фильтру."
+  "Nothing matches the filter.": "Ничего не соответствует фильтру.",
+  "Export support bundle…": "Экспорт пакета для поддержки…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "Текстовый файл для отчета о проблеме: диагностика, состояние службы, последние предупреждения и ошибки. Перед сохранением вы видите его целиком.",
+  "Support bundle": "Пакет для поддержки",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "Ниже — всё, что будет сохранено. Секреты и имя учетной записи всегда скрыты; имена процессов и пути тоже, если вы их не включите.",
+  "Include process names and paths": "Включить имена процессов и пути",
+  "Save…": "Сохранить…",
+  "Saved to {0}": "Сохранено в {0}",
+  "Show in folder": "Показать в папке",
+  "Could not save the support bundle: {0}": "Не удалось сохранить пакет для поддержки: {0}",
+  "Save support bundle": "Сохранить пакет для поддержки",
+  "Text file": "Текстовый файл"
 }

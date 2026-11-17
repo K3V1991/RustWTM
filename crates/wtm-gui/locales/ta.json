@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "இது திறந்திருந்தபோது அமைப்புகள் மாறின; இப்போது பயன்படுத்த முடியாது.",
   "Not running": "இயங்கவில்லை",
   "Blocked programs could not be read: {0}": "தடுக்கப்பட்ட நிரல்களைப் படிக்க முடியவில்லை: {0}",
-  "Nothing matches the filter.": "வடிகட்டியுடன் எதுவும் பொருந்தவில்லை."
+  "Nothing matches the filter.": "வடிகட்டியுடன் எதுவும் பொருந்தவில்லை.",
+  "Export support bundle…": "உதவித் தொகுப்பை ஏற்றுமதி செய்…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "சிக்கல் அறிக்கையுடன் அனுப்ப ஒரு உரைக் கோப்பு: கண்டறிதல் தகவல், சேவையின் நிலை, சமீபத்திய எச்சரிக்கைகள் மற்றும் பிழைகள். சேமிக்கும் முன் முழுவதையும் பார்க்கலாம்.",
+  "Support bundle": "உதவித் தொகுப்பு",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "கீழே உள்ள அனைத்தும்தான் சேமிக்கப்படும். ரகசியங்களும் உங்கள் கணக்குப் பெயரும் எப்போதும் மறைக்கப்படும்; செயல்முறைப் பெயர்களும் பாதைகளும் நீங்கள் சேர்க்காவிட்டால் மறைக்கப்படும்.",
+  "Include process names and paths": "செயல்முறைப் பெயர்களையும் பாதைகளையும் சேர்",
+  "Save…": "சேமி…",
+  "Saved to {0}": "{0} இல் சேமிக்கப்பட்டது",
+  "Show in folder": "கோப்புறையில் காட்டு",
+  "Could not save the support bundle: {0}": "உதவித் தொகுப்பைச் சேமிக்க முடியவில்லை: {0}",
+  "Save support bundle": "உதவித் தொகுப்பைச் சேமி",
+  "Text file": "உரைக் கோப்பு"
 }

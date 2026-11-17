@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "ਇਹ ਖੁੱਲ੍ਹਾ ਹੋਣ ਦੌਰਾਨ ਸੈਟਿੰਗਾਂ ਬਦਲ ਗਈਆਂ; ਹੁਣ ਇਹ ਲਾਗੂ ਨਹੀਂ ਹੋ ਸਕਦਾ।",
   "Not running": "ਨਹੀਂ ਚੱਲ ਰਹੇ",
   "Blocked programs could not be read: {0}": "ਬਲੌਕ ਕੀਤੇ ਪ੍ਰੋਗਰਾਮ ਪੜ੍ਹੇ ਨਹੀਂ ਜਾ ਸਕੇ: {0}",
-  "Nothing matches the filter.": "ਫਿਲਟਰ ਨਾਲ ਕੁਝ ਵੀ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।"
+  "Nothing matches the filter.": "ਫਿਲਟਰ ਨਾਲ ਕੁਝ ਵੀ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।",
+  "Export support bundle…": "ਸਹਾਇਤਾ ਬੰਡਲ ਨਿਰਯਾਤ ਕਰੋ…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "ਸਮੱਸਿਆ ਰਿਪੋਰਟ ਨਾਲ ਭੇਜਣ ਲਈ ਇੱਕ ਟੈਕਸਟ ਫ਼ਾਈਲ: ਨਿਦਾਨ ਜਾਣਕਾਰੀ, ਸੇਵਾ ਦੀ ਸਥਿਤੀ ਅਤੇ ਹਾਲੀਆ ਚੇਤਾਵਨੀਆਂ ਤੇ ਗਲਤੀਆਂ। ਸੰਭਾਲਣ ਤੋਂ ਪਹਿਲਾਂ ਤੁਸੀਂ ਸਾਰਾ ਦੇਖਦੇ ਹੋ।",
+  "Support bundle": "ਸਹਾਇਤਾ ਬੰਡਲ",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "ਹੇਠਾਂ ਜੋ ਕੁਝ ਹੈ, ਉਹੀ ਸੰਭਾਲਿਆ ਜਾਵੇਗਾ। ਗੁਪਤ ਜਾਣਕਾਰੀ ਅਤੇ ਤੁਹਾਡੇ ਖਾਤੇ ਦਾ ਨਾਮ ਹਮੇਸ਼ਾ ਲੁਕੇ ਰਹਿੰਦੇ ਹਨ; ਪ੍ਰੋਸੈਸ ਨਾਮ ਅਤੇ ਪਾਥ ਵੀ, ਜਦੋਂ ਤੱਕ ਤੁਸੀਂ ਉਨ੍ਹਾਂ ਨੂੰ ਸ਼ਾਮਲ ਨਾ ਕਰੋ।",
+  "Include process names and paths": "ਪ੍ਰੋਸੈਸ ਨਾਮ ਅਤੇ ਪਾਥ ਸ਼ਾਮਲ ਕਰੋ",
+  "Save…": "ਸੰਭਾਲੋ…",
+  "Saved to {0}": "{0} ਵਿੱਚ ਸੰਭਾਲਿਆ ਗਿਆ",
+  "Show in folder": "ਫੋਲਡਰ ਵਿੱਚ ਦਿਖਾਓ",
+  "Could not save the support bundle: {0}": "ਸਹਾਇਤਾ ਬੰਡਲ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ: {0}",
+  "Save support bundle": "ਸਹਾਇਤਾ ਬੰਡਲ ਸੰਭਾਲੋ",
+  "Text file": "ਟੈਕਸਟ ਫ਼ਾਈਲ"
 }

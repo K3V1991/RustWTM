@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "打开期间设置已更改；现在无法应用。",
   "Not running": "未运行",
   "Blocked programs could not be read: {0}": "无法读取被阻止的程序：{0}",
-  "Nothing matches the filter.": "没有与筛选条件匹配的项。"
+  "Nothing matches the filter.": "没有与筛选条件匹配的项。",
+  "Export support bundle…": "导出支持包…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "随问题报告一起发送的文本文件：诊断信息、服务状态以及最近的警告和错误。保存前可以看到全部内容。",
+  "Support bundle": "支持包",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "下面就是将要保存的全部内容。机密信息和你的帐户名始终隐藏；进程名称和路径也会隐藏，除非你选择包含。",
+  "Include process names and paths": "包含进程名称和路径",
+  "Save…": "保存…",
+  "Saved to {0}": "已保存到 {0}",
+  "Show in folder": "在文件夹中显示",
+  "Could not save the support bundle: {0}": "无法保存支持包：{0}",
+  "Save support bundle": "保存支持包",
+  "Text file": "文本文件"
 }

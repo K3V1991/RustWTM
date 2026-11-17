@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "開啟期間設定已變更；現在無法套用。",
   "Not running": "未執行",
   "Blocked programs could not be read: {0}": "無法讀取被封鎖的程式：{0}",
-  "Nothing matches the filter.": "沒有符合篩選條件的項目。"
+  "Nothing matches the filter.": "沒有符合篩選條件的項目。",
+  "Export support bundle…": "匯出支援套件…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "隨問題回報一起傳送的文字檔：診斷資訊、服務狀態，以及最近的警告和錯誤。儲存前可以看到全部內容。",
+  "Support bundle": "支援套件",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "下方就是將要儲存的全部內容。機密資訊和你的帳戶名稱一律隱藏；處理程序名稱和路徑也會隱藏，除非你選擇包含。",
+  "Include process names and paths": "包含處理程序名稱和路徑",
+  "Save…": "儲存…",
+  "Saved to {0}": "已儲存到 {0}",
+  "Show in folder": "在資料夾中顯示",
+  "Could not save the support bundle: {0}": "無法儲存支援套件：{0}",
+  "Save support bundle": "儲存支援套件",
+  "Text file": "文字檔"
 }

@@ -426,6 +426,13 @@ stable identity. [Transfer verification](docs/repository-migration.md).
   unusable.
 - Tray icon with a live CPU bar, desktop notifications; keeps running in the
   tray and starts there at sign-in (switchable in Settings).
+- **Support bundle**: *Export support bundle…* in About saves one text file
+  for a problem report: diagnostics, service status, recent warnings and
+  errors and the service log's last warnings. You read all of it before
+  saving; secrets and the account name are always hidden, process names
+  and paths unless you include them. Configuration files, command lines,
+  environment variables, window titles and container logs are never part
+  of it, and nothing is uploaded.
 
 **Governor service (`wtm-service`)**
 

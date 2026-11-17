@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "As configurações mudaram enquanto isto estava aberto; não é possível aplicar agora.",
   "Not running": "Não em execução",
   "Blocked programs could not be read: {0}": "Não foi possível ler os programas bloqueados: {0}",
-  "Nothing matches the filter.": "Nada corresponde ao filtro."
+  "Nothing matches the filter.": "Nada corresponde ao filtro.",
+  "Export support bundle…": "Exportar pacote de suporte…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "Um arquivo de texto para enviar com um relatório de problema: diagnóstico, status do serviço e avisos e erros recentes. Você vê tudo antes de salvar.",
+  "Support bundle": "Pacote de suporte",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "Tudo abaixo é o que será salvo. Segredos e o nome da sua conta ficam sempre ocultos; nomes de processos e caminhos também, a menos que você os inclua.",
+  "Include process names and paths": "Incluir nomes de processos e caminhos",
+  "Save…": "Salvar…",
+  "Saved to {0}": "Salvo em {0}",
+  "Show in folder": "Mostrar na pasta",
+  "Could not save the support bundle: {0}": "Não foi possível salvar o pacote de suporte: {0}",
+  "Save support bundle": "Salvar pacote de suporte",
+  "Text file": "Arquivo de texto"
 }

@@ -3,6 +3,7 @@
 //! names, file paths, serial numbers and network addresses are never part
 //! of it.
 
+use eframe::egui;
 use wtm_core::format_bytes;
 
 /// What the report says. Built only when the user asks for it.
@@ -53,7 +54,9 @@ impl Facts {
             ("Memory", format_bytes(self.memory as f64)),
             (
                 "Interface scale",
-                crate::i18n::percent(format!("{:.0}", self.scale * 100.0)),
+                // English like the rest of the report, whatever the window's
+                // language.
+                format!("{:.0}%", self.scale * 100.0),
             ),
             (
                 "Window",
@@ -102,6 +105,41 @@ pub fn windows_version() -> String {
 }
 
 /// Whether this copy runs from Program Files.
+/// How `mode` is named in the report and the support bundle.
+pub fn engine(mode: crate::backend::Mode) -> &'static str {
+    use crate::backend::Mode;
+    match mode {
+        Mode::Starting => "starting",
+        Mode::Service {
+            admin: true,
+            verified: true,
+        } => "service",
+        Mode::Service { admin: false, .. } => "service (read-only)",
+        Mode::Service {
+            verified: false, ..
+        } => "console engine",
+        Mode::Local => "local",
+    }
+}
+
+/// The report for this window.
+pub fn for_window(data: &crate::backend::Data, ctx: &egui::Context) -> String {
+    let snapshot = data.snapshot.as_deref();
+    Facts {
+        version: env!("CARGO_PKG_VERSION").into(),
+        windows: windows_version(),
+        elevated: data.elevated,
+        engine: engine(data.mode).into(),
+        installed: installed(),
+        language: crate::i18n::Language::current().code().into(),
+        logical_cpus: snapshot.map_or(0, |s| s.system.logical_cpus),
+        memory: snapshot.map_or(0, |s| s.system.memory_total),
+        scale: ctx.pixels_per_point(),
+        window: ctx.content_rect().size().into(),
+    }
+    .report()
+}
+
 pub fn installed() -> bool {
     let Ok(exe) = std::env::current_exe() else {
         return false;

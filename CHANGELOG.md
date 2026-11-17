@@ -6,6 +6,27 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- About has *Export support bundle…*: one text file to send with a
+  problem report, with this window's diagnostics, the service's status
+  (counts and switches, never names), the last 100 warnings and errors and
+  the last 200 warning and error lines of the service log. The whole text
+  is shown first, and what is saved is what was shown, through the
+  Windows Save As dialog. Secrets (Bearer tokens, `key=`/`token=` URL
+  values, a Telegram bot token in a URL) and the account name are always
+  hidden; process names (every `.exe` name, and the names this window
+  knows) and paths are replaced unless *Include process names and paths*
+  is ticked. config.toml, telegram.toml, ai.toml, command lines,
+  environment variables, window titles and container logs are never part
+  of it, and nothing is uploaded.
+
+### Fixed
+
+- *Copy diagnostic information* wrote the interface scale with the
+  window's percent style ("%125" in Turkish) in an otherwise English
+  report; it says "125%".
+
 ## [0.35.0] - 2026-11-16
 
 A review release: every page was gone over visually and functionally.

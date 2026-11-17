@@ -11398,5 +11398,71 @@
     "de": "Nichts entspricht dem Filter.",
     "fr": "Rien ne correspond au filtre.",
     "es": "Nada coincide con el filtro."
+  },
+  "Export support bundle…": {
+    "tr": "Destek paketini dışa aktar…",
+    "de": "Supportpaket exportieren…",
+    "fr": "Exporter le paquet d'assistance…",
+    "es": "Exportar paquete de soporte…"
+  },
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": {
+    "tr": "Sorun bildirimiyle gönderilecek bir metin dosyası: tanılama bilgileri, servis durumu ve son uyarılar ile hatalar. Kaydetmeden önce tamamını görürsünüz.",
+    "de": "Eine Textdatei für einen Problembericht: Diagnosedaten, Dienststatus sowie aktuelle Warnungen und Fehler. Sie sehen alles, bevor Sie speichern.",
+    "fr": "Un fichier texte à joindre à un rapport de problème : diagnostic, état du service et avertissements et erreurs récents. Vous voyez tout avant d'enregistrer.",
+    "es": "Un archivo de texto para enviar con un informe de problema: diagnóstico, estado del servicio y advertencias y errores recientes. Verá todo antes de guardar."
+  },
+  "Support bundle": {
+    "tr": "Destek paketi",
+    "de": "Supportpaket",
+    "fr": "Paquet d'assistance",
+    "es": "Paquete de soporte"
+  },
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": {
+    "tr": "Aşağıdakilerin tamamı kaydedilecek olandır. Gizli bilgiler ve hesap adınız her zaman gizlenir; işlem adları ve yollar, siz eklemedikçe gizlenir.",
+    "de": "Alles unten wird genau so gespeichert. Geheimnisse und Ihr Kontoname werden immer ausgeblendet, Prozessnamen und Pfade, sofern Sie sie nicht einschließen.",
+    "fr": "Tout ce qui suit sera enregistré tel quel. Les secrets et le nom de votre compte sont toujours masqués ; les noms de processus et les chemins aussi, sauf si vous les incluez.",
+    "es": "Todo lo de abajo es lo que se guardará. Los secretos y el nombre de su cuenta siempre se ocultan; los nombres de procesos y las rutas también, salvo que los incluya."
+  },
+  "Include process names and paths": {
+    "tr": "İşlem adlarını ve yolları ekle",
+    "de": "Prozessnamen und Pfade einschließen",
+    "fr": "Inclure les noms de processus et les chemins",
+    "es": "Incluir nombres de procesos y rutas"
+  },
+  "Save…": {
+    "tr": "Kaydet…",
+    "de": "Speichern…",
+    "fr": "Enregistrer…",
+    "es": "Guardar…"
+  },
+  "Saved to {0}": {
+    "tr": "{0} konumuna kaydedildi",
+    "de": "Gespeichert unter {0}",
+    "fr": "Enregistré dans {0}",
+    "es": "Guardado en {0}"
+  },
+  "Show in folder": {
+    "tr": "Klasörde göster",
+    "de": "Im Ordner anzeigen",
+    "fr": "Afficher dans le dossier",
+    "es": "Mostrar en la carpeta"
+  },
+  "Could not save the support bundle: {0}": {
+    "tr": "Destek paketi kaydedilemedi: {0}",
+    "de": "Das Supportpaket konnte nicht gespeichert werden: {0}",
+    "fr": "Impossible d'enregistrer le paquet d'assistance : {0}",
+    "es": "No se pudo guardar el paquete de soporte: {0}"
+  },
+  "Save support bundle": {
+    "tr": "Destek paketini kaydet",
+    "de": "Supportpaket speichern",
+    "fr": "Enregistrer le paquet d'assistance",
+    "es": "Guardar paquete de soporte"
+  },
+  "Text file": {
+    "tr": "Metin dosyası",
+    "de": "Textdatei",
+    "fr": "Fichier texte",
+    "es": "Archivo de texto"
   }
 }

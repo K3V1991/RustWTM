@@ -54,6 +54,7 @@ mod security_view;
 mod sensors;
 mod settings;
 mod sort;
+mod support_bundle;
 mod telegram_settings;
 mod theme;
 mod threads_view;

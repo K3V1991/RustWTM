@@ -45,6 +45,8 @@ pub enum Asked {
     CheckForUpdates,
     /// Show again the update bar that Later or Skip hid.
     ShowUpdate,
+    /// Open the support bundle window.
+    SupportBundle,
 }
 
 /// `bar_hidden`: a newer release is out but its bar was put away (Later, or
@@ -59,6 +61,7 @@ pub fn about(
     use crate::backend::UpdateState;
     let mut check = false;
     let mut show_update = false;
+    let mut bundle = false;
     let mut area = egui::ScrollArea::vertical().id_salt("about");
     if let Some(y) = crate::theme::take_scroll(ui, "about") {
         area = area.vertical_scroll_offset(y);
@@ -247,6 +250,16 @@ pub fn about(
                 ui.ctx().copy_text(diagnostics());
             }
             ui.label("·");
+            if ui
+                .link(crate::i18n::tr("Export support bundle…"))
+                .on_hover_text(crate::i18n::tr(
+                    "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.",
+                ))
+                .clicked()
+            {
+                bundle = true;
+            }
+            ui.label("·");
             ui.hyperlink_to(
                 crate::i18n::tr("Configuration reference"),
                 format!("{REPO}/blob/main/docs/configuration.md"),
@@ -267,6 +280,8 @@ pub fn about(
     crate::theme::more_below(ui, "about", &out, ui.visuals().panel_fill);
     if show_update {
         Asked::ShowUpdate
+    } else if bundle {
+        Asked::SupportBundle
     } else if check {
         Asked::CheckForUpdates
     } else {

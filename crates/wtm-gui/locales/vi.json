@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "Cài đặt đã thay đổi trong lúc mục này mở; không thể áp dụng bây giờ.",
   "Not running": "Không chạy",
   "Blocked programs could not be read: {0}": "Không đọc được các chương trình bị chặn: {0}",
-  "Nothing matches the filter.": "Không có mục nào khớp với bộ lọc."
+  "Nothing matches the filter.": "Không có mục nào khớp với bộ lọc.",
+  "Export support bundle…": "Xuất gói hỗ trợ…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "Tệp văn bản để gửi kèm báo cáo sự cố: thông tin chẩn đoán, trạng thái dịch vụ, các cảnh báo và lỗi gần đây. Bạn xem toàn bộ trước khi lưu.",
+  "Support bundle": "Gói hỗ trợ",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "Mọi thứ bên dưới là nội dung sẽ được lưu. Thông tin bí mật và tên tài khoản của bạn luôn được ẩn; tên tiến trình và đường dẫn cũng vậy, trừ khi bạn chọn đưa vào.",
+  "Include process names and paths": "Đưa tên tiến trình và đường dẫn vào",
+  "Save…": "Lưu…",
+  "Saved to {0}": "Đã lưu vào {0}",
+  "Show in folder": "Hiện trong thư mục",
+  "Could not save the support bundle: {0}": "Không thể lưu gói hỗ trợ: {0}",
+  "Save support bundle": "Lưu gói hỗ trợ",
+  "Text file": "Tệp văn bản"
 }

@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "Nagbago ang mga setting habang bukas ito; hindi ito mailalapat ngayon.",
   "Not running": "Hindi tumatakbo",
   "Blocked programs could not be read: {0}": "Hindi mabasa ang mga naka-block na program: {0}",
-  "Nothing matches the filter.": "Walang tumutugma sa filter."
+  "Nothing matches the filter.": "Walang tumutugma sa filter.",
+  "Export support bundle…": "I-export ang support bundle…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "Isang text file na ipapadala kasama ng ulat ng problema: diagnostics, status ng serbisyo, at mga kamakailang babala at error. Makikita mo ang lahat bago i-save.",
+  "Support bundle": "Support bundle",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "Ang lahat sa ibaba ang ise-save. Laging nakatago ang mga lihim at ang pangalan ng account mo; ganoon din ang mga pangalan ng proseso at path, maliban kung isasama mo.",
+  "Include process names and paths": "Isama ang mga pangalan ng proseso at path",
+  "Save…": "I-save…",
+  "Saved to {0}": "Na-save sa {0}",
+  "Show in folder": "Ipakita sa folder",
+  "Could not save the support bundle: {0}": "Hindi ma-save ang support bundle: {0}",
+  "Save support bundle": "I-save ang support bundle",
+  "Text file": "Text file"
 }

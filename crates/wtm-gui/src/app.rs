@@ -462,6 +462,8 @@ struct UiState {
     nav_collapsed: Option<bool>,
     /// The Run new task dialog: command line and "as administrator".
     run_task: Option<(String, bool)>,
+    /// The support bundle window, while open.
+    support_bundle: Option<crate::support_bundle::View>,
     /// When to pop up on CPU overload.
     alerts: crate::alert::AlertSettings,
     /// The close button hides the window; the tray menu exits.
@@ -826,6 +828,7 @@ impl Default for UiState {
             panic: false,
             nav_collapsed: None,
             run_task: None,
+            support_bundle: None,
             alerts: crate::alert::AlertSettings::default(),
             notifications: true,
             tray_on_close: true,
@@ -1483,36 +1486,7 @@ impl eframe::App for App {
                     }
                     Tab::About => {
                         let ctx = ui.ctx().clone();
-                        let diagnostics = || {
-                            let snapshot = data.snapshot.as_deref();
-                            crate::diagnostics::Facts {
-                                version: env!("CARGO_PKG_VERSION").into(),
-                                windows: crate::diagnostics::windows_version(),
-                                elevated: data.elevated,
-                                engine: match data.mode {
-                                    crate::backend::Mode::Starting => "starting",
-                                    crate::backend::Mode::Service {
-                                        admin: true,
-                                        verified: true,
-                                    } => "service",
-                                    crate::backend::Mode::Service { admin: false, .. } => {
-                                        "service (read-only)"
-                                    }
-                                    crate::backend::Mode::Service {
-                                        verified: false, ..
-                                    } => "console engine",
-                                    crate::backend::Mode::Local => "local",
-                                }
-                                .into(),
-                                installed: crate::diagnostics::installed(),
-                                language: crate::i18n::Language::current().code().into(),
-                                logical_cpus: snapshot.map_or(0, |s| s.system.logical_cpus),
-                                memory: snapshot.map_or(0, |s| s.system.memory_total),
-                                scale: ctx.pixels_per_point(),
-                                window: ctx.content_rect().size().into(),
-                            }
-                            .report()
-                        };
+                        let diagnostics = || crate::diagnostics::for_window(&data, &ctx);
                         let bar_hidden = matches!(
                             &data.update,
                             crate::backend::UpdateState::Available(r)
@@ -1533,6 +1507,9 @@ impl eframe::App for App {
                             crate::about::Asked::ShowUpdate => {
                                 state.update_later = false;
                                 state.skip_version = None;
+                            }
+                            crate::about::Asked::SupportBundle => {
+                                state.support_bundle = Some(Default::default());
                             }
                             crate::about::Asked::Nothing => {}
                         }
@@ -1908,6 +1885,19 @@ impl eframe::App for App {
             &mut intents,
         );
         crate::kill_tab::panic_dialog(&ctx, &data, &mut state.panic, &mut intents);
+
+        if let Some(view) = &mut state.support_bundle {
+            // Made when opened and when the choice changes, not each frame:
+            // what is saved is what was shown.
+            if view.needs_text() {
+                let input = crate::support_bundle::from_window(&data, &ctx);
+                view.set_text(crate::support_bundle::build(&input, view.options));
+            }
+            let owner = backend.window.load(std::sync::atomic::Ordering::Relaxed);
+            if !crate::support_bundle::window(&ctx, view, owner) {
+                state.support_bundle = None;
+            }
+        }
 
         if let Some((line, elevated)) = &mut state.run_task {
             let mut run = false;
@@ -8419,6 +8409,48 @@ o-such-folder",
     }
 
     #[test]
+    fn about_opens_the_support_bundle_and_closes_it() {
+        let (backend, _rx) = Backend::offline(data());
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::About,
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        h.run_steps(2);
+        // Below the release notes.
+        h.get_by_label("Export support bundle…").scroll_to_me();
+        h.run_steps(20);
+        h.get_by_label("Export support bundle…").click();
+        h.run_steps(2);
+        let text = h
+            .state()
+            .state
+            .support_bundle
+            .as_ref()
+            .unwrap()
+            .text()
+            .to_owned();
+        assert!(text.starts_with("RustWTM support bundle"), "{text}");
+        assert!(text.contains("RustWTM diagnostic information"), "{text}");
+        assert!(text.contains("Engine: "), "{text}");
+        // Shown as it will be saved.
+        assert!(
+            h.query_by_label_contains("== Recent warnings and errors")
+                .is_some()
+        );
+        h.get_by_label("Close").click();
+        h.run_steps(2);
+        assert!(h.state().state.support_bundle.is_none());
+    }
+
+    #[test]
     fn closing_the_window_hides_it_to_the_tray_setting() {
         let (backend, _rx) = Backend::offline(data());
         let mut h = Harness::builder()
@@ -11755,6 +11787,16 @@ o-such-folder",
                                 )),
                             );
                             h.get_by_label(crate::i18n::tr("Cancel")).click();
+                            h.run_steps(2);
+                        }
+                        if tab == Tab::About {
+                            h.state_mut().state.support_bundle = Some(Default::default());
+                            h.run_steps(3);
+                            capture(
+                                &mut h,
+                                &out.join(format!("{theme_name}-{size_name}-SupportBundle.png")),
+                            );
+                            h.state_mut().state.support_bundle = None;
                             h.run_steps(2);
                         }
                         if std::env::var_os("WTM_REVIEW_BOTTOMS").is_some()

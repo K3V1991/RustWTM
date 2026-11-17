@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "열려 있는 동안 설정이 바뀌어 지금은 적용할 수 없습니다.",
   "Not running": "실행 중 아님",
   "Blocked programs could not be read: {0}": "차단된 프로그램을 읽을 수 없습니다: {0}",
-  "Nothing matches the filter.": "필터와 일치하는 항목이 없습니다."
+  "Nothing matches the filter.": "필터와 일치하는 항목이 없습니다.",
+  "Export support bundle…": "지원 번들 내보내기…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "문제 보고와 함께 보낼 텍스트 파일입니다. 진단 정보, 서비스 상태, 최근 경고와 오류가 들어 있습니다. 저장하기 전에 전체 내용을 볼 수 있습니다.",
+  "Support bundle": "지원 번들",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "아래 내용이 그대로 저장됩니다. 비밀 정보와 계정 이름은 항상 숨겨지며, 프로세스 이름과 경로도 포함하도록 선택하지 않으면 숨겨집니다.",
+  "Include process names and paths": "프로세스 이름과 경로 포함",
+  "Save…": "저장…",
+  "Saved to {0}": "{0}에 저장했습니다",
+  "Show in folder": "폴더에서 보기",
+  "Could not save the support bundle: {0}": "지원 번들을 저장할 수 없습니다: {0}",
+  "Save support bundle": "지원 번들 저장",
+  "Text file": "텍스트 파일"
 }

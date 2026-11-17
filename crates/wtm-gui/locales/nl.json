@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "De instellingen zijn gewijzigd terwijl dit open stond; het kan nu niet worden toegepast.",
   "Not running": "Niet actief",
   "Blocked programs could not be read: {0}": "Geblokkeerde programma's konden niet worden gelezen: {0}",
-  "Nothing matches the filter.": "Niets komt overeen met het filter."
+  "Nothing matches the filter.": "Niets komt overeen met het filter.",
+  "Export support bundle…": "Ondersteuningspakket exporteren…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "Een tekstbestand om met een probleemrapport mee te sturen: diagnose, servicestatus en recente waarschuwingen en fouten. Je ziet alles voordat je opslaat.",
+  "Support bundle": "Ondersteuningspakket",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "Alles hieronder wordt precies zo opgeslagen. Geheimen en je accountnaam worden altijd verborgen; procesnamen en paden ook, tenzij je ze opneemt.",
+  "Include process names and paths": "Procesnamen en paden opnemen",
+  "Save…": "Opslaan…",
+  "Saved to {0}": "Opgeslagen in {0}",
+  "Show in folder": "Weergeven in map",
+  "Could not save the support bundle: {0}": "Kan het ondersteuningspakket niet opslaan: {0}",
+  "Save support bundle": "Ondersteuningspakket opslaan",
+  "Text file": "Tekstbestand"
 }

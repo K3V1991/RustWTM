@@ -17,6 +17,7 @@ mod error;
 pub mod etw;
 pub mod explorer;
 mod fasthash;
+pub mod file_dialog;
 pub mod file_locks;
 pub mod firewall;
 pub mod gpu;

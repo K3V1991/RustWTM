@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "Pengaturan berubah saat ini terbuka; tidak dapat diterapkan sekarang.",
   "Not running": "Tidak berjalan",
   "Blocked programs could not be read: {0}": "Program yang diblokir tidak dapat dibaca: {0}",
-  "Nothing matches the filter.": "Tidak ada yang cocok dengan filter."
+  "Nothing matches the filter.": "Tidak ada yang cocok dengan filter.",
+  "Export support bundle…": "Ekspor paket dukungan…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "File teks untuk dikirim bersama laporan masalah: diagnostik, status layanan, serta peringatan dan galat terbaru. Anda melihat semuanya sebelum menyimpan.",
+  "Support bundle": "Paket dukungan",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "Semua di bawah ini adalah yang akan disimpan. Rahasia dan nama akun Anda selalu disembunyikan; nama proses dan jalur juga, kecuali Anda menyertakannya.",
+  "Include process names and paths": "Sertakan nama proses dan jalur",
+  "Save…": "Simpan…",
+  "Saved to {0}": "Disimpan ke {0}",
+  "Show in folder": "Tampilkan di folder",
+  "Could not save the support bundle: {0}": "Paket dukungan tidak dapat disimpan: {0}",
+  "Save support bundle": "Simpan paket dukungan",
+  "Text file": "File teks"
 }

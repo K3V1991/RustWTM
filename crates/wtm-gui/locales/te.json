@@ -1898,5 +1898,16 @@
   "The settings changed while this was open; it cannot be applied now.": "ఇది తెరిచి ఉన్నప్పుడు సెట్టింగ్‌లు మారాయి; ఇప్పుడు దీన్ని వర్తింపజేయలేరు.",
   "Not running": "నడవడం లేదు",
   "Blocked programs could not be read: {0}": "బ్లాక్ చేసిన ప్రోగ్రామ్‌లను చదవలేకపోయాం: {0}",
-  "Nothing matches the filter.": "ఫిల్టర్‌కు ఏదీ సరిపోలలేదు."
+  "Nothing matches the filter.": "ఫిల్టర్‌కు ఏదీ సరిపోలలేదు.",
+  "Export support bundle…": "సహాయ బండిల్‌ను ఎగుమతి చేయి…",
+  "A text file to send with a problem report: diagnostics, service status and recent warnings and errors. You see all of it before saving.": "సమస్య నివేదికతో పంపడానికి ఒక టెక్స్ట్ ఫైల్: విశ్లేషణ సమాచారం, సేవ స్థితి, ఇటీవలి హెచ్చరికలు మరియు లోపాలు. సేవ్ చేయడానికి ముందు మీరు మొత్తం చూస్తారు.",
+  "Support bundle": "సహాయ బండిల్",
+  "Everything below is what will be saved. Secrets and your account name are always hidden; process names and paths are hidden unless you include them.": "కింద ఉన్నదంతా సేవ్ అవుతుంది. రహస్యాలు మరియు మీ ఖాతా పేరు ఎల్లప్పుడూ దాచబడతాయి; ప్రాసెస్ పేర్లు మరియు పాత్‌లు కూడా, మీరు వాటిని చేర్చకపోతే.",
+  "Include process names and paths": "ప్రాసెస్ పేర్లు మరియు పాత్‌లను చేర్చు",
+  "Save…": "సేవ్ చేయి…",
+  "Saved to {0}": "{0}లో సేవ్ చేయబడింది",
+  "Show in folder": "ఫోల్డర్‌లో చూపు",
+  "Could not save the support bundle: {0}": "సహాయ బండిల్‌ను సేవ్ చేయలేకపోయాము: {0}",
+  "Save support bundle": "సహాయ బండిల్‌ను సేవ్ చేయి",
+  "Text file": "టెక్స్ట్ ఫైల్"
 }
