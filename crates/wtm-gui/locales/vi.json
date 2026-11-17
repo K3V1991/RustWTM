@@ -610,7 +610,6 @@
   "Release page": "Trang phát hành",
   "Dismiss": "Bỏ qua",
   "Update now": "Cập nhật ngay",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "Tải xuống trình cài đặt, kiểm tra với SHA-256 đã công bố, cài đặt (Windows sẽ yêu cầu quyền quản trị viên) và khởi động lại RustWTM",
   "Download": "Tải xuống",
   "This copy was not installed with the installer": "Bản này không được cài đặt bằng trình cài đặt",
   "What's new": "Có gì mới",
@@ -1957,5 +1956,13 @@
   "Loading…": "Đang tải…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Dịch vụ không có lịch sử của thiết bị này. Dịch vụ ghi một thiết bị sau khi đọc được kiểu máy hoặc tên của nó, và chỉ khi đang chạy.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Không có gì được ghi trong khoảng thời gian này. Dịch vụ giữ tuần gần nhất của mỗi thiết bị, theo từng phút.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Đã ghi {0} trong khoảng thời gian này. Dịch vụ giữ tuần gần nhất của mỗi thiết bị, theo từng phút; những phút dịch vụ không chạy để trống."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Đã ghi {0} trong khoảng thời gian này. Dịch vụ giữ tuần gần nhất của mỗi thiết bị, theo từng phút; những phút dịch vụ không chạy để trống.",
+  "The update to {0} was installed.": "Đã cài đặt bản cập nhật lên {0}.",
+  "The update to {0} was installed; restart Windows to finish it.": "Đã cài đặt bản cập nhật lên {0}; khởi động lại Windows để hoàn tất.",
+  "The update to {0} was canceled.": "Bản cập nhật lên {0} đã bị hủy.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "Đã dừng bản cập nhật lên {0}: trình cài đặt đã thay đổi sau khi được kiểm tra. Không có gì được cài đặt.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "Đã dừng bản cập nhật lên {0}: trình cài đặt không được nhà phát hành của RustWTM này ký. Không có gì được cài đặt; hãy tải xuống từ trang phát hành.",
+  "The installer of {0} failed with code {1}.": "Trình cài đặt {0} thất bại với mã {1}.",
+  "The update to {0} could not start (Windows error {1}).": "Không thể bắt đầu bản cập nhật lên {0} (lỗi Windows {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "Tải xuống trình cài đặt, kiểm tra theo SHA-256 đã công bố và, nếu RustWTM này được ký, rằng cùng nhà phát hành đã ký nó, cài đặt (Windows yêu cầu quyền quản trị) và khởi động lại RustWTM"
 }

@@ -610,7 +610,6 @@
   "Release page": "ಬಿಡುಗಡೆ ಪುಟ",
   "Dismiss": "ವಜಾಗೊಳಿಸಿ",
   "Update now": "ಈಗ ನವೀಕರಿಸಿ",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "ಇನ್‌ಸ್ಟಾಲರ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡುತ್ತದೆ, ಅದರ ಪ್ರಕಟಿತ SHA-256 ನೊಂದಿಗೆ ಪರಿಶೀಲಿಸುತ್ತದೆ, ಸ್ಥಾಪಿಸುತ್ತದೆ (Windows ನಿರ್ವಾಹಕ ಹಕ್ಕುಗಳನ್ನು ಕೇಳುತ್ತದೆ) ಮತ್ತು RustWTM ಮರುಪ್ರಾರಂಭಿಸುತ್ತದೆ",
   "Download": "ಡೌನ್‌ಲೋಡ್",
   "This copy was not installed with the installer": "ಈ ಪ್ರತಿಯನ್ನು ಇನ್‌ಸ್ಟಾಲರ್ ಮೂಲಕ ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ",
   "What's new": "ಹೊಸದೇನು",
@@ -1957,5 +1956,13 @@
   "Loading…": "ಲೋಡ್ ಆಗುತ್ತಿದೆ…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "ಸೇವೆಯ ಬಳಿ ಈ ಸಾಧನದ ಇತಿಹಾಸವಿಲ್ಲ. ಸಾಧನದ ಮಾದರಿ ಅಥವಾ ಹೆಸರನ್ನು ಓದಿದ ನಂತರ, ಮತ್ತು ಚಾಲನೆಯಲ್ಲಿರುವಾಗ ಮಾತ್ರ ಅದು ದಾಖಲಿಸುತ್ತದೆ.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "ಈ ಅವಧಿಯಲ್ಲಿ ಏನೂ ದಾಖಲಾಗಿಲ್ಲ. ಸೇವೆ ಪ್ರತಿ ಸಾಧನದ ಕೊನೆಯ ವಾರವನ್ನು ನಿಮಿಷ ನಿಮಿಷಕ್ಕೆ ಇರಿಸುತ್ತದೆ.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "ಈ ಅವಧಿಯಲ್ಲಿ {0} ದಾಖಲಾಗಿದೆ. ಸೇವೆ ಪ್ರತಿ ಸಾಧನದ ಕೊನೆಯ ವಾರವನ್ನು ನಿಮಿಷ ನಿಮಿಷಕ್ಕೆ ಇರಿಸುತ್ತದೆ; ಅದು ಚಾಲನೆಯಲ್ಲಿರದ ನಿಮಿಷಗಳು ಖಾಲಿ ಉಳಿಯುತ್ತವೆ."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "ಈ ಅವಧಿಯಲ್ಲಿ {0} ದಾಖಲಾಗಿದೆ. ಸೇವೆ ಪ್ರತಿ ಸಾಧನದ ಕೊನೆಯ ವಾರವನ್ನು ನಿಮಿಷ ನಿಮಿಷಕ್ಕೆ ಇರಿಸುತ್ತದೆ; ಅದು ಚಾಲನೆಯಲ್ಲಿರದ ನಿಮಿಷಗಳು ಖಾಲಿ ಉಳಿಯುತ್ತವೆ.",
+  "The update to {0} was installed.": "{0} ಗೆ ಅಪ್‌ಡೇಟ್ ಸ್ಥಾಪಿಸಲಾಗಿದೆ.",
+  "The update to {0} was installed; restart Windows to finish it.": "{0} ಗೆ ಅಪ್‌ಡೇಟ್ ಸ್ಥಾಪಿಸಲಾಗಿದೆ; ಪೂರ್ಣಗೊಳಿಸಲು Windows ಮರುಪ್ರಾರಂಭಿಸಿ.",
+  "The update to {0} was canceled.": "{0} ಗೆ ಅಪ್‌ಡೇಟ್ ರದ್ದಾಗಿದೆ.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "{0} ಗೆ ಅಪ್‌ಡೇಟ್ ನಿಲ್ಲಿಸಲಾಗಿದೆ: ಪರಿಶೀಲನೆಯ ನಂತರ ಇನ್‌ಸ್ಟಾಲರ್ ಬದಲಾಗಿದೆ. ಏನೂ ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "{0} ಗೆ ಅಪ್‌ಡೇಟ್ ನಿಲ್ಲಿಸಲಾಗಿದೆ: ಇನ್‌ಸ್ಟಾಲರ್‌ಗೆ ಈ RustWTM ನ ಪ್ರಕಾಶಕರು ಸಹಿ ಮಾಡಿಲ್ಲ. ಏನೂ ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ; ಬದಲಿಗೆ ಬಿಡುಗಡೆ ಪುಟದಿಂದ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ.",
+  "The installer of {0} failed with code {1}.": "{0} ನ ಇನ್‌ಸ್ಟಾಲರ್ ಕೋಡ್ {1} ನೊಂದಿಗೆ ವಿಫಲವಾಗಿದೆ.",
+  "The update to {0} could not start (Windows error {1}).": "{0} ಗೆ ಅಪ್‌ಡೇಟ್ ಪ್ರಾರಂಭಿಸಲಾಗಲಿಲ್ಲ (Windows ದೋಷ {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "ಇನ್‌ಸ್ಟಾಲರ್ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ, ಪ್ರಕಟಿತ SHA-256 ನೊಂದಿಗೆ ಮತ್ತು ಈ RustWTM ಸಹಿ ಮಾಡಿದ್ದರೆ ಅದೇ ಪ್ರಕಾಶಕರು ಸಹಿ ಮಾಡಿದ್ದಾರೆ ಎಂದು ಪರಿಶೀಲಿಸಿ, ಸ್ಥಾಪಿಸುತ್ತದೆ (Windows ನಿರ್ವಾಹಕ ಹಕ್ಕುಗಳನ್ನು ಕೇಳುತ್ತದೆ) ಮತ್ತು RustWTM ಮರುಪ್ರಾರಂಭಿಸುತ್ತದೆ"
 }

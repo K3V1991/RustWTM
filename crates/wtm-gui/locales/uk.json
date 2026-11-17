@@ -610,7 +610,6 @@
   "Release page": "Сторінка випуску",
   "Dismiss": "Закрити",
   "Update now": "Оновити зараз",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "Завантажує інсталятор, перевіряє його за опублікованим SHA-256, інсталює (Windows запитає права адміністратора) і перезапускає RustWTM",
   "Download": "Завантажити",
   "This copy was not installed with the installer": "Цю копію не було інстальовано за допомогою інсталятора",
   "What's new": "Що нового",
@@ -1957,5 +1956,13 @@
   "Loading…": "Завантаження…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Служба не має історії цього пристрою. Вона записує пристрій, коли прочитає його модель або назву, і лише поки працює.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "За цей період нічого не записано. Служба зберігає останній тиждень кожного пристрою похвилинно.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "За цей період записано {0}. Служба зберігає останній тиждень кожного пристрою похвилинно; хвилини, коли вона не працювала, лишаються порожніми."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "За цей період записано {0}. Служба зберігає останній тиждень кожного пристрою похвилинно; хвилини, коли вона не працювала, лишаються порожніми.",
+  "The update to {0} was installed.": "Оновлення до {0} встановлено.",
+  "The update to {0} was installed; restart Windows to finish it.": "Оновлення до {0} встановлено; перезапустіть Windows, щоб завершити його.",
+  "The update to {0} was canceled.": "Оновлення до {0} скасовано.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "Оновлення до {0} зупинено: інсталятор змінився після перевірки. Нічого не встановлено.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "Оновлення до {0} зупинено: інсталятор не підписаний видавцем цієї RustWTM. Нічого не встановлено; завантажте його зі сторінки випуску.",
+  "The installer of {0} failed with code {1}.": "Інсталятор {0} завершився з помилкою, код {1}.",
+  "The update to {0} could not start (Windows error {1}).": "Не вдалося запустити оновлення до {0} (помилка Windows {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "Завантажує інсталятор, перевіряє його за опублікованим SHA-256 і, якщо ця RustWTM підписана, що його підписав той самий видавець, встановлює (Windows попросить права адміністратора) і перезапускає RustWTM"
 }

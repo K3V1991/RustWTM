@@ -610,7 +610,6 @@
   "Release page": "విడుదల పేజీ",
   "Dismiss": "తీసివేయి",
   "Update now": "ఇప్పుడే నవీకరించు",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "ఇన్‌స్టాలర్‌ను డౌన్‌లోడ్ చేసి, దాని ప్రచురించిన SHA-256తో తనిఖీ చేసి, ఇన్‌స్టాల్ చేస్తుంది (Windows నిర్వాహక హక్కులను అడుగుతుంది) మరియు RustWTMను పునఃప్రారంభిస్తుంది",
   "Download": "డౌన్‌లోడ్ చేయి",
   "This copy was not installed with the installer": "ఈ కాపీ ఇన్‌స్టాలర్‌తో ఇన్‌స్టాల్ చేయబడలేదు",
   "What's new": "కొత్తవి ఏమిటి",
@@ -1957,5 +1956,13 @@
   "Loading…": "లోడ్ అవుతోంది…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "సేవ వద్ద ఈ పరికరం చరిత్ర లేదు. పరికరం మోడల్ లేదా పేరును చదివిన తర్వాత, నడుస్తున్నప్పుడు మాత్రమే అది నమోదు చేస్తుంది.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "ఈ వ్యవధిలో ఏమీ నమోదు కాలేదు. సేవ ప్రతి పరికరం గత వారాన్ని నిమిషం నిమిషంగా ఉంచుతుంది.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "ఈ వ్యవధిలో {0} నమోదైంది. సేవ ప్రతి పరికరం గత వారాన్ని నిమిషం నిమిషంగా ఉంచుతుంది; అది నడవని నిమిషాలు ఖాళీగా ఉంటాయి."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "ఈ వ్యవధిలో {0} నమోదైంది. సేవ ప్రతి పరికరం గత వారాన్ని నిమిషం నిమిషంగా ఉంచుతుంది; అది నడవని నిమిషాలు ఖాళీగా ఉంటాయి.",
+  "The update to {0} was installed.": "{0} కు నవీకరణ ఇన్‌స్టాల్ అయింది.",
+  "The update to {0} was installed; restart Windows to finish it.": "{0} కు నవీకరణ ఇన్‌స్టాల్ అయింది; పూర్తి చేయడానికి Windows ను పునఃప్రారంభించండి.",
+  "The update to {0} was canceled.": "{0} కు నవీకరణ రద్దయింది.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "{0} కు నవీకరణ ఆపబడింది: తనిఖీ తర్వాత ఇన్‌స్టాలర్ మారింది. ఏమీ ఇన్‌స్టాల్ కాలేదు.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "{0} కు నవీకరణ ఆపబడింది: ఇన్‌స్టాలర్‌పై ఈ RustWTM ప్రచురణకర్త సంతకం లేదు. ఏమీ ఇన్‌స్టాల్ కాలేదు; బదులుగా విడుదల పేజీ నుండి డౌన్‌లోడ్ చేయండి.",
+  "The installer of {0} failed with code {1}.": "{0} ఇన్‌స్టాలర్ కోడ్ {1} తో విఫలమైంది.",
+  "The update to {0} could not start (Windows error {1}).": "{0} కు నవీకరణ ప్రారంభం కాలేదు (Windows లోపం {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "ఇన్‌స్టాలర్‌ను డౌన్‌లోడ్ చేసి, ప్రచురించిన SHA-256 తో మరియు ఈ RustWTM సంతకం చేసినదైతే అదే ప్రచురణకర్త సంతకం చేశారో తనిఖీ చేసి, ఇన్‌స్టాల్ చేస్తుంది (Windows నిర్వాహక హక్కులు అడుగుతుంది) మరియు RustWTM ను పునఃప్రారంభిస్తుంది"
 }

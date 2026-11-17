@@ -131,6 +131,41 @@ gh attestation verify .\RustWTM-VERSION-x64.msi --repo rustwtm/rustwtm --signer-
 
 No real Azure signing can be certified until the owner completes validation,
 configures the variables and a signed release passes downloaded-asset checks.
-Existing unsigned update/install paths are not retroactively publisher-pinned
-by adding this release workflow; enforcing publisher trust inside the updater
-is a separate follow-up before describing updates as publisher-validated.
+## Publisher policy of the updater
+
+The in-app updater holds an update to the publisher of the RustWTM that runs
+it. It reads the Authenticode signature of its own executable and of the
+downloaded MSI (offline, through `WinVerifyTrust`):
+
+- **This build is unsigned** (developer builds and every release so far):
+  any installer is accepted, signed or not, as before. Such updates rely on
+  the SHA-256 published in the same release, which catches a corrupted or
+  swapped download but not a compromised release.
+- **This build is signed:** the installer must carry a valid embedded
+  Authenticode signature (not a catalog signature) whose certificate's simple
+  name is exactly the same; an unsigned installer or another publisher is
+  refused before Windows asks for administrator rights. The name is compared,
+  not the certificate thumbprint, because Trusted Signing certificates are
+  short-lived; it is the same comparison `verify-signatures.ps1` makes
+  (`GetNameInfo('SimpleName', $false)`, ordinal).
+- **This build's own signature cannot be checked** (it does not hold, or is
+  only a catalog signature): the update is refused rather than unchecked.
+
+Unsigned to signed is therefore allowed once, with the first signed release;
+from then on, signed to unsigned or to another publisher is refused. The
+elevated step checks again on the copy it installs, in a folder only SYSTEM
+and administrators can write to: first the SHA-256, then, when a publisher is
+pinned, `Get-AuthenticodeSignature` (status `Valid`, type `Authenticode`, the
+same simple name). A mismatch exits before `msiexec` runs.
+
+What became of the update is written by the launcher, as the user, to
+`%TEMP%\RustWTM-update\outcome.txt`, and told by the RustWTM it starts again,
+in the status bar and in Events: installed, installed with a restart of
+Windows needed, canceled (the administrator prompt declined, or the
+installer canceled), stopped because the copy changed or had another
+publisher, the installer's error code, or the Windows error that kept the
+installer from starting. The file is the user's to write, so only a version
+and one of these words are believed, it is ignored when older than an hour,
+and it is removed once read. The relaunch happens whatever the outcome. The
+updater does not roll back: a failed Windows Installer transaction is undone
+by Windows Installer itself, as for any MSI.

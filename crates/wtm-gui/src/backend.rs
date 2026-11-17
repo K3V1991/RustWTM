@@ -628,7 +628,11 @@ pub struct Updater {
         &wtm_core::update::Release,
         &std::path::Path,
     ) -> Result<wtm_core::update::Download, String>,
-    pub install: fn(&wtm_core::update::Download, &std::path::Path) -> Result<(), String>,
+    pub install: fn(
+        &wtm_core::update::Download,
+        &std::path::Path,
+        wtm_core::update::Version,
+    ) -> Result<(), String>,
 }
 
 impl Default for Updater {
@@ -1671,7 +1675,7 @@ impl Worker {
                     let dir = std::env::temp_dir().join("RustWTM-update");
                     let result = (updater.download)(&release, &dir).and_then(|msi| {
                         let exe = std::env::current_exe().map_err(|e| e.to_string())?;
-                        (updater.install)(&msi, &exe)
+                        (updater.install)(&msi, &exe, release.version)
                     });
                     match result {
                         // The installer replaces our files and starts us again.
@@ -3017,6 +3021,65 @@ fn notify(e: &Event) {
     let _ = notification(e).show();
 }
 
+/// Tells what became of the update the last RustWTM started: in the status
+/// bar and, from this window, in Events. The text is English, translated
+/// when shown, as the service's events are.
+pub fn tell_update(
+    data: &mut Data,
+    version: wtm_core::update::Version,
+    outcome: wtm_core::update::Outcome,
+) {
+    use wtm_core::update::Outcome;
+    let (a, b, c) = version;
+    let v = format!("{a}.{b}.{c}");
+    let (level, message) = match outcome {
+        Outcome::Installed => (
+            EventLevel::Info,
+            format!("The update to {v} was installed."),
+        ),
+        Outcome::RestartNeeded => (
+            EventLevel::Info,
+            format!("The update to {v} was installed; restart Windows to finish it."),
+        ),
+        Outcome::Cancelled => (EventLevel::Warn, format!("The update to {v} was canceled.")),
+        Outcome::ChecksumChanged => (
+            EventLevel::Error,
+            format!(
+                "The update to {v} was stopped: the installer changed after it was checked. \
+                 Nothing was installed."
+            ),
+        ),
+        Outcome::WrongPublisher => (
+            EventLevel::Error,
+            format!(
+                "The update to {v} was stopped: the installer is not signed by this RustWTM's \
+                 publisher. Nothing was installed; download it from the release page instead."
+            ),
+        ),
+        Outcome::InstallerFailed(code) => (
+            EventLevel::Error,
+            format!("The installer of {v} failed with code {code}."),
+        ),
+        Outcome::NotStarted(code) => (
+            EventLevel::Error,
+            format!("The update to {v} could not start (Windows error {code})."),
+        ),
+    };
+    data.events.push_back(Event {
+        id: 0,
+        unix_ms: SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_or(0, |d| d.as_millis() as u64),
+        level,
+        pid: None,
+        name: None,
+        message: message.clone(),
+        notify: false,
+    });
+    trim(&mut data.events, EVENTS_KEPT);
+    data.message = Some((level, message));
+}
+
 /// Shows container notices while the tray menu's Notifications is checked.
 fn container_toast(
     notifications: Arc<AtomicBool>,
@@ -3192,7 +3255,7 @@ mod tests {
             updater: Updater {
                 latest: || Err("offline".into()),
                 download: |_, _| Err("offline".into()),
-                install: |_, _| Err("offline".into()),
+                install: |_, _, _| Err("offline".into()),
             },
             client: None,
             pipe: String::new(),
@@ -3566,6 +3629,65 @@ mod tests {
     }
 
     #[test]
+    fn what_became_of_an_update_is_told_in_the_status_bar_and_in_events() {
+        use wtm_core::update::Outcome;
+        let _language = crate::i18n::scope(crate::i18n::Language::Turkish);
+        for (outcome, level, english) in [
+            (
+                Outcome::Installed,
+                EventLevel::Info,
+                "The update to 0.36.0 was installed.",
+            ),
+            (
+                Outcome::RestartNeeded,
+                EventLevel::Info,
+                "The update to 0.36.0 was installed; restart Windows to finish it.",
+            ),
+            (
+                Outcome::Cancelled,
+                EventLevel::Warn,
+                "The update to 0.36.0 was canceled.",
+            ),
+            (
+                Outcome::ChecksumChanged,
+                EventLevel::Error,
+                "The update to 0.36.0 was stopped: the installer changed after it was checked. \
+                 Nothing was installed.",
+            ),
+            (
+                Outcome::WrongPublisher,
+                EventLevel::Error,
+                "The update to 0.36.0 was stopped: the installer is not signed by this \
+                 RustWTM's publisher. Nothing was installed; download it from the release page \
+                 instead.",
+            ),
+            (
+                Outcome::InstallerFailed(1603),
+                EventLevel::Error,
+                "The installer of 0.36.0 failed with code 1603.",
+            ),
+            (
+                Outcome::NotStarted(2),
+                EventLevel::Error,
+                "The update to 0.36.0 could not start (Windows error 2).",
+            ),
+        ] {
+            let mut d = Data::default();
+            tell_update(&mut d, (0, 36, 0), outcome);
+            assert_eq!(d.message, Some((level, english.to_owned())), "{outcome:?}");
+            let event = d.events.back().unwrap();
+            assert_eq!(
+                (event.id, event.level, event.message.as_str()),
+                (0, level, english)
+            );
+            // Kept in English, shown in the window's language.
+            let shown = crate::i18n::message(english);
+            assert_ne!(shown, english, "{english}");
+            assert!(shown.contains("0.36.0"), "{shown}");
+        }
+    }
+
+    #[test]
     fn checks_for_and_installs_updates_in_the_background() {
         let mut w = worker();
         w.updater.latest = || Ok(release(99));
@@ -3588,7 +3710,7 @@ mod tests {
 
         // A failed download is shown and nothing is installed.
         w.updater.download = |_, _| Err("checksum mismatch".into());
-        w.updater.install = |_, _| panic!("must not install");
+        w.updater.install = |_, _, _| panic!("must not install");
         w.handle(UiCommand::InstallUpdate(release(99)));
         assert_eq!(settled(&w), UpdateState::Failed("checksum mismatch".into()));
 
@@ -3601,8 +3723,9 @@ mod tests {
                 sha256: [7; 32],
             })
         };
-        w.updater.install = |msi, exe| {
+        w.updater.install = |msi, exe, version| {
             assert!(msi.path.ends_with("RustWTM-update\\a.msi"));
+            assert_eq!(version, (99, 0, 0), "the outcome names the release");
             assert_eq!(msi.sha256, [7; 32]);
             assert_eq!(exe, std::env::current_exe().unwrap());
             Ok(())

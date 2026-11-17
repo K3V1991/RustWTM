@@ -610,7 +610,6 @@
   "Release page": "রিলিজ পেজ",
   "Dismiss": "খারিজ করুন",
   "Update now": "এখনই আপডেট করুন",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "ইনস্টলার ডাউনলোড করে, প্রকাশিত SHA-256-এর সাথে যাচাই করে, ইনস্টল করে (Windows অ্যাডমিনিস্ট্রেটর অধিকার চায়) এবং RustWTM রিস্টার্ট করে",
   "Download": "ডাউনলোড",
   "This copy was not installed with the installer": "এই কপিটি ইনস্টলার দিয়ে ইনস্টল করা হয়নি",
   "What's new": "নতুন কী আছে",
@@ -1957,5 +1956,13 @@
   "Loading…": "লোড হচ্ছে…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "সার্ভিসের কাছে এই ডিভাইসের কোনো ইতিহাস নেই। এটি কোনো ডিভাইসের মডেল বা নাম পড়ার পরে এবং কেবল চলাকালীন রেকর্ড করে।",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "এই সময়ে কিছু রেকর্ড হয়নি। সার্ভিস প্রতিটি ডিভাইসের শেষ সপ্তাহ মিনিটে মিনিটে রাখে।",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "এই সময়ে {0} রেকর্ড হয়েছে। সার্ভিস প্রতিটি ডিভাইসের শেষ সপ্তাহ মিনিটে মিনিটে রাখে; যে মিনিটগুলোতে এটি চলেনি সেগুলো খালি থাকে।"
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "এই সময়ে {0} রেকর্ড হয়েছে। সার্ভিস প্রতিটি ডিভাইসের শেষ সপ্তাহ মিনিটে মিনিটে রাখে; যে মিনিটগুলোতে এটি চলেনি সেগুলো খালি থাকে।",
+  "The update to {0} was installed.": "{0}-এ আপডেট ইনস্টল হয়েছে।",
+  "The update to {0} was installed; restart Windows to finish it.": "{0}-এ আপডেট ইনস্টল হয়েছে; শেষ করতে Windows আবার চালু করুন।",
+  "The update to {0} was canceled.": "{0}-এ আপডেট বাতিল হয়েছে।",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "{0}-এ আপডেট থামানো হয়েছে: যাচাইয়ের পরে ইনস্টলার বদলে গেছে। কিছুই ইনস্টল হয়নি।",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "{0}-এ আপডেট থামানো হয়েছে: ইনস্টলারটি এই RustWTM-এর প্রকাশক স্বাক্ষর করেনি। কিছুই ইনস্টল হয়নি; এর বদলে রিলিজ পৃষ্ঠা থেকে ডাউনলোড করুন।",
+  "The installer of {0} failed with code {1}.": "{0}-এর ইনস্টলার {1} কোডে ব্যর্থ হয়েছে।",
+  "The update to {0} could not start (Windows error {1}).": "{0}-এ আপডেট শুরু করা যায়নি (Windows ত্রুটি {1})।",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "ইনস্টলার ডাউনলোড করে, প্রকাশিত SHA-256 দিয়ে এবং এই RustWTM স্বাক্ষরিত হলে একই প্রকাশক স্বাক্ষর করেছে কিনা যাচাই করে, ইনস্টল করে (Windows প্রশাসক অধিকার চায়) এবং RustWTM আবার চালু করে"
 }

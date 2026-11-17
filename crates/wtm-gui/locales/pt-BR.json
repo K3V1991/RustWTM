@@ -610,7 +610,6 @@
   "Release page": "Página da versão",
   "Dismiss": "Ignorar",
   "Update now": "Atualizar agora",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "Baixa o instalador, verifica-o com o SHA-256 publicado, instala-o (o Windows solicita direitos de administrador) e reinicia o RustWTM",
   "Download": "Baixar",
   "This copy was not installed with the installer": "Esta cópia não foi instalada com o instalador",
   "What's new": "Novidades",
@@ -1957,5 +1956,13 @@
   "Loading…": "Carregando…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "O serviço não tem histórico deste dispositivo. Ele registra um dispositivo depois de ler seu modelo ou nome, e só enquanto está em execução.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Nada registrado neste período. O serviço guarda a última semana de cada dispositivo, minuto a minuto.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "{0} registrados neste período. O serviço guarda a última semana de cada dispositivo, minuto a minuto; os minutos em que não estava em execução ficam vazios."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "{0} registrados neste período. O serviço guarda a última semana de cada dispositivo, minuto a minuto; os minutos em que não estava em execução ficam vazios.",
+  "The update to {0} was installed.": "A atualização para {0} foi instalada.",
+  "The update to {0} was installed; restart Windows to finish it.": "A atualização para {0} foi instalada; reinicie o Windows para concluí-la.",
+  "The update to {0} was canceled.": "A atualização para {0} foi cancelada.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "A atualização para {0} foi interrompida: o instalador mudou depois de verificado. Nada foi instalado.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "A atualização para {0} foi interrompida: o instalador não está assinado pelo editor deste RustWTM. Nada foi instalado; baixe-o pela página da versão.",
+  "The installer of {0} failed with code {1}.": "O instalador de {0} falhou com o código {1}.",
+  "The update to {0} could not start (Windows error {1}).": "A atualização para {0} não pôde iniciar (erro do Windows {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "Baixa o instalador, verifica-o com o SHA-256 publicado e, se este RustWTM for assinado, que o mesmo editor o assinou, instala-o (o Windows pede direitos de administrador) e reinicia o RustWTM"
 }

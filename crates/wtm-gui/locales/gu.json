@@ -610,7 +610,6 @@
   "Release page": "રિલીઝ પેજ",
   "Dismiss": "અવગણો",
   "Update now": "હમણાં અપડેટ કરો",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "ઇન્સ્ટોલર ડાઉનલોડ કરે છે, તેના પ્રકાશિત SHA-256 સામે તપાસે છે, તેને ઇન્સ્ટોલ કરે છે (Windows વ્યવસ્થાપક અધિકારો માગે છે) અને RustWTM પુનઃપ્રારંભ કરે છે",
   "Download": "ડાઉનલોડ કરો",
   "This copy was not installed with the installer": "આ નકલ ઇન્સ્ટોલર વડે ઇન્સ્ટોલ કરવામાં આવી ન હતી",
   "What's new": "નવું શું છે",
@@ -1957,5 +1956,13 @@
   "Loading…": "લોડ થઈ રહ્યું છે…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "સેવા પાસે આ ઉપકરણનો કોઈ ઇતિહાસ નથી. તે ઉપકરણનું મોડેલ અથવા નામ વાંચ્યા પછી અને ફક્ત ચાલતી હોય ત્યારે નોંધે છે.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "આ સમયગાળામાં કંઈ નોંધાયું નથી. સેવા દરેક ઉપકરણનું છેલ્લું અઠવાડિયું મિનિટે મિનિટે રાખે છે.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "આ સમયગાળામાં {0} નોંધાયું. સેવા દરેક ઉપકરણનું છેલ્લું અઠવાડિયું મિનિટે મિનિટે રાખે છે; જે મિનિટોમાં તે ચાલી ન હતી તે ખાલી રહે છે."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "આ સમયગાળામાં {0} નોંધાયું. સેવા દરેક ઉપકરણનું છેલ્લું અઠવાડિયું મિનિટે મિનિટે રાખે છે; જે મિનિટોમાં તે ચાલી ન હતી તે ખાલી રહે છે.",
+  "The update to {0} was installed.": "{0} પરનું અપડેટ ઇન્સ્ટોલ થયું.",
+  "The update to {0} was installed; restart Windows to finish it.": "{0} પરનું અપડેટ ઇન્સ્ટોલ થયું; પૂર્ણ કરવા Windows ફરી શરૂ કરો.",
+  "The update to {0} was canceled.": "{0} પરનું અપડેટ રદ થયું.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "{0} પરનું અપડેટ રોકાયું: ચકાસણી પછી ઇન્સ્ટોલર બદલાયું. કંઈ ઇન્સ્ટોલ થયું નથી.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "{0} પરનું અપડેટ રોકાયું: ઇન્સ્ટોલર આ RustWTM ના પ્રકાશકે સહી કરેલું નથી. કંઈ ઇન્સ્ટોલ થયું નથી; તેના બદલે રિલીઝ પૃષ્ઠ પરથી ડાઉનલોડ કરો.",
+  "The installer of {0} failed with code {1}.": "{0} નું ઇન્સ્ટોલર કોડ {1} સાથે નિષ્ફળ ગયું.",
+  "The update to {0} could not start (Windows error {1}).": "{0} પરનું અપડેટ શરૂ થઈ શક્યું નહીં (Windows ભૂલ {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "ઇન્સ્ટોલર ડાઉનલોડ કરે છે, તેના પ્રકાશિત SHA-256 સામે અને આ RustWTM સહી કરેલું હોય તો એ જ પ્રકાશકે સહી કરી છે કે નહીં તે ચકાસે છે, ઇન્સ્ટોલ કરે છે (Windows એડમિનિસ્ટ્રેટર અધિકાર માંગે છે) અને RustWTM ફરી શરૂ કરે છે"
 }

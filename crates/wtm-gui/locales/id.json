@@ -610,7 +610,6 @@
   "Release page": "Halaman rilis",
   "Dismiss": "Abaikan",
   "Update now": "Perbarui sekarang",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "Mengunduh penginstal, memeriksanya terhadap SHA-256 yang dipublikasikan, menginstalnya (Windows meminta hak administrator), dan memulai ulang RustWTM",
   "Download": "Unduh",
   "This copy was not installed with the installer": "Salinan ini tidak diinstal dengan penginstal",
   "What's new": "Yang baru",
@@ -1957,5 +1956,13 @@
   "Loading…": "Memuat…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Layanan tidak punya riwayat perangkat ini. Layanan merekam perangkat setelah membaca model atau namanya, dan hanya saat berjalan.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Tidak ada yang direkam dalam periode ini. Layanan menyimpan seminggu terakhir setiap perangkat, per menit.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Terekam {0} dalam periode ini. Layanan menyimpan seminggu terakhir setiap perangkat, per menit; menit saat layanan tidak berjalan tetap kosong."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Terekam {0} dalam periode ini. Layanan menyimpan seminggu terakhir setiap perangkat, per menit; menit saat layanan tidak berjalan tetap kosong.",
+  "The update to {0} was installed.": "Pembaruan ke {0} telah dipasang.",
+  "The update to {0} was installed; restart Windows to finish it.": "Pembaruan ke {0} telah dipasang; mulai ulang Windows untuk menyelesaikannya.",
+  "The update to {0} was canceled.": "Pembaruan ke {0} dibatalkan.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "Pembaruan ke {0} dihentikan: penginstal berubah setelah diperiksa. Tidak ada yang dipasang.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "Pembaruan ke {0} dihentikan: penginstal tidak ditandatangani oleh penerbit RustWTM ini. Tidak ada yang dipasang; unduh dari halaman rilis sebagai gantinya.",
+  "The installer of {0} failed with code {1}.": "Penginstal {0} gagal dengan kode {1}.",
+  "The update to {0} could not start (Windows error {1}).": "Pembaruan ke {0} tidak dapat dimulai (galat Windows {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "Mengunduh penginstal, memeriksanya dengan SHA-256 yang diterbitkan dan, bila RustWTM ini ditandatangani, bahwa penerbit yang sama menandatanganinya, memasangnya (Windows meminta hak administrator) dan memulai ulang RustWTM"
 }

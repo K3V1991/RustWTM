@@ -539,6 +539,14 @@ impl App {
             ));
         }
         state.onboarding.schedule(env!("CARGO_PKG_VERSION"));
+        // What became of an update the last RustWTM handed to the installer.
+        // Tests never read (or remove) the user's.
+        if !cfg!(test)
+            && let Some((version, outcome)) =
+                wtm_core::update::take_outcome(&std::env::temp_dir().join("RustWTM-update"))
+        {
+            crate::backend::tell_update(&mut backend.data(), version, outcome);
+        }
         if let Some(error) = &startup_error {
             backend.data().message = Some((
                 EventLevel::Warn,
@@ -2342,7 +2350,8 @@ fn update_bar(ui: &mut Ui, data: &Data, state: &mut UiState, commands: &mut Vec<
                 if ui
                     .button(RichText::new(crate::i18n::tr("Update now")).strong())
                     .on_hover_text(
-                        crate::i18n::tr("Downloads the installer, checks it against its published SHA-256, \
+                        crate::i18n::tr("Downloads the installer, checks it against its published SHA-256 \
+                         and, when this RustWTM is signed, that the same publisher signed it, \
                          installs it (Windows asks for administrator rights) and restarts RustWTM"),
                     )
                     .clicked()

@@ -610,7 +610,6 @@
   "Release page": "Ukurasa wa toleo",
   "Dismiss": "Ondoa",
   "Update now": "Sasisha sasa",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "Hupakua kisakinishi, hukikagua dhidi ya SHA-256 yake iliyochapishwa, hukisakinisha (Windows huomba haki za msimamizi) na kuanzisha upya RustWTM",
   "Download": "Pakua",
   "This copy was not installed with the installer": "Nakala hii haikusakinishwa kwa kisakinishi",
   "What's new": "Mapya",
@@ -1957,5 +1956,13 @@
   "Loading…": "Inapakia…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "Huduma haina historia ya kifaa hiki. Hurekodi kifaa ikishasoma modeli au jina lake, na tu inapofanya kazi.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Hakuna kilichorekodiwa katika kipindi hiki. Huduma huhifadhi wiki iliyopita ya kila kifaa, dakika kwa dakika.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Imerekodiwa {0} katika kipindi hiki. Huduma huhifadhi wiki iliyopita ya kila kifaa, dakika kwa dakika; dakika ambazo haikufanya kazi hubaki tupu."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "Imerekodiwa {0} katika kipindi hiki. Huduma huhifadhi wiki iliyopita ya kila kifaa, dakika kwa dakika; dakika ambazo haikufanya kazi hubaki tupu.",
+  "The update to {0} was installed.": "Sasisho la {0} limesakinishwa.",
+  "The update to {0} was installed; restart Windows to finish it.": "Sasisho la {0} limesakinishwa; anzisha upya Windows ili kulikamilisha.",
+  "The update to {0} was canceled.": "Sasisho la {0} limeghairiwa.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "Sasisho la {0} limesimamishwa: kisakinishi kilibadilika baada ya kukaguliwa. Hakuna kilichosakinishwa.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "Sasisho la {0} limesimamishwa: kisakinishi hakijatiwa sahihi na mchapishaji wa RustWTM hii. Hakuna kilichosakinishwa; badala yake kipakue kutoka ukurasa wa toleo.",
+  "The installer of {0} failed with code {1}.": "Kisakinishi cha {0} kimeshindwa kwa msimbo {1}.",
+  "The update to {0} could not start (Windows error {1}).": "Sasisho la {0} halikuweza kuanza (hitilafu ya Windows {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "Hupakua kisakinishi, hukikagua dhidi ya SHA-256 iliyochapishwa na, ikiwa RustWTM hii imetiwa sahihi, kwamba mchapishaji yule yule alikitia sahihi, hukisakinisha (Windows huomba haki za msimamizi) na huanzisha upya RustWTM"
 }

@@ -79,6 +79,18 @@ refuse each other, as before.
   it under *Recorded history*, for the last hour, 24 hours or 7 days: the
   average and the peak of each measure, minutes not recorded left empty,
   and how much of the period was recorded.
+- The updater holds an update to the publisher of the RustWTM that runs it:
+  a signed build installs only an MSI with a valid embedded signature by
+  the same publisher, checked before Windows asks for administrator rights
+  and again on the copy only administrators can reach. Every release so far
+  is unsigned, so for now updates still rely on the release's SHA-256;
+  pinning starts with the first signed build installed.
+- After an update RustWTM says what became of it, in the status bar and in
+  Events: installed, installed with a restart of Windows needed, canceled
+  at the administrator prompt or in the installer, stopped because the
+  installer changed or had another publisher, or the installer's error code.
+  Before, a declined prompt or a failed installer just started the old
+  version again without a word.
 
 ### Fixed
 

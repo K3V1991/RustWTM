@@ -3665,12 +3665,6 @@
     "fr": "Mettre à jour",
     "es": "Actualizar ahora"
   },
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": {
-    "tr": "Kurulumu indirir, yayımlanan SHA-256 ile doğrular, yönetici izniyle kurar ve RustWTM'yi yeniden başlatır",
-    "de": "Lädt das Installationspaket, prüft SHA-256, installiert mit Administratorfreigabe und startet RustWTM neu",
-    "fr": "Télécharge l'installateur, vérifie SHA-256, installe avec autorisation administrateur et redémarre RustWTM",
-    "es": "Descarga el instalador, verifica SHA-256, instala con autorización administrativa y reinicia RustWTM"
-  },
   "Download": {
     "tr": "İndir",
     "de": "Herunterladen",
@@ -11752,5 +11746,53 @@
     "de": "{0} in diesem Zeitraum aufgezeichnet. Der Dienst bewahrt die letzte Woche jedes Geräts minutenweise auf; Minuten, in denen er nicht lief, bleiben leer.",
     "fr": "{0} enregistrées sur cette période. Le service conserve la dernière semaine de chaque appareil, minute par minute ; les minutes où il ne fonctionnait pas restent vides.",
     "es": "Registrado {0} en este periodo. El servicio guarda la última semana de cada dispositivo, minuto a minuto; los minutos en que no se ejecutó quedan vacíos."
+  },
+  "The update to {0} was installed.": {
+    "tr": "{0} güncellemesi kuruldu.",
+    "de": "Das Update auf {0} wurde installiert.",
+    "fr": "La mise à jour vers {0} a été installée.",
+    "es": "Se instaló la actualización a {0}."
+  },
+  "The update to {0} was installed; restart Windows to finish it.": {
+    "tr": "{0} güncellemesi kuruldu; tamamlamak için Windows'u yeniden başlatın.",
+    "de": "Das Update auf {0} wurde installiert; starten Sie Windows neu, um es abzuschließen.",
+    "fr": "La mise à jour vers {0} a été installée ; redémarrez Windows pour la terminer.",
+    "es": "Se instaló la actualización a {0}; reinicie Windows para terminarla."
+  },
+  "The update to {0} was canceled.": {
+    "tr": "{0} güncellemesi iptal edildi.",
+    "de": "Das Update auf {0} wurde abgebrochen.",
+    "fr": "La mise à jour vers {0} a été annulée.",
+    "es": "Se canceló la actualización a {0}."
+  },
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": {
+    "tr": "{0} güncellemesi durduruldu: yükleyici denetlendikten sonra değişti. Hiçbir şey kurulmadı.",
+    "de": "Das Update auf {0} wurde gestoppt: Das Installationsprogramm hat sich nach der Prüfung geändert. Nichts wurde installiert.",
+    "fr": "La mise à jour vers {0} a été arrêtée : le programme d'installation a changé après sa vérification. Rien n'a été installé.",
+    "es": "Se detuvo la actualización a {0}: el instalador cambió después de comprobarse. No se instaló nada."
+  },
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": {
+    "tr": "{0} güncellemesi durduruldu: yükleyici bu RustWTM'nin yayıncısı tarafından imzalanmamış. Hiçbir şey kurulmadı; bunun yerine sürüm sayfasından indirin.",
+    "de": "Das Update auf {0} wurde gestoppt: Das Installationsprogramm ist nicht vom Herausgeber dieses RustWTM signiert. Nichts wurde installiert; laden Sie es stattdessen von der Release-Seite herunter.",
+    "fr": "La mise à jour vers {0} a été arrêtée : le programme d'installation n'est pas signé par l'éditeur de ce RustWTM. Rien n'a été installé ; téléchargez-le plutôt depuis la page de la version.",
+    "es": "Se detuvo la actualización a {0}: el instalador no está firmado por el editor de este RustWTM. No se instaló nada; descárguelo desde la página de la versión."
+  },
+  "The installer of {0} failed with code {1}.": {
+    "tr": "{0} yükleyicisi {1} koduyla başarısız oldu.",
+    "de": "Das Installationsprogramm von {0} ist mit Code {1} fehlgeschlagen.",
+    "fr": "Le programme d'installation de {0} a échoué avec le code {1}.",
+    "es": "El instalador de {0} falló con el código {1}."
+  },
+  "The update to {0} could not start (Windows error {1}).": {
+    "tr": "{0} güncellemesi başlatılamadı (Windows hatası {1}).",
+    "de": "Das Update auf {0} konnte nicht starten (Windows-Fehler {1}).",
+    "fr": "La mise à jour vers {0} n'a pas pu démarrer (erreur Windows {1}).",
+    "es": "La actualización a {0} no pudo iniciarse (error de Windows {1})."
+  },
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": {
+    "tr": "Yükleyiciyi indirir, yayımlanan SHA-256 değeriyle ve bu RustWTM imzalıysa aynı yayıncının imzaladığıyla denetler, kurar (Windows yönetici izni ister) ve RustWTM'yi yeniden başlatır",
+    "de": "Lädt das Installationsprogramm herunter, prüft es anhand seiner veröffentlichten SHA-256 und, wenn dieses RustWTM signiert ist, ob derselbe Herausgeber es signiert hat, installiert es (Windows fragt nach Administratorrechten) und startet RustWTM neu",
+    "fr": "Télécharge le programme d'installation, le vérifie avec son SHA-256 publié et, si ce RustWTM est signé, vérifie que le même éditeur l'a signé, l'installe (Windows demande les droits d'administrateur) et redémarre RustWTM",
+    "es": "Descarga el instalador, lo comprueba con su SHA-256 publicado y, si este RustWTM está firmado, que lo firmó el mismo editor, lo instala (Windows pide permisos de administrador) y reinicia RustWTM"
   }
 }

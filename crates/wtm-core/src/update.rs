@@ -1,6 +1,8 @@
 //! Update checks against the GitHub releases of RustWTM, and installing a
 //! newer version: the MSI is downloaded, verified against its published
-//! SHA-256, and handed to Windows Installer.
+//! SHA-256 and, when this build is signed, against its publisher, and
+//! handed to Windows Installer. What became of it is written down for the
+//! RustWTM started afterwards to tell.
 
 use std::path::{Path, PathBuf};
 
@@ -202,38 +204,225 @@ fn same_dir(install_dir: &Path, exe: &Path) -> bool {
     exe.parent().is_some_and(|p| norm(p) == norm(install_dir))
 }
 
+/// Who signed a file, as far as the updater cares.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Publisher {
+    /// An embedded Authenticode signature that holds, by this signer (the
+    /// certificate's simple name, as `GetNameInfo('SimpleName')` gives it).
+    Signed(String),
+    Unsigned,
+    /// Signed through a catalog, signed without a readable signer, or a
+    /// signature that does not hold.
+    Unusable(String),
+}
+
+/// The publisher of the file at `path`.
+pub fn publisher(path: &Path) -> Publisher {
+    match wtm_sys::modules::signature(&path.to_string_lossy()) {
+        wtm_sys::modules::Signature::Signed {
+            signer: Some(signer),
+            catalog: false,
+        } => Publisher::Signed(signer),
+        wtm_sys::modules::Signature::Signed { catalog: true, .. } => {
+            Publisher::Unusable("signed only through a Windows catalog".into())
+        }
+        wtm_sys::modules::Signature::Signed { signer: None, .. } => {
+            Publisher::Unusable("the signer cannot be read".into())
+        }
+        wtm_sys::modules::Signature::Unsigned => Publisher::Unsigned,
+        wtm_sys::modules::Signature::Invalid(e) => Publisher::Unusable(e),
+    }
+}
+
+/// Whether an installer by `update` may replace a build by `current`, and
+/// the publisher the elevated step checks again (`None`: no pin).
+///
+/// An unsigned build (every release before the first signed one, and
+/// developer builds) takes an unsigned or signed installer: it has no
+/// publisher to hold the update to. A signed build takes only an installer
+/// with a valid embedded signature by the same publisher. A build whose own
+/// signature cannot be read takes nothing, rather than nothing checked.
+pub fn publisher_policy(current: &Publisher, update: &Publisher) -> Result<Option<String>, String> {
+    match (current, update) {
+        (_, Publisher::Unusable(e)) => Err(format!(
+            "the installer's signature does not hold ({e}); nothing was installed"
+        )),
+        (Publisher::Unusable(e), _) => Err(format!(
+            "this RustWTM's own signature cannot be checked ({e}), so the installer's \
+             publisher cannot be either; nothing was installed. Download the release from \
+             its page instead"
+        )),
+        (Publisher::Unsigned, _) => Ok(None),
+        (Publisher::Signed(ours), Publisher::Signed(theirs)) if ours == theirs => {
+            Ok(Some(ours.clone()))
+        }
+        (Publisher::Signed(ours), Publisher::Signed(theirs)) => Err(format!(
+            "the installer is signed by {theirs}, not by {ours} like this RustWTM; nothing \
+             was installed. Download the release from its page instead"
+        )),
+        (Publisher::Signed(ours), Publisher::Unsigned) => Err(format!(
+            "the installer is not signed, while this RustWTM is signed by {ours}; nothing was \
+             installed. Download the release from its page instead"
+        )),
+    }
+}
+
+/// The elevated step's own exit codes, apart from PowerShell's 1 (an
+/// unexpected error) and Windows Installer's.
+const CHECKSUM_CHANGED: i32 = 9001;
+const WRONG_PUBLISHER: i32 = 9002;
+/// Where the launcher writes what became of the update, beside the download.
+const OUTCOME_FILE: &str = "outcome.txt";
+/// An outcome older than this is from another time; it is not told.
+const OUTCOME_FRESH: std::time::Duration = std::time::Duration::from_secs(3600);
+
+/// What became of an update, told by the RustWTM started after it.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Outcome {
+    Installed,
+    /// Installed; Windows must restart to finish.
+    RestartNeeded,
+    /// Declined at the administrator prompt or canceled in the installer.
+    Cancelled,
+    /// The copy no longer matched the checked download: nothing installed.
+    ChecksumChanged,
+    /// The copy was not signed by this build's publisher: nothing installed.
+    WrongPublisher,
+    /// Windows Installer failed with this code.
+    InstallerFailed(i32),
+    /// The elevated step could not run; a Windows error code, or 0.
+    NotStarted(i32),
+}
+
+impl Outcome {
+    /// The elevated step's exit code.
+    fn of_exit(code: i32) -> Self {
+        match code {
+            0 => Self::Installed,
+            3010 | 1641 => Self::RestartNeeded,
+            1602 => Self::Cancelled,
+            CHECKSUM_CHANGED => Self::ChecksumChanged,
+            WRONG_PUBLISHER => Self::WrongPublisher,
+            code => Self::InstallerFailed(code),
+        }
+    }
+
+    /// A line the launcher wrote: `<version> exit <code>`, `<version>
+    /// cancelled` or `<version> failed <code>`. Anything else is `None`:
+    /// the file is the user's to write, so only these are believed.
+    pub fn parse(line: &str) -> Option<(Version, Self)> {
+        let mut words = line.split_whitespace();
+        let version = parse_version(words.next()?)?;
+        let outcome = match (words.next()?, words.next()) {
+            ("exit", Some(code)) => Self::of_exit(code.parse().ok()?),
+            ("cancelled", None) => Self::Cancelled,
+            ("failed", Some(code)) => match code.parse().ok()? {
+                1223 => Self::Cancelled,
+                code => Self::NotStarted(code),
+            },
+            _ => return None,
+        };
+        words.next().is_none().then_some((version, outcome))
+    }
+}
+
+/// What became of the last update, if the launcher wrote it within the
+/// last hour; the record is removed either way.
+pub fn take_outcome(dir: &Path) -> Option<(Version, Outcome)> {
+    let path = dir.join(OUTCOME_FILE);
+    let fresh = std::fs::metadata(&path)
+        .ok()?
+        .modified()
+        .ok()
+        .and_then(|t| t.elapsed().ok())
+        .is_some_and(|age| age < OUTCOME_FRESH);
+    let text = std::fs::read(&path).ok();
+    let _ = std::fs::remove_file(&path);
+    let text = text.filter(|t| t.len() <= 256 && fresh)?;
+    Outcome::parse(std::str::from_utf8(&text).ok()?.trim())
+}
+
 /// Runs the installer (Windows asks for administrator rights) and starts
 /// `relaunch` once it is done. The caller should exit right away so its
 /// files can be replaced.
 ///
-/// The download sits in the user's temp folder, where anything running as
-/// the user could swap it after it was checked. So the elevated step copies
-/// it to a folder only administrators can reach, checks the copy against
-/// the hash again and installs that.
-pub fn install(msi: &Download, relaunch: &Path) -> Result<(), String> {
+/// When `relaunch`, this build, is signed, the installer must be signed by
+/// the same publisher. The download sits in the user's temp folder, where
+/// anything running as the user could swap it after it was checked. So the
+/// elevated step copies it to a folder only administrators can reach,
+/// checks the copy against the hash, and the publisher, again and installs
+/// that. What became of it is written beside the download for the RustWTM
+/// started afterwards ([`take_outcome`]).
+pub fn install(msi: &Download, relaunch: &Path, version: Version) -> Result<(), String> {
+    let pin = publisher_policy(&publisher(relaunch), &publisher(&msi.path))?;
+    let dir = msi.path.parent().unwrap_or(Path::new("."));
+    let outcome = dir.join(OUTCOME_FILE);
+    let _ = std::fs::remove_file(&outcome);
+    let elevate = elevate(&elevated_install(msi, pin.as_deref()));
+    let start = format!(
+        "Start-Process -FilePath {}",
+        ps_quote(&relaunch.to_string_lossy())
+    );
     let args = format!(
         "-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand {}",
-        encode_command(&launcher(msi, relaunch))
+        encode_command(&launcher(&elevate, &outcome, version, &start))
     );
     wtm_sys::shell::launch_hidden("powershell.exe", &args).map_err(|e| e.to_string())
 }
 
-/// Asks for elevation to run [`elevated_install`], then starts `relaunch`
-/// as the user, also when elevation is declined.
-fn launcher(msi: &Download, relaunch: &Path) -> String {
+/// A command that runs `script` as administrator (Windows asks) and gives
+/// its process once it has ended. Process.Start, not Start-Process: only it
+/// keeps the Windows error (1223 when the prompt is declined) inside the
+/// exception it throws.
+fn elevate(script: &str) -> String {
     format!(
-        "try {{ Start-Process powershell.exe -Verb RunAs -Wait -WindowStyle Hidden \
-         -ArgumentList '-NoProfile','-NonInteractive','-EncodedCommand','{}' }} \
-         finally {{ Start-Process -FilePath {} }}",
-        encode_command(&elevated_install(msi)),
-        ps_quote(&relaunch.to_string_lossy())
+        "& {{ $i = New-Object Diagnostics.ProcessStartInfo 'powershell.exe'; \
+         $i.UseShellExecute = $true; $i.Verb = 'runas'; $i.WindowStyle = 'Hidden'; \
+         $i.Arguments = '-NoProfile -NonInteractive -EncodedCommand {}'; \
+         $q = [Diagnostics.Process]::Start($i); $q.WaitForExit(); $q }}",
+        encode_command(script)
+    )
+}
+
+/// Runs `elevate`, a command that runs the elevated step and gives its
+/// process, then writes what became of it to `outcome` and runs `relaunch`,
+/// also when elevation is declined or fails, and also when the outcome
+/// cannot be written.
+fn launcher(elevate: &str, outcome: &Path, version: Version, relaunch: &str) -> String {
+    let (a, b, c) = version;
+    format!(
+        "$r = 'failed 0'\n\
+         try {{\n\
+         $p = {elevate}\n\
+         $r = 'exit ' + $p.ExitCode\n\
+         }} catch {{\n\
+         $c = 0; $e = $_.Exception\n\
+         while ($e) {{ if ($e -is [ComponentModel.Win32Exception]) {{ $c = $e.NativeErrorCode }}; $e = $e.InnerException }}\n\
+         if ($c -eq 1223) {{ $r = 'cancelled' }} else {{ $r = 'failed ' + $c }}\n\
+         }} finally {{\n\
+         try {{ Set-Content -LiteralPath {} -Value ('{a}.{b}.{c} ' + $r) -Encoding ASCII }} catch {{}}\n\
+         {relaunch}\n\
+         }}\n",
+        ps_quote(&outcome.to_string_lossy()),
     )
 }
 
 /// Copies the installer to a fresh folder under the system's temp folder
-/// that only SYSTEM and administrators can reach, checks it and installs it.
-fn elevated_install(msi: &Download) -> String {
+/// that only SYSTEM and administrators can reach, checks it (and, with
+/// `publisher`, that a valid embedded signature by it is on the copy) and
+/// installs it.
+fn elevated_install(msi: &Download, publisher: Option<&str>) -> String {
     let hash: String = msi.sha256.iter().map(|b| format!("{b:02X}")).collect();
+    // An unsigned file never reaches GetNameInfo: under 'Stop' it would
+    // throw and exit 1 for the wrong reason.
+    let signed = publisher.map_or_else(String::new, |p| {
+        format!(
+            "$s = Get-AuthenticodeSignature -LiteralPath $msi\n\
+             if ($s.Status -ne 'Valid' -or $s.SignatureType -ne 'Authenticode' -or $null -eq $s.SignerCertificate) {{ exit {WRONG_PUBLISHER} }}\n\
+             if ($s.SignerCertificate.GetNameInfo('SimpleName', $false) -cne {}) {{ exit {WRONG_PUBLISHER} }}\n",
+            ps_quote(p)
+        )
+    });
     format!(
         "$ErrorActionPreference = 'Stop'\n\
          $dir = Join-Path $env:SystemRoot ('Temp\\rustwtm-update-' + [Guid]::NewGuid().ToString('N'))\n\
@@ -244,7 +433,8 @@ fn elevated_install(msi: &Download) -> String {
          Set-Acl -LiteralPath $dir -AclObject $acl\n\
          $msi = Join-Path $dir 'RustWTM.msi'\n\
          Copy-Item -LiteralPath {} -Destination $msi\n\
-         if ((Get-FileHash -Algorithm SHA256 -LiteralPath $msi).Hash -ne '{hash}') {{ exit 1 }}\n\
+         if ((Get-FileHash -Algorithm SHA256 -LiteralPath $msi).Hash -ne '{hash}') {{ exit {CHECKSUM_CHANGED} }}\n\
+         {signed}\
          $p = Start-Process msiexec.exe -ArgumentList '/i', ('\"' + $msi + '\"'), '/passive', '/norestart' -Wait -PassThru\n\
          exit $p.ExitCode\n\
          }} finally {{ cmd.exe /d /c rd /s /q \"$dir\" }}\n",
@@ -443,27 +633,50 @@ mod tests {
             path: PathBuf::from(r"C:\Users\o'neil\AppData\Local\Temp\RustWTM-update\a.msi"),
             sha256: [0xab; 32],
         };
-        let launcher = launcher(&msi, Path::new(r"C:\Program Files\RustWTM\rustwtm.exe"));
-        assert!(launcher.contains("-Verb RunAs -Wait"), "{launcher}");
-        assert!(launcher.contains(
-            r"finally { Start-Process -FilePath 'C:\Program Files\RustWTM\rustwtm.exe' }"
-        ));
-        let encoded = launcher.split('\'').nth(7).unwrap();
-        let elevated = decode_command(encoded);
-        assert_eq!(elevated, elevated_install(&msi));
+        let unpinned = elevated_install(&msi, None);
         assert!(
-            elevated.contains(r"Copy-Item -LiteralPath 'C:\Users\o''neil\AppData"),
-            "{elevated}"
+            unpinned.contains(r"Copy-Item -LiteralPath 'C:\Users\o''neil\AppData"),
+            "{unpinned}"
         );
-        assert!(elevated.contains(&format!("-ne '{}'", "AB".repeat(32))));
-        assert!(elevated.contains("O:BAD:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)"));
+        assert!(unpinned.contains(&format!("-ne '{}') {{ exit 9001 }}", "AB".repeat(32))));
+        assert!(unpinned.contains("O:BAD:PAI(A;OICI;FA;;;SY)(A;OICI;FA;;;BA)"));
+        assert!(
+            !unpinned.contains("Get-AuthenticodeSignature"),
+            "no publisher to hold to"
+        );
         // The copy is installed, never the download.
-        assert!(elevated.contains("'/i', ('\"' + $msi + '\"')"));
-        let args = format!("-EncodedCommand {}", encode_command(&launcher));
+        assert!(unpinned.contains("'/i', ('\"' + $msi + '\"')"));
+        let pinned = elevated_install(&msi, Some("OXOGNET OÜ"));
+        let check = pinned
+            .find("Get-AuthenticodeSignature -LiteralPath $msi")
+            .unwrap();
+        assert!(
+            check > pinned.find("Get-FileHash").unwrap(),
+            "after the copy's hash"
+        );
+        assert!(
+            check < pinned.find("msiexec.exe").unwrap(),
+            "before installing"
+        );
+        assert!(pinned.contains("$s.Status -ne 'Valid' -or $s.SignatureType -ne 'Authenticode'"));
+        assert!(
+            pinned.contains("GetNameInfo('SimpleName', $false) -cne 'OXOGNET OÜ') { exit 9002 }")
+        );
+
+        let launcher = launcher(
+            "Start-Elevated",
+            Path::new(r"C:\Users\o'neil\AppData\Local\Temp\RustWTM-update\outcome.txt"),
+            (0, 36, 0),
+            r"Start-Process -FilePath 'C:\Program Files\RustWTM\rustwtm.exe'",
+        );
+        let args = format!(
+            "-EncodedCommand {}",
+            encode_command(&launcher.replace("Start-Elevated", &elevate(&pinned)))
+        );
         assert!(args.len() < 32_000, "fits a command line: {}", args.len());
 
-        // PowerShell itself reads both scripts, passed the way they will be.
-        for script in [&launcher, &elevated] {
+        // PowerShell itself reads the scripts, passed the way they will be.
+        for script in [&launcher, &unpinned, &pinned] {
             let check = format!(
                 "$e = $null; [void][Management.Automation.Language.Parser]::ParseInput({}, \
                  [ref]$null, [ref]$e); exit $e.Count",
@@ -476,6 +689,182 @@ mod tests {
                 .unwrap();
             assert!(status.success(), "{script}");
         }
+    }
+
+    #[test]
+    fn only_a_signed_build_holds_an_update_to_its_publisher() {
+        use Publisher::*;
+        let ours = Signed("OXOGNET OÜ".into());
+        let other = Signed("Someone Else".into());
+        let broken = Unusable("tampered".into());
+        // Unsigned builds take what the checksum allows, as before.
+        assert_eq!(publisher_policy(&Unsigned, &Unsigned), Ok(None));
+        assert_eq!(publisher_policy(&Unsigned, &ours), Ok(None));
+        // A signed build takes only its own publisher, and says so.
+        assert_eq!(
+            publisher_policy(&ours, &ours),
+            Ok(Some("OXOGNET OÜ".into()))
+        );
+        let refused = publisher_policy(&ours, &other).unwrap_err();
+        assert!(
+            refused.contains("signed by Someone Else, not by OXOGNET OÜ"),
+            "{refused}"
+        );
+        assert!(refused.contains("release from its page"), "{refused}");
+        assert!(
+            publisher_policy(&ours, &Unsigned)
+                .unwrap_err()
+                .contains("not signed")
+        );
+        // A signature that does not hold, on either side, stops it.
+        for current in [&Unsigned, &ours, &broken] {
+            assert!(publisher_policy(current, &broken).is_err());
+        }
+        for update in [&Unsigned, &ours] {
+            let refused = publisher_policy(&broken, update).unwrap_err();
+            assert!(
+                refused.contains("own signature cannot be checked"),
+                "{refused}"
+            );
+        }
+    }
+
+    #[test]
+    fn this_test_binary_and_a_plain_file_have_no_publisher() {
+        // Unsigned, as developer and every release build so far.
+        let exe = std::env::current_exe().unwrap();
+        assert_eq!(publisher(&exe), Publisher::Unsigned);
+        let dir = std::env::temp_dir().join(format!("wtm-publisher-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let file = dir.join("a.msi");
+        std::fs::write(&file, b"not an installer").unwrap();
+        assert!(matches!(
+            publisher(&file),
+            Publisher::Unsigned | Publisher::Unusable(_)
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn outcomes_are_read_strictly() {
+        let v = (0, 36, 0);
+        for (line, outcome) in [
+            ("0.36.0 exit 0", Outcome::Installed),
+            ("0.36.0 exit 3010", Outcome::RestartNeeded),
+            ("0.36.0 exit 1641", Outcome::RestartNeeded),
+            ("0.36.0 exit 1602", Outcome::Cancelled),
+            ("0.36.0 exit 1603", Outcome::InstallerFailed(1603)),
+            ("0.36.0 exit 1618", Outcome::InstallerFailed(1618)),
+            ("0.36.0 exit 1", Outcome::InstallerFailed(1)),
+            ("0.36.0 exit 9001", Outcome::ChecksumChanged),
+            ("0.36.0 exit 9002", Outcome::WrongPublisher),
+            ("0.36.0 cancelled", Outcome::Cancelled),
+            ("0.36.0 failed 1223", Outcome::Cancelled),
+            ("0.36.0 failed 2", Outcome::NotStarted(2)),
+        ] {
+            assert_eq!(Outcome::parse(line), Some((v, outcome)), "{line}");
+        }
+        for line in [
+            "",
+            "0.36.0",
+            "0.36.0 exit",
+            "0.36.0 exit x",
+            "0.36.0 exit 0 more",
+            "0.36.0 installed",
+            "<b>0.36.0</b> exit 0",
+            "0.36.0 cancelled please",
+        ] {
+            assert_eq!(Outcome::parse(line), None, "{line:?}");
+        }
+    }
+
+    #[test]
+    fn an_outcome_is_told_once_and_only_while_fresh() {
+        let dir = std::env::temp_dir().join(format!("wtm-outcome-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join(OUTCOME_FILE);
+        std::fs::write(&path, "0.36.0 exit 0\r\n").unwrap();
+        assert_eq!(take_outcome(&dir), Some(((0, 36, 0), Outcome::Installed)));
+        assert_eq!(take_outcome(&dir), None, "removed once read");
+        // Left from a run long ago: removed, not told.
+        std::fs::write(&path, "0.36.0 exit 0").unwrap();
+        let old = std::time::SystemTime::now() - std::time::Duration::from_secs(2 * 3600);
+        std::fs::File::options()
+            .write(true)
+            .open(&path)
+            .unwrap()
+            .set_modified(old)
+            .unwrap();
+        assert_eq!(take_outcome(&dir), None);
+        assert!(!path.exists());
+        // Too long to be the launcher's.
+        std::fs::write(&path, format!("0.36.0 exit 0{}", " ".repeat(300))).unwrap();
+        assert_eq!(take_outcome(&dir), None);
+        assert!(!path.exists());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_launcher_tells_what_happened_and_always_starts_rustwtm_again() {
+        // The steps are stand-ins: nothing is elevated, installed or shown.
+        let dir = std::env::temp_dir().join(format!("wtm-launcher-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let outcome = dir.join(OUTCOME_FILE);
+        let marker = dir.join("relaunched.txt");
+        let relaunch = format!(
+            "Set-Content -LiteralPath {} -Value 'relaunched'",
+            ps_quote(&marker.to_string_lossy())
+        );
+        let run = |elevate: &str, outcome: &Path| {
+            let _ = std::fs::remove_file(outcome);
+            let _ = std::fs::remove_file(&marker);
+            let script = launcher(elevate, outcome, (0, 36, 0), &relaunch);
+            let status = std::process::Command::new("powershell.exe")
+                .args(["-NoProfile", "-NonInteractive", "-EncodedCommand"])
+                .arg(encode_command(&script))
+                .status()
+                .unwrap();
+            assert!(status.success(), "{script}");
+            assert!(marker.exists(), "started again after: {elevate}");
+            std::fs::read_to_string(outcome).ok()
+        };
+        let exits = |code: i32| format!("[pscustomobject]@{{ ExitCode = {code} }}");
+        for (elevate, expected) in [
+            (exits(0), Outcome::Installed),
+            (exits(1603), Outcome::InstallerFailed(1603)),
+            (exits(9002), Outcome::WrongPublisher),
+            // Declined at the prompt: Process.Start throws this, the
+            // Windows error inside PowerShell's MethodInvocationException.
+            (
+                "throw [Management.Automation.MethodInvocationException]::new(\
+                 'Exception calling \"Start\"', [ComponentModel.Win32Exception]::new(1223))"
+                    .to_owned(),
+                Outcome::Cancelled,
+            ),
+            // A real Process.Start failure (no prompt: the file is missing),
+            // unwrapped the same way.
+            (
+                "& { $i = New-Object Diagnostics.ProcessStartInfo \
+                 'C:\\no-such-folder-rustwtm\\none.exe'; $i.UseShellExecute = $true; \
+                 $q = [Diagnostics.Process]::Start($i); $q.WaitForExit(); $q }"
+                    .to_owned(),
+                Outcome::NotStarted(2),
+            ),
+        ] {
+            let text = run(&elevate, &outcome).expect("the outcome is written");
+            assert_eq!(
+                Outcome::parse(text.trim()),
+                Some(((0, 36, 0), expected)),
+                "{elevate}: {text}"
+            );
+        }
+        // An outcome that cannot be written still starts RustWTM again.
+        assert_eq!(
+            run(&exits(0), &dir.join("missing").join(OUTCOME_FILE)),
+            None
+        );
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     #[test]

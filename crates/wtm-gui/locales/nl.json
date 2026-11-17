@@ -610,7 +610,6 @@
   "Release page": "Releasepagina",
   "Dismiss": "Negeren",
   "Update now": "Nu bijwerken",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "Downloadt het installatieprogramma, controleert het aan de hand van de gepubliceerde SHA-256, installeert het (Windows vraagt om administratorrechten) en start RustWTM opnieuw",
   "Download": "Downloaden",
   "This copy was not installed with the installer": "Deze kopie is niet met het installatieprogramma geïnstalleerd",
   "What's new": "Wat is er nieuw",
@@ -1957,5 +1956,13 @@
   "Loading…": "Laden…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "De service heeft geen geschiedenis van dit apparaat. Ze legt een apparaat vast zodra ze het model of de naam heeft gelezen, en alleen terwijl ze draait.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "Niets vastgelegd in deze periode. De service bewaart de laatste week van elk apparaat, per minuut.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "{0} vastgelegd in deze periode. De service bewaart de laatste week van elk apparaat, per minuut; minuten waarin ze niet draaide blijven leeg."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "{0} vastgelegd in deze periode. De service bewaart de laatste week van elk apparaat, per minuut; minuten waarin ze niet draaide blijven leeg.",
+  "The update to {0} was installed.": "De update naar {0} is geïnstalleerd.",
+  "The update to {0} was installed; restart Windows to finish it.": "De update naar {0} is geïnstalleerd; start Windows opnieuw om hem af te ronden.",
+  "The update to {0} was canceled.": "De update naar {0} is geannuleerd.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "De update naar {0} is gestopt: het installatieprogramma is na de controle gewijzigd. Er is niets geïnstalleerd.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "De update naar {0} is gestopt: het installatieprogramma is niet ondertekend door de uitgever van deze RustWTM. Er is niets geïnstalleerd; download het in plaats daarvan van de releasepagina.",
+  "The installer of {0} failed with code {1}.": "Het installatieprogramma van {0} is mislukt met code {1}.",
+  "The update to {0} could not start (Windows error {1}).": "De update naar {0} kon niet starten (Windows-fout {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "Downloadt het installatieprogramma, controleert het met de gepubliceerde SHA-256 en, als deze RustWTM ondertekend is, of dezelfde uitgever het ondertekende, installeert het (Windows vraagt om beheerdersrechten) en start RustWTM opnieuw"
 }

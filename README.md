@@ -411,8 +411,10 @@ stable identity. [Transfer verification](docs/repository-migration.md).
 - Update checks discover releases by stable GitHub repository identity across
   owner/name transfers. Installer and checksum URLs come from the same release.
 - Update notice with one-click update: the new installer is downloaded,
-  checked against its published SHA-256 and installed; RustWTM restarts
-  by itself.
+  checked against its published SHA-256 (and, once RustWTM is signed,
+  against its publisher) and installed; RustWTM restarts by itself and says
+  whether the update was installed, canceled or failed.
+  [Publisher policy](docs/signing.md#publisher-policy-of-the-updater).
 - Run new task (optionally as administrator) and one-click restart as
   administrator; the window remembers its size, tab, columns and sorts.
   Opening it as administrator also remembers that preference. In a protected

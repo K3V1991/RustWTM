@@ -610,7 +610,6 @@
   "Release page": "릴리스 페이지",
   "Dismiss": "닫기",
   "Update now": "지금 업데이트",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "설치 관리자를 다운로드하고, 게시된 SHA-256과 대조하여 확인한 후 설치하고(Windows에서 관리자 권한을 요청함) RustWTM을 다시 시작합니다",
   "Download": "다운로드",
   "This copy was not installed with the installer": "이 사본은 설치 관리자로 설치되지 않았습니다",
   "What's new": "새로운 기능",
@@ -1957,5 +1956,13 @@
   "Loading…": "불러오는 중…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "서비스에 이 장치의 기록이 없습니다. 서비스는 장치의 모델이나 이름을 읽은 뒤, 실행 중일 때만 기록합니다.",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "이 기간에는 기록된 것이 없습니다. 서비스는 각 장치의 지난 1주일을 1분 단위로 보관합니다.",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "이 기간에 {0} 기록되었습니다. 서비스는 각 장치의 지난 1주일을 1분 단위로 보관하며, 실행되지 않은 분은 비어 있습니다."
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "이 기간에 {0} 기록되었습니다. 서비스는 각 장치의 지난 1주일을 1분 단위로 보관하며, 실행되지 않은 분은 비어 있습니다.",
+  "The update to {0} was installed.": "{0}(으)로 업데이트를 설치했습니다.",
+  "The update to {0} was installed; restart Windows to finish it.": "{0}(으)로 업데이트를 설치했습니다. 완료하려면 Windows를 다시 시작하세요.",
+  "The update to {0} was canceled.": "{0}(으)로 업데이트가 취소되었습니다.",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "{0}(으)로 업데이트를 중지했습니다: 확인 후 설치 프로그램이 바뀌었습니다. 아무것도 설치되지 않았습니다.",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "{0}(으)로 업데이트를 중지했습니다: 설치 프로그램이 이 RustWTM의 게시자가 서명하지 않았습니다. 아무것도 설치되지 않았습니다. 대신 릴리스 페이지에서 다운로드하세요.",
+  "The installer of {0} failed with code {1}.": "{0} 설치 프로그램이 코드 {1}(으)로 실패했습니다.",
+  "The update to {0} could not start (Windows error {1}).": "{0}(으)로 업데이트를 시작할 수 없습니다(Windows 오류 {1}).",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "설치 프로그램을 다운로드하고 게시된 SHA-256과, 이 RustWTM이 서명된 경우 같은 게시자가 서명했는지 확인한 뒤 설치하고(Windows가 관리자 권한을 요청함) RustWTM을 다시 시작합니다"
 }

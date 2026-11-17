@@ -610,7 +610,6 @@
   "Release page": "發行頁面",
   "Dismiss": "關閉",
   "Update now": "立即更新",
-  "Downloads the installer, checks it against its published SHA-256, installs it (Windows asks for administrator rights) and restarts RustWTM": "下載安裝程式、依其公布的 SHA-256 驗證、進行安裝 (Windows 會要求系統管理員權限)，然後重新啟動 RustWTM",
   "Download": "下載",
   "This copy was not installed with the installer": "此複本並非透過安裝程式安裝",
   "What's new": "新功能",
@@ -1957,5 +1956,13 @@
   "Loading…": "正在載入…",
   "The service has no history of this device. It records a device once it has read its model or name, and only while it runs.": "服務沒有此裝置的歷史記錄。服務在讀取到裝置的型號或名稱後才會記錄，且僅在執行時記錄。",
   "Nothing recorded in this period. The service keeps each device's last week, a minute at a time.": "此期間沒有任何記錄。服務按分鐘保留每個裝置最近一週的資料。",
-  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "此期間已記錄 {0}。服務按分鐘保留每個裝置最近一週的資料；服務未執行的分鐘留空。"
+  "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.": "此期間已記錄 {0}。服務按分鐘保留每個裝置最近一週的資料；服務未執行的分鐘留空。",
+  "The update to {0} was installed.": "已安裝到 {0} 的更新。",
+  "The update to {0} was installed; restart Windows to finish it.": "已安裝到 {0} 的更新；請重新啟動 Windows 以完成。",
+  "The update to {0} was canceled.": "到 {0} 的更新已取消。",
+  "The update to {0} was stopped: the installer changed after it was checked. Nothing was installed.": "到 {0} 的更新已停止：安裝程式在檢查後遭到變更。未安裝任何內容。",
+  "The update to {0} was stopped: the installer is not signed by this RustWTM's publisher. Nothing was installed; download it from the release page instead.": "到 {0} 的更新已停止：安裝程式並非由此 RustWTM 的發行者簽署。未安裝任何內容；請改從發行頁面下載。",
+  "The installer of {0} failed with code {1}.": "{0} 的安裝程式失敗，代碼 {1}。",
+  "The update to {0} could not start (Windows error {1}).": "無法啟動到 {0} 的更新（Windows 錯誤 {1}）。",
+  "Downloads the installer, checks it against its published SHA-256 and, when this RustWTM is signed, that the same publisher signed it, installs it (Windows asks for administrator rights) and restarts RustWTM": "下載安裝程式，依其公布的 SHA-256 檢查，並在此 RustWTM 已簽署時確認由同一發行者簽署，然後安裝（Windows 會要求系統管理員權限）並重新啟動 RustWTM"
 }
