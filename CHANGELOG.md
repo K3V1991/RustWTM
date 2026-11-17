@@ -14,12 +14,13 @@ All notable changes to this project are documented here. The format follows
   the last 200 warning and error lines of the service log. The whole text
   is shown first, and what is saved is what was shown, through the
   Windows Save As dialog. Secrets (Bearer tokens, `key=`/`token=` URL
-  values, a Telegram bot token in a URL) and the account name are always
-  hidden; process names (every `.exe` name, and the names this window
-  knows) and paths are replaced unless *Include process names and paths*
-  is ticked. config.toml, telegram.toml, ai.toml, command lines,
-  environment variables, window titles and container logs are never part
-  of it, and nothing is uploaded.
+  values, a Telegram bot token in a URL) and the account name and profile
+  folder are always hidden; process names (every `.exe` name, and the
+  names this window knows), paths (spaces included) and a kill-list
+  entry's command-line text are replaced unless *Include process names
+  and paths* is ticked. config.toml, telegram.toml, ai.toml, environment
+  variables, window titles and container logs are never read for it,
+  nor are processes' command lines, and nothing is uploaded.
 
 ### Fixed
 

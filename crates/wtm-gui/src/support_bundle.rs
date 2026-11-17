@@ -145,9 +145,26 @@ pub struct Options {
     pub names_and_paths: bool,
 }
 
+/// Who is hidden whatever was chosen: the account name and the profile
+/// folder, which can differ from it and can contain spaces.
+pub struct Account {
+    pub redactor: wtm_ai::Redactor,
+    /// `%USERPROFILE%`, e.g. `C:\Users\John Smith`.
+    pub profile: Option<String>,
+}
+
+impl Account {
+    pub fn current() -> Self {
+        Self {
+            redactor: wtm_ai::Redactor::for_current_user(),
+            profile: std::env::var("USERPROFILE").ok(),
+        }
+    }
+}
+
 /// Hides what the bundle must not carry.
 struct Redaction<'a> {
-    account: wtm_ai::Redactor,
+    account: Account,
     names: &'a [&'a str],
     keep_names_and_paths: bool,
 }
@@ -155,17 +172,45 @@ struct Redaction<'a> {
 impl Redaction<'_> {
     fn apply(&self, text: &str) -> String {
         let mut text = secret_urls(text);
+        if let Some(profile) = self.account.profile.as_deref().filter(|p| p.len() > 3) {
+            text = replace_ignore_case(&text, profile, "%USERPROFILE%");
+        }
+        // Secrets in flags and headers, user-profile paths and the account
+        // name, whatever was chosen, before paths are cut at their spaces.
+        text = self.account.redactor.redact(&text);
         if !self.keep_names_and_paths {
+            text = command_patterns(&text);
             text = paths(&text);
             text = exe_names(&text);
             for name in self.names.iter().filter(|n| n.chars().count() >= 3) {
-                text = replace_ignore_case(&text, name, "<process>");
+                text = replace_word_ignore_case(&text, name, "<process>");
             }
         }
-        // Secrets in flags and headers, user-profile paths and the account
-        // name, whatever was chosen.
-        self.account.redact(&text)
+        text
     }
+}
+
+/// Hides the command-line text of a kill-list entry, as its label quotes it:
+/// `node.exe running "vitest"`.
+fn command_patterns(text: &str) -> String {
+    const MARK: &str = " running \"";
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(at) = rest.find(MARK) {
+        let (head, tail) = rest.split_at(at + MARK.len());
+        out.push_str(head);
+        match tail.find('"') {
+            Some(end) => {
+                out.push_str("<pattern>");
+                rest = &tail[end..];
+            }
+            None => {
+                rest = tail;
+            }
+        }
+    }
+    out.push_str(rest);
+    out
 }
 
 /// Masks a Telegram bot token in a URL path (`/bot123:abc/`) and the
@@ -221,7 +266,9 @@ fn secret_urls(text: &str) -> String {
 }
 
 /// Replaces absolute paths (`D:\…`, `\\server\…`) with `<path>`. A quoted
-/// path ends at its quote, an unquoted one at the next space.
+/// path ends at its quote. An unquoted one goes on across a space while the
+/// next word still looks like part of it (see [`continues_path`]), and stops
+/// at the first word that does not.
 fn paths(text: &str) -> String {
     let chars: Vec<char> = text.chars().collect();
     let mut out = String::with_capacity(text.len());
@@ -238,15 +285,32 @@ fn paths(text: &str) -> String {
             && !chars[i + 2].is_whitespace();
         if drive || unc {
             let quoted = i > 0 && chars[i - 1] == '"';
+            let ends = |c: char| c.is_whitespace() || matches!(c, '"' | '\'' | ',' | ';' | ')');
             let mut j = i;
-            while j < chars.len()
-                && if quoted {
-                    chars[j] != '"'
-                } else {
-                    !chars[j].is_whitespace() && !matches!(chars[j], '"' | '\'' | ',' | ';' | ')')
+            if quoted {
+                while j < chars.len() && chars[j] != '"' {
+                    j += 1;
                 }
-            {
-                j += 1;
+            } else {
+                loop {
+                    while j < chars.len() && !ends(chars[j]) {
+                        j += 1;
+                    }
+                    // A space inside the path: the next word goes on with it.
+                    let mut k = j;
+                    while k < chars.len() && chars[k] == ' ' {
+                        k += 1;
+                    }
+                    let mut m = k;
+                    while m < chars.len() && !ends(chars[m]) {
+                        m += 1;
+                    }
+                    if j < chars.len() && chars[j] == ' ' && m > k && continues_path(&chars[k..m]) {
+                        j = m;
+                    } else {
+                        break;
+                    }
+                }
             }
             out.push_str("<path>");
             i = j;
@@ -256,6 +320,22 @@ fn paths(text: &str) -> String {
         }
     }
     out
+}
+
+/// Whether a word after a space inside a path still belongs to it: it has
+/// a `\` or `/` (`C:\Users\John Smith\x`), or ends in a file extension
+/// (`C:\x\my notes.txt`). A version number after a path is hidden with it.
+fn continues_path(word: &[char]) -> bool {
+    if word.iter().any(|c| matches!(c, '\\' | '/')) {
+        return true;
+    }
+    let Some(dot) = word.iter().rposition(|&c| c == '.') else {
+        return false;
+    };
+    let extension = &word[dot + 1..];
+    dot > 0
+        && (1..=5).contains(&extension.len())
+        && extension.iter().all(char::is_ascii_alphanumeric)
 }
 
 /// Replaces every word ending in `.exe` with `<process>`.
@@ -299,13 +379,30 @@ fn replace_ignore_case(text: &str, needle: &str, with: &str) -> String {
     out
 }
 
+/// Like [`replace_ignore_case`], but only where `needle` is a whole word:
+/// the name `System` leaves `wtm_service::system_info` alone.
+fn replace_word_ignore_case(text: &str, needle: &str, with: &str) -> String {
+    let word = |c: Option<char>| c.is_some_and(|c| c.is_alphanumeric() || c == '_');
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(at) = find_ignore_case(rest, needle) {
+        let end = at + needle.len();
+        let whole = !word(rest[..at].chars().next_back()) && !word(rest[end..].chars().next());
+        out.push_str(&rest[..at]);
+        out.push_str(if whole { with } else { &rest[at..end] });
+        rest = &rest[end..];
+    }
+    out.push_str(rest);
+    out
+}
+
 /// The bundle's text. Numbers use the point whatever the window's language:
 /// it is read by whoever answers the report.
 pub fn build(input: &Input<'_>, options: Options) -> String {
-    build_with(input, options, wtm_ai::Redactor::for_current_user())
+    build_with(input, options, Account::current())
 }
 
-fn build_with(input: &Input<'_>, options: Options, account: wtm_ai::Redactor) -> String {
+fn build_with(input: &Input<'_>, options: Options, account: Account) -> String {
     let r = Redaction {
         account,
         names: &input.names,
@@ -683,9 +780,12 @@ mod tests {
         }
     }
 
-    fn account() -> wtm_ai::Redactor {
-        wtm_ai::Redactor {
-            user_name: Some("kaanuser".into()),
+    fn account() -> Account {
+        Account {
+            redactor: wtm_ai::Redactor {
+                user_name: Some("kaanuser".into()),
+            },
+            profile: Some(r"C:\Users\Kaan Ersoy".into()),
         }
     }
 
@@ -706,6 +806,8 @@ mod tests {
         "AIzaSECRET123",
         "sk-abcdef123456",
         "kaanuser",
+        "Kaan Ersoy",
+        "Ersoy",
     ];
     const NAMES_AND_PATHS: &[&str] = &[
         "clientapp.exe",
@@ -714,6 +816,10 @@ mod tests {
         "vmmem",
         r"\\fileserver\share",
         "secret-app.exe",
+        "Acme Corp",
+        r"Corp\",
+        "budget.xlsx",
+        "vitest",
     ];
 
     fn planted_bundle(options: Options) -> String {
@@ -745,6 +851,16 @@ mod tests {
                 "ended clientapp.exe (pid 42) using 95% CPU",
             ),
             event(EventLevel::Warn, Some("vmmem"), "vmmem holds 8 GiB"),
+            event(
+                EventLevel::Warn,
+                None,
+                r"cannot read D:\Clients\Acme Corp\budget.xlsx now",
+            ),
+            event(
+                EventLevel::Warn,
+                None,
+                "KillList: Terminate (kill list 'node.exe running \"vitest\"': 95% CPU for 60 s)",
+            ),
             event(EventLevel::Info, None, "started"),
         ];
         let input = Input {
@@ -758,6 +874,7 @@ mod tests {
             log: LogTail::Lines(vec![
                 r"2026-11-17T10:00:00Z  WARN wtm_service: could not open D:\Clients\Acme\plan.txt for secretproc.exe".into(),
                 r"2026-11-17T10:00:01Z ERROR wtm_service: C:\Users\kaanuser\AppData\Local\x failed".into(),
+                r"2026-11-17T10:00:02Z  WARN wtm_service: C:\Users\Kaan Ersoy\Documents\notes.txt locked".into(),
             ]),
             created: "2026-11-17 10:00".into(),
         };
@@ -784,8 +901,40 @@ mod tests {
             text.contains("could not open <path> for <process>"),
             "{text}"
         );
+        assert!(text.contains("cannot read <path> now"), "{text}");
+        assert!(text.contains("<process> running \"<pattern>\""), "{text}");
         assert!(text.contains("Process names and paths: hidden"));
         assert!(!text.contains("started"), "info events are left out");
+    }
+
+    #[test]
+    fn paths_go_on_across_spaces_while_they_still_look_like_paths() {
+        assert_eq!(
+            paths(r"open C:\Program Files\App\a b.txt failed"),
+            "open <path> failed"
+        );
+        assert_eq!(paths(r#"open "C:\x y\z" now"#), r#"open "<path>" now"#);
+        assert_eq!(paths(r"at D:\data, then"), "at <path>, then");
+        assert_eq!(
+            paths(r"saved C:\Users\Kaan Ersoy\my notes.txt and left"),
+            "saved <path> and left"
+        );
+        // Not a path: no drive, or a letter inside a word.
+        for same in ["ratio 3:2 and https://x.test/a", "abc:\\ no"] {
+            assert_eq!(paths(same), same);
+        }
+    }
+
+    #[test]
+    fn known_names_are_hidden_as_words_only() {
+        assert_eq!(
+            replace_word_ignore_case(
+                "System holds it; wtm_service::system_info and Subsystem stay; (system)",
+                "System",
+                "<process>"
+            ),
+            "<process> holds it; wtm_service::system_info and Subsystem stay; (<process>)"
+        );
     }
 
     #[test]
@@ -819,8 +968,11 @@ mod tests {
         for wanted in [
             "clientapp.exe",
             r"D:\Clients\Acme\plan.txt",
+            r"D:\Clients\Acme Corp\budget.xlsx",
             "secretproc.exe",
             "vmmem",
+            "node.exe running \"vitest\"",
+            r"%USERPROFILE%\Documents\notes.txt",
         ] {
             assert!(text.contains(wanted), "{wanted} missing:\n{text}");
         }
