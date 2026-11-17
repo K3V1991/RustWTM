@@ -11512,5 +11512,83 @@
     "de": "Alle Karten der Übersicht sind ausgeblendet.",
     "fr": "Toutes les cartes de la vue d'ensemble sont masquées.",
     "es": "Todas las tarjetas del resumen están ocultas."
+  },
+  "{0} has used {1} of its CPUs for {2}.": {
+    "tr": "{0}, {2} boyunca CPU'larının {1} kadarını kullandı.",
+    "de": "{0} hat {2} lang {1} seiner CPUs genutzt.",
+    "fr": "{0} a utilisé {1} de ses CPU pendant {2}.",
+    "es": "{0} ha usado {1} de sus CPU durante {2}."
+  },
+  "Docker shows {0} (100% per core).": {
+    "tr": "Docker {0} gösteriyor (çekirdek başına %100).",
+    "de": "Docker zeigt {0} (100 % pro Kern).",
+    "fr": "Docker affiche {0} (100 % par cœur).",
+    "es": "Docker muestra {0} (100 % por núcleo)."
+  },
+  "{0} has used {1} of its memory limit for {2}.": {
+    "tr": "{0}, {2} boyunca bellek sınırının {1} kadarını kullandı.",
+    "de": "{0} hat {2} lang {1} seines Speicherlimits genutzt.",
+    "fr": "{0} a utilisé {1} de sa limite de mémoire pendant {2}.",
+    "es": "{0} ha usado {1} de su límite de memoria durante {2}."
+  },
+  "{0}: CPU use is back below the limit.": {
+    "tr": "{0}: CPU kullanımı yeniden sınırın altında.",
+    "de": "{0}: CPU-Nutzung wieder unter dem Limit.",
+    "fr": "{0} : l'utilisation du CPU est revenue sous la limite.",
+    "es": "{0}: el uso de CPU vuelve a estar por debajo del límite."
+  },
+  "{0}: memory use is back below the limit.": {
+    "tr": "{0}: bellek kullanımı yeniden sınırın altında.",
+    "de": "{0}: Speichernutzung wieder unter dem Limit.",
+    "fr": "{0} : l'utilisation de la mémoire est revenue sous la limite.",
+    "es": "{0}: el uso de memoria vuelve a estar por debajo del límite."
+  },
+  "{0} stopped while over a limit.": {
+    "tr": "{0}, bir sınırın üzerindeyken durdu.",
+    "de": "{0} wurde gestoppt, während ein Limit überschritten war.",
+    "fr": "{0} s'est arrêté alors qu'il dépassait une limite.",
+    "es": "{0} se detuvo mientras superaba un límite."
+  },
+  "Notify when a container stays above": {
+    "tr": "Bir konteyner şu değerlerin üzerinde kalırsa bildir",
+    "de": "Benachrichtigen, wenn ein Container dauerhaft darüber liegt",
+    "fr": "Notifier si un conteneur reste au-dessus de",
+    "es": "Notificar si un contenedor permanece por encima de"
+  },
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": {
+    "tr": "Docker bu durumda arka planda da her 10 sn'de bir denetlenir. CPU, konteynerin kullanabileceği tüm CPU'ların payıdır; bellek, sınırının payıdır, sınırı yoksa Docker'ın belleğinin payıdır.",
+    "de": "Docker wird dann alle 10 s abgefragt, auch im Hintergrund. CPU ist der Anteil aller CPUs, die ein Container nutzen kann; Speicher der Anteil seines Limits oder, ohne Limit, des Docker-Speichers.",
+    "fr": "Docker est alors interrogé toutes les 10 s, y compris en arrière-plan. Le CPU est la part de tous les CPU qu'un conteneur peut utiliser ; la mémoire la part de sa limite, ou de la mémoire de Docker s'il n'en a pas.",
+    "es": "Docker se consulta entonces cada 10 s, también en segundo plano. La CPU es la parte de todas las CPU que puede usar un contenedor; la memoria, la parte de su límite o, si no tiene, de la memoria de Docker."
+  },
+  "Container alerts": {
+    "tr": "Konteyner uyarıları",
+    "de": "Container-Warnungen",
+    "fr": "Alertes des conteneurs",
+    "es": "Alertas de contenedores"
+  },
+  "On: CPU above {0} or memory above {1} for {2}.": {
+    "tr": "Açık: {2} boyunca CPU {0} veya bellek {1} üzerinde.",
+    "de": "Ein: CPU über {0} oder Speicher über {1} für {2}.",
+    "fr": "Activées : CPU au-dessus de {0} ou mémoire au-dessus de {1} pendant {2}.",
+    "es": "Activadas: CPU por encima de {0} o memoria por encima de {1} durante {2}."
+  },
+  "Off. Turn them on in Settings.": {
+    "tr": "Kapalı. Ayarlar'dan açabilirsiniz.",
+    "de": "Aus. In den Einstellungen einschalten.",
+    "fr": "Désactivées. Activez-les dans les Paramètres.",
+    "es": "Desactivadas. Actívelas en Configuración."
+  },
+  "No container has stayed above a limit.": {
+    "tr": "Hiçbir konteyner bir sınırın üzerinde kalmadı.",
+    "de": "Kein Container lag dauerhaft über einem Limit.",
+    "fr": "Aucun conteneur n'est resté au-dessus d'une limite.",
+    "es": "Ningún contenedor ha permanecido por encima de un límite."
+  },
+  "Clear": {
+    "tr": "Temizle",
+    "de": "Leeren",
+    "fr": "Effacer",
+    "es": "Borrar"
   }
 }

@@ -1917,5 +1917,18 @@
   "Resource cards": "Thẻ tài nguyên",
   "Sections": "Mục",
   "Restore default layout": "Khôi phục bố cục mặc định",
-  "Every Overview card is hidden.": "Tất cả thẻ Tổng quan đều bị ẩn."
+  "Every Overview card is hidden.": "Tất cả thẻ Tổng quan đều bị ẩn.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} đã dùng {1} CPU của nó trong {2}.",
+  "Docker shows {0} (100% per core).": "Docker hiển thị {0} (100% mỗi lõi).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} đã dùng {1} giới hạn bộ nhớ của nó trong {2}.",
+  "{0}: CPU use is back below the limit.": "{0}: mức dùng CPU đã trở lại dưới giới hạn.",
+  "{0}: memory use is back below the limit.": "{0}: mức dùng bộ nhớ đã trở lại dưới giới hạn.",
+  "{0} stopped while over a limit.": "{0} đã dừng khi đang vượt giới hạn.",
+  "Notify when a container stays above": "Thông báo khi một vùng chứa duy trì trên",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "Khi đó Docker được kiểm tra mỗi 10 giây, kể cả ở chế độ nền. CPU là phần trên tất cả CPU mà vùng chứa có thể dùng; bộ nhớ là phần trên giới hạn của nó, hoặc trên bộ nhớ của Docker nếu không có giới hạn.",
+  "Container alerts": "Cảnh báo vùng chứa",
+  "On: CPU above {0} or memory above {1} for {2}.": "Bật: CPU trên {0} hoặc bộ nhớ trên {1} trong {2}.",
+  "Off. Turn them on in Settings.": "Tắt. Bật trong Cài đặt.",
+  "No container has stayed above a limit.": "Không có vùng chứa nào duy trì trên giới hạn.",
+  "Clear": "Xóa"
 }

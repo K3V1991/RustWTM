@@ -1917,5 +1917,18 @@
   "Resource cards": "资源卡片",
   "Sections": "版块",
   "Restore default layout": "还原默认布局",
-  "Every Overview card is hidden.": "概览中的所有卡片均已隐藏。"
+  "Every Overview card is hidden.": "概览中的所有卡片均已隐藏。",
+  "{0} has used {1} of its CPUs for {2}.": "{0} 在 {2} 内使用了其 CPU 的 {1}。",
+  "Docker shows {0} (100% per core).": "Docker 显示为 {0}（每个核心 100%）。",
+  "{0} has used {1} of its memory limit for {2}.": "{0} 在 {2} 内使用了其内存限制的 {1}。",
+  "{0}: CPU use is back below the limit.": "{0}：CPU 使用率已回到限制以下。",
+  "{0}: memory use is back below the limit.": "{0}：内存使用已回到限制以下。",
+  "{0} stopped while over a limit.": "{0} 在超出限制时停止了。",
+  "Notify when a container stays above": "容器持续高于以下值时通知",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "开启后，即使在后台也每 10 秒检查一次 Docker。CPU 是容器可用的全部 CPU 中所占的比例；内存是其限制中所占的比例，未设限制时为 Docker 内存中所占的比例。",
+  "Container alerts": "容器警报",
+  "On: CPU above {0} or memory above {1} for {2}.": "开启：CPU 高于 {0} 或内存高于 {1}，持续 {2}。",
+  "Off. Turn them on in Settings.": "已关闭。可在设置中开启。",
+  "No container has stayed above a limit.": "没有容器持续高于限制。",
+  "Clear": "清除"
 }

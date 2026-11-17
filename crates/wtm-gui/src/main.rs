@@ -9,6 +9,7 @@ mod app;
 mod backend;
 mod background;
 mod charts;
+mod container_alerts;
 mod containers;
 mod context_actions;
 mod device_facts;

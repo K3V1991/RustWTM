@@ -404,6 +404,8 @@ pub struct Data {
     pub elevated: bool,
     /// Pops the window up when the CPU stays overloaded.
     pub alert_watch: crate::alert::AlertWatch,
+    /// Notices when a container stays over a CPU or memory limit.
+    pub container_alerts: crate::container_alerts::Watch,
     /// The service's kill list, from the last configuration loaded.
     pub kill_list: Vec<wtm_policy::KillEntry>,
     /// When many copies of one program count as a swarm (the service's
@@ -705,7 +707,14 @@ impl Backend {
         let (tx, rx) = mpsc::channel();
         let notifications = Arc::new(AtomicBool::new(true));
         let window = Arc::new(AtomicIsize::new(0));
-        let docker = crate::docker_worker::DockerWorker::new(&data, ctx.clone());
+        let docker = crate::docker_worker::DockerWorker::new(&data, ctx.clone(), {
+            let notifications = notifications.clone();
+            move |notice: &crate::container_alerts::Notice| {
+                if notifications.load(Ordering::Relaxed) {
+                    notify(&container_event(notice));
+                }
+            }
+        });
         let mut worker = Worker {
             local_hardware: None,
             startup_impact_at: None,
@@ -753,6 +762,11 @@ impl Backend {
 
     pub fn request_docker(&self, selected: Option<&str>) {
         self.docker.request(selected);
+    }
+
+    /// Keeps Docker read in the background for container alerts.
+    pub fn watch_containers(&self) {
+        self.docker.watch();
     }
 
     pub fn data(&self) -> MutexGuard<'_, Data> {
@@ -2974,6 +2988,23 @@ fn notification(e: &Event) -> notify_rust::Notification {
 
 fn notify(e: &Event) {
     let _ = notification(e).show();
+}
+
+/// A container notice as a notification; its text is already translated.
+fn container_event(notice: &crate::container_alerts::Notice) -> Event {
+    let level = match notice.kind {
+        crate::container_alerts::Kind::Above { .. } => EventLevel::Warn,
+        _ => EventLevel::Info,
+    };
+    Event {
+        id: 0,
+        unix_ms: 0,
+        level,
+        pid: None,
+        name: None,
+        message: notice.text(),
+        notify: true,
+    }
 }
 
 /// The toast shown when Windows starts us instead of a blocked program.

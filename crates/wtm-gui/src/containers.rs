@@ -567,6 +567,7 @@ pub fn fixture() -> State {
             created: 1700000000,
             metrics: Metrics {
                 cpu: Some(12.5 + i as f32 * 20.0),
+                cpu_cores: Some(4),
                 memory: Some((64 + i * 32) * 1024 * 1024),
                 limit: Some(1024 * 1024 * 1024),
                 rx_rate: Some(2048.0),

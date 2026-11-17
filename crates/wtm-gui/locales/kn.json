@@ -1917,5 +1917,18 @@
   "Resource cards": "ರಿಸೋರ್ಸ್ ಕಾರ್ಡ್‌ಗಳು",
   "Sections": "ವಿಭಾಗಗಳು",
   "Restore default layout": "ಡೀಫಾಲ್ಟ್ ಲೇಔಟ್ ಮರುಸ್ಥಾಪಿಸಿ",
-  "Every Overview card is hidden.": "ಅವಲೋಕನದ ಎಲ್ಲಾ ಕಾರ್ಡ್‌ಗಳು ಮರೆಯಾಗಿವೆ."
+  "Every Overview card is hidden.": "ಅವಲೋಕನದ ಎಲ್ಲಾ ಕಾರ್ಡ್‌ಗಳು ಮರೆಯಾಗಿವೆ.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} {2} ಕಾಲ ತನ್ನ CPUಗಳ {1} ಬಳಸಿದೆ.",
+  "Docker shows {0} (100% per core).": "Docker {0} ತೋರಿಸುತ್ತದೆ (ಪ್ರತಿ ಕೋರ್‌ಗೆ 100%).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} {2} ಕಾಲ ತನ್ನ ಮೆಮೊರಿ ಮಿತಿಯ {1} ಬಳಸಿದೆ.",
+  "{0}: CPU use is back below the limit.": "{0}: CPU ಬಳಕೆ ಮತ್ತೆ ಮಿತಿಗಿಂತ ಕೆಳಗಿದೆ.",
+  "{0}: memory use is back below the limit.": "{0}: ಮೆಮೊರಿ ಬಳಕೆ ಮತ್ತೆ ಮಿತಿಗಿಂತ ಕೆಳಗಿದೆ.",
+  "{0} stopped while over a limit.": "{0} ಮಿತಿಯನ್ನು ಮೀರಿದ್ದಾಗ ನಿಂತಿತು.",
+  "Notify when a container stays above": "ಕಂಟೈನರ್ ಇದಕ್ಕಿಂತ ಮೇಲಿದ್ದರೆ ಸೂಚಿಸಿ",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "ಆಗ Docker ಅನ್ನು ಪ್ರತಿ 10 ಸೆಕೆಂಡಿಗೆ ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ, ಹಿನ್ನೆಲೆಯಲ್ಲಿಯೂ. CPU ಎಂದರೆ ಕಂಟೈನರ್ ಬಳಸಬಹುದಾದ ಎಲ್ಲಾ CPUಗಳ ಪಾಲು; ಮೆಮೊರಿ ಅದರ ಮಿತಿಯ ಪಾಲು, ಮಿತಿ ಇಲ್ಲದಿದ್ದರೆ Docker ಮೆಮೊರಿಯ ಪಾಲು.",
+  "Container alerts": "ಕಂಟೈನರ್ ಎಚ್ಚರಿಕೆಗಳು",
+  "On: CPU above {0} or memory above {1} for {2}.": "ಆನ್: {2} ಕಾಲ CPU {0} ಅಥವಾ ಮೆಮೊರಿ {1} ಮೀರಿದರೆ.",
+  "Off. Turn them on in Settings.": "ಆಫ್. ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಆನ್ ಮಾಡಿ.",
+  "No container has stayed above a limit.": "ಯಾವ ಕಂಟೈನರ್ ಕೂಡ ಮಿತಿಯನ್ನು ಮೀರಿ ಉಳಿದಿಲ್ಲ.",
+  "Clear": "ತೆರವುಗೊಳಿಸಿ"
 }

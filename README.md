@@ -271,8 +271,10 @@ stable identity. [Transfer verification](docs/repository-migration.md).
 - **Docker containers**: a read-only monitor for the active local Docker context,
   including Compose project/state/search filters, CPU, memory/limit, network and
   disk rates, recent graphs, port mappings, health, restart count and bounded logs.
-  Overview shows running containers and the busiest sampled workloads. Docker is
-  optional; engine failures never block the process sampler. [Setup and limits](docs/docker.md).
+  Overview shows running containers and the busiest sampled workloads. Optional
+  container alerts notify when a container stays above a CPU or memory limit and
+  when it recovers. Docker is optional; engine failures never block the process
+  sampler. [Setup and limits](docs/docker.md).
   [Container monitor preview](screenshots/containers.png).
 
 - Overview start page: load at a glance, one-click protection on/off and

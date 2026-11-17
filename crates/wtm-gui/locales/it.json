@@ -1917,5 +1917,18 @@
   "Resource cards": "Schede delle risorse",
   "Sections": "Sezioni",
   "Restore default layout": "Ripristina layout predefinito",
-  "Every Overview card is hidden.": "Tutte le schede della panoramica sono nascoste."
+  "Every Overview card is hidden.": "Tutte le schede della panoramica sono nascoste.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} ha usato {1} delle sue CPU per {2}.",
+  "Docker shows {0} (100% per core).": "Docker mostra {0} (100% per core).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} ha usato {1} del suo limite di memoria per {2}.",
+  "{0}: CPU use is back below the limit.": "{0}: l'uso della CPU è tornato sotto il limite.",
+  "{0}: memory use is back below the limit.": "{0}: l'uso della memoria è tornato sotto il limite.",
+  "{0} stopped while over a limit.": "{0} si è fermato mentre superava un limite.",
+  "Notify when a container stays above": "Notifica quando un contenitore resta sopra",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "Docker viene allora controllato ogni 10 s, anche in background. La CPU è la quota di tutte le CPU che un contenitore può usare; la memoria la quota del suo limite o, se non ne ha, della memoria di Docker.",
+  "Container alerts": "Avvisi dei contenitori",
+  "On: CPU above {0} or memory above {1} for {2}.": "Attivi: CPU sopra {0} o memoria sopra {1} per {2}.",
+  "Off. Turn them on in Settings.": "Disattivati. Attivali nelle Impostazioni.",
+  "No container has stayed above a limit.": "Nessun contenitore è rimasto sopra un limite.",
+  "Clear": "Cancella"
 }

@@ -907,6 +907,7 @@ mod tests {
             include_str!("alert.rs"),
             include_str!("disks_tab.rs"),
             include_str!("containers.rs"),
+            include_str!("container_alerts.rs"),
             include_str!("backend.rs"),
             include_str!("kill_tab.rs"),
             include_str!("limits_tab.rs"),

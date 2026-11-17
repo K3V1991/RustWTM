@@ -212,7 +212,11 @@ pub fn http_body(raw: &[u8]) -> Result<Vec<u8>, String> {
 
 #[derive(Clone, Debug, Default)]
 pub struct Metrics {
+    /// Docker's CPU percent: 100% per core when `cpu_cores` is set (Linux
+    /// containers), otherwise a share of the whole machine (Windows ones).
     pub cpu: Option<f32>,
+    /// The CPUs a Linux container can use, when `cpu` counts 100% per core.
+    pub cpu_cores: Option<u64>,
     pub memory: Option<u64>,
     pub limit: Option<u64>,
     pub rx_rate: Option<f64>,
@@ -227,6 +231,21 @@ impl Metrics {
     pub fn fresh(&self, now: Instant) -> bool {
         self.measured
             .is_some_and(|t| now.saturating_duration_since(t) <= STALE)
+    }
+    /// CPU as a share of every CPU the container can use, 0–100, whichever
+    /// convention Docker reported it in.
+    pub fn cpu_share(&self) -> Option<f32> {
+        let cpu = self.cpu?;
+        Some(match self.cpu_cores {
+            Some(cores) if cores > 0 => cpu / cores as f32,
+            _ => cpu,
+        })
+    }
+    /// Memory as a share of the container's limit, 0–100. Without a limit
+    /// of its own, Docker reports the memory of its host or VM as the limit.
+    pub fn memory_share(&self) -> Option<f32> {
+        let (used, limit) = (self.memory?, self.limit.filter(|l| *l > 0)?);
+        Some((used as f64 / limit as f64 * 100.0) as f32)
     }
 }
 #[derive(Clone, Debug, Default)]
@@ -648,6 +667,7 @@ impl Sampler {
                         .and_then(|(n, o)| n.checked_sub(o))
                         .map(|n| (n as f64 / delta as f64 * cores as f64 * 100.0) as f32)
                         .filter(|n| n.is_finite());
+                    m.cpu_cores = m.cpu.map(|_| cores);
                 } else if system.is_none()
                     && let Some(cores) = number(v, "/num_procs").filter(|n| *n > 0)
                 {
@@ -858,6 +878,11 @@ mod tests {
             t + Duration::from_secs(2),
         );
         assert_eq!(second.cpu, Some(100.0));
+        // Linux convention: 100% per core, here one of four cores busy.
+        assert_eq!(second.cpu_cores, Some(4));
+        assert_eq!(second.cpu_share(), Some(25.0));
+        assert_eq!(second.memory_share(), Some(22.5));
+        assert_eq!(first.cpu_cores, None);
         assert_eq!(second.rx_rate, Some(100.0));
         assert_eq!(second.tx_rate, Some(200.0));
         assert_eq!(second.read_rate, Some(300.0));
@@ -921,6 +946,9 @@ mod tests {
             t + Duration::from_secs(1),
         );
         assert_eq!(second.cpu, Some(50.0));
+        // Windows convention: already a share of the whole machine.
+        assert_eq!(second.cpu_cores, None);
+        assert_eq!(second.cpu_share(), Some(50.0));
         assert_eq!(second.memory, Some(900));
         assert_eq!(second.read_rate, Some(512.0));
         assert_eq!(second.write_rate, Some(1024.0));

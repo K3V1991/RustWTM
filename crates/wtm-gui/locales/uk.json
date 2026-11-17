@@ -1917,5 +1917,18 @@
   "Resource cards": "Картки ресурсів",
   "Sections": "Розділи",
   "Restore default layout": "Відновити стандартний макет",
-  "Every Overview card is hidden.": "Усі картки огляду приховано."
+  "Every Overview card is hidden.": "Усі картки огляду приховано.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} використовував {1} своїх CPU протягом {2}.",
+  "Docker shows {0} (100% per core).": "Docker показує {0} (100% на ядро).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} використовував {1} свого ліміту пам'яті протягом {2}.",
+  "{0}: CPU use is back below the limit.": "{0}: використання CPU знову нижче ліміту.",
+  "{0}: memory use is back below the limit.": "{0}: використання пам'яті знову нижче ліміту.",
+  "{0} stopped while over a limit.": "{0} зупинився, перевищуючи ліміт.",
+  "Notify when a container stays above": "Сповіщати, коли контейнер стабільно вище",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "Тоді Docker перевіряється кожні 10 с, зокрема у фоні. CPU — частка всіх CPU, доступних контейнеру; пам'ять — частка його ліміту, а без ліміту — частка пам'яті Docker.",
+  "Container alerts": "Сповіщення контейнерів",
+  "On: CPU above {0} or memory above {1} for {2}.": "Увімк.: CPU вище {0} або пам'ять вище {1} протягом {2}.",
+  "Off. Turn them on in Settings.": "Вимк. Увімкніть їх у параметрах.",
+  "No container has stayed above a limit.": "Жоден контейнер не перевищував ліміт.",
+  "Clear": "Очистити"
 }

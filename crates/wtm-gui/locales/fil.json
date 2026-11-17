@@ -1917,5 +1917,18 @@
   "Resource cards": "Mga card ng resource",
   "Sections": "Mga seksyon",
   "Restore default layout": "Ibalik ang default na layout",
-  "Every Overview card is hidden.": "Nakatago ang lahat ng card ng Pangkalahatang-ideya."
+  "Every Overview card is hidden.": "Nakatago ang lahat ng card ng Pangkalahatang-ideya.",
+  "{0} has used {1} of its CPUs for {2}.": "Ginamit ng {0} ang {1} ng mga CPU nito sa loob ng {2}.",
+  "Docker shows {0} (100% per core).": "Ipinapakita ng Docker ang {0} (100% bawat core).",
+  "{0} has used {1} of its memory limit for {2}.": "Ginamit ng {0} ang {1} ng limitasyon ng memory nito sa loob ng {2}.",
+  "{0}: CPU use is back below the limit.": "{0}: bumalik sa ilalim ng limitasyon ang paggamit ng CPU.",
+  "{0}: memory use is back below the limit.": "{0}: bumalik sa ilalim ng limitasyon ang paggamit ng memory.",
+  "{0} stopped while over a limit.": "Huminto ang {0} habang lampas sa isang limitasyon.",
+  "Notify when a container stays above": "Mag-abiso kapag nananatili ang isang container sa itaas ng",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "Sinusuri noon ang Docker bawat 10 s, pati sa background. Ang CPU ay bahagi ng lahat ng CPU na magagamit ng container; ang memory ay bahagi ng limitasyon nito, o ng memory ng Docker kapag wala itong limitasyon.",
+  "Container alerts": "Mga alerto ng container",
+  "On: CPU above {0} or memory above {1} for {2}.": "Naka-on: CPU lampas sa {0} o memory lampas sa {1} sa loob ng {2}.",
+  "Off. Turn them on in Settings.": "Naka-off. I-on ang mga ito sa Mga Setting.",
+  "No container has stayed above a limit.": "Walang container na nanatiling lampas sa isang limitasyon.",
+  "Clear": "I-clear"
 }

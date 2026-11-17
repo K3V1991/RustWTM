@@ -47,11 +47,35 @@ marked until successfully read again. Daemon failures retain the last list with
 a stale warning. Samples older than 30 seconds are not presented as current.
 Histories contain at most 60 measured values per metric.
 
+## Container alerts
+
+Settings → This window → *Notify when a container stays above* is off by default.
+On, it sends a Windows notification when a running container stays at or above
+a CPU or memory limit for the chosen time (60 s by default), another when it has
+stayed back below for that time (at least 30 s), and one when it stops or is
+removed while over a limit. The Containers page lists the last 50 notices;
+at most three notifications are shown per check, and the tray menu's
+*Notifications* switch silences them all.
+
+The limits are shares, whichever convention Docker reports in: CPU is the share
+of all the CPUs a container can use (a Linux container at 200% on 4 cores is at
+50%), and the notice also gives Docker's own figure; memory is the share of the
+container's limit, or of the host's or Docker VM's memory when it has none,
+which is what Docker then reports as the limit.
+
+Containers are followed by name, so a restarted or re-created container (a new
+id, as Compose does) keeps its alert. Only fresh measurements count: a
+container measured more than 30 seconds ago, Docker being unreachable, a
+listing cut at 512 containers or a change of Docker context restarts the wait
+and never raises or ends an alert. After an alert ends, the same container and
+resource stay quiet for five minutes.
+
 ## Resource and privacy limits
 
 A single lazy worker polls when Overview or Containers requests data; it becomes
-idle after those pages stop requesting data. Refreshes wait two seconds after a
-cycle. Each pipe request has a 750 ms overall deadline. Pending overlapped I/O is
+idle after those pages stop requesting data, unless container alerts are on: it
+then keeps reading every 10 seconds, without details or logs. Refreshes wait
+two seconds after a cycle while a page shows Docker. Each pipe request has a 750 ms overall deadline. Pending overlapped I/O is
 cancelled and drained before buffers and handles are released. Pipe clients use
 identification-level security, so the server cannot impersonate the window.
 
@@ -68,7 +92,9 @@ selected container.
 All Engine requests are GET: version, container list, statistics, inspection and
 logs. The integration does not start, stop, restart, remove, exec into or alter
 containers. Container data and logs are held in bounded window memory; they are
-not written to the history database, notifications or saved preferences.
+not written to the history database or saved preferences. Container alerts put
+a container's name and its CPU or memory share in a Windows notification;
+only the alert settings are saved.
 
 ## Validation
 

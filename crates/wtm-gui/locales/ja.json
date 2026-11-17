@@ -1917,5 +1917,18 @@
   "Resource cards": "リソース カード",
   "Sections": "セクション",
   "Restore default layout": "既定のレイアウトに戻す",
-  "Every Overview card is hidden.": "概要のカードがすべて非表示です。"
+  "Every Overview card is hidden.": "概要のカードがすべて非表示です。",
+  "{0} has used {1} of its CPUs for {2}.": "{0} が {2} にわたり CPU の {1} を使用しました。",
+  "Docker shows {0} (100% per core).": "Docker の表示は {0} です (1 コアあたり 100%)。",
+  "{0} has used {1} of its memory limit for {2}.": "{0} が {2} にわたりメモリ上限の {1} を使用しました。",
+  "{0}: CPU use is back below the limit.": "{0}: CPU 使用率が上限を下回りました。",
+  "{0}: memory use is back below the limit.": "{0}: メモリ使用量が上限を下回りました。",
+  "{0} stopped while over a limit.": "{0} は上限を超えた状態で停止しました。",
+  "Notify when a container stays above": "コンテナーが次の値を超え続けたら通知",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "オンにすると、Docker をバックグラウンドでも 10 秒ごとに確認します。CPU はコンテナーが使用できる全 CPU に対する割合、メモリは上限に対する割合です (上限がない場合は Docker のメモリに対する割合)。",
+  "Container alerts": "コンテナーの通知",
+  "On: CPU above {0} or memory above {1} for {2}.": "オン: CPU {0} 超またはメモリ {1} 超が {2} 続いた場合。",
+  "Off. Turn them on in Settings.": "オフ。設定でオンにできます。",
+  "No container has stayed above a limit.": "上限を超え続けたコンテナーはありません。",
+  "Clear": "クリア"
 }

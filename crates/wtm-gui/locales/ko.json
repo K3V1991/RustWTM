@@ -1917,5 +1917,18 @@
   "Resource cards": "리소스 카드",
   "Sections": "섹션",
   "Restore default layout": "기본 레이아웃 복원",
-  "Every Overview card is hidden.": "개요의 모든 카드가 숨겨져 있습니다."
+  "Every Overview card is hidden.": "개요의 모든 카드가 숨겨져 있습니다.",
+  "{0} has used {1} of its CPUs for {2}.": "{0}이(가) {2} 동안 CPU의 {1}을(를) 사용했습니다.",
+  "Docker shows {0} (100% per core).": "Docker 표시값: {0} (코어당 100%).",
+  "{0} has used {1} of its memory limit for {2}.": "{0}이(가) {2} 동안 메모리 제한의 {1}을(를) 사용했습니다.",
+  "{0}: CPU use is back below the limit.": "{0}: CPU 사용이 다시 제한 아래로 내려갔습니다.",
+  "{0}: memory use is back below the limit.": "{0}: 메모리 사용이 다시 제한 아래로 내려갔습니다.",
+  "{0} stopped while over a limit.": "{0}이(가) 제한을 넘은 상태로 중지되었습니다.",
+  "Notify when a container stays above": "컨테이너가 계속 다음보다 높으면 알림",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "켜면 Docker를 백그라운드에서도 10초마다 확인합니다. CPU는 컨테이너가 사용할 수 있는 전체 CPU 중 비율이고, 메모리는 제한 대비 비율입니다(제한이 없으면 Docker 메모리 대비).",
+  "Container alerts": "컨테이너 알림",
+  "On: CPU above {0} or memory above {1} for {2}.": "켜짐: {2} 동안 CPU {0} 초과 또는 메모리 {1} 초과.",
+  "Off. Turn them on in Settings.": "꺼짐. 설정에서 켜세요.",
+  "No container has stayed above a limit.": "제한을 계속 넘은 컨테이너가 없습니다.",
+  "Clear": "지우기"
 }

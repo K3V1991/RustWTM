@@ -468,6 +468,7 @@ struct UiState {
     support_bundle: Option<crate::support_bundle::View>,
     /// When to pop up on CPU overload.
     alerts: crate::alert::AlertSettings,
+    container_alerts: crate::container_alerts::Settings,
     /// The close button hides the window; the tray menu exits.
     /// Desktop notifications for notable service events (tray menu).
     notifications: bool,
@@ -604,6 +605,7 @@ struct Prefs {
     chart_options: crate::charts::Options,
     cooling_profiles: HashMap<String, wtm_policy::CoolingProfile>,
     alerts: crate::alert::AlertSettings,
+    container_alerts: crate::container_alerts::Settings,
     /// The tray menu's Notifications check, which reset to on at every start.
     notifications: bool,
     tray_on_close: bool,
@@ -710,6 +712,7 @@ impl UiState {
             chart_options: self.charts.options,
             cooling_profiles: self.sensors.profiles.clone(),
             alerts: self.alerts,
+            container_alerts: self.container_alerts,
             notifications: self.notifications,
             tray_on_close: self.tray_on_close,
             check_updates: self.check_updates,
@@ -768,6 +771,7 @@ impl UiState {
         self.devices.layout = prefs.device_layout;
         self.sensors.profiles = prefs.cooling_profiles;
         self.alerts = prefs.alerts;
+        self.container_alerts = prefs.container_alerts;
         self.tray_on_close = prefs.tray_on_close;
         self.check_updates = prefs.check_updates;
         self.skip_version = prefs.skip_version;
@@ -839,6 +843,7 @@ impl Default for UiState {
             overview_editor: None,
             support_bundle: None,
             alerts: crate::alert::AlertSettings::default(),
+            container_alerts: Default::default(),
             notifications: true,
             tray_on_close: true,
             autostart: None,
@@ -969,6 +974,7 @@ impl eframe::App for App {
         }
         let service_mode = matches!(data.mode, Mode::Service { .. });
         data.alert_watch.settings = state.alerts;
+        data.container_alerts.settings = state.container_alerts;
         if state.hide_frames > 0 && tray.is_none() {
             // A failed tray icon must not leave a hidden window with no way
             // to reopen it. The initial --background viewport is hidden too.
@@ -1435,6 +1441,7 @@ impl eframe::App for App {
                         }
                     }
                     Tab::Containers => {
+                        crate::container_alerts::notices(ui, &mut data.container_alerts);
                         crate::containers::show(ui, &data.docker, &mut state.containers)
                     }
                     Tab::Events => events(ui, &data, &mut state.events),
@@ -2076,6 +2083,8 @@ impl eframe::App for App {
             } else {
                 None
             });
+        } else if state.container_alerts.enabled {
+            backend.watch_containers();
         }
         if state.tab == Tab::History {
             let stale = state
@@ -2472,6 +2481,7 @@ fn window_settings(ui: &mut Ui, state: &mut UiState, data: &Data) -> Option<UiCo
                 );
             },
         );
+        crate::container_alerts::settings(ui, &mut state.container_alerts);
         crate::theme::option_switch(
             ui,
             crate::theme::icon::MINIMIZE,
@@ -7946,6 +7956,29 @@ mod tests {
     }
 
     #[test]
+    fn container_alert_settings_are_kept_and_start_off() {
+        use eframe::Storage as _;
+        let mut storage = MemStorage::default();
+        let state = UiState {
+            container_alerts: crate::container_alerts::Settings {
+                enabled: true,
+                cpu: 55.0,
+                memory: 70.0,
+                seconds: 120,
+            },
+            ..UiState::default()
+        };
+        eframe::set_value(&mut storage, PREFS_KEY, &state.prefs());
+        assert_eq!(
+            UiState::restored(Some(&storage)).container_alerts,
+            state.container_alerts
+        );
+        // Saved before container alerts existed: off.
+        storage.set_string(PREFS_KEY, "(tab: About)".into());
+        assert!(!UiState::restored(Some(&storage)).container_alerts.enabled);
+    }
+
+    #[test]
     fn future_overview_cards_do_not_discard_other_window_preferences() {
         use crate::overview_layout::{Card, Layout};
         use eframe::Storage as _;
@@ -12007,6 +12040,66 @@ o-such-folder",
                                 )),
                             );
                             h.get_by_label(crate::i18n::tr("Cancel")).click();
+                            h.run_steps(2);
+                        }
+                        if tab == Tab::Containers {
+                            use crate::container_alerts::{Kind, Notice, Resource};
+                            let at = std::time::SystemTime::now();
+                            let notice = |name: &str, kind| Notice {
+                                at,
+                                name: name.into(),
+                                kind,
+                            };
+                            {
+                                let mut data = h.state().backend.data();
+                                let watch = &mut data.container_alerts;
+                                watch.notices.extend([
+                                    notice(
+                                        "web-1",
+                                        Kind::Above {
+                                            resource: Resource::Cpu,
+                                            share: 86.0,
+                                            docker: Some(344.0),
+                                            lasted: Duration::from_secs(75),
+                                        },
+                                    ),
+                                    notice("web-1", Kind::Back(Resource::Cpu)),
+                                    notice(
+                                        "database-3",
+                                        Kind::Above {
+                                            resource: Resource::Memory,
+                                            share: 93.0,
+                                            docker: None,
+                                            lasted: Duration::from_secs(60),
+                                        },
+                                    ),
+                                ]);
+                            }
+                            h.state_mut().state.container_alerts.enabled = true;
+                            h.run_steps(3);
+                            capture(
+                                &mut h,
+                                &out.join(format!("{theme_name}-{size_name}-ContainerAlerts.png")),
+                            );
+                            h.state().backend.data().container_alerts.notices.clear();
+                            h.state_mut().state.container_alerts.enabled = false;
+                            h.run_steps(2);
+                        }
+                        if tab == Tab::Settings {
+                            h.state_mut().state.config.page = crate::settings::Page::Window;
+                            h.run_steps(3);
+                            h.get_all_by_label(crate::i18n::tr(
+                                "Notify when a container stays above",
+                            ))
+                            .next()
+                            .unwrap()
+                            .scroll_to_me();
+                            h.run_steps(3);
+                            capture(
+                                &mut h,
+                                &out.join(format!("{theme_name}-{size_name}-SettingsWindow.png")),
+                            );
+                            h.state_mut().state.config.page = Default::default();
                             h.run_steps(2);
                         }
                         if tab == Tab::Overview {

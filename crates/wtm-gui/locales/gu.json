@@ -1917,5 +1917,18 @@
   "Resource cards": "રિસોર્સ કાર્ડ",
   "Sections": "વિભાગો",
   "Restore default layout": "ડિફૉલ્ટ લેઆઉટ પુનઃસ્થાપિત કરો",
-  "Every Overview card is hidden.": "અવલોકનનાં બધાં કાર્ડ છુપાયેલાં છે."
+  "Every Overview card is hidden.": "અવલોકનનાં બધાં કાર્ડ છુપાયેલાં છે.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} એ {2} સુધી તેના CPUના {1} વાપર્યા.",
+  "Docker shows {0} (100% per core).": "Docker {0} બતાવે છે (દરેક કોર માટે 100%).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} એ {2} સુધી તેની મેમરી મર્યાદાના {1} વાપર્યા.",
+  "{0}: CPU use is back below the limit.": "{0}: CPU વપરાશ ફરી મર્યાદાથી નીચે છે.",
+  "{0}: memory use is back below the limit.": "{0}: મેમરી વપરાશ ફરી મર્યાદાથી નીચે છે.",
+  "{0} stopped while over a limit.": "{0} મર્યાદાથી ઉપર હતું ત્યારે બંધ થયું.",
+  "Notify when a container stays above": "કન્ટેનર આનાથી ઉપર રહે ત્યારે સૂચિત કરો",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "ત્યારે Docker દર 10 સેકન્ડે તપાસાય છે, પૃષ્ઠભૂમિમાં પણ. CPU એટલે કન્ટેનર વાપરી શકે તે બધા CPUનો હિસ્સો; મેમરી એટલે તેની મર્યાદાનો હિસ્સો, અથવા મર્યાદા ન હોય તો Dockerની મેમરીનો.",
+  "Container alerts": "કન્ટેનર ચેતવણીઓ",
+  "On: CPU above {0} or memory above {1} for {2}.": "ચાલુ: {2} સુધી CPU {0} અથવા મેમરી {1}થી ઉપર.",
+  "Off. Turn them on in Settings.": "બંધ. સેટિંગ્સમાં ચાલુ કરો.",
+  "No container has stayed above a limit.": "કોઈ કન્ટેનર મર્યાદાથી ઉપર રહ્યું નથી.",
+  "Clear": "સાફ કરો"
 }

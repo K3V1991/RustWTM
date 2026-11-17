@@ -1917,5 +1917,18 @@
   "Resource cards": "रिसोर्स कार्ड",
   "Sections": "अनुभाग",
   "Restore default layout": "डिफ़ॉल्ट लेआउट पुनर्स्थापित करें",
-  "Every Overview card is hidden.": "अवलोकन के सभी कार्ड छिपे हुए हैं।"
+  "Every Overview card is hidden.": "अवलोकन के सभी कार्ड छिपे हुए हैं।",
+  "{0} has used {1} of its CPUs for {2}.": "{0} ने {2} तक अपने CPU का {1} उपयोग किया।",
+  "Docker shows {0} (100% per core).": "Docker {0} दिखाता है (प्रति कोर 100%)।",
+  "{0} has used {1} of its memory limit for {2}.": "{0} ने {2} तक अपनी मेमोरी सीमा का {1} उपयोग किया।",
+  "{0}: CPU use is back below the limit.": "{0}: CPU उपयोग फिर से सीमा से नीचे है।",
+  "{0}: memory use is back below the limit.": "{0}: मेमोरी उपयोग फिर से सीमा से नीचे है।",
+  "{0} stopped while over a limit.": "{0} सीमा से ऊपर रहते हुए रुक गया।",
+  "Notify when a container stays above": "कोई कंटेनर इससे ऊपर रहे तो सूचित करें",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "तब Docker हर 10 सेकंड में जाँचा जाता है, बैकग्राउंड में भी। CPU वह हिस्सा है जो कंटेनर अपने सभी उपलब्ध CPU में से उपयोग करता है; मेमोरी उसकी सीमा का हिस्सा है, या सीमा न होने पर Docker की मेमोरी का।",
+  "Container alerts": "कंटेनर अलर्ट",
+  "On: CPU above {0} or memory above {1} for {2}.": "चालू: {2} तक CPU {0} या मेमोरी {1} से ऊपर।",
+  "Off. Turn them on in Settings.": "बंद। इन्हें सेटिंग्स में चालू करें।",
+  "No container has stayed above a limit.": "कोई कंटेनर किसी सीमा से ऊपर नहीं रहा।",
+  "Clear": "साफ़ करें"
 }

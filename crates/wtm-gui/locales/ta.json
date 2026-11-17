@@ -1917,5 +1917,18 @@
   "Resource cards": "ரிசோர்ஸ் கார்டுகள்",
   "Sections": "பிரிவுகள்",
   "Restore default layout": "இயல்புநிலை தளவமைப்பை மீட்டமை",
-  "Every Overview card is hidden.": "மேலோட்டத்தின் எல்லா கார்டுகளும் மறைக்கப்பட்டுள்ளன."
+  "Every Overview card is hidden.": "மேலோட்டத்தின் எல்லா கார்டுகளும் மறைக்கப்பட்டுள்ளன.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} {2} நேரம் தனது CPU-களில் {1} பயன்படுத்தியது.",
+  "Docker shows {0} (100% per core).": "Docker {0} காட்டுகிறது (ஒரு கோருக்கு 100%).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} {2} நேரம் தனது நினைவக வரம்பில் {1} பயன்படுத்தியது.",
+  "{0}: CPU use is back below the limit.": "{0}: CPU பயன்பாடு மீண்டும் வரம்புக்குக் கீழே உள்ளது.",
+  "{0}: memory use is back below the limit.": "{0}: நினைவகப் பயன்பாடு மீண்டும் வரம்புக்குக் கீழே உள்ளது.",
+  "{0} stopped while over a limit.": "{0} வரம்பை மீறியிருந்தபோது நின்றது.",
+  "Notify when a container stays above": "கொள்கலன் இதற்கு மேல் தொடர்ந்தால் அறிவி",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "அப்போது Docker ஒவ்வொரு 10 வினாடிக்கும் சரிபார்க்கப்படும், பின்னணியிலும். CPU என்பது கொள்கலன் பயன்படுத்தக்கூடிய எல்லா CPU-களின் பங்கு; நினைவகம் அதன் வரம்பின் பங்கு, வரம்பு இல்லையெனில் Docker நினைவகத்தின் பங்கு.",
+  "Container alerts": "கொள்கலன் எச்சரிக்கைகள்",
+  "On: CPU above {0} or memory above {1} for {2}.": "இயக்கத்தில்: {2} நேரம் CPU {0} அல்லது நினைவகம் {1}-க்கு மேல்.",
+  "Off. Turn them on in Settings.": "முடக்கத்தில். அமைப்புகளில் இயக்கவும்.",
+  "No container has stayed above a limit.": "எந்தக் கொள்கலனும் வரம்புக்கு மேல் தொடரவில்லை.",
+  "Clear": "அழி"
 }

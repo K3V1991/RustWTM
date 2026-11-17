@@ -1917,5 +1917,18 @@
   "Resource cards": "Bronkaarten",
   "Sections": "Secties",
   "Restore default layout": "Standaardindeling herstellen",
-  "Every Overview card is hidden.": "Alle kaarten van het overzicht zijn verborgen."
+  "Every Overview card is hidden.": "Alle kaarten van het overzicht zijn verborgen.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} heeft {2} lang {1} van zijn CPU's gebruikt.",
+  "Docker shows {0} (100% per core).": "Docker toont {0} (100% per kern).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} heeft {2} lang {1} van zijn geheugenlimiet gebruikt.",
+  "{0}: CPU use is back below the limit.": "{0}: CPU-gebruik weer onder de limiet.",
+  "{0}: memory use is back below the limit.": "{0}: geheugengebruik weer onder de limiet.",
+  "{0} stopped while over a limit.": "{0} is gestopt terwijl een limiet overschreden was.",
+  "Notify when a container stays above": "Melden als een container boven blijft",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "Docker wordt dan elke 10 s gecontroleerd, ook op de achtergrond. CPU is het deel van alle CPU's die een container kan gebruiken; geheugen het deel van zijn limiet, of van het geheugen van Docker als hij er geen heeft.",
+  "Container alerts": "Containermeldingen",
+  "On: CPU above {0} or memory above {1} for {2}.": "Aan: CPU boven {0} of geheugen boven {1} gedurende {2}.",
+  "Off. Turn them on in Settings.": "Uit. Zet ze aan in Instellingen.",
+  "No container has stayed above a limit.": "Geen container is boven een limiet gebleven.",
+  "Clear": "Wissen"
 }

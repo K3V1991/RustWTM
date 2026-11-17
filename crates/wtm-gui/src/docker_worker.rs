@@ -1,10 +1,18 @@
 //! One lazy Docker reader, independent of the process sampler and UI thread.
+//! It reads every 2 s while a page shows Docker, and every [`BACKGROUND`]
+//! while container alerts are on, which it checks after each reading.
 use crate::backend::Data;
+use crate::container_alerts::Notice;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::mpsc::{self, SyncSender};
 use std::sync::{Arc, Mutex, PoisonError, Weak};
 use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
+
+/// Time between readings while only container alerts need them.
+pub const BACKGROUND: Duration = Duration::from_secs(10);
+/// Time between readings while a page shows Docker.
+const SHOWN: Duration = Duration::from_secs(2);
 
 struct Request {
     selected: Option<String>,
@@ -24,9 +32,15 @@ pub struct DockerWorker {
     data: Weak<Mutex<Data>>,
     ctx: eframe::egui::Context,
     control: Mutex<Control>,
+    /// Shows a container notice as a Windows notification.
+    toast: Arc<dyn Fn(&Notice) + Send + Sync>,
 }
 impl DockerWorker {
-    pub fn new(data: &Arc<Mutex<Data>>, ctx: eframe::egui::Context) -> Self {
+    pub fn new(
+        data: &Arc<Mutex<Data>>,
+        ctx: eframe::egui::Context,
+        toast: impl Fn(&Notice) + Send + Sync + 'static,
+    ) -> Self {
         Self {
             data: Arc::downgrade(data),
             ctx,
@@ -34,6 +48,7 @@ impl DockerWorker {
                 session: None,
                 retry: Instant::now(),
             }),
+            toast: Arc::new(toast),
         }
     }
     #[cfg(test)]
@@ -45,13 +60,34 @@ impl DockerWorker {
                 session: None,
                 retry: Instant::now(),
             }),
+            toast: Arc::new(|_: &Notice| {}),
         }
     }
+    /// A page shows Docker: read every 2 s for the next 6 s, with the
+    /// details of `selected`.
     pub fn request(&self, selected: Option<&str>) {
-        if self.data.strong_count() == 0 {
-            return;
+        let control = self.start();
+        if let Some(session) = &control.session {
+            let mut request = session
+                .latest
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner);
+            request.selected = selected.map(str::to_owned);
+            request.until = Instant::now() + Duration::from_secs(6);
+            drop(request);
+            let _ = session.signal.try_send(());
         }
+    }
+    /// Container alerts are on: make sure the reader runs. It keeps reading
+    /// in the background for as long as they stay on.
+    pub fn watch(&self) {
+        drop(self.start());
+    }
+    fn start(&self) -> std::sync::MutexGuard<'_, Control> {
         let mut control = self.control.lock().unwrap_or_else(PoisonError::into_inner);
+        if self.data.strong_count() == 0 {
+            return control;
+        }
         if control.session.is_none() && Instant::now() >= control.retry {
             let (signal, receiver) = mpsc::sync_channel(1);
             let latest = Arc::new(Mutex::new(Request {
@@ -65,6 +101,7 @@ impl DockerWorker {
                 self.data.clone(),
                 self.ctx.clone(),
             );
+            let toast = self.toast.clone();
             match std::thread::Builder::new()
                 .name("docker-monitor".into())
                 .spawn(move || {
@@ -76,6 +113,7 @@ impl DockerWorker {
                         data,
                         ctx,
                         move |selected, stop| sampler.sample(selected, stop),
+                        move |notice| toast(notice),
                     );
                 }) {
                 Ok(worker) => {
@@ -98,16 +136,7 @@ impl DockerWorker {
                 }
             }
         }
-        if let Some(session) = &control.session {
-            let mut request = session
-                .latest
-                .lock()
-                .unwrap_or_else(PoisonError::into_inner);
-            request.selected = selected.map(str::to_owned);
-            request.until = Instant::now() + Duration::from_secs(6);
-            drop(request);
-            let _ = session.signal.try_send(());
-        }
+        control
     }
 }
 fn run(
@@ -117,9 +146,11 @@ fn run(
     data: Weak<Mutex<Data>>,
     ctx: eframe::egui::Context,
     mut sample: impl FnMut(Option<&str>, &AtomicBool) -> Result<wtm_core::docker::Report, String>,
+    toast: impl Fn(&Notice),
 ) {
     let mut next = Instant::now();
     let mut selected = None;
+    let mut was_shown = false;
     while !stopping.load(Ordering::Relaxed) {
         if matches!(
             receiver.recv_timeout(Duration::from_millis(200)),
@@ -131,21 +162,33 @@ fn run(
             let r = requests.lock().unwrap_or_else(PoisonError::into_inner);
             (r.selected.clone(), r.until)
         };
-        if requested != selected {
+        let shown = Instant::now() < until;
+        if requested != selected || (shown && !was_shown) {
             selected = requested;
             next = Instant::now();
         }
-        if Instant::now() < next || Instant::now() >= until {
+        was_shown = shown;
+        let Some(watching) = data.upgrade().map(|data| {
+            data.lock()
+                .unwrap_or_else(PoisonError::into_inner)
+                .container_alerts
+                .settings
+                .enabled
+        }) else {
+            break;
+        };
+        if Instant::now() < next || !(shown || watching) {
             continue;
         }
-        let report = sample(selected.as_deref(), &stopping);
+        // Details and logs only for a page that shows them.
+        let report = sample(selected.as_deref().filter(|_| shown), &stopping);
         if stopping.load(Ordering::Relaxed) {
             break;
         }
         let Some(data) = data.upgrade() else {
             break;
         };
-        {
+        let notices = {
             let mut data = data.lock().unwrap_or_else(PoisonError::into_inner);
             let mut state = (*data.docker).clone();
             match report {
@@ -155,10 +198,18 @@ fn run(
                 }
                 Err(error) => state.error = Some(error),
             }
+            let notices = data.container_alerts.update(Instant::now(), &state);
             data.docker = Arc::new(state);
-        }
+            notices
+        };
+        // Many containers crossing a limit together: the first few as
+        // notifications, all of them on the Containers page.
+        notices
+            .iter()
+            .take(crate::container_alerts::TOASTS_PER_CHECK)
+            .for_each(&toast);
         ctx.request_repaint();
-        next = Instant::now() + Duration::from_secs(2);
+        next = Instant::now() + if shown { SHOWN } else { BACKGROUND };
     }
 }
 
@@ -185,6 +236,82 @@ impl Drop for DockerWorker {
 #[cfg(test)]
 mod tests {
     use super::*;
+    /// Runs the reader with no page asking for Docker, alerts `on` or off,
+    /// until it has read once or `wait` has passed.
+    fn background(on: bool, wait: Duration) -> (Vec<Option<String>>, Vec<String>) {
+        let data = Arc::new(Mutex::new(Data::default()));
+        {
+            let mut d = data.lock().unwrap();
+            d.container_alerts.settings = crate::container_alerts::Settings {
+                enabled: on,
+                // Of the fixture's running containers only database-3 is
+                // above: 72.5% in Docker's count, 18% of its 4 cores.
+                cpu: 15.0,
+                seconds: 0,
+                ..Default::default()
+            };
+        }
+        let requests = Arc::new(Mutex::new(Request {
+            selected: Some("details".into()),
+            // No page has asked for Docker recently.
+            until: Instant::now(),
+        }));
+        let stop = Arc::new(AtomicBool::new(false));
+        let (_signal, receiver) = mpsc::sync_channel(1);
+        let (read, reads) = mpsc::channel();
+        let (shown, toasts) = mpsc::channel();
+        let (weak, stopping) = (Arc::downgrade(&data), stop.clone());
+        let worker = std::thread::spawn(move || {
+            run(
+                receiver,
+                requests,
+                stopping,
+                weak,
+                Default::default(),
+                move |id, _| {
+                    read.send(id.map(str::to_owned)).unwrap();
+                    Ok(crate::containers::fixture().report.unwrap())
+                },
+                move |notice| shown.send(notice.text()).unwrap(),
+            )
+        });
+        let first = reads.recv_timeout(wait).ok();
+        // With alerts on, the reading is followed by its notice.
+        let notified = if on {
+            toasts.recv_timeout(wait).ok()
+        } else {
+            None
+        };
+        stop.store(true, Ordering::Relaxed);
+        worker.join().unwrap();
+        let toasts: Vec<String> = notified.into_iter().chain(toasts.try_iter()).collect();
+        if on {
+            let d = data.lock().unwrap();
+            assert!(d.docker.report.is_some(), "the reading is published");
+            assert_eq!(d.container_alerts.notices.len(), toasts.len());
+        }
+        (first.into_iter().collect(), toasts)
+    }
+
+    #[test]
+    fn alerts_keep_docker_read_in_the_background_and_notify() {
+        let (reads, toasts) = background(true, Duration::from_secs(3));
+        // Read without a page asking, and without the details only a page shows.
+        assert_eq!(reads, [None]);
+        // database-4 is busier but has exited: it is not followed.
+        assert_eq!(toasts.len(), 1, "{toasts:?}");
+        assert!(
+            toasts[0].starts_with("database-3 has used 18% of its CPUs for 0s. Docker shows 7"),
+            "{toasts:?}"
+        );
+        let (reads, toasts) = background(false, Duration::from_millis(600));
+        assert!(
+            reads.is_empty(),
+            "alerts off and no page: Docker is not read"
+        );
+        assert!(toasts.is_empty());
+    }
+
     #[test]
     fn slow_docker_does_not_lock_process_data_and_shutdown_discards_its_reply() {
         let data = Arc::new(Mutex::new(Data::default()));
@@ -209,6 +336,7 @@ mod tests {
                     gate.recv_timeout(Duration::from_secs(3)).unwrap();
                     Ok(crate::containers::fixture().report.unwrap())
                 },
+                |_| {},
             )
         });
         signal.send(()).unwrap();

@@ -1917,5 +1917,18 @@
   "Resource cards": "రిసోర్స్ కార్డ్‌లు",
   "Sections": "విభాగాలు",
   "Restore default layout": "డిఫాల్ట్ లేఅవుట్‌ను పునరుద్ధరించు",
-  "Every Overview card is hidden.": "అవలోకనంలోని అన్ని కార్డ్‌లు దాచబడ్డాయి."
+  "Every Overview card is hidden.": "అవలోకనంలోని అన్ని కార్డ్‌లు దాచబడ్డాయి.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} {2} పాటు తన CPUలలో {1} ఉపయోగించింది.",
+  "Docker shows {0} (100% per core).": "Docker {0} చూపుతుంది (ఒక్కో కోర్‌కు 100%).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} {2} పాటు తన మెమరీ పరిమితిలో {1} ఉపయోగించింది.",
+  "{0}: CPU use is back below the limit.": "{0}: CPU వినియోగం మళ్లీ పరిమితి కంటే తక్కువగా ఉంది.",
+  "{0}: memory use is back below the limit.": "{0}: మెమరీ వినియోగం మళ్లీ పరిమితి కంటే తక్కువగా ఉంది.",
+  "{0} stopped while over a limit.": "{0} పరిమితిని మించి ఉండగా ఆగిపోయింది.",
+  "Notify when a container stays above": "కంటైనర్ దీని కంటే ఎక్కువగా ఉంటే తెలియజేయి",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "అప్పుడు Docker ప్రతి 10 సెకన్లకు తనిఖీ చేయబడుతుంది, నేపథ్యంలో కూడా. CPU అంటే కంటైనర్ ఉపయోగించగల అన్ని CPUల వాటా; మెమరీ అంటే దాని పరిమితి వాటా, పరిమితి లేకపోతే Docker మెమరీ వాటా.",
+  "Container alerts": "కంటైనర్ హెచ్చరికలు",
+  "On: CPU above {0} or memory above {1} for {2}.": "ఆన్: {2} పాటు CPU {0} లేదా మెమరీ {1} కంటే ఎక్కువ.",
+  "Off. Turn them on in Settings.": "ఆఫ్. సెట్టింగ్‌లలో ఆన్ చేయండి.",
+  "No container has stayed above a limit.": "ఏ కంటైనర్ కూడా పరిమితిని మించి ఉండలేదు.",
+  "Clear": "క్లియర్ చేయి"
 }

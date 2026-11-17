@@ -1917,5 +1917,18 @@
   "Resource cards": "Карточки ресурсов",
   "Sections": "Разделы",
   "Restore default layout": "Восстановить макет по умолчанию",
-  "Every Overview card is hidden.": "Все карточки обзора скрыты."
+  "Every Overview card is hidden.": "Все карточки обзора скрыты.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} использовал {1} своих CPU в течение {2}.",
+  "Docker shows {0} (100% per core).": "Docker показывает {0} (100% на ядро).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} использовал {1} своего лимита памяти в течение {2}.",
+  "{0}: CPU use is back below the limit.": "{0}: загрузка CPU снова ниже лимита.",
+  "{0}: memory use is back below the limit.": "{0}: использование памяти снова ниже лимита.",
+  "{0} stopped while over a limit.": "{0} остановился, превышая лимит.",
+  "Notify when a container stays above": "Уведомлять, когда контейнер дольше выше",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "Тогда Docker опрашивается каждые 10 с, в том числе в фоне. CPU — доля всех CPU, доступных контейнеру; память — доля его лимита, а без лимита — доля памяти Docker.",
+  "Container alerts": "Оповещения контейнеров",
+  "On: CPU above {0} or memory above {1} for {2}.": "Вкл.: CPU выше {0} или память выше {1} в течение {2}.",
+  "Off. Turn them on in Settings.": "Выкл. Включите их в параметрах.",
+  "No container has stayed above a limit.": "Ни один контейнер не превышал лимит.",
+  "Clear": "Очистить"
 }

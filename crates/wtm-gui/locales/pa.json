@@ -1917,5 +1917,18 @@
   "Resource cards": "ਰਿਸੋਰਸ ਕਾਰਡ",
   "Sections": "ਭਾਗ",
   "Restore default layout": "ਡਿਫੌਲਟ ਲੇਆਉਟ ਬਹਾਲ ਕਰੋ",
-  "Every Overview card is hidden.": "ਝਲਕ ਦੇ ਸਾਰੇ ਕਾਰਡ ਲੁਕੇ ਹੋਏ ਹਨ।"
+  "Every Overview card is hidden.": "ਝਲਕ ਦੇ ਸਾਰੇ ਕਾਰਡ ਲੁਕੇ ਹੋਏ ਹਨ।",
+  "{0} has used {1} of its CPUs for {2}.": "{0} ਨੇ {2} ਤੱਕ ਆਪਣੇ CPU ਦਾ {1} ਵਰਤਿਆ।",
+  "Docker shows {0} (100% per core).": "Docker {0} ਦਿਖਾਉਂਦਾ ਹੈ (ਹਰ ਕੋਰ ਲਈ 100%)।",
+  "{0} has used {1} of its memory limit for {2}.": "{0} ਨੇ {2} ਤੱਕ ਆਪਣੀ ਮੈਮੋਰੀ ਸੀਮਾ ਦਾ {1} ਵਰਤਿਆ।",
+  "{0}: CPU use is back below the limit.": "{0}: CPU ਵਰਤੋਂ ਮੁੜ ਸੀਮਾ ਤੋਂ ਹੇਠਾਂ ਹੈ।",
+  "{0}: memory use is back below the limit.": "{0}: ਮੈਮੋਰੀ ਵਰਤੋਂ ਮੁੜ ਸੀਮਾ ਤੋਂ ਹੇਠਾਂ ਹੈ।",
+  "{0} stopped while over a limit.": "{0} ਸੀਮਾ ਤੋਂ ਉੱਪਰ ਹੁੰਦਿਆਂ ਰੁਕ ਗਿਆ।",
+  "Notify when a container stays above": "ਜਦੋਂ ਕੋਈ ਕੰਟੇਨਰ ਇਸ ਤੋਂ ਉੱਪਰ ਰਹੇ ਤਾਂ ਸੂਚਿਤ ਕਰੋ",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "ਤਦ Docker ਹਰ 10 ਸਕਿੰਟ ਵਿੱਚ ਜਾਂਚਿਆ ਜਾਂਦਾ ਹੈ, ਪਿਛੋਕੜ ਵਿੱਚ ਵੀ। CPU ਉਹ ਹਿੱਸਾ ਹੈ ਜੋ ਕੰਟੇਨਰ ਆਪਣੇ ਸਾਰੇ ਉਪਲਬਧ CPU ਵਿੱਚੋਂ ਵਰਤਦਾ ਹੈ; ਮੈਮੋਰੀ ਉਸ ਦੀ ਸੀਮਾ ਦਾ ਹਿੱਸਾ ਹੈ, ਜਾਂ ਸੀਮਾ ਨਾ ਹੋਣ 'ਤੇ Docker ਦੀ ਮੈਮੋਰੀ ਦਾ।",
+  "Container alerts": "ਕੰਟੇਨਰ ਚੇਤਾਵਨੀਆਂ",
+  "On: CPU above {0} or memory above {1} for {2}.": "ਚਾਲੂ: {2} ਤੱਕ CPU {0} ਜਾਂ ਮੈਮੋਰੀ {1} ਤੋਂ ਉੱਪਰ।",
+  "Off. Turn them on in Settings.": "ਬੰਦ। ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਾਲੂ ਕਰੋ।",
+  "No container has stayed above a limit.": "ਕੋਈ ਕੰਟੇਨਰ ਕਿਸੇ ਸੀਮਾ ਤੋਂ ਉੱਪਰ ਨਹੀਂ ਰਿਹਾ।",
+  "Clear": "ਸਾਫ਼ ਕਰੋ"
 }

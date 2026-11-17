@@ -1917,5 +1917,18 @@
   "Resource cards": "Kartu sumber daya",
   "Sections": "Bagian",
   "Restore default layout": "Pulihkan tata letak default",
-  "Every Overview card is hidden.": "Semua kartu Ikhtisar disembunyikan."
+  "Every Overview card is hidden.": "Semua kartu Ikhtisar disembunyikan.",
+  "{0} has used {1} of its CPUs for {2}.": "{0} telah memakai {1} dari CPU-nya selama {2}.",
+  "Docker shows {0} (100% per core).": "Docker menampilkan {0} (100% per core).",
+  "{0} has used {1} of its memory limit for {2}.": "{0} telah memakai {1} dari batas memorinya selama {2}.",
+  "{0}: CPU use is back below the limit.": "{0}: penggunaan CPU kembali di bawah batas.",
+  "{0}: memory use is back below the limit.": "{0}: penggunaan memori kembali di bawah batas.",
+  "{0} stopped while over a limit.": "{0} berhenti saat melebihi batas.",
+  "Notify when a container stays above": "Beri tahu saat kontainer tetap di atas",
+  "Docker is then checked every 10 s, also in the background. CPU is the share of all the CPUs a container can use; memory the share of its limit, or of Docker's memory when it has none.": "Docker lalu diperiksa setiap 10 dtk, juga di latar belakang. CPU adalah bagian dari semua CPU yang dapat dipakai kontainer; memori adalah bagian dari batasnya, atau dari memori Docker bila tidak ada batas.",
+  "Container alerts": "Peringatan kontainer",
+  "On: CPU above {0} or memory above {1} for {2}.": "Aktif: CPU di atas {0} atau memori di atas {1} selama {2}.",
+  "Off. Turn them on in Settings.": "Nonaktif. Aktifkan di Pengaturan.",
+  "No container has stayed above a limit.": "Tidak ada kontainer yang tetap di atas batas.",
+  "Clear": "Hapus"
 }

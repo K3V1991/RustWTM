@@ -31,6 +31,17 @@ All notable changes to this project are documented here. The format follows
   and game mode) always show. A card added by a later version shows until
   it is hidden, and a card this version does not know is dropped without
   resetting the other window preferences.
+- Container alerts (Settings → This window, off by default): a Windows
+  notification when a running container stays above a CPU or memory limit
+  for the chosen time, another when it is back below, and one when it
+  stops or is removed while over a limit; the Containers page lists the last
+  50. CPU is compared as a share of the CPUs the container can use, so
+  Docker's Linux count (100% per core) and Windows count give the same
+  meaning, and the notice shows Docker's own figure too. Containers are
+  followed by name across restarts and re-creation. Late measurements,
+  Docker being unreachable, a cut listing or another context never raise or
+  end an alert, and an ended alert stays quiet for five minutes. While on,
+  Docker is read every 10 s in the background, without details or logs.
 
 ### Fixed
 
