@@ -12269,6 +12269,27 @@ o-such-folder",
                             );
                             d.foreground_pid = Some(p.pid);
                         }
+                        if tab == Tab::Overview {
+                            d.memory_composition = Some(wtm_sys::memory::Composition {
+                                total: 16 << 30,
+                                available: 8 << 30,
+                                installed: Some(16 << 30),
+                                paged_pool: 600 << 20,
+                                nonpaged_pool: 300 << 20,
+                                modified: Some(400 << 20),
+                                standby: Some(5 << 30),
+                                free: Some((2 << 30) + (600 << 20)),
+                            });
+                            let snap = std::sync::Arc::make_mut(d.snapshot.as_mut().unwrap());
+                            snap.system.net_adapters = vec![wtm_core::NetAdapterUsage {
+                                luid: 1,
+                                name: "Ethernet".into(),
+                                link_speed: 1_000_000,
+                                rx_rate: 2048.0,
+                                tx_rate: 512.0,
+                                ..Default::default()
+                            }];
+                        }
                         let (backend, _rx) = Backend::offline(d);
                         let mut h = Harness::builder()
                             .allow_missing_glyphs()

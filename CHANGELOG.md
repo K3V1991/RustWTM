@@ -93,6 +93,20 @@ refuse each other, as before.
   Before, a declined prompt or a failed installer just started the old
   version again without a word.
 
+### Changed
+
+- The Overview is redrawn. Each resource card is tinted in its colour and
+  shows what its reading is made of: a cell per logical processor, the
+  in use, modified, standby and free memory, the busiest GPU engines, how
+  busy each disk is and how full each network link is (hover for the
+  numbers). The verdict leads the page with the process, thread and
+  handle counts and the hottest sensor beside it; the rescue core, game
+  mode and programs not responding are marked notices. The busiest apps
+  and Docker containers have bars ranking them, the protection state is a
+  pill with its facts as chips, the levels are one segmented control, and
+  recent automatic actions are a timeline coloured by level. Nothing
+  animates, so the page asks for no extra redraws.
+
 ### Fixed
 
 - The service kept every daily log file for ever (30 files, 33 MB after a

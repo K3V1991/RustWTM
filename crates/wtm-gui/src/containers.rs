@@ -83,14 +83,37 @@ pub fn overview(ui: &mut Ui, state: &State) -> bool {
                     .unwrap_or(0.0)
                     .total_cmp(&a.metrics.cpu.unwrap_or(0.0))
             });
-            for c in busy.into_iter().take(3) {
-                ui.label(format!(
-                    "{}  ·  {} CPU  ·  {}",
-                    c.name,
-                    crate::i18n::percent(format!("{:.1}", c.metrics.cpu.unwrap_or(0.0))),
-                    value(c.metrics.memory.map(|n| n as f64))
-                ));
-            }
+            let busy: Vec<_> = busy.into_iter().take(3).collect();
+            // Bars rank the containers shown against the busiest of them.
+            let top = busy
+                .iter()
+                .map(|c| c.metrics.cpu.unwrap_or(0.0))
+                .fold(1.0_f32, f32::max);
+            egui::Grid::new("overview_containers")
+                .num_columns(3)
+                .spacing([16.0, 4.0])
+                .show(ui, |ui| {
+                    for c in busy {
+                        let cpu = c.metrics.cpu.unwrap_or(0.0);
+                        ui.horizontal(|ui| {
+                            let (dot, _) =
+                                ui.allocate_exact_size(egui::vec2(8.0, 14.0), egui::Sense::hover());
+                            ui.painter().circle_filled(dot.center(), 3.5, theme::GOOD);
+                            ui.label(&c.name);
+                        });
+                        crate::overview::bar_cell(
+                            ui,
+                            egui::RichText::new(format!(
+                                "{} CPU",
+                                crate::i18n::percent(format!("{cpu:.1}"))
+                            )),
+                            cpu / top,
+                            theme::CPU,
+                        );
+                        ui.label(value(c.metrics.memory.map(|n| n as f64)));
+                        ui.end_row();
+                    }
+                });
         }
     });
     open
