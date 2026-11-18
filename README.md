@@ -43,7 +43,17 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.36.0
+## New in 0.36.1
+
+[Release scope and validation](docs/0.36.1-review.md)
+
+- **Time in your language:** container alerts, recorded history and App
+  history write "1 dk 15 sn" or "21 Std." instead of "1m 15s" and
+  "21h 00m", and the 1 h, 6 h and 24 h period buttons are translated.
+
+IPC stays at protocol 18, so a 0.36.0 service keeps working with this GUI.
+
+## Included since 0.36.0
 
 [Release scope and validation](docs/0.36.0-review.md)
 
@@ -560,8 +570,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.36.0-x64.msi            # interactive
-msiexec /i RustWTM-0.36.0-x64.msi /qn        # silent
+msiexec /i RustWTM-0.36.1-x64.msi            # interactive
+msiexec /i RustWTM-0.36.1-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc

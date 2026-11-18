@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.36.1] - 2026-11-18
+
+Lengths of time and period buttons are written in the window's language,
+found by the visual review of 0.36.0's new pages in English, Turkish and
+German. IPC stays at protocol 18, so a 0.36.0 service and a 0.36.1 window
+work together.
+
 ### Fixed
 
 - Lengths of time are written in the window's language: container alerts,
@@ -1988,7 +1995,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.1...HEAD
+[0.36.1]: https://github.com/rustwtm/rustwtm/compare/v0.36.0...v0.36.1
 [0.36.0]: https://github.com/rustwtm/rustwtm/compare/v0.35.0...v0.36.0
 [0.35.0]: https://github.com/rustwtm/rustwtm/compare/v0.34.0...v0.35.0
 [0.34.0]: https://github.com/rustwtm/rustwtm/compare/v0.33.0...v0.34.0
