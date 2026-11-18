@@ -43,7 +43,18 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.36.1
+## New in 0.36.2
+
+[Release scope and validation](docs/0.36.2-review.md)
+
+- **Every page reviewed in three languages:** the process inspector's up
+  time, sensor ranges, singular counts, Limits' GiB budgets and many
+  Turkish and German phrases are corrected; durations of two days or more
+  are written in days.
+
+IPC stays at protocol 18, so a 0.36.x service keeps working with this GUI.
+
+## Included since 0.36.1
 
 [Release scope and validation](docs/0.36.1-review.md)
 
@@ -570,8 +581,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.36.1-x64.msi            # interactive
-msiexec /i RustWTM-0.36.1-x64.msi /qn        # silent
+msiexec /i RustWTM-0.36.2-x64.msi            # interactive
+msiexec /i RustWTM-0.36.2-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc

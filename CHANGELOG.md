@@ -6,6 +6,39 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.36.2] - 2026-11-18
+
+Fixes from the visual review of the pages 0.36.x had not looked at
+(Processes, Disks, Sensors, Governor, Limits, Kill list, Network, Ports,
+Startup and the rest) in English, Turkish and German. IPC stays at
+protocol 18, so a 0.36.x service and a 0.36.2 window work together.
+
+### Fixed
+
+- The process inspector wrote its up time as "2h 00m 03s" in every
+  language; it uses the window's units now ("2 sa", "2 Std."). Lengths of
+  two days or more are written in days and hours ("6 gün 23 sa",
+  "6 Tage 23 Std.") instead of hours alone.
+- Sensors' *Min / max* column used a decimal point in Turkish and German
+  while the reading beside it used a comma.
+- English: the Governor's effective limits and its events named the
+  priority class as Windows' API does ("BelowNormal"); they say "below
+  normal".
+- Limits wrote memory budgets in "GB" though they are GiB, as the rest of
+  the window and the service count them; `wtm config` lists them in GiB
+  too.
+- Kill list: the CPU field put the percent sign after the number in
+  Turkish ("50% CPU"); it reads "%50 CPU" like the rest of the window.
+- Network wrote protocols as "Tcp" and "Udp"; they read "TCP" and "UDP".
+- A count of one took the plural in German, French, Spanish, Italian,
+  Dutch, Brazilian Portuguese and Ukrainian ("1 TCP-Ports lauschen",
+  "1 Autostart-Apps").
+- Turkish: a percentage no longer takes a suffix that only fits some
+  numbers ("%50'ı"); "instance" is "kopya", not "örnek"; the Limits
+  dry-run notice, *Ask AI about this PC*, the uninstall notice, the fan's
+  manual duty and "stays above … for …" read naturally.
+- German: "Zuwachs/Std." and the GPU card's busiest-engine line.
+
 ## [0.36.1] - 2026-11-18
 
 Lengths of time and period buttons are written in the window's language,
@@ -1995,7 +2028,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.1...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.2...HEAD
+[0.36.2]: https://github.com/rustwtm/rustwtm/compare/v0.36.1...v0.36.2
 [0.36.1]: https://github.com/rustwtm/rustwtm/compare/v0.36.0...v0.36.1
 [0.36.0]: https://github.com/rustwtm/rustwtm/compare/v0.35.0...v0.36.0
 [0.35.0]: https://github.com/rustwtm/rustwtm/compare/v0.34.0...v0.35.0
