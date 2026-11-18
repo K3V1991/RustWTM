@@ -545,7 +545,7 @@ pub fn network(
                 }));
                 row.col(|ui| crate::theme::table_cell(ui, |ui| {right(ui, c.pid.to_string()); }));
                 row.col(|ui| crate::theme::table_cell(ui, |ui| {
-                    ui.label(format!("{:?}", c.protocol));
+                    ui.label(format!("{:?}", c.protocol).to_uppercase());
                 }));
                 row.col(|ui| crate::theme::table_cell(ui, |ui| {
                     ui.label(c.local.to_string());

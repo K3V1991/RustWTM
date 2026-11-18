@@ -1657,7 +1657,8 @@ fn connections_filter_by_state_and_name_missing_owners() {
         h.query_by_label("Exited").is_some(),
         "PID 999 is not running"
     );
-    h.get_by_label("UDP").click();
+    // The filter comes before the rows, which now read "UDP" too.
+    h.get_all_by_label("UDP").next().unwrap().click();
     h.run_steps(2);
     assert!(h.query_by_label("[::1]:53").is_some());
     assert!(h.query_by_label("127.0.0.1:8080").is_none());
@@ -2023,8 +2024,8 @@ fn processes_show_limits_and_fit_cpu_limits_to_the_machine() {
             view.ui(ui, &snap, &extra(&managed));
         });
     h.run();
-    assert!(h.query_by_label("Governor: BelowNormal").is_some());
-    assert!(h.query_by_label("App limit: 1.5 cores, 8 GB").is_some());
+    assert!(h.query_by_label("Governor: below normal").is_some());
+    assert!(h.query_by_label("App limit: 1.5 cores, 8 GiB").is_some());
     h.get_by_label("beta.exe").click_secondary();
     h.run();
     h.get_all_by_label("Limits").last().unwrap().hover();

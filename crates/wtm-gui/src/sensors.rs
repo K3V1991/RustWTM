@@ -107,7 +107,7 @@ fn range(kind: SensorKind, min: f32, max: f32) -> String {
         SensorKind::Fan | SensorKind::Clock => 0,
         _ => 1,
     };
-    format!("{min:.digits$} – {max:.digits$} {}", kind.unit())
+    crate::i18n::decimal(format!("{min:.digits$} – {max:.digits$} {}", kind.unit()))
 }
 
 pub fn sensors(ui: &mut Ui, data: &Data, view: &mut SensorsView) -> Vec<UiCommand> {
@@ -631,6 +631,15 @@ mod tests {
         view: SensorsView,
         sent: Vec<(String, CoolingProfile)>,
     }
+
+    #[test]
+    fn a_range_uses_the_language_decimal_sign() {
+        assert_eq!(range(SensorKind::Power, 39.14, 45.9), "39.1 – 45.9 W");
+        let _tr = crate::i18n::scope(crate::i18n::Language::Turkish);
+        assert_eq!(range(SensorKind::Power, 39.14, 45.9), "39,1 – 45,9 W");
+        assert_eq!(range(SensorKind::Fan, 1104.0, 1296.0), "1104 – 1296 RPM");
+    }
+
     fn harness() -> Harness<'static, State> {
         let mut data = crate::ui_tests::data();
         data.hardware = fixture();

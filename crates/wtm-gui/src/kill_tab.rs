@@ -501,6 +501,8 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
             ],
         );
         let automatic = crate::i18n::tr("End it automatically at");
+        // "50% CPU", or "%50 CPU" where the sign goes first.
+        let (before, after) = crate::i18n::percent_affixes();
         option_named_by_control(ui, icon::SPEED, automatic, &share, |ui| {
             ui.add_enabled(
                 view.automatic,
@@ -508,7 +510,8 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
                     .local_decimal()
                     .range(1.0..=100.0)
                     .clamp_existing_to_range(false)
-                    .suffix(crate::i18n::tr("% CPU")),
+                    .prefix(before)
+                    .suffix(format!("{after} CPU")),
             );
             ui.label(crate::i18n::tr("for"));
             ui.add_enabled(

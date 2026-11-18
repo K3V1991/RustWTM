@@ -436,7 +436,7 @@ egui::Grid::new("app_limits_grid")
                     .clamp_existing_to_range(false)
                     .speed(0.1)
                     .max_decimals(2)
-                    .suffix(crate::i18n::tr(" GB")),
+                    .suffix(" GiB"),
             );
             ui.add_space(8.0);
             ui.label(crate::i18n::tr(if view.memory { "On" } else { "Off" }));

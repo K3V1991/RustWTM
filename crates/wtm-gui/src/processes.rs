@@ -14,14 +14,14 @@ use wtm_ipc::Command;
 /// The Limits column text per process instance.
 pub type ManagedMap = HashMap<(u32, i64), String>;
 
-/// Short form of an app limit's budgets, e.g. `2 cores, 8 GB`.
+/// Short form of an app limit's budgets, e.g. `2 cores, 8 GiB`.
 pub fn budget_label(limit: &wtm_policy::AppLimit) -> String {
     let mut parts = Vec::new();
     if let Some(c) = limit.cpu_cores {
         parts.push(crate::i18n::format("{0} cores", &[format!("{}", c)]));
     }
     if let Some(m) = limit.memory_gb {
-        parts.push(crate::i18n::format("{0} GB", &[format!("{}", m)]));
+        parts.push(crate::i18n::decimal(format!("{m} GiB")));
     }
     parts.join(", ")
 }

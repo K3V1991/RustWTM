@@ -110,7 +110,7 @@ pub fn app_limit(
                     "{:<24} {:>8} {:>10} {:<10} {:>6} {:>9.1}% {:>10}",
                     l.name,
                     l.cpu_cores.map_or("-".to_owned(), |c| c.to_string()),
-                    l.memory_gb.map_or("-".to_owned(), |m| format!("{m} GB")),
+                    l.memory_gb.map_or("-".to_owned(), |m| format!("{m} GiB")),
                     if l.scope == LimitScope::Each {
                         "each"
                     } else {
@@ -360,7 +360,7 @@ mod tests {
             let out = out.unwrap();
             assert!(out.starts_with("APP"), "{out}");
             assert!(
-                out.contains("zen.exe") && out.contains("8 GB") && out.contains("each"),
+                out.contains("zen.exe") && out.contains("8 GiB") && out.contains("each"),
                 "{out}"
             );
             assert!(out.contains("Dry-run mode"), "{out}");

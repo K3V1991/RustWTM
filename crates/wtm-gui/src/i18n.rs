@@ -375,6 +375,14 @@ pub fn message(english: &str) -> std::borrow::Cow<'_, str> {
     }
     let language = index();
     if language == 0 {
+        // The service names priority classes as Windows' API does.
+        if english.contains("BelowNormal") || english.contains("AboveNormal") {
+            return Cow::Owned(
+                english
+                    .replace("BelowNormal", "below normal")
+                    .replace("AboveNormal", "above normal"),
+            );
+        }
         return Cow::Borrowed(english);
     }
     let known = SEEN.with(|seen| {
@@ -530,8 +538,9 @@ pub fn bytes(n: f64) -> String {
 
 /// A length of time (`wtm_core::format_duration`) in the language's units:
 /// "1m 15s" in English, "1 dk 15 sn" in Turkish, "21 Std." in German. A
-/// zero second part is left out ("1 dk"); a day or more is counted in hours,
-/// as the catalog has no day unit.
+/// zero part is left out ("1 dk"). Two days or more are written in days and
+/// hours ("6 gün 23 sa"); a single day stays in hours ("30 sa"), as the
+/// catalog's day unit is a plural.
 pub fn duration(d: std::time::Duration) -> String {
     if index() == 0 {
         return wtm_core::format_duration(d);
@@ -545,9 +554,13 @@ pub fn duration(d: std::time::Duration) -> String {
             minutes(s / 60),
             (!s.is_multiple_of(60)).then(|| seconds(s % 60)),
         ),
-        _ => (
+        3600..172_800 => (
             hours(s / 3600),
             (s % 3600 / 60 > 0).then(|| minutes(s % 3600 / 60)),
+        ),
+        _ => (
+            format!("{}{}", s / 86_400, tr(" days")),
+            (s % 86_400 / 3600 > 0).then(|| hours(s % 86_400 / 3600)),
         ),
     };
     match rest {
@@ -797,6 +810,20 @@ mod tests {
         }
     }
     #[test]
+    fn english_names_priority_classes_in_words() {
+        let _scope = scope(Language::English);
+        assert_eq!(
+            message("Governor: priority BelowNormal (system CPU 98%)"),
+            "Governor: priority below normal (system CPU 98%)"
+        );
+        assert_eq!(
+            message("AboveNormal, efficiency mode"),
+            "above normal, efficiency mode"
+        );
+        assert_eq!(message("Idle"), "Idle");
+    }
+
+    #[test]
     fn durations_and_periods_use_the_language_units() {
         let d = std::time::Duration::from_secs;
         for (language, expected) in [
@@ -813,7 +840,7 @@ mod tests {
                     "1 dk 15 sn",
                     "1 dk",
                     "21 sa",
-                    "167 sa",
+                    "6 gün 23 sa",
                     "24 sa",
                     "7 gün",
                 ],
@@ -825,7 +852,7 @@ mod tests {
                     "1 Min. 15 s",
                     "1 Min.",
                     "21 Std.",
-                    "167 Std.",
+                    "6 Tage 23 Std.",
                     "24 Std.",
                     "7 Tage",
                 ],

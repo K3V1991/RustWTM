@@ -288,7 +288,7 @@
     "es": "Seleccione un proceso para inspeccionar su identidad, actividad y acciones. Borre la selección para volver aquí."
   },
   "{0} available of {1}": {
-    "tr": "{1} toplamın {0} kadarı kullanılabilir",
+    "tr": "{0} / {1} kullanılabilir",
     "de": "{0} von {1} verfügbar",
     "fr": "{0} disponibles sur {1}",
     "es": "{0} disponibles de {1}"
@@ -301,7 +301,7 @@
   },
   "Busiest engine across all GPUs": {
     "tr": "Tüm GPU’lar içindeki en yoğun motor",
-    "de": "Aktivste Engine aller GPUs",
+    "de": "Am stärksten ausgelastete Engine aller GPUs",
     "fr": "Moteur le plus actif de tous les GPU",
     "es": "Motor más activo de todas las GPU"
   },
@@ -1199,12 +1199,6 @@
     "fr": "Terminer automatiquement à",
     "es": "Finalizar automáticamente al"
   },
-  "% CPU": {
-    "tr": "% CPU",
-    "de": "% CPU",
-    "fr": "% CPU",
-    "es": "% CPU"
-  },
   "only while the PC is above": {
     "tr": "yalnızca bilgisayar şu değerin üzerindeyken",
     "de": "nur bei PC-Last über",
@@ -1242,7 +1236,7 @@
     "es": "todos los procesos juntos"
   },
   "each instance separately": {
-    "tr": "her örnek ayrı",
+    "tr": "her kopya ayrı ayrı",
     "de": "jede Instanz einzeln",
     "fr": "chaque instance séparément",
     "es": "cada instancia por separado"
@@ -1254,7 +1248,7 @@
     "es": "La aplicación y sus procesos hijos comparten el presupuesto. Al alcanzar el límite de memoria se producen errores de memoria insuficiente."
   },
   "Dry-run mode: limits are only previewed in the event log. Switch to enforcing in Settings.": {
-    "tr": "Deneme modu: sınırlar yalnızca olay günlüğünde gösterilir. Ayarlar'dan uygulamayı etkinleştirin.",
+    "tr": "Deneme modu: sınırlar yalnızca olay günlüğünde gösterilir. Uygulamak için Ayarlar'da \"Uygulanıyor\" seçeneğine geçin.",
     "de": "Testmodus: Grenzen werden nur protokolliert. In Einstellungen aktivieren.",
     "fr": "Simulation : limites uniquement journalisées. Activez l'application dans les paramètres.",
     "es": "Simulación: los límites solo se registran. Active la aplicación en Configuración."
@@ -1343,12 +1337,6 @@
     "fr": " cœurs",
     "es": " núcleos"
   },
-  " GB": {
-    "tr": " GB",
-    "de": " GB",
-    "fr": " Go",
-    "es": " GB"
-  },
   "All processes together": {
     "tr": "Tüm işlemler birlikte",
     "de": "Alle Prozesse gemeinsam",
@@ -1362,7 +1350,7 @@
     "es": "Un presupuesto común para la aplicación y todos sus procesos hijos."
   },
   "Each instance separately": {
-    "tr": "Her örnek ayrı",
+    "tr": "Her kopya ayrı ayrı",
     "de": "Jede Instanz einzeln",
     "fr": "Chaque instance séparément",
     "es": "Cada instancia por separado"
@@ -1380,7 +1368,7 @@
     "es": "Guardar límite"
   },
   "Use of the budget; for one budget per instance, the fullest instance": {
-    "tr": "Bütçe kullanımı; örnek başına bütçede en dolu örnek",
+    "tr": "Bütçe kullanımı; kopya başına bütçede en dolu kopya",
     "de": "Budgetauslastung; bei Einzelbudgets die vollste Instanz",
     "fr": "Utilisation du budget ; instance la plus chargée pour les budgets individuels",
     "es": "Uso del presupuesto; instancia más ocupada si hay presupuestos individuales"
@@ -2388,7 +2376,7 @@
     "es": "Automático del hardware"
   },
   "Manual duty": {
-    "tr": "Elle görev oranı",
+    "tr": "Sabit oran",
     "de": "Manueller Tastgrad",
     "fr": "Rapport cyclique manuel",
     "es": "Ciclo de trabajo manual"
@@ -3013,7 +3001,7 @@
   },
   "Growth/h": {
     "tr": "Artış/saat",
-    "de": "Zuwachs/h",
+    "de": "Zuwachs/Std.",
     "fr": "Croissance/h",
     "es": "Crecimiento/h"
   },
@@ -4662,7 +4650,7 @@
     "es": "🚨 Emergencia: finalizar {0} procesos"
   },
   "{0}% of this PC = {1} of its {2} logical processors (one fully busy core is {3}%)": {
-    "tr": "Bu bilgisayarın %{0}'ı = {2} mantıksal işlemcinin {1} tanesi (tam dolu bir çekirdek %{3})",
+    "tr": "Bu bilgisayarın %{0} kadarı = {2} mantıksal işlemcinin {1} tanesi (tam dolu bir çekirdek %{3})",
     "de": "{0}% dieses PCs = {1} seiner {2} logischen Prozessoren (ein voller Kern: {3}%)",
     "fr": "{0}% de ce PC = {1} de ses {2} processeurs logiques (un cœur occupé : {3}%)",
     "es": "{0}% del equipo = {1} de sus {2} procesadores lógicos (un núcleo ocupado: {3}%)"
@@ -4680,13 +4668,13 @@
     "es": "Configuración no válida ({0}); corríjala en Configuración."
   },
   " ({0}% of machine)": {
-    "tr": " (bilgisayarın %{0}'ı)",
+    "tr": " (bilgisayarın %{0} kadarı)",
     "de": " ({0}% des PCs)",
     "fr": " ({0}% du PC)",
     "es": " ({0}% del equipo)"
   },
   "{0} in {1} instances": {
-    "tr": "{0} / {1} örnek",
+    "tr": "{0} / {1} kopya",
     "de": "{0} in {1} Instanzen",
     "fr": "{0} dans {1} instances",
     "es": "{0} en {1} instancias"
@@ -4710,7 +4698,7 @@
     "es": "{0}  ({1}% CPU, {2})"
   },
   ": {0} uses {1}% of it": {
-    "tr": ": {0} bütçenin %{1}'ını kullanıyor",
+    "tr": ": {0} bütçenin %{1} kadarını kullanıyor",
     "de": ": {0} nutzt {1}% davon",
     "fr": " : {0} en utilise {1}%",
     "es": ": {0} usa el {1}%"
@@ -4919,12 +4907,6 @@
     "fr": "Classe de politique Windows {0} · {1} · {2} MHz",
     "es": "Clase de directiva Windows {0} · {1} · {2} MHz"
   },
-  "{0} GB": {
-    "tr": "{0} GB",
-    "de": "{0} GB",
-    "fr": "{0} Go",
-    "es": "{0} GB"
-  },
   "App limit: {0}": {
     "tr": "Uygulama sınırı: {0}",
     "de": "App-Grenze: {0}",
@@ -4950,7 +4932,7 @@
     "es": "Finalizar los {0} procesos"
   },
   "{0}  ({1}% of machine)": {
-    "tr": "{0}  (bilgisayarın %{1}'ı)",
+    "tr": "{0}  (bilgisayarın %{1} kadarı)",
     "de": "{0}  ({1}% des PCs)",
     "fr": "{0}  ({1}% du PC)",
     "es": "{0}  ({1}% del equipo)"
@@ -5040,7 +5022,7 @@
     "es": "No se pudo guardar el idioma: {0}"
   },
   "for": {
-    "tr": "süreyle",
+    "tr": "en az",
     "de": "für",
     "fr": "pendant",
     "es": "durante"
@@ -5550,7 +5532,7 @@
     "es": "CPU del sistema {0}%, proceso {1}% (paso {2}/{3})"
   },
   "memory {0}% in use, process holds {1} MiB": {
-    "tr": "belleğin %{0}'ı kullanımda, işlem {1} MiB tutuyor",
+    "tr": "belleğin %{0} kadarı kullanımda, işlem {1} MiB tutuyor",
     "de": "Speicher {0}% belegt, Prozess hält {1} MiB",
     "fr": "mémoire utilisée à {0}%, processus : {1} Mio",
     "es": "memoria al {0}%, el proceso usa {1} MiB"
@@ -7428,7 +7410,7 @@
     "es": "¿Desinstalar la aplicación?"
   },
   "This opens the registered uninstaller. It may ask for administrator rights. Review its prompts before continuing.": {
-    "tr": "Kayıtlı kaldırıcı açılacak. Yönetici izni isteyebilir. Devam etmeden önce kendi onaylarını incele.",
+    "tr": "Kayıtlı kaldırıcı açılacak. Yönetici izni isteyebilir. Devam etmeden önce sorduklarını dikkatle okuyun.",
     "de": "Öffnet den registrierten Deinstaller. Er kann Administratorrechte anfordern. Prüfen Sie seine Hinweise.",
     "fr": "Ouvre le désinstalleur enregistré. Des droits administrateur peuvent être demandés. Vérifiez ses invites.",
     "es": "Abre el desinstalador registrado. Puede pedir permisos de administrador. Revisa sus indicaciones."
@@ -8760,7 +8742,7 @@
     "es": "Predeterminado del modelo"
   },
   "Ask AI about this PC": {
-    "tr": "Bu bilgisayarı yapay zekâya sor",
+    "tr": "Bu bilgisayar hakkında yapay zekâya sor",
     "de": "KI zu diesem PC fragen",
     "fr": "Interroger l'IA sur ce PC",
     "es": "Preguntar a la IA sobre este equipo"
@@ -11269,33 +11251,33 @@
   },
   "{0} of {1} event": {
     "tr": "{0} / {1} olay",
-    "de": "{0} von {1} Ereignissen",
-    "fr": "{0} sur {1} événements",
-    "es": "{0} de {1} eventos"
+    "de": "{0} von {1} Ereignis",
+    "fr": "{0} sur {1} événement",
+    "es": "{0} de {1} evento"
   },
   "{0} TCP port listening": {
     "tr": "{0} TCP portu dinliyor",
-    "de": "{0} TCP-Ports lauschen",
-    "fr": "{0} ports TCP en écoute",
-    "es": "{0} puertos TCP en escucha"
+    "de": "{0} TCP-Port lauscht",
+    "fr": "{0} port TCP en écoute",
+    "es": "{0} puerto TCP en escucha"
   },
   "{0} well-known tool or server running": {
-    "tr": "{0} bilinen araç ve sunucu çalışıyor",
-    "de": "{0} bekannte Tools und Server aktiv",
-    "fr": "{0} outils et serveurs connus actifs",
-    "es": "{0} herramientas y servidores conocidos activos"
+    "tr": "{0} bilinen araç veya sunucu çalışıyor",
+    "de": "{0} bekanntes Tool oder bekannter Server aktiv",
+    "fr": "{0} outil ou serveur connu actif",
+    "es": "{0} herramienta o servidor conocido activo"
   },
   "{0} startup app, {1} enabled": {
     "tr": "{0} başlangıç uygulaması, {1} etkin",
-    "de": "{0} Autostart-Apps, {1} aktiviert",
-    "fr": "{0} applications de démarrage, {1} activées",
-    "es": "{0} aplicaciones de inicio, {1} habilitadas"
+    "de": "{0} Autostart-App, {1} aktiviert",
+    "fr": "{0} application de démarrage, {1} activée",
+    "es": "{0} aplicación de inicio, {1} habilitada"
   },
   "{0} window, {1} visible": {
     "tr": "{0} pencere, {1} görünür",
     "de": "{0} Fenster, {1} sichtbar",
-    "fr": "{0} fenêtres, {1} visibles",
-    "es": "{0} ventanas, {1} visibles"
+    "fr": "{0} fenêtre, {1} visible",
+    "es": "{0} ventana, {1} visible"
   },
   " s": {
     "tr": " sn",

@@ -2883,6 +2883,9 @@ fn uptime(start: Option<SystemTime>) -> String {
     else {
         return "n/a".into();
     };
+    if crate::i18n::Language::current() != crate::i18n::Language::English {
+        return crate::i18n::duration(Duration::from_secs(secs));
+    }
     let (d, h, m, s) = (secs / 86_400, secs / 3600 % 24, secs / 60 % 60, secs % 60);
     if d > 0 {
         format!("{d}d {h:02}h {m:02}m")
@@ -7948,6 +7951,9 @@ mod tests {
         assert!(uptime(Some(start)).starts_with("2d 03h 04m"));
         let start = SystemTime::now() - Duration::from_secs(3661);
         assert!(uptime(Some(start)).starts_with("1h 01m 0"));
+        let _tr = crate::i18n::scope(crate::i18n::Language::Turkish);
+        let start = SystemTime::now() - Duration::from_secs(2 * 86_400 + 3 * 3600 + 4 * 60);
+        assert_eq!(uptime(Some(start)), "2 gün 3 sa");
     }
 
     #[test]
@@ -10619,7 +10625,7 @@ o-such-folder",
                 frames: Default::default(),
             });
         h.run_steps(2);
-        assert!(h.query_by_label_contains("2 cores, 8 GB").is_some());
+        assert!(h.query_by_label_contains("2 cores, 8 GiB").is_some());
         assert!(h.query_by_label("1 (1 outside)").is_some());
         // 3.5% of 8 CPUs against a 2-core budget; 1 GiB of 8 GB.
         assert!(h.query_by_label_contains("0.28 cores (14%)").is_some());
@@ -10805,7 +10811,7 @@ o-such-folder",
                 .is_some()
         );
         assert!(
-            h.query_by_label_contains("Governor: priority BelowNormal")
+            h.query_by_label_contains("Governor: priority below normal")
                 .is_some()
         );
 
@@ -11174,7 +11180,7 @@ o-such-folder",
         assert_eq!(h.state().2, ["containers", "sensors"]);
 
         // A governor decision about a process that still runs.
-        h.get_by_label("Governor: priority BelowNormal").click();
+        h.get_by_label("Governor: priority below normal").click();
         h.run();
         h.get_by_label("Show process").click();
         h.run();
@@ -11188,7 +11194,7 @@ o-such-folder",
         d.events[0].name = Some("ended.exe".into());
         let mut h = events_page(d);
         h.run();
-        h.get_by_label("Governor: priority BelowNormal").click();
+        h.get_by_label("Governor: priority below normal").click();
         h.run();
         assert!(h.query_by_label("Show process").is_none());
         assert!(
