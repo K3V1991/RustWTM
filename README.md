@@ -43,7 +43,29 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.35.0
+## New in 0.36.0
+
+[Release scope and validation](docs/0.36.0-review.md)
+
+- **Recorded device history:** the service keeps a week of per-minute
+  averages and peaks for each disk, network adapter and GPU; a device's
+  Performance page shows the last hour, 24 hours or 7 days.
+- **Containers:** a container's last 24 hours, and optional Windows
+  notifications when one stays above a CPU or memory limit and when it is
+  back below.
+- **Overview:** redrawn, with each resource card showing what its reading
+  is made of (a cell per processor, memory composition, GPU engines, disks
+  and links), and *Customize Overview…* hides and reorders the cards.
+- **Support bundle:** About exports one text file for a problem report,
+  shown in full before it is saved, with secrets, names and paths hidden.
+- **Events** lists container alerts and sensor failures, each with its
+  source; the updater installs only its own publisher's MSI once a signed
+  build runs, and says what became of an update after the restart.
+
+IPC moves to protocol 18: update the GUI, CLI and service together (the
+MSI does). A 0.35.0 service and a 0.36.0 window refuse each other.
+
+## Included since 0.35.0
 
 [Release scope and validation](docs/0.35.0-review.md)
 
@@ -538,8 +560,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.35.0-x64.msi            # interactive
-msiexec /i RustWTM-0.35.0-x64.msi /qn        # silent
+msiexec /i RustWTM-0.36.0-x64.msi            # interactive
+msiexec /i RustWTM-0.36.0-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc

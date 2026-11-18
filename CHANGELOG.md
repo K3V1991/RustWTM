@@ -6,9 +6,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
-IPC moves to protocol 18 (a device's history can be asked for): update the
-GUI, CLI and service together; a window and service of different protocols
-refuse each other, as before.
+## [0.36.0] - 2026-11-18
+
+The service keeps a week of per-minute history for each disk, network
+adapter and GPU, containers keep their last 24 hours and can raise CPU and
+memory alerts, About exports a support bundle, the Overview can be
+arranged and is redrawn, and the updater holds an update to the publisher
+of the build that runs it. IPC moves to protocol 18 (a device's history can
+be asked for): update the GUI, CLI and service together; a window and
+service of different protocols refuse each other, as before.
 
 ### Added
 
@@ -1970,7 +1976,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.35.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.0...HEAD
+[0.36.0]: https://github.com/rustwtm/rustwtm/compare/v0.35.0...v0.36.0
 [0.35.0]: https://github.com/rustwtm/rustwtm/compare/v0.34.0...v0.35.0
 [0.34.0]: https://github.com/rustwtm/rustwtm/compare/v0.33.0...v0.34.0
 [0.33.0]: https://github.com/rustwtm/rustwtm/compare/v0.32.0...v0.33.0
