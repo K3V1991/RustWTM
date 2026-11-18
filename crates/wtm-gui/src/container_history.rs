@@ -318,7 +318,7 @@ pub fn show(ui: &mut egui::Ui, series: Option<&Series>, wall: SystemTime) -> boo
         ui.strong(crate::i18n::tr("Last 24 hours"));
         ui.weak(crate::i18n::format(
             "Recorded {0} of the last 24 hours.",
-            &[wtm_core::format_duration(Duration::from_secs(
+            &[crate::i18n::duration(Duration::from_secs(
                 recorded as u64 * 60,
             ))],
         ));
@@ -816,7 +816,7 @@ mod tests {
             harness.run();
             let recorded = crate::i18n::format(
                 "Recorded {0} of the last 24 hours.",
-                &[wtm_core::format_duration(Duration::from_secs(5 * 60))],
+                &[crate::i18n::duration(Duration::from_secs(5 * 60))],
             );
             assert!(harness.query_by_label(&recorded).is_some(), "{language:?}");
             harness

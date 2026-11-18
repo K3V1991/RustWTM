@@ -101,7 +101,7 @@ impl Notice {
                     &[
                         name,
                         crate::i18n::percent(format!("{share:.0}")),
-                        wtm_core::format_duration(*lasted),
+                        crate::i18n::duration(*lasted),
                     ],
                 );
                 if let Some(docker) = docker {
@@ -123,7 +123,7 @@ impl Notice {
                 &[
                     name,
                     crate::i18n::percent(format!("{share:.0}")),
-                    wtm_core::format_duration(*lasted),
+                    crate::i18n::duration(*lasted),
                 ],
             ),
             Kind::Back(Resource::Cpu) => {
@@ -381,7 +381,7 @@ pub fn notices(ui: &mut eframe::egui::Ui, watch: &mut Watch) {
                     &[
                         crate::i18n::percent(format!("{:.0}", s.cpu)),
                         crate::i18n::percent(format!("{:.0}", s.memory)),
-                        wtm_core::format_duration(Duration::from_secs(u64::from(s.seconds))),
+                        crate::i18n::duration(Duration::from_secs(u64::from(s.seconds))),
                     ],
                 ));
             } else {

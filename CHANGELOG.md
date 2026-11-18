@@ -6,6 +6,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Lengths of time are written in the window's language: container alerts,
+  a container's and a device's recorded history, App history and the
+  watch notices said "1m 15s" and "21h 00m" in every language; Turkish
+  now reads "1 dk 15 sn" and "21 sa", German "1 Min. 15 s". The 1 h,
+  6 h and 24 h period buttons of App history, recorded incidents and a
+  device's recorded history are translated too ("24 sa", "24 Std."), and
+  a sentence ending in an abbreviation no longer gets two full stops.
+- Turkish: the support bundle's opening sentence read awkwardly; it now
+  says the text below is saved as shown.
+
 ## [0.36.0] - 2026-11-18
 
 The service keeps a week of per-minute history for each disk, network

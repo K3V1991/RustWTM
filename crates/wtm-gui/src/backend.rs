@@ -1131,7 +1131,7 @@ impl Worker {
                 name: Some(t.name.clone()),
                 message: {
                     let __wtm_i18n_0 = &(t.name);
-                    let __wtm_i18n_1 = &(wtm_core::format_duration(since.elapsed()));
+                    let __wtm_i18n_1 = &(crate::i18n::duration(since.elapsed()));
                     crate::i18n::format(
                         "{0} has exited (watched for {1}).",
                         &[__wtm_i18n_0.to_string(), __wtm_i18n_1.to_string()],

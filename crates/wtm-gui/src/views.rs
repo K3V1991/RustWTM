@@ -904,6 +904,9 @@ fn mib(bytes: f64) -> f64 {
 }
 
 fn duration_label(minutes: u32) -> String {
+    if crate::i18n::Language::current() != crate::i18n::Language::English {
+        return crate::i18n::duration(std::time::Duration::from_secs(u64::from(minutes) * 60));
+    }
     match minutes {
         m if m >= 60 => format!("{}h {:02}m", m / 60, m % 60),
         m => format!("{m}m"),
@@ -915,14 +918,10 @@ pub fn app_history(ui: &mut Ui, data: &Data, view: &mut HistoryView) -> bool {
     let mut changed = false;
     ui.horizontal_wrapped(|ui| {
         ui.label(crate::i18n::tr("Window:"));
-        for (label, hours) in [
-            ("1 h", 1),
-            ("6 h", 6),
-            ("24 h", 24),
-            (crate::i18n::tr("7 days"), 168),
-            (crate::i18n::tr("30 days"), 720),
-        ] {
-            if crate::theme::choice(ui, &mut view.hours, hours, label).changed() {
+        for hours in [1, 6, 24, 168, 720] {
+            if crate::theme::choice(ui, &mut view.hours, hours, crate::i18n::period(hours))
+                .changed()
+            {
                 changed = true;
             }
         }

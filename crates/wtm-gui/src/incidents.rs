@@ -27,8 +27,8 @@ impl View {
             self.frames = Some(result);
         }
         ui.horizontal_wrapped(|ui| {
-            for (hours, label) in [(1, "1 h"), (24, "24 h"), (168, "7 days")] {
-                if crate::theme::choice(ui, &mut self.hours, hours, crate::i18n::tr(label))
+            for hours in [1, 24, 168] {
+                if crate::theme::choice(ui, &mut self.hours, hours, crate::i18n::period(hours))
                     .clicked()
                 {
                     self.frames = None;

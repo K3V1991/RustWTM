@@ -9,7 +9,7 @@ use eframe::egui::{self, Color32, Ui};
 use crate::backend::Data;
 
 /// The ranges offered, in hours.
-const RANGES: [(u32, &str); 3] = [(1, "1 h"), (24, "24 h"), (168, "7 days")];
+const RANGES: [u32; 3] = [1, 24, 168];
 /// A shown history is asked for again this often.
 pub const REFRESH: Duration = Duration::from_secs(60);
 
@@ -114,8 +114,8 @@ fn measures(device: &str) -> Vec<(&'static str, Unit, Color32)> {
 pub fn show(ui: &mut Ui, data: &Data, device: &str, view: &mut View) {
     crate::theme::card(ui, crate::i18n::tr("Recorded history"), |ui| {
         ui.horizontal_wrapped(|ui| {
-            for (hours, label) in RANGES {
-                crate::theme::choice(ui, &mut view.hours, hours, crate::i18n::tr(label));
+            for hours in RANGES {
+                crate::theme::choice(ui, &mut view.hours, hours, crate::i18n::period(hours));
             }
         });
         let loaded = data
@@ -147,7 +147,7 @@ pub fn show(ui: &mut Ui, data: &Data, device: &str, view: &mut View) {
         } else {
             crate::i18n::format(
                 "Recorded {0} in this period. The service keeps each device's last week, a minute at a time; minutes it did not run stay empty.",
-                &[wtm_core::format_duration(Duration::from_secs(
+                &[crate::i18n::duration(Duration::from_secs(
                     history.minutes.len() as u64 * 60,
                 ))],
             )

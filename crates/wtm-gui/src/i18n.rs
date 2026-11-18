@@ -528,6 +528,48 @@ pub fn bytes(n: f64) -> String {
     decimal(wtm_core::format_bytes(n))
 }
 
+/// A length of time (`wtm_core::format_duration`) in the language's units:
+/// "1m 15s" in English, "1 dk 15 sn" in Turkish, "21 Std." in German. A
+/// zero second part is left out ("1 dk"); a day or more is counted in hours,
+/// as the catalog has no day unit.
+pub fn duration(d: std::time::Duration) -> String {
+    if index() == 0 {
+        return wtm_core::format_duration(d);
+    }
+    let s = d.as_secs();
+    let seconds = |n: u64| format!("{n}{}", tr(" s"));
+    let minutes = |n: u64| format("{0} min", &[n.to_string()]);
+    let (whole, rest) = match s {
+        0..60 => return seconds(s),
+        60..3600 => (
+            minutes(s / 60),
+            (!s.is_multiple_of(60)).then(|| seconds(s % 60)),
+        ),
+        _ => (
+            hours(s / 3600),
+            (s % 3600 / 60 > 0).then(|| minutes(s % 3600 / 60)),
+        ),
+    };
+    match rest {
+        Some(rest) => format!("{whole} {rest}"),
+        None => whole,
+    }
+}
+
+/// A number of hours: "24 h", "24 sa", "24 Std.".
+pub fn hours(n: u64) -> String {
+    format("{0} h", &[n.to_string()])
+}
+
+/// A period's button: "24 h", "7 days" or "30 days" in the language shown.
+pub fn period(hours_back: u32) -> String {
+    match hours_back {
+        168 => tr("7 days").to_owned(),
+        720 => tr("30 days").to_owned(),
+        n => hours(u64::from(n)),
+    }
+}
+
 /// The text before and after a percentage, from the same "{0}%" template as
 /// [`percent`]: Turkish writes %42, so its sign goes before the number.
 pub fn percent_affixes() -> (String, String) {
@@ -609,6 +651,15 @@ pub fn format(english: &str, values: &[String]) -> String {
         {
             result.push_str(v);
             rest = &rest[end + 1..];
+            // A value ending in an abbreviation ("1 Min.") at the end of a
+            // sentence takes one full stop, not two.
+            if v.ends_with('.')
+                && !v.ends_with("..")
+                && rest.starts_with('.')
+                && !rest.starts_with("..")
+            {
+                rest = &rest[1..];
+            }
         } else {
             result.push(rest.chars().next().unwrap());
             rest = &rest[1..];
@@ -744,6 +795,66 @@ mod tests {
                 )
             );
         }
+    }
+    #[test]
+    fn durations_and_periods_use_the_language_units() {
+        let d = std::time::Duration::from_secs;
+        for (language, expected) in [
+            (
+                Language::English,
+                [
+                    "45s", "1m 15s", "1m 00s", "21h 00m", "6d 23h", "24 h", "7 days",
+                ],
+            ),
+            (
+                Language::Turkish,
+                [
+                    "45 sn",
+                    "1 dk 15 sn",
+                    "1 dk",
+                    "21 sa",
+                    "167 sa",
+                    "24 sa",
+                    "7 gün",
+                ],
+            ),
+            (
+                Language::German,
+                [
+                    "45 s",
+                    "1 Min. 15 s",
+                    "1 Min.",
+                    "21 Std.",
+                    "167 Std.",
+                    "24 Std.",
+                    "7 Tage",
+                ],
+            ),
+        ] {
+            let _scope = scope(language);
+            let shown = [
+                duration(d(45)),
+                duration(d(75)),
+                duration(d(60)),
+                duration(d(21 * 3600)),
+                duration(d(6 * 86400 + 23 * 3600)),
+                period(24),
+                period(168),
+            ];
+            assert_eq!(shown, expected, "{language:?}");
+        }
+        let _scope = scope(Language::Turkish);
+        assert_eq!(duration(d(3600 + 5 * 60 + 30)), "1 sa 5 dk");
+        drop(_scope);
+        let _scope = scope(Language::German);
+        assert_eq!(
+            format(
+                "On: CPU above {0} or memory above {1} for {2}.",
+                &["80 %".into(), "90 %".into(), duration(d(60))]
+            ),
+            "Ein: CPU über 80 % oder Speicher über 90 % für 1 Min."
+        );
+        assert_eq!(format("{0}.", &["Wait...".into()]), "Wait....");
     }
     #[test]
     fn scoped_languages_restore_after_unwinding_and_do_not_cross_threads() {
