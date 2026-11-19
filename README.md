@@ -43,7 +43,18 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.36.3
+## New in 0.36.4
+
+[Release scope and validation](docs/0.36.4-review.md)
+
+- **A tidier compact window:** the status bar keeps to one line, *More
+  below* no longer covers the last row, and tables that scroll sideways
+  fade the edge with more columns. Service messages use your language's
+  decimal sign, and counts of one read right in the remaining languages.
+
+IPC stays at protocol 18, so a 0.36.x service keeps working with this GUI.
+
+## Included since 0.36.3
 
 [Release scope and validation](docs/0.36.3-review.md)
 
@@ -592,8 +603,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.36.3-x64.msi            # interactive
-msiexec /i RustWTM-0.36.3-x64.msi /qn        # silent
+msiexec /i RustWTM-0.36.4-x64.msi            # interactive
+msiexec /i RustWTM-0.36.4-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc

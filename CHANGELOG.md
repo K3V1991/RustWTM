@@ -6,6 +6,32 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.36.4] - 2026-11-19
+
+The layout details left from the 0.36.2 review, singular counts in the
+remaining catalogs, and numbers in the service's messages. IPC stays at
+protocol 18, so a 0.36.x service and a 0.36.4 window work together.
+
+### Fixed
+
+- The status bar kept to one line only on wide windows: on a compact one
+  its last action and the message wrapped to a second line. The actions
+  now keep their place at the right, the CPU and memory summary is
+  shortened first, and a message moves below only when its start does
+  not fit beside them.
+- *More below* covered the last row and its buttons when less than a row
+  was left; its button now shows only while more than a row is hidden,
+  and the faded edge says the rest.
+- Tables that scroll sideways cut their last column at the edge with
+  nothing to say it goes on; the side with columns beyond it fades.
+- Numbers in the service's messages kept their decimal point in every
+  language ("durchschnittlich 12.5% CPU"); they take the language's sign
+  ("12,5%").
+- A count of one took the plural noun or verb in Swahili, Hindi, Marathi,
+  Gujarati, Punjabi, Telugu, Tamil and Kannada; the singular of the
+  well-known tools line says "or" in those and in Bengali, Filipino,
+  Indonesian, Vietnamese, Japanese, Korean and Chinese.
+
 ## [0.36.3] - 2026-11-19
 
 A fix for the memory map of a process that has just started, and three
@@ -2046,7 +2072,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.3...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.4...HEAD
+[0.36.4]: https://github.com/rustwtm/rustwtm/compare/v0.36.3...v0.36.4
 [0.36.3]: https://github.com/rustwtm/rustwtm/compare/v0.36.2...v0.36.3
 [0.36.2]: https://github.com/rustwtm/rustwtm/compare/v0.36.1...v0.36.2
 [0.36.1]: https://github.com/rustwtm/rustwtm/compare/v0.36.0...v0.36.1
