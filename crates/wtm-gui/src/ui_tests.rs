@@ -577,7 +577,7 @@ pub fn data() -> Data {
             vec![Finding {
                 app: "alpha.exe".into(),
                 kind: FindingKind::ChronicCpu,
-                detail: "average CPU 12.5%".into(),
+                detail: "average CPU 12.5% (p95 20.0%) over 125 min".into(),
             }],
         ))),
         series: Some(("alpha.exe".into(), 24, Ok(vec![row(1, 5.0), row(2, 15.0)]))),

@@ -408,6 +408,17 @@ pub fn message(english: &str) -> std::borrow::Cow<'_, str> {
     });
     text
 }
+/// A number with one decimal point and digits on both sides: "12.5",
+/// "-0.25"; not "1.2.3", "a.txt" or "5".
+fn is_plain_decimal(value: &str) -> bool {
+    let digits = |s: &str| !s.is_empty() && s.bytes().all(|b| b.is_ascii_digit());
+    value
+        .strip_prefix('-')
+        .unwrap_or(value)
+        .split_once('.')
+        .is_some_and(|(whole, part)| digits(whole) && digits(part))
+}
+
 fn message_at_depth(english: &str, depth: usize) -> std::borrow::Cow<'_, str> {
     use std::borrow::Cow;
     if index() == 0 {
@@ -450,6 +461,13 @@ fn message_at_depth(english: &str, depth: usize) -> std::borrow::Cow<'_, str> {
             }
             if *key == "priority {0}" {
                 values[0] = tr(&values[0]).to_owned();
+            }
+            // The service writes numbers with a point: "12.5" is "12,5"
+            // in Turkish. Versions and addresses have more than one.
+            for value in &mut values {
+                if is_plain_decimal(value) {
+                    *value = decimal(std::mem::take(value));
+                }
             }
             return Cow::Owned(format(key, &values));
         }
@@ -810,6 +828,25 @@ mod tests {
         }
     }
     #[test]
+    fn service_numbers_take_the_language_decimal_sign() {
+        let _scope = scope(Language::German);
+        assert_eq!(
+            message("average CPU 12.5% (p95 20.0%) over 125 min"),
+            "durchschnittlich 12,5% CPU (p95 20,0%) über 125 Min."
+        );
+        assert!(is_plain_decimal("12.5") && is_plain_decimal("-0.25"));
+        for value in ["1.2.3", "a.txt", "5", ".5", "5.", "192.168.0.1"] {
+            assert!(!is_plain_decimal(value), "{value}");
+        }
+        drop(_scope);
+        let _scope = scope(Language::English);
+        assert_eq!(
+            message("average CPU 12.5% (p95 20.0%) over 125 min"),
+            "average CPU 12.5% (p95 20.0%) over 125 min"
+        );
+    }
+
+    #[test]
     fn english_names_priority_classes_in_words() {
         let _scope = scope(Language::English);
         assert_eq!(
@@ -971,7 +1008,7 @@ mod tests {
         assert_eq!(captures("{0}{1}", "ambiguous"), None);
         assert_eq!(
             message("Governor: priority BelowNormal (system CPU 98%, process at 40.0% (step 1/3))"),
-            "Kaynak yöneticisi: öncelik Normalin altında (sistem CPU %98, işlem %40.0 (adım 1/3))"
+            "Kaynak yöneticisi: öncelik Normalin altında (sistem CPU %98, işlem %40,0 (adım 1/3))"
         );
         assert_eq!(
             message("Rule: kill (rule 'Idle')"),

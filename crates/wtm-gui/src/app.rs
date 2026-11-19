@@ -68,6 +68,11 @@ const NAV: [(Tab, crate::navigation::Icon, &str); 20] = {
     ]
 };
 const NAV_AUTO_COLLAPSE: f32 = 1000.0;
+/// Width of a status bar message's start that is kept beside the facts;
+/// a message with less room goes to a line of its own.
+const STATUS_MESSAGE_MIN_WIDTH: f32 = 240.0;
+/// Narrowest the CPU and memory summary is shortened to before it is left out.
+const STATUS_SUMMARY_MIN_WIDTH: f32 = 80.0;
 
 #[derive(Default)]
 struct QuickNavigation {
@@ -1051,108 +1056,146 @@ impl eframe::App for App {
         egui::Panel::bottom("status")
             .frame(crate::theme::surface(ui).inner_margin(egui::Margin::symmetric(10, 4)))
             .show(ui, |ui| {
-                // Actions keep their space even when an operation reports a long
-                // error. Wrap the toolbar, then truncate the separate message row.
+                // One line: the actions keep their size at the right and the
+                // facts on the left share what is left, the CPU and memory
+                // summary shortened first. A message goes beside them while
+                // there is room for it, else on a line of its own.
                 ui.spacing_mut().item_spacing = egui::vec2(10.0, 5.0);
                 ui.style_mut().override_font_id = Some(egui::FontId::proportional(12.0));
-                ui.horizontal_wrapped(|ui| {
-                    ui.weak(concat!("v", env!("CARGO_PKG_VERSION")));
-                    crate::theme::divider(ui);
-                    mode_badge(
-                        ui,
-                        data.mode,
-                        crate::backend::service_problem(data.service_error.as_deref()),
-                        stale_age(&data, Instant::now()),
-                    );
-                    if !matches!(state.tab, Tab::Hardware | Tab::InstalledApps) {
-                        data_age(ui, &data, Instant::now());
-                    }
-                    if let Some(game) = data.status.as_ref().and_then(|s| s.game.as_ref()) {
-                        ui.label(
-                            RichText::new(crate::i18n::tr("▶ Game mode"))
-                                .color(crate::theme::text_color(ui, crate::theme::GPU))
-                                .strong(),
-                        )
-                        .on_hover_text(crate::overview::game_text(game));
-                    }
-                    if let Some(rescue) = data.status.as_ref().and_then(|s| s.rescue_core.as_ref())
-                    {
-                        ui.label(
-                            RichText::new(crate::i18n::tr("⛨ Rescue core"))
-                                .color(crate::theme::text_color(ui, crate::theme::CPU))
-                                .strong(),
-                        )
-                        .on_hover_text(crate::overview::rescue_text(rescue));
-                    }
-                    if let Some(s) = &data.snapshot {
-                        let summary = {
-                            let __wtm_i18n_0 = &(s.system.cpu_percent);
-                            let __wtm_i18n_1 = &(format_bytes(s.system.memory_used() as f64));
-                            let __wtm_i18n_2 = &(format_bytes(s.system.memory_total as f64));
-                            crate::i18n::format(
-                                "CPU {0}%   Memory {1} / {2}",
-                                &[
-                                    format!("{:.0}", __wtm_i18n_0),
-                                    __wtm_i18n_1.to_string(),
-                                    __wtm_i18n_2.to_string(),
-                                ],
-                            )
-                        };
-                        ui.add(egui::Label::new(&summary).truncate());
-                    }
-                    ui.separator();
-                    if !data.kill_list.is_empty()
-                        && ui
-                            .small_button(
-                                RichText::new(crate::i18n::tr("🚨 Panic"))
-                                    .strong()
-                                    .color(crate::theme::text_color(ui, BAD)),
-                            )
+                let message = data.message.as_ref().map(|(level, text)| {
+                    (level_color(ui, *level), crate::i18n::message(text).into_owned())
+                });
+                let mut message_below = false;
+                ui.horizontal(|ui| {
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        // Right to left: the last action first.
+                        if !data.elevated
+                            && ui
+                                .small_button(crate::i18n::tr("Restart as administrator"))
+                                .on_hover_text(crate::i18n::tr(
+                                    "Control every process, including those of other users and services",
+                                ))
+                                .clicked()
+                        {
+                            service_cmds.push(UiCommand::RestartElevated);
+                        }
+                        if state.tab == Tab::Processes {
+                            state.inspector_mode.menu(ui);
+                        }
+                        if ui
+                            .small_button(crate::i18n::tr("Run new task"))
                             .on_hover_text(crate::i18n::tr(
-                                "End everything on the kill list (Ctrl+Shift+K)",
+                                "Start a program, folder, document or website",
                             ))
                             .clicked()
-                    {
-                        state.panic = true;
-                    }
-                    if ui
-                        .small_button(crate::i18n::tr("Run new task"))
-                        .on_hover_text(crate::i18n::tr(
-                            "Start a program, folder, document or website",
-                        ))
-                        .clicked()
-                    {
-                        state.run_task = Some((String::new(), false));
-                    }
-                    if state.tab == Tab::Processes {
-                        state.inspector_mode.menu(ui);
-                    }
-                    if !data.elevated
-                    && ui
-                        .small_button(crate::i18n::tr("Restart as administrator"))
-                        .on_hover_text(crate::i18n::tr(
-                            "Control every process, including those of other users and services",
-                        ))
-                        .clicked()
-                {
-                    service_cmds.push(UiCommand::RestartElevated);
-                }
-                    let (color, text) = match &data.message {
-                        Some((level, text)) => {
-                            (level_color(ui, *level), crate::i18n::message(text))
+                        {
+                            state.run_task = Some((String::new(), false));
                         }
-                        None => (
-                            ui.visuals().weak_text_color(),
-                            crate::i18n::tr("Right-click a process for actions.").into(),
-                        ),
-                    };
-                    if data.message.is_some() {
-                        ui.add(
-                            egui::Label::new(RichText::new(text.as_ref()).color(color)).truncate(),
-                        )
-                        .on_hover_text(text.as_ref());
-                    }
+                        if !data.kill_list.is_empty()
+                            && ui
+                                .small_button(
+                                    RichText::new(crate::i18n::tr("🚨 Panic"))
+                                        .strong()
+                                        .color(crate::theme::text_color(ui, BAD)),
+                                )
+                                .on_hover_text(crate::i18n::tr(
+                                    "End everything on the kill list (Ctrl+Shift+K)",
+                                ))
+                                .clicked()
+                        {
+                            state.panic = true;
+                        }
+                        ui.separator();
+                        ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                            // Facts that still do not fit are cut at the actions.
+                            ui.set_clip_rect(ui.clip_rect().intersect(ui.max_rect()));
+                            ui.weak(concat!("v", env!("CARGO_PKG_VERSION")));
+                            crate::theme::divider(ui);
+                            mode_badge(
+                                ui,
+                                data.mode,
+                                crate::backend::service_problem(data.service_error.as_deref()),
+                                stale_age(&data, Instant::now()),
+                            );
+                            if !matches!(state.tab, Tab::Hardware | Tab::InstalledApps) {
+                                data_age(ui, &data, Instant::now());
+                            }
+                            if let Some(game) = data.status.as_ref().and_then(|s| s.game.as_ref())
+                            {
+                                ui.label(
+                                    RichText::new(crate::i18n::tr("▶ Game mode"))
+                                        .color(crate::theme::text_color(ui, crate::theme::GPU))
+                                        .strong(),
+                                )
+                                .on_hover_text(crate::overview::game_text(game));
+                            }
+                            if let Some(rescue) =
+                                data.status.as_ref().and_then(|s| s.rescue_core.as_ref())
+                            {
+                                ui.label(
+                                    RichText::new(crate::i18n::tr("⛨ Rescue core"))
+                                        .color(crate::theme::text_color(ui, crate::theme::CPU))
+                                        .strong(),
+                                )
+                                .on_hover_text(crate::overview::rescue_text(rescue));
+                            }
+                            // Room the message wants beside the facts: all of
+                            // it, or enough to read its start.
+                            let wanted = message.as_ref().map_or(0.0, |(_, text)| {
+                                let width = ui
+                                    .painter()
+                                    .layout_no_wrap(
+                                        text.clone(),
+                                        egui::FontId::proportional(12.0),
+                                        Color32::WHITE,
+                                    )
+                                    .size()
+                                    .x;
+                                width.min(STATUS_MESSAGE_MIN_WIDTH) + 10.0
+                            });
+                            // The message beside the facts when its start
+                            // fits, else below; the summary gets the rest.
+                            let mut room = ui.available_width();
+                            if message.is_some() {
+                                if room >= wanted {
+                                    room -= wanted;
+                                } else {
+                                    message_below = true;
+                                }
+                            }
+                            if let Some(s) = &data.snapshot {
+                                let summary = crate::i18n::format(
+                                    "CPU {0}%   Memory {1} / {2}",
+                                    &[
+                                        format!("{:.0}", s.system.cpu_percent),
+                                        format_bytes(s.system.memory_used() as f64),
+                                        format_bytes(s.system.memory_total as f64),
+                                    ],
+                                );
+                                // Shortened, but not to a lone ellipsis.
+                                if room >= STATUS_SUMMARY_MIN_WIDTH {
+                                    ui.scope(|ui| {
+                                        ui.set_max_width(room);
+                                        ui.add(egui::Label::new(&summary).truncate())
+                                            .on_hover_text(&summary);
+                                    });
+                                }
+                            }
+                            if let Some((color, text)) = &message
+                                && !message_below
+                            {
+                                ui.add(
+                                    egui::Label::new(RichText::new(text).color(*color)).truncate(),
+                                )
+                                .on_hover_text(text);
+                            }
+                        });
+                    });
                 });
+                if message_below && let Some((color, text)) = &message {
+                    ui.add(egui::Label::new(RichText::new(text).color(*color)).truncate())
+                        .on_hover_text(text);
+                }
             });
         // Only the process table shows them; rebuilt once per data update.
         let labels_key = (data.revision, state.language);
@@ -6247,6 +6290,29 @@ mod tests {
         }
     }
 
+    fn status_app(d: Data, language: crate::i18n::Language, tab: Tab) -> Harness<'static, App> {
+        let (backend, _rx) = Backend::offline(d);
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([820.0, 500.0])
+            .build_eframe(|cc| {
+                crate::theme::apply(&cc.egui_ctx);
+                App {
+                    backend,
+                    state: UiState {
+                        language,
+                        tab,
+                        check_updates: false,
+                        ..Default::default()
+                    },
+                    tray: None,
+                    frames: Default::default(),
+                }
+            });
+        h.run_steps(3);
+        h
+    }
+
     #[test]
     fn status_actions_stay_inside_a_compact_window_with_a_long_message() {
         for language in crate::i18n::Language::TRANSLATED {
@@ -6255,50 +6321,100 @@ mod tests {
             d.elevated = false;
             let long = "A process could not be controlled. ".repeat(12);
             d.message = Some((EventLevel::Warn, long.clone()));
-            let (backend, _rx) = Backend::offline(d);
-            let mut h = Harness::builder()
-                .allow_missing_glyphs()
-                .with_size([820.0, 500.0])
-                .build_eframe(|cc| {
-                    crate::theme::apply(&cc.egui_ctx);
-                    App {
-                        backend,
-                        state: UiState {
-                            language,
-                            check_updates: false,
-                            ..Default::default()
-                        },
-                        tray: None,
-                        frames: Default::default(),
-                    }
-                });
-            h.run_steps(3);
+            let mut h = status_app(d, language, Tab::Overview);
+            let version = h
+                .get_by_label(concat!("v", env!("CARGO_PKG_VERSION")))
+                .rect();
+            let mut actions = Vec::new();
             for label in ["Run new task", "Restart as administrator"] {
                 let node = h.get_by_role_and_label(egui::Role::Button, crate::i18n::tr(label));
                 let rect = node.rect();
                 println!("EXPECTED: {label} inside 820x500; ACTUAL: {rect:?}");
                 assert!(
                     rect.min.x >= 0.0 && rect.max.x <= 820.0 && rect.max.y <= 500.0,
-                    "{label}: {rect:?}"
+                    "{language:?} {label}: {rect:?}"
                 );
+                assert!(
+                    (rect.center().y - version.center().y).abs() < 4.0,
+                    "{language:?} {label} on the version's line: {rect:?} {version:?}"
+                );
+                actions.push(rect);
             }
-            let summary = crate::i18n::format(
-                "CPU {0}%   Memory {1} / {2}",
-                &[
-                    "42".into(),
-                    crate::i18n::decimal("8.0 GiB"),
-                    crate::i18n::decimal("16.0 GiB"),
-                ],
-            );
-            let rect = h.get_by_label(&summary).rect();
+            // Beside the facts when its start fits, before the actions;
+            // else on a line of its own. Shortened to the window either way.
+            let message = h
+                .get_by_label_contains("A process could not be controlled.")
+                .rect();
+            let inline = (message.center().y - version.center().y).abs() < 4.0;
+            let first_action = actions.iter().map(|r| r.min.x).fold(f32::MAX, f32::min);
             assert!(
-                rect.height() <= 30.0,
-                "resource summary stays on one line: {rect:?}"
+                if inline {
+                    message.max.x <= first_action
+                } else {
+                    message.min.y >= actions[0].max.y
+                } && message.max.x <= 820.0
+                    && message.max.y <= 500.0,
+                "{language:?} message clear of the actions: {message:?} {actions:?}"
             );
             h.get_by_role_and_label(egui::Role::Button, crate::i18n::tr("Run new task"))
                 .click();
             h.run_steps(2);
             assert!(h.state().state.run_task.is_some());
+        }
+    }
+
+    #[test]
+    fn the_status_bar_keeps_to_one_line_on_a_compact_window() {
+        use crate::i18n::Language;
+        // The Processes page adds the inspector menu; the fixture has the
+        // rescue core. Without a message every language fits one line, and
+        // so does a short one in the reviewed languages.
+        let cases = Language::TRANSLATED
+            .into_iter()
+            .map(|language| (language, false, None))
+            .chain(
+                [Language::English, Language::Turkish, Language::German]
+                    .map(|language| (language, true, Some("ready"))),
+            );
+        for (language, elevated, message) in cases {
+            let _language = crate::i18n::scope(language);
+            let mut d = data();
+            d.elevated = elevated;
+            d.message = message.map(|m| (EventLevel::Info, m.to_owned()));
+            let h = status_app(d, language, Tab::Processes);
+            let version = h
+                .get_by_label(concat!("v", env!("CARGO_PKG_VERSION")))
+                .rect();
+            let line = |rect: egui::Rect, what: &str| {
+                assert!(
+                    (rect.center().y - version.center().y).abs() < 4.0
+                        && rect.min.x >= 0.0
+                        && rect.max.x <= 820.0,
+                    "{language:?} {what} on the version's line: {rect:?} {version:?}"
+                );
+            };
+            let mut actions = vec!["Run new task"];
+            if !elevated {
+                actions.push("Restart as administrator");
+            }
+            for label in actions {
+                line(
+                    h.get_by_role_and_label(egui::Role::Button, crate::i18n::tr(label))
+                        .rect(),
+                    label,
+                );
+            }
+            line(
+                h.get_by_label(crate::i18n::tr("Inspector")).rect(),
+                "Inspector",
+            );
+            if let Some(m) = message {
+                line(h.get_by_label(&crate::i18n::message(m)).rect(), "message");
+            }
+            assert!(
+                version.max.y > 500.0 - 30.0,
+                "{language:?} one line at the bottom: {version:?}"
+            );
         }
     }
 
@@ -8960,6 +9076,8 @@ o-such-folder",
 
         // The Run button works too; elevated GUIs hide the restart button.
         h.state().backend.data().elevated = true;
+        // Without the restart button the actions move right.
+        h.run_steps(2);
         h.get_by_role_and_label(egui::accesskit::Role::Button, "Run new task")
             .click();
         h.run_steps(2);

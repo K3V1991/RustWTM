@@ -785,16 +785,70 @@ pub fn table_panel<R>(ui: &mut Ui, id: &str, min_width: f32, add: impl FnOnce(&m
     panel(ui, |ui| {
         let scroll = ui.spacing().scroll;
         ui.spacing_mut().scroll = solid_scroll();
-        egui::ScrollArea::horizontal()
+        let out = egui::ScrollArea::horizontal()
             .id_salt(("table_panel", id))
             .auto_shrink([false, true])
             .show(ui, |ui| {
                 ui.spacing_mut().scroll = scroll;
                 ui.set_min_width(min_width);
                 add(ui)
-            })
-            .inner
+            });
+        side_fades(ui, &out, card_fill(ui));
+        out.inner
     })
+}
+
+/// Which sides of a sideways scroll area have columns beyond them: the
+/// view is `view` wide, its content `content`, scrolled by `offset`.
+fn hidden_sides(view: f32, content: f32, offset: f32) -> (bool, bool) {
+    (offset > 1.0, content - view - offset > 1.0)
+}
+
+/// Fades the sides of a sideways scroll area that have columns beyond
+/// them into `fill`, so a column cut at the edge reads as going on.
+fn side_fades<R>(ui: &Ui, out: &egui::scroll_area::ScrollAreaOutput<R>, fill: Color32) {
+    const WIDTH: f32 = 28.0;
+    // The view can reach below a short table: fade only beside its rows.
+    let mut view = out.inner_rect;
+    view.max.y = view.max.y.min(view.min.y + out.content_size.y);
+    let (left, right) = hidden_sides(
+        view.width(),
+        out.content_size.x,
+        out.state.clamped_offset().x,
+    );
+    let painter = ui.painter().with_clip_rect(view);
+    let clear = fill.gamma_multiply(0.0);
+    for (hidden, rect, colors) in [
+        (
+            left,
+            Rect::from_min_max(view.min, egui::pos2(view.left() + WIDTH, view.bottom())),
+            [fill, clear, clear, fill],
+        ),
+        (
+            right,
+            Rect::from_min_max(egui::pos2(view.right() - WIDTH, view.top()), view.max),
+            [clear, fill, fill, clear],
+        ),
+    ] {
+        if !hidden {
+            continue;
+        }
+        let mut mesh = epaint::Mesh::default();
+        for (pos, color) in [
+            rect.left_top(),
+            rect.right_top(),
+            rect.right_bottom(),
+            rect.left_bottom(),
+        ]
+        .into_iter()
+        .zip(colors)
+        {
+            mesh.colored_vertex(pos, color);
+        }
+        mesh.add_triangle(0, 1, 2);
+        mesh.add_triangle(0, 2, 3);
+        painter.add(Shape::mesh(mesh));
+    }
 }
 
 /// A cell of a table or grid with its text on the right, for numbers.
@@ -1107,6 +1161,10 @@ pub fn ring_gauge(
     response
 }
 
+/// What must be left below a scroll area's edge for [`more_below`] to show
+/// its button: a little more than a table row.
+const MORE_BELOW_BUTTON_FROM: f32 = 48.0;
+
 fn scroll_key(key: &str) -> egui::Id {
     egui::Id::unique(("more_below", key))
 }
@@ -1118,8 +1176,8 @@ pub fn take_scroll(ui: &Ui, key: &str) -> Option<f32> {
 }
 
 /// While a scroll area's content goes on below its bottom edge: fades that
-/// edge into `fill` and shows a *More below* button that scrolls most of a
-/// view further (see [`take_scroll`]).
+/// edge into `fill` and, while more than a row is left, shows a *More
+/// below* button that scrolls most of a view further (see [`take_scroll`]).
 pub fn more_below<R>(
     ui: &Ui,
     key: &str,
@@ -1133,6 +1191,7 @@ pub fn more_below<R>(
         return;
     }
     let painter = ui.painter().with_clip_rect(view);
+    let left = max_offset - offset;
 
     let fade = Rect::from_min_max(egui::pos2(view.left(), view.bottom() - 36.0), view.max);
     let mut mesh = epaint::Mesh::default();
@@ -1148,6 +1207,11 @@ pub fn more_below<R>(
     mesh.add_triangle(0, 1, 2);
     mesh.add_triangle(0, 2, 3);
     painter.add(Shape::mesh(mesh));
+    // With less than a row left the button would only cover the last row
+    // and its buttons; the fade says enough.
+    if left < MORE_BELOW_BUTTON_FROM {
+        return;
+    }
 
     let label = crate::i18n::tr("More below");
     let galley = painter.layout_no_wrap(
@@ -1756,6 +1820,40 @@ mod tests {
         }
         assert!(h.query_by_label("More below").is_none(), "gone at the end");
         assert!(h.query_by_label("row 59").is_some());
+    }
+
+    #[test]
+    fn sideways_tables_fade_the_sides_with_columns_beyond() {
+        assert_eq!(hidden_sides(500.0, 500.0, 0.0), (false, false), "fits");
+        assert_eq!(hidden_sides(500.0, 800.0, 0.0), (false, true), "start");
+        assert_eq!(hidden_sides(500.0, 800.0, 150.0), (true, true), "middle");
+        assert_eq!(hidden_sides(500.0, 800.0, 300.0), (true, false), "end");
+    }
+
+    #[test]
+    fn more_below_leaves_a_last_row_uncovered() {
+        // Content taller than the view by `extra`: the button shows only
+        // when more than a row is hidden.
+        for (extra, shown) in [(30.0, false), (200.0, true)] {
+            let h = egui_kittest::Harness::builder()
+                .allow_missing_glyphs()
+                .with_size([400.0, 300.0])
+                .build_ui(move |ui| {
+                    let out = egui::ScrollArea::vertical()
+                        .id_salt("list")
+                        .auto_shrink([false, false])
+                        .show(ui, |ui| {
+                            let height = ui.available_height() + extra;
+                            ui.allocate_space(egui::vec2(100.0, height));
+                        });
+                    more_below(ui, "list", &out, ui.visuals().panel_fill);
+                });
+            assert_eq!(
+                h.query_by_label("More below").is_some(),
+                shown,
+                "{extra} px hidden"
+            );
+        }
     }
 
     #[test]
