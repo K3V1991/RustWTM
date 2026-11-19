@@ -8,9 +8,11 @@
 use std::collections::{HashMap, HashSet};
 use std::mem::discriminant;
 
-use wtm_core::control::{self, EcoQos, Limiter, Limits, PriorityClass, ProcessRef};
+use wtm_core::control::{
+    self, EcoQos, IoPriority, Limiter, Limits, MemoryPriority, PriorityClass, ProcessRef,
+};
 use wtm_ipc::Managed;
-use wtm_policy::{Action, Decision, PriorityLevel, Source};
+use wtm_policy::{Action, Decision, IoLevel, MemoryLevel, PriorityLevel, Source};
 
 use crate::events::EventLog;
 
@@ -20,6 +22,8 @@ type Key = (u32, i64);
 struct Effective {
     priority: Option<PriorityLevel>,
     eco_qos: bool,
+    io: Option<IoLevel>,
+    memory_priority: Option<MemoryLevel>,
     cpu_cap: Option<f32>,
     memory_bytes: Option<u64>,
     suspended: bool,
@@ -32,6 +36,10 @@ impl Effective {
             match *a {
                 Action::Priority(p) => e.priority = Some(e.priority.map_or(p, |q| q.min(p))),
                 Action::EcoQos => e.eco_qos = true,
+                Action::IoPriority(l) => e.io = Some(e.io.map_or(l, |m| m.min(l))),
+                Action::MemoryPriority(l) => {
+                    e.memory_priority = Some(e.memory_priority.map_or(l, |m| m.min(l)));
+                }
                 Action::CpuCap(c) => e.cpu_cap = Some(e.cpu_cap.map_or(c, |d| d.min(c))),
                 Action::MemoryCapMb(mb) => {
                     let b = mb.saturating_mul(1 << 20);
@@ -59,6 +67,12 @@ impl Effective {
         if self.eco_qos {
             parts.push("efficiency mode".into());
         }
+        if let Some(l) = self.io {
+            parts.push(format!("I/O priority {l}"));
+        }
+        if let Some(l) = self.memory_priority {
+            parts.push(format!("memory priority {l}"));
+        }
         if let Some(c) = self.cpu_cap {
             parts.push(format!("CPU ≤ {c:.2}%"));
         }
@@ -81,6 +95,8 @@ struct Touched {
     target: ProcessRef,
     original_priority: Option<PriorityClass>,
     original_eco: Option<EcoQos>,
+    original_io: Option<IoPriority>,
+    original_memory: Option<MemoryPriority>,
     actions: HashMap<Source, Vec<Action>>,
     pending_restores: HashSet<Source>,
     applied: Effective,
@@ -243,6 +259,8 @@ impl Executor {
                 target: t.clone(),
                 original_priority: None,
                 original_eco: None,
+                original_io: None,
+                original_memory: None,
                 actions: HashMap::new(),
                 pending_restores: HashSet::new(),
                 applied: Effective::default(),
@@ -385,7 +403,9 @@ fn reconcile(limiter: &mut Limiter, t: &mut Touched) -> Result<(), String> {
     // predate a change made outside RustWTM.
     let takes_priority = new.priority.is_some() && old.priority.is_none();
     let takes_eco = new.eco_qos && !old.eco_qos;
-    if (takes_priority || takes_eco)
+    let takes_io = new.io.is_some() && old.io.is_none();
+    let takes_memory = new.memory_priority.is_some() && old.memory_priority.is_none();
+    if (takes_priority || takes_eco || takes_io || takes_memory)
         && let Ok(d) = control::inspect(target)
     {
         if takes_priority {
@@ -393,6 +413,12 @@ fn reconcile(limiter: &mut Limiter, t: &mut Touched) -> Result<(), String> {
         }
         if takes_eco {
             t.original_eco = d.eco_qos.or(t.original_eco);
+        }
+        if takes_io {
+            t.original_io = d.io_priority.or(t.original_io);
+        }
+        if takes_memory {
+            t.original_memory = d.memory_priority.or(t.original_memory);
         }
     }
     if new.priority != old.priority {
@@ -417,6 +443,27 @@ fn reconcile(limiter: &mut Limiter, t: &mut Touched) -> Result<(), String> {
         };
         match control::set_eco_qos(target, mode) {
             Ok(()) => t.applied.eco_qos = new.eco_qos,
+            Err(e) => errors.push(e),
+        }
+    }
+    if new.io != old.io {
+        // Back to what it had, or normal when that could not be read.
+        let io = new
+            .io
+            .map(IoPriority::from)
+            .unwrap_or(t.original_io.unwrap_or(IoPriority::Normal));
+        match control::set_io_priority(target, io) {
+            Ok(()) => t.applied.io = new.io,
+            Err(e) => errors.push(e),
+        }
+    }
+    if new.memory_priority != old.memory_priority {
+        let memory = new
+            .memory_priority
+            .map(MemoryPriority::from)
+            .unwrap_or(t.original_memory.unwrap_or(MemoryPriority::Normal));
+        match control::set_memory_priority(target, memory) {
+            Ok(()) => t.applied.memory_priority = new.memory_priority,
             Err(e) => errors.push(e),
         }
     }
@@ -483,6 +530,8 @@ mod tests {
                 target: target.clone(),
                 original_priority: Some(PriorityClass::Normal),
                 original_eco: None,
+                original_io: None,
+                original_memory: None,
                 actions: HashMap::from([(
                     Source::Manual,
                     vec![Action::Priority(PriorityLevel::Idle)],
@@ -749,6 +798,53 @@ mod process_tests {
                 .iter()
                 .any(|ev| ev.message.contains("restored"))
         );
+    }
+
+    #[test]
+    fn io_and_memory_priorities_take_the_lowest_and_roll_back() {
+        let (_child, t) = spawn();
+        let io = || control::inspect(&t).unwrap().io_priority;
+        let memory = || control::inspect(&t).unwrap().memory_priority;
+        let (original_io, original_memory) = (io(), memory());
+        println!("EXPECTED: normal before; ACTUAL: {original_io:?} {original_memory:?}");
+        let mut e = Executor::new(false, EventLog::default());
+
+        apply(
+            &mut e,
+            Source::Governor,
+            &t,
+            Action::IoPriority(IoLevel::Low),
+        )
+        .unwrap();
+        apply(
+            &mut e,
+            Source::Rule,
+            &t,
+            Action::IoPriority(IoLevel::VeryLow),
+        )
+        .unwrap();
+        apply(
+            &mut e,
+            Source::Rule,
+            &t,
+            Action::MemoryPriority(MemoryLevel::Low),
+        )
+        .unwrap();
+        assert_eq!(io(), Some(IoPriority::Background));
+        assert_eq!(memory(), Some(MemoryPriority::Low));
+        let summary = &e.managed()[0].summary;
+        assert!(
+            summary.contains("I/O priority very low") && summary.contains("memory priority low"),
+            "{summary}"
+        );
+
+        // The rule letting go leaves the governor's (higher) I/O priority.
+        restore(&mut e, Source::Rule, &t).unwrap();
+        assert_eq!(io(), Some(IoPriority::Low));
+        assert_eq!(memory(), original_memory);
+        restore(&mut e, Source::Governor, &t).unwrap();
+        assert_eq!(io(), original_io);
+        assert!(e.managed().is_empty());
     }
 
     #[test]

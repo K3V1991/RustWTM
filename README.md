@@ -45,6 +45,9 @@ extract the release ZIP and open `rustwtm.exe`.
 - **Place apps on cores.** Keep an app on chosen cores, keep apps apart
   while they run together, or reserve cores for one app.
   [Core placement](docs/core-placement.md)
+- **Power while an app runs.** Switch to a power plan and keep the computer
+  awake while a render or a call runs; the previous plan comes back after.
+  [App power](docs/app-power.md)
 - **Manage Windows and local workloads.** Review startup entries, services,
   installed apps and packages, inspect disk usage and monitor local Docker
   containers. [Installed apps](docs/inventory-app-management.md) · [Docker](docs/docker.md)

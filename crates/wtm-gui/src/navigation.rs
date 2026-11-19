@@ -26,6 +26,7 @@ pub enum Icon {
     Network,
     Ports,
     About,
+    Power,
 }
 
 fn paint(ui: &Ui, rect: Rect, icon: Icon, color: Color32) {
@@ -229,6 +230,17 @@ fn paint(ui: &Ui, rect: Rect, icon: Icon, color: Color32) {
             circle(9.5, 9.5, 7.5);
             circle(9.5, 5.5, 0.5);
             line(&[(9.5, 9.0), (9.5, 14.0)]);
+        }
+        Icon::Power => {
+            // The power symbol: a ring open at the top, a bar through it.
+            let ring: Vec<(f32, f32)> = (0..=16)
+                .map(|i| {
+                    let angle = (-55.0 + i as f32 * 290.0 / 16.0_f32).to_radians();
+                    (9.5 + 7.0 * angle.sin(), 10.5 - 7.0 * angle.cos())
+                })
+                .collect();
+            line(&ring);
+            line(&[(9.5, 1.5), (9.5, 9.5)]);
         }
     }
 }

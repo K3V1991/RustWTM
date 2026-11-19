@@ -49,6 +49,8 @@ pub struct Config {
     pub separate: Vec<crate::Separate>,
     /// Cores kept for one app while it runs.
     pub reserve_cores: Vec<crate::ReserveCores>,
+    /// A power plan, and the computer kept awake, while an app runs.
+    pub while_running: Vec<crate::WhileRunning>,
 }
 
 impl Default for Config {
@@ -70,6 +72,7 @@ impl Default for Config {
             pins: Vec::new(),
             separate: Vec::new(),
             reserve_cores: Vec::new(),
+            while_running: Vec::new(),
         }
     }
 }
@@ -208,6 +211,7 @@ impl Config {
                 .map_err(|e| format!("kill '{}': {e}", k.label()))?;
         }
         self.placement().validate()?;
+        crate::app_power::validate_all(&self.while_running)?;
         for r in &self.rules {
             r.validate()
                 .map_err(|e| format!("rule '{}': {e}", r.name))?;

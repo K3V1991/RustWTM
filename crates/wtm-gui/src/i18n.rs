@@ -459,7 +459,7 @@ fn message_at_depth(english: &str, depth: usize) -> std::borrow::Cow<'_, str> {
                     *value = message_at_depth(value, depth + 1).into_owned();
                 }
             }
-            if *key == "priority {0}" {
+            if ["priority {0}", "I/O priority {0}", "memory priority {0}"].contains(key) {
                 values[0] = tr(&values[0]).to_owned();
             }
             // The service writes numbers with a point: "12.5" is "12,5"
@@ -847,6 +847,32 @@ mod tests {
     }
 
     #[test]
+    fn app_power_texts_and_priority_actions_translate() {
+        let _scope = scope(Language::Turkish);
+        for (english, kept) in [
+            ("I/O priority very low", None),
+            ("memory priority below normal", None),
+            ("power plan High performance for 'Render'", Some("Render")),
+            ("power plan Balanced again", Some("Balanced")),
+            (
+                "RustWTM: 'Render' keeps the computer awake",
+                Some("'Render'"),
+            ),
+        ] {
+            let shown = message(english);
+            assert_ne!(shown, english);
+            // The level words are translated inside the action.
+            assert!(
+                !shown.contains("very low") && !shown.contains("below normal"),
+                "{shown}"
+            );
+            if let Some(kept) = kept {
+                assert!(shown.contains(kept), "{shown}");
+            }
+        }
+    }
+
+    #[test]
     fn core_placement_reasons_translate() {
         let _scope = scope(Language::Turkish);
         for reason in [
@@ -1122,6 +1148,7 @@ mod tests {
             include_str!("kill_tab.rs"),
             include_str!("limits_tab.rs"),
             include_str!("cores_view.rs"),
+            include_str!("app_power_view.rs"),
             include_str!("overview.rs"),
             include_str!("overview_layout.rs"),
             include_str!("support_bundle.rs"),

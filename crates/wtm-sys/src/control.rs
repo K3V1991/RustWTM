@@ -49,10 +49,10 @@ use windows::Win32::System::Threading::{
     GetCurrentProcess, PROCESS_CREATE_PROCESS, PROCESS_DUP_HANDLE,
 };
 use windows::Win32::System::Threading::{
-    GetCurrentThread, GetProcessDefaultCpuSets, MEMORY_PRIORITY_INFORMATION, MEMORY_PRIORITY_LOW,
-    MEMORY_PRIORITY_NORMAL, PROCESS_SET_LIMITED_INFORMATION, ProcessMemoryPriority,
-    SetProcessDefaultCpuSets, SetThreadPriority, THREAD_MODE_BACKGROUND_BEGIN,
-    THREAD_PRIORITY_ABOVE_NORMAL,
+    GetCurrentThread, GetProcessDefaultCpuSets, MEMORY_PRIORITY, MEMORY_PRIORITY_INFORMATION,
+    MEMORY_PRIORITY_LOW, MEMORY_PRIORITY_NORMAL, PROCESS_SET_LIMITED_INFORMATION,
+    ProcessMemoryPriority, SetProcessDefaultCpuSets, SetThreadPriority,
+    THREAD_MODE_BACKGROUND_BEGIN, THREAD_PRIORITY_ABOVE_NORMAL,
 };
 use windows::core::PWSTR;
 
@@ -68,6 +68,15 @@ windows::core::link!("ntdll.dll" "system" fn NtQueryInformationProcess(
     len: u32,
     returned: *mut u32,
 ) -> NTSTATUS);
+windows::core::link!("ntdll.dll" "system" fn NtSetInformationProcess(
+    process_handle: HANDLE,
+    class: u32,
+    info: *const core::ffi::c_void,
+    len: u32,
+) -> NTSTATUS);
+
+/// `PROCESSINFOCLASS::ProcessIoPriority`.
+const PROCESS_IO_PRIORITY: u32 = 33;
 
 /// `PROCESSINFOCLASS::ProcessCommandLineInformation` (Windows 8.1+).
 const PROCESS_COMMAND_LINE_INFORMATION: u32 = 60;
@@ -193,6 +202,17 @@ pub enum IoPriority {
 }
 
 impl IoPriority {
+    /// The `IO_PRIORITY_HINT` value.
+    pub fn hint(self) -> u32 {
+        match self {
+            Self::Background => 0,
+            Self::Low => 1,
+            Self::Normal => 2,
+            Self::High => 3,
+            Self::Critical => 4,
+        }
+    }
+
     /// From an `IO_PRIORITY_HINT`.
     pub fn from_hint(hint: u32) -> Option<Self> {
         Some(match hint {
@@ -201,6 +221,44 @@ impl IoPriority {
             2 => Self::Normal,
             3 => Self::High,
             4 => Self::Critical,
+            _ => return None,
+        })
+    }
+}
+
+/// A process's memory priority: how soon Windows repurposes its standby
+/// pages for other programs (the lower, the sooner).
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+)]
+pub enum MemoryPriority {
+    VeryLow,
+    Low,
+    Medium,
+    BelowNormal,
+    Normal,
+}
+
+impl MemoryPriority {
+    /// The `MEMORY_PRIORITY_*` value.
+    pub fn value(self) -> u32 {
+        match self {
+            Self::VeryLow => 1,
+            Self::Low => 2,
+            Self::Medium => 3,
+            Self::BelowNormal => 4,
+            Self::Normal => 5,
+        }
+    }
+
+    /// From a `MEMORY_PRIORITY_*` value; the lowest (0) reads as very low.
+    pub fn from_value(value: u32) -> Option<Self> {
+        Some(match value {
+            0 | 1 => Self::VeryLow,
+            2 => Self::Low,
+            3 => Self::Medium,
+            4 => Self::BelowNormal,
+            5 => Self::Normal,
             _ => return None,
         })
     }
@@ -837,10 +895,58 @@ impl ProcessHandle {
         )
     }
 
+    /// Sets the I/O priority the process's I/O gets by default. Raising it
+    /// above normal needs a privilege RustWTM does not use. Requires
+    /// `Access::SET_INFORMATION`.
+    pub fn set_io_priority(&self, priority: IoPriority) -> Result<()> {
+        let hint = priority.hint();
+        // SAFETY: `hint` is a readable ULONG of the size passed.
+        let status = unsafe {
+            NtSetInformationProcess(
+                self.raw(),
+                PROCESS_IO_PRIORITY,
+                (&raw const hint).cast(),
+                size_of::<u32>() as u32,
+            )
+        };
+        nt_ok("NtSetInformationProcess", status)
+    }
+
+    /// The process's memory priority. Requires `Access::QUERY`.
+    pub fn memory_priority(&self) -> Result<MemoryPriority> {
+        let mut info = MEMORY_PRIORITY_INFORMATION::default();
+        // SAFETY: `info` is a correctly sized MEMORY_PRIORITY_INFORMATION.
+        unsafe {
+            GetProcessInformation(
+                self.raw(),
+                ProcessMemoryPriority,
+                (&raw mut info).cast(),
+                size_of::<MEMORY_PRIORITY_INFORMATION>() as u32,
+            )?
+        };
+        MemoryPriority::from_value(info.MemoryPriority.0)
+            .ok_or_else(|| windows::core::Error::from(E_FAIL).into())
+    }
+
+    /// Sets the process's memory priority. Requires `Access::SET_INFORMATION`.
+    pub fn set_memory_priority(&self, priority: MemoryPriority) -> Result<()> {
+        let info = MEMORY_PRIORITY_INFORMATION {
+            MemoryPriority: MEMORY_PRIORITY(priority.value()),
+        };
+        // SAFETY: `info` is a correctly sized MEMORY_PRIORITY_INFORMATION.
+        unsafe {
+            SetProcessInformation(
+                self.raw(),
+                ProcessMemoryPriority,
+                (&raw const info).cast(),
+                size_of::<MEMORY_PRIORITY_INFORMATION>() as u32,
+            )?
+        };
+        Ok(())
+    }
+
     /// The I/O priority the process's I/O gets by default.
     pub fn io_priority(&self) -> Result<IoPriority> {
-        /// `PROCESSINFOCLASS::ProcessIoPriority`.
-        const PROCESS_IO_PRIORITY: u32 = 33;
         let mut hint = 0u32;
         let mut len = 0u32;
         // SAFETY: `hint` is a writable ULONG of the size passed.

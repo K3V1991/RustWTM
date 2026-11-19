@@ -79,6 +79,8 @@ Used by `ladder`, rules and insights.
 |---|---|
 | `{ priority = "idle" \| "below_normal" \| "normal" \| "above_normal" }` | Priority class. |
 | `"eco_qos"` | Efficiency mode (power throttling). |
+| `{ io_priority = "very_low" \| "low" }` | Default priority of the process's disk and network I/O; `very_low` is what Windows gives background-mode processes. |
+| `{ memory_priority = "very_low" \| "low" \| "medium" \| "below_normal" }` | How soon Windows repurposes the process's standby pages for other programs. |
 | `{ cpu_cap = 10 }` | Hard cap at 10% of the machine (job object). |
 | `{ cpu_cap_relative = 0.5 }` | Cap at half of the usage observed when first acted on (governor and rules only; a rule needs `when.cpu_above`, which is also the least it is resolved against). |
 | `{ memory_cap_mb = 4096 }` | Committed memory limit per process. |
@@ -87,7 +89,8 @@ Used by `ladder`, rules and insights.
 
 When several sources act on one process, the most restrictive state wins
 (lowest priority, tightest caps). When a source rolls back, only its own
-actions are removed.
+actions are removed. I/O and memory priority can only be lowered: raising
+them above normal would let one program starve the others.
 
 ## `[[rule]]`
 
@@ -175,10 +178,56 @@ the status bar show *Game mode* meanwhile.
 | `enabled` | `true` | |
 | `background_cpu_percent` | `2.0` | Background apps using at least this share of the machine are calmed. |
 | `actions` | below-normal priority + efficiency mode | `cpu_cap_relative` is not allowed. |
-| `power_plan` | `false` | Switch to the High performance power plan meanwhile and back to the previous plan afterwards. |
+| `power_plan` | `false` | Switch to the High performance power plan meanwhile and back to the previous plan afterwards (see [`[[while_running]]`](#while_running--app-power) for how plans are shared). |
 | `exempt` | `["obs*.exe", "discord.exe", "audiodg.exe", "explorer.exe"]` | Image-name wildcards never calmed. |
 
 Applied only when `dry_run = false`.
+
+## `[[while_running]]` — app power
+
+```toml
+[[while_running]]
+name = "Render"
+apps = ["blender.exe", "HandBrake*.exe"]   # image-name wildcards
+power_plan = "High performance"           # a plan's GUID or its name
+keep_awake = "system"                     # or "display"
+
+[[while_running]]
+name = "Movie"
+apps = ["vlc.exe"]
+keep_awake = "display"
+```
+
+While one of an entry's apps runs, and for `hold_secs` after the last one
+exits, the service switches to the entry's power plan and keeps the
+computer from sleeping. Edit entries on the **App power** page (under
+*Protect*).
+
+| Key | Default | Meaning |
+|---|---|---|
+| `name` | required | Unique. |
+| `apps` | required | Image-name wildcards. |
+| `power_plan` | none | A plan by GUID (`8C5E7FDA-…`, braces optional) or by the name Windows shows (which depends on the system's language; the page writes GUIDs). |
+| `keep_awake` | none | `"system"`: the computer does not go to sleep by itself. `"display"`: nor does the screen turn off. |
+| `hold_secs` | `5` | How long the entry stays active after its apps exit (at most 3600). |
+
+At least one of `power_plan` / `keep_awake` is required.
+
+- **One plan at a time.** Game mode's plan comes first, then the entries
+  in the order of the file. The plan in use before the first switch is
+  written to `%ProgramData%\RustWTM\power-plan.txt` before switching and
+  comes back when no entry asks any more (or after a crash, at the next
+  start). If you choose another plan meanwhile, RustWTM keeps your choice
+  and does not switch back.
+- A plan that is not on the machine (laptops with Modern Standby often
+  have only *Balanced*) is reported in the event log and on the page;
+  nothing is switched.
+- **The screen** is kept on by the RustWTM window, also while it sits in
+  the tray: Windows refuses that request from a service. The computer
+  itself is kept awake by the service. `powercfg /requests` lists both
+  with the entries' names.
+- Applied only when `dry_run = false`; *Monitoring only* logs what would
+  be switched. Everything is given back when the service stops.
 
 ## `[[limit]]` — app limits
 

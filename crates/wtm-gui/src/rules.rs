@@ -2,7 +2,9 @@
 use crate::i18n::LocalDecimal;
 use crate::i18n::PercentAffix;
 use eframe::egui::{self, Ui};
-use wtm_policy::{Action, Condition, Config, Matcher, Preset, PriorityLevel, Rule};
+use wtm_policy::{
+    Action, Condition, Config, IoLevel, Matcher, MemoryLevel, Preset, PriorityLevel, Rule,
+};
 #[derive(Default)]
 pub struct View {
     draft: Option<Rule>,
@@ -225,7 +227,7 @@ impl View {
                 ui.strong(crate::i18n::tr("Actions"));
                 for (index, action) in rule.actions.iter_mut().enumerate() {
                     ui.horizontal_wrapped(|ui| {
-                        let label = ui.label(action.to_string());
+                        let label = ui.label(crate::i18n::message(&action.to_string()));
                         match action {
                             Action::CpuCap(v) => {
                                 ui.add(
@@ -269,6 +271,41 @@ impl View {
                                     .response
                                     .labelled_by(label.id);
                             }
+                            Action::IoPriority(v) => {
+                                egui::ComboBox::from_id_salt(("rule-io", index))
+                                    .selected_text(crate::i18n::tr(&v.to_string()))
+                                    .show_ui(ui, |ui| {
+                                        for l in [IoLevel::VeryLow, IoLevel::Low] {
+                                            ui.selectable_value(
+                                                v,
+                                                l,
+                                                crate::i18n::tr(&l.to_string()),
+                                            );
+                                        }
+                                    })
+                                    .response
+                                    .labelled_by(label.id);
+                            }
+                            Action::MemoryPriority(v) => {
+                                egui::ComboBox::from_id_salt(("rule-memory", index))
+                                    .selected_text(crate::i18n::tr(&v.to_string()))
+                                    .show_ui(ui, |ui| {
+                                        for l in [
+                                            MemoryLevel::VeryLow,
+                                            MemoryLevel::Low,
+                                            MemoryLevel::Medium,
+                                            MemoryLevel::BelowNormal,
+                                        ] {
+                                            ui.selectable_value(
+                                                v,
+                                                l,
+                                                crate::i18n::tr(&l.to_string()),
+                                            );
+                                        }
+                                    })
+                                    .response
+                                    .labelled_by(label.id);
+                            }
                             _ => {}
                         }
                         if ui.small_button(crate::i18n::tr("Remove action")).clicked() {
@@ -280,6 +317,8 @@ impl View {
                     for action in [
                         Action::EcoQos,
                         Action::Priority(PriorityLevel::BelowNormal),
+                        Action::IoPriority(IoLevel::Low),
+                        Action::MemoryPriority(MemoryLevel::Low),
                         Action::CpuCap(25.0),
                         Action::CpuCapRelative(0.5),
                         Action::MemoryCapMb(1024),
@@ -287,7 +326,10 @@ impl View {
                         Action::Suspend,
                         Action::Kill,
                     ] {
-                        if ui.button(action.to_string()).clicked() {
+                        if ui
+                            .button(crate::i18n::message(&action.to_string()))
+                            .clicked()
+                        {
                             add = Some(action);
                             ui.close();
                         }

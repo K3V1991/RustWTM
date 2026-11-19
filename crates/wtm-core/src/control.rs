@@ -11,8 +11,8 @@ use serde::{Deserialize, Serialize};
 
 use wtm_sys::control::{Access, ProcessHandle};
 pub use wtm_sys::control::{
-    Architecture, EcoQos, Integrity, IoPriority, PriorityClass, enter_background_mode,
-    raise_current_thread,
+    Architecture, EcoQos, Integrity, IoPriority, MemoryPriority, PriorityClass,
+    enter_background_mode, raise_current_thread,
 };
 pub use wtm_sys::handles::{HandleInfo, HandleReport, MOST_HANDLES};
 use wtm_sys::job::Job;
@@ -420,6 +420,18 @@ pub fn set_eco_qos(target: &ProcessRef, mode: EcoQos) -> ControlResult<()> {
     sys(target.pid, h.set_eco_qos(mode))
 }
 
+/// The default I/O priority of the process's I/O.
+pub fn set_io_priority(target: &ProcessRef, priority: IoPriority) -> ControlResult<()> {
+    let h = open_controlled(target, Access::SET_INFORMATION)?;
+    sys(target.pid, h.set_io_priority(priority))
+}
+
+/// How soon Windows repurposes the process's standby pages.
+pub fn set_memory_priority(target: &ProcessRef, priority: MemoryPriority) -> ControlResult<()> {
+    let h = open_controlled(target, Access::SET_INFORMATION)?;
+    sys(target.pid, h.set_memory_priority(priority))
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProcessDetails {
     pub path: Option<String>,
@@ -430,6 +442,10 @@ pub struct ProcessDetails {
     /// `(process_mask, system_mask)`.
     pub affinity: Option<(u64, u64)>,
     pub eco_qos: Option<EcoQos>,
+    #[serde(default)]
+    pub io_priority: Option<IoPriority>,
+    #[serde(default)]
+    pub memory_priority: Option<MemoryPriority>,
     pub critical: Option<bool>,
     pub protected: Option<String>,
 }
@@ -724,6 +740,8 @@ pub fn inspect(target: &ProcessRef) -> ControlResult<ProcessDetails> {
         priority: h.priority().ok(),
         affinity: h.affinity().ok(),
         eco_qos: h.eco_qos().ok(),
+        io_priority: h.io_priority().ok(),
+        memory_priority: h.memory_priority().ok(),
         critical: h.is_critical().ok(),
         protected: protection_reason(target.pid, &target.name).map(Into::into),
     })

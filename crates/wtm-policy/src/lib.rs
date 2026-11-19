@@ -7,6 +7,7 @@
 #![forbid(unsafe_code)]
 
 mod action;
+mod app_power;
 #[cfg(test)]
 mod bench;
 mod config;
@@ -26,7 +27,11 @@ mod rules;
 mod swarm;
 mod telegram;
 
-pub use action::{Action, Decision, PriorityLevel, Source};
+pub use action::{Action, Decision, IoLevel, MemoryLevel, PriorityLevel, Source};
+pub use app_power::{
+    ActiveEntry, AppPower, KeepAwake, PlanRequest, WhileRunning, choose_plan, keep_awake,
+    remove_while_running, resolve_plan, set_while_running,
+};
 pub use config::{Config, ConfigError, DEFAULT_CONFIG_TOML, GovernorConfig, set_config_value};
 pub use cooling::{CoolingMode, CoolingProfile, CurvePoint, smooth_duty};
 pub use game::{GameChange, GameMode, GameModeConfig};

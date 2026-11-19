@@ -12,6 +12,7 @@ macro_rules! expect_reply {
 }
 
 mod app_limits;
+mod app_power;
 mod blocker;
 mod device_keys;
 mod engine;

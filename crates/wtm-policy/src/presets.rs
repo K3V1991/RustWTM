@@ -127,6 +127,22 @@ pub(crate) fn ladder_item(a: &Action) -> toml_edit::Value {
             };
             t.insert("priority", name.into());
         }
+        Action::IoPriority(l) => {
+            let name = match l {
+                crate::IoLevel::VeryLow => "very_low",
+                crate::IoLevel::Low => "low",
+            };
+            t.insert("io_priority", name.into());
+        }
+        Action::MemoryPriority(l) => {
+            let name = match l {
+                crate::MemoryLevel::VeryLow => "very_low",
+                crate::MemoryLevel::Low => "low",
+                crate::MemoryLevel::Medium => "medium",
+                crate::MemoryLevel::BelowNormal => "below_normal",
+            };
+            t.insert("memory_priority", name.into());
+        }
         Action::CpuCap(c) => {
             t.insert("cpu_cap", f64::from(c).into());
         }

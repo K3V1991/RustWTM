@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **App power** ([design and measurements](docs/app-power.md)): a page
+  under *Protect* and `[[while_running]]` entries that, while one of their
+  programs runs, switch to a chosen power plan and keep the computer, or
+  the computer and the screen, awake. The plan in use before comes back
+  when the programs exit, unless you chose another one meanwhile; a crash
+  never leaves the machine on another plan. Game mode's plan comes first.
+- Rule actions `io_priority` and `memory_priority`: lower a program's disk
+  and network I/O priority, or how long Windows keeps its standby memory.
+
+### Changed
+
+- Game mode's High performance plan goes through the same owner as the
+  App power entries, so the two never undo each other's plan.
+- IPC protocol 20: a 0.37 window and a 0.38 service refuse each other
+  until both are updated (the MSI updates both).
+
 ## [0.37.1] - 2026-11-19
 
 [Release scope and validation](docs/0.37.1-review.md)

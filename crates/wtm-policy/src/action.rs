@@ -1,7 +1,7 @@
 use std::fmt;
 
 use serde::{Deserialize, Serialize};
-use wtm_core::control::{PriorityClass, ProcessRef};
+use wtm_core::control::{IoPriority, MemoryPriority, PriorityClass, ProcessRef};
 
 /// Ordered from most to least restrictive.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
@@ -24,6 +24,65 @@ impl From<PriorityLevel> for PriorityClass {
     }
 }
 
+/// An I/O priority below normal; ordered from most to least restrictive.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum IoLevel {
+    /// What Windows gives background-mode processes.
+    VeryLow,
+    Low,
+}
+
+impl From<IoLevel> for IoPriority {
+    fn from(level: IoLevel) -> Self {
+        match level {
+            IoLevel::VeryLow => IoPriority::Background,
+            IoLevel::Low => IoPriority::Low,
+        }
+    }
+}
+
+impl fmt::Display for IoLevel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            IoLevel::VeryLow => "very low",
+            IoLevel::Low => "low",
+        })
+    }
+}
+
+/// A memory priority below normal; ordered from most to least restrictive.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum MemoryLevel {
+    VeryLow,
+    Low,
+    Medium,
+    BelowNormal,
+}
+
+impl From<MemoryLevel> for MemoryPriority {
+    fn from(level: MemoryLevel) -> Self {
+        match level {
+            MemoryLevel::VeryLow => MemoryPriority::VeryLow,
+            MemoryLevel::Low => MemoryPriority::Low,
+            MemoryLevel::Medium => MemoryPriority::Medium,
+            MemoryLevel::BelowNormal => MemoryPriority::BelowNormal,
+        }
+    }
+}
+
+impl fmt::Display for MemoryLevel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str(match self {
+            MemoryLevel::VeryLow => "very low",
+            MemoryLevel::Low => "low",
+            MemoryLevel::Medium => "medium",
+            MemoryLevel::BelowNormal => "below normal",
+        })
+    }
+}
+
 /// One enforcement step. In TOML: `"eco_qos"`, `{ cpu_cap = 25 }`,
 /// `{ priority = "idle" }`, ...
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
@@ -31,6 +90,10 @@ impl From<PriorityLevel> for PriorityClass {
 pub enum Action {
     Priority(PriorityLevel),
     EcoQos,
+    /// The default priority of the process's disk and network I/O.
+    IoPriority(IoLevel),
+    /// How soon Windows repurposes the process's standby pages.
+    MemoryPriority(MemoryLevel),
     /// Hard cap as a share of total machine CPU (0 < x <= 100).
     CpuCap(f32),
     /// Hard cap as a fraction (0 < x <= 1) of the CPU usage observed when
@@ -71,6 +134,8 @@ impl fmt::Display for Action {
         match self {
             Action::Priority(p) => write!(f, "priority {p:?}"),
             Action::EcoQos => f.write_str("efficiency mode"),
+            Action::IoPriority(l) => write!(f, "I/O priority {l}"),
+            Action::MemoryPriority(l) => write!(f, "memory priority {l}"),
             Action::CpuCap(p) => write!(f, "CPU cap {p:.2}%"),
             Action::CpuCapRelative(r) => write!(f, "CPU cap {:.0}% of baseline", r * 100.0),
             Action::MemoryCapMb(mb) => write!(f, "memory cap {mb} MiB"),
@@ -166,10 +231,46 @@ mod tests {
     }
 
     #[test]
+    fn io_and_memory_priorities_parse_from_toml_and_only_lower() {
+        #[derive(Deserialize)]
+        struct Doc {
+            actions: Vec<Action>,
+        }
+        let doc: Doc = toml::from_str(
+            r#"actions = [{ io_priority = "very_low" }, { memory_priority = "low" }]"#,
+        )
+        .unwrap();
+        assert_eq!(
+            doc.actions,
+            [
+                Action::IoPriority(IoLevel::VeryLow),
+                Action::MemoryPriority(MemoryLevel::Low)
+            ]
+        );
+        for raised in [
+            r#"actions = [{ io_priority = "normal" }]"#,
+            r#"actions = [{ io_priority = "high" }]"#,
+            r#"actions = [{ memory_priority = "normal" }]"#,
+        ] {
+            assert!(toml::from_str::<Doc>(raised).is_err(), "{raised}");
+        }
+        assert_eq!(IoPriority::from(IoLevel::VeryLow), IoPriority::Background);
+        assert_eq!(
+            MemoryPriority::from(MemoryLevel::BelowNormal),
+            MemoryPriority::BelowNormal
+        );
+        // The most restrictive first, as the executor folds them.
+        assert!(IoLevel::VeryLow < IoLevel::Low);
+        assert!(MemoryLevel::VeryLow < MemoryLevel::BelowNormal);
+    }
+
+    #[test]
     fn display_is_human_readable() {
         let shown: Vec<String> = [
             Action::Priority(PriorityLevel::Idle),
             Action::EcoQos,
+            Action::IoPriority(IoLevel::VeryLow),
+            Action::MemoryPriority(MemoryLevel::BelowNormal),
             Action::CpuCap(12.5),
             Action::CpuCapRelative(0.25),
             Action::MemoryCapMb(512),
@@ -184,6 +285,8 @@ mod tests {
             [
                 "priority Idle",
                 "efficiency mode",
+                "I/O priority very low",
+                "memory priority below normal",
                 "CPU cap 12.50%",
                 "CPU cap 25% of baseline",
                 "memory cap 512 MiB",

@@ -4473,6 +4473,8 @@ mod tests {
                 priority: None,
                 affinity: None,
                 eco_qos: None,
+                io_priority: None,
+                memory_priority: None,
                 critical: None,
                 protected: None,
             }),

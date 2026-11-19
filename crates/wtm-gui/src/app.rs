@@ -40,10 +40,11 @@ enum Tab {
     Settings,
     About,
     Cores,
+    AppPower,
 }
 
 /// Navigation follows the task: observe, protect, inspect the system, configure.
-const NAV: [(Tab, crate::navigation::Icon, &str); 21] = {
+const NAV: [(Tab, crate::navigation::Icon, &str); 22] = {
     use crate::navigation::Icon as I;
     [
         (Tab::Overview, I::Overview, "Overview"),
@@ -57,6 +58,7 @@ const NAV: [(Tab, crate::navigation::Icon, &str); 21] = {
         (Tab::Governor, I::Shield, "Governor"),
         (Tab::Limits, I::Limits, "Limits"),
         (Tab::Cores, I::Cpu, "Cores"),
+        (Tab::AppPower, I::Power, "App power"),
         (Tab::KillList, I::Stop, "Kill list"),
         (Tab::Events, I::Events, "Events"),
         (Tab::InstalledApps, I::Containers, "Installed apps"),
@@ -268,6 +270,9 @@ impl Tab {
             Self::Governor => crate::i18n::tr("How automatic protection keeps your PC responsive"),
             Self::Limits => crate::i18n::tr("Give each app a predictable resource budget"),
             Self::Cores => crate::i18n::tr("Choose which cores apps run on"),
+            Self::AppPower => {
+                crate::i18n::tr("Switch the power plan and stay awake while an app runs")
+            }
             Self::KillList => crate::i18n::tr("Choose which background tasks may be ended"),
             Self::Events => crate::i18n::tr("A record of decisions and actions"),
             Self::Startup => crate::i18n::tr("Choose what starts when you sign in"),
@@ -462,6 +467,7 @@ struct UiState {
     ai: crate::ai_assistant::AiChat,
     limits: crate::limits_tab::LimitsView,
     cores: crate::cores_view::CoresView,
+    app_power: crate::app_power_view::AppPowerView,
     kill: crate::kill_tab::KillView,
     ports: crate::ports_tab::PortsView,
     disks: crate::disks_tab::DisksView,
@@ -851,6 +857,7 @@ impl Default for UiState {
             ai: Default::default(),
             limits: crate::limits_tab::LimitsView::default(),
             cores: crate::cores_view::CoresView::default(),
+            app_power: crate::app_power_view::AppPowerView::default(),
             kill: crate::kill_tab::KillView::default(),
             ports: crate::ports_tab::PortsView::default(),
             disks: crate::disks_tab::DisksView::default(),
@@ -899,6 +906,9 @@ impl eframe::App for App {
         self.state
             .experience
             .apply(ctx, self.backend.window.clone());
+        // The screen stays on for an entry that asks, also in the tray.
+        let screen = crate::screen_awake::wanted(&self.backend.data());
+        crate::screen_awake::update(screen);
         let Some(tray) = self.tray.as_mut() else {
             crate::numeric_tray::publish_interval(
                 ctx,
@@ -1367,6 +1377,7 @@ impl eframe::App for App {
                             | Tab::Governor
                             | Tab::Limits
                             | Tab::Cores
+                            | Tab::AppPower
                             | Tab::KillList
                             | Tab::Hardware
                             | Tab::InstalledApps
@@ -1645,6 +1656,13 @@ impl eframe::App for App {
                             ui,
                             &data,
                             &mut state.cores,
+                        ));
+                    }
+                    Tab::AppPower => {
+                        service_cmds.extend(crate::app_power_view::app_power_tab(
+                            ui,
+                            &data,
+                            &mut state.app_power,
                         ));
                     }
                     Tab::KillList => {
@@ -2234,9 +2252,12 @@ impl eframe::App for App {
             Tab::Services => Some((Panel::Services, Duration::from_secs(5))),
             Tab::History => None,
             Tab::Startup => Some((Panel::Startup, Duration::from_secs(10))),
-            Tab::Settings | Tab::Limits | Tab::Cores | Tab::Overview | Tab::KillList => {
-                Some((Panel::Config, Duration::from_secs(30)))
-            }
+            Tab::Settings
+            | Tab::Limits
+            | Tab::Cores
+            | Tab::AppPower
+            | Tab::Overview
+            | Tab::KillList => Some((Panel::Config, Duration::from_secs(30))),
             // The panic button needs the kill list on every tab.
             _ if service_mode => Some((Panel::Config, Duration::from_secs(30))),
             _ => None,
@@ -12397,6 +12418,7 @@ o-such-folder",
                         Tab::Governor,
                         Tab::Limits,
                         Tab::Cores,
+                        Tab::AppPower,
                         Tab::Events,
                         Tab::Services,
                         Tab::Startup,
@@ -12437,6 +12459,22 @@ o-such-folder",
                             )));
                             if let Some(s) = d.status.as_mut() {
                                 s.placement = Some(crate::cores_view::fixture());
+                            }
+                        }
+                        if tab == Tab::AppPower {
+                            d.config = Some(Ok((
+                                "config.toml".into(),
+                                format!(
+                                    "{}{}",
+                                    wtm_policy::DEFAULT_CONFIG_TOML
+                                        .replace("dry_run = true", "dry_run = false"),
+                                    crate::app_power_view::REVIEW_ENTRIES
+                                        .replace("dry_run = false\n", "")
+                                ),
+                            )));
+                            if let Some(s) = d.status.as_mut() {
+                                s.dry_run = false;
+                                *s.power = crate::app_power_view::fixture();
                             }
                         }
                         d.telegram = Some(Ok(wtm_policy::TelegramConfig::default()));
@@ -12599,6 +12637,7 @@ o-such-folder",
                                         prefer_administrator: Some(false),
                                         check_updates: false,
                                         disks: crate::disks_tab::review_fixture(),
+                                        app_power: crate::app_power_view::review_view(),
                                         ..UiState::default()
                                     },
                                     tray: None,

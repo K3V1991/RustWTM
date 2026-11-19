@@ -478,6 +478,7 @@ pub fn data() -> Data {
             }),
             placement: None,
             game: None,
+            power: Default::default(),
             config_error: None,
         }),
         details: Some((
@@ -489,6 +490,8 @@ pub fn data() -> Data {
                 priority: Some(PriorityClass::Normal),
                 affinity: Some((0xff, 0xff)),
                 eco_qos: Some(EcoQos::SystemManaged),
+                io_priority: None,
+                memory_priority: None,
                 critical: Some(false),
                 protected: None,
             }),

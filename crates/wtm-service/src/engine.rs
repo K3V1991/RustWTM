@@ -19,6 +19,7 @@ use wtm_policy::{
 };
 
 use crate::app_limits::AppLimiter;
+use crate::app_power::{PowerKeeper, awake_reason};
 use crate::blocker::Blocker;
 use crate::events::EventLog;
 use crate::executor::Executor;
@@ -34,7 +35,8 @@ pub struct Paths {
     /// Telegram bot settings (holds the bot token).
     #[cfg(feature = "telegram")]
     pub telegram: PathBuf,
-    /// The power plan game mode replaced, while it is replaced.
+    /// The power plan in use before game mode or a `[[while_running]]`
+    /// entry switched it, while it is switched.
     pub power_plan: PathBuf,
     /// Processes placed on cores, so a restart gives them every core back.
     pub placement: PathBuf,
@@ -183,6 +185,7 @@ fn load_config(path: &Path) -> anyhow::Result<(Config, Option<String>)> {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn status(
     config: &Config,
     paths: &Paths,
@@ -191,6 +194,7 @@ fn status(
     foreground: Option<&str>,
     rescue: &Rescue,
     game: &GameMode,
+    power: &wtm_ipc::PowerStatus,
 ) -> Status {
     Status {
         dry_run: config.dry_run,
@@ -208,6 +212,7 @@ fn status(
             name: name.to_owned(),
             calmed: game.calmed(),
         }),
+        power: Box::new(power.clone()),
         config_error: None,
     }
 }
@@ -352,15 +357,19 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
     // The foreground window covers its monitor.
     let mut fullscreen = false;
     let mut game_mode = GameMode::new(config.game_mode.clone());
-    // The plan active before game mode switched it; one left by a crash is
-    // put back first.
+    // The plan active before game mode or an entry switched it; one left
+    // by a crash is put back first.
     restore_saved_plan(&paths.power_plan, &mut |line| {
         shared.events.info(None, line)
     });
-    let mut saved_plan = SavedPlan {
-        plan: None,
-        file: Some(paths.power_plan.clone()),
-    };
+    let mut keeper = PowerKeeper::new(
+        Box::new(crate::app_power::System::default()),
+        Some(paths.power_plan.clone()),
+        config.dry_run,
+        shared.events.clone(),
+    );
+    let mut app_power = wtm_policy::AppPower::new(config.while_running.clone());
+    let mut power_status = wtm_ipc::PowerStatus::default();
     let mut last_snapshot: Option<Arc<Snapshot>> = None;
 
     shared.events.info(
@@ -410,6 +419,7 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
                             foreground_app.as_deref(),
                             &rescue,
                             &game_mode,
+                            &power_status,
                         )
                     };
                 }
@@ -455,12 +465,6 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
                     if new.game_mode != config.game_mode {
                         executor.restore_sources(&[Source::GameMode], "game mode settings changed");
                         game_mode = GameMode::new(new.game_mode.clone());
-                        // The new game mode never reports the game in front
-                        // as ended: the plan goes back now unless it is
-                        // still wanted.
-                        if !(new.game_mode.enabled && new.game_mode.power_plan) {
-                            restore_plan(&mut saved_plan, &shared.events);
-                        }
                     }
                     governor.set_config(new.governor.clone());
                     memory_guard.set_config(new.memory_guard.clone());
@@ -478,10 +482,10 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
                         kill_watch = wtm_policy::KillWatch::new(new.kill.clone());
                         insights = InsightPolicy::new();
                         game_mode = GameMode::new(new.game_mode.clone());
-                        if new.dry_run {
-                            restore_plan(&mut saved_plan, &shared.events);
-                        }
                     }
+                    // Starts over only when the mode changes.
+                    keeper.set_dry_run(new.dry_run);
+                    app_power.set_config(new.while_running.clone());
                     rescue.configure(new.reserve.clone(), new.dry_run);
                     rescue.set_placement(new.placement());
                     game_mode.set_config(new.game_mode.clone());
@@ -622,8 +626,20 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         let (calm, change) = game_mode.tick(game, &snap.processes);
         decisions.extend(calm);
         if let Some(change) = change {
-            game_changed(&change, &config, &mut saved_plan, &shared.events);
+            game_changed(&change, &shared.events);
         }
+        let active = app_power.tick(
+            started.1.elapsed().as_secs(),
+            snap.processes.iter().map(|p| p.name.as_str()),
+        );
+        let game_plan = (config.game_mode.power_plan && game_mode.game().is_some())
+            .then_some(wtm_sys::power::HIGH_PERFORMANCE);
+        let awake = wtm_policy::keep_awake(&active);
+        keeper.tick(
+            wtm_policy::choose_plan(game_plan, &active),
+            awake_reason(awake.as_ref()),
+        );
+        power_status = keeper.status(active, awake);
         for d in &decisions {
             let _ = executor.execute(d);
         }
@@ -663,6 +679,7 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
                 foreground_app.as_deref(),
                 &rescue,
                 &game_mode,
+                &power_status,
             )
         };
         last_snapshot = Some(snap);
@@ -677,7 +694,7 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         .disk_trace
         .lock()
         .unwrap_or_else(PoisonError::into_inner) = None;
-    restore_plan(&mut saved_plan, &shared.events);
+    keeper.release("service stopping");
     rescue.release_all("service stopping");
     app_limiter.lift_all("service stopping");
     let unblock = Config {
@@ -699,83 +716,17 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
     Ok(())
 }
 
-/// The power plan game mode replaced. Kept on disk too while it is
-/// replaced, so that it is put back after a crash ([`restore_saved_plan`]
-/// at the next start, or on uninstall) and the machine is not left on High
-/// performance.
-#[derive(Default)]
-struct SavedPlan {
-    plan: Option<String>,
-    file: Option<PathBuf>,
-}
-
-/// Switches the power plan for a game that starts, and back when it ends.
-fn game_changed(
-    change: &GameChange,
-    config: &Config,
-    saved_plan: &mut SavedPlan,
-    events: &EventLog,
-) {
+/// Reports a game coming to the front or leaving it; the power plan for it
+/// is the [`PowerKeeper`]'s.
+fn game_changed(change: &GameChange, events: &EventLog) {
     match change {
-        GameChange::Started(name) => {
-            events.info(None, format!("game mode: {name} is in front"));
-            if !config.game_mode.power_plan || saved_plan.plan.is_some() {
-                return;
-            }
-            if config.dry_run {
-                events.info(None, "game mode would switch to High performance (dry run)");
-                return;
-            }
-            let Ok(current) = wtm_sys::power::active_scheme() else {
-                return;
-            };
-            let current = current.trim_matches(['{', '}']).to_owned();
-            // Written first: a crash right after switching still finds it.
-            if let Some(file) = &saved_plan.file
-                && let Err(e) = std::fs::write(file, &current)
-            {
-                events.warn(
-                    None,
-                    format!(
-                        "game mode: power plan unchanged: cannot remember the current one: {e}"
-                    ),
-                );
-                return;
-            }
-            match wtm_sys::power::set_active_scheme(wtm_sys::power::HIGH_PERFORMANCE) {
-                Ok(()) => {
-                    events.info(None, "game mode: High performance power plan");
-                    saved_plan.plan = Some(current);
-                }
-                Err(e) => events.warn(None, format!("game mode: power plan unchanged: {e}")),
-            }
-        }
-        GameChange::Ended(name) => {
-            events.info(None, format!("game mode: {name} ended"));
-            restore_plan(saved_plan, events);
-        }
+        GameChange::Started(name) => events.info(None, format!("game mode: {name} is in front")),
+        GameChange::Ended(name) => events.info(None, format!("game mode: {name} ended")),
     }
 }
 
-fn restore_plan(saved_plan: &mut SavedPlan, events: &EventLog) {
-    let Some(plan) = saved_plan.plan.take() else {
-        return;
-    };
-    match wtm_sys::power::set_active_scheme(&plan) {
-        // Left on disk otherwise, to be tried again at the next start.
-        Ok(()) => {
-            if let Some(file) = &saved_plan.file {
-                let _ = std::fs::remove_file(file);
-            }
-        }
-        Err(e) => events.warn(
-            None,
-            format!("could not restore the power plan {plan}: {e}"),
-        ),
-    }
-}
-
-/// Puts back the power plan game mode replaced before the service stopped
+/// Puts back the power plan game mode or an entry replaced before the
+/// service stopped
 /// without restoring it (a crash), as remembered in `file`; reports to
 /// `say`. Run at start and on uninstall.
 pub fn restore_saved_plan(file: &Path, say: &mut dyn FnMut(String)) {
@@ -1740,44 +1691,16 @@ mod unit_tests {
     }
 
     #[test]
-    fn game_mode_leaves_the_power_plan_alone_in_dry_run_or_when_off() {
+    fn game_mode_only_reports_its_game() {
         let events = EventLog::default();
-        let mut saved = SavedPlan::default();
-        let mut config = Config {
-            dry_run: true,
-            ..Config::default()
-        };
-        config.game_mode.power_plan = true;
-        game_changed(
-            &GameChange::Started("game.exe".into()),
-            &config,
-            &mut saved,
-            &events,
-        );
-        assert!(saved.plan.is_none());
-        config.game_mode.power_plan = false;
-        config.dry_run = false;
-        game_changed(
-            &GameChange::Started("game.exe".into()),
-            &config,
-            &mut saved,
-            &events,
-        );
-        assert!(saved.plan.is_none());
-        game_changed(
-            &GameChange::Ended("game.exe".into()),
-            &config,
-            &mut saved,
-            &events,
-        );
+        game_changed(&GameChange::Started("game.exe".into()), &events);
+        game_changed(&GameChange::Ended("game.exe".into()), &events);
         let log: Vec<String> = events.after(0).into_iter().map(|e| e.message).collect();
         assert_eq!(
             log,
             [
                 "game mode: game.exe is in front",
-                "game mode would switch to High performance (dry run)",
-                "game mode: game.exe is in front",
-                "game mode: game.exe ended",
+                "game mode: game.exe ended"
             ]
         );
     }
@@ -2219,6 +2142,7 @@ mod unit_tests {
             Some("game.exe"),
             &rescue,
             &game,
+            &Default::default(),
         );
         assert!(s.game.is_none());
         assert_eq!(s.foreground.as_deref(), Some("game.exe"));

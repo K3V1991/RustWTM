@@ -30,7 +30,7 @@ pub const SERVICE_NAME: &str = "RustWTM";
 /// nobody else can serve its name alongside the service.
 pub const PIPE_SDDL: &str = "D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;OW)(A;;0x12008b;;;IU)";
 
-pub const PROTOCOL_VERSION: u32 = 19;
+pub const PROTOCOL_VERSION: u32 = 20;
 
 const MAX_FRAME: usize = 32 * 1024 * 1024;
 
@@ -264,10 +264,29 @@ pub struct Status {
     pub placement: Option<PlacementStatus>,
     /// The game in front while game mode is active.
     pub game: Option<GameStatus>,
+    /// The power plan and keep-awake of `[[while_running]]` and game mode.
+    pub power: Box<PowerStatus>,
     /// Why the configuration file was not loaded: at start the service then
     /// runs on built-in defaults (dry run), after an edit it keeps the
     /// previous configuration. `None` once a load succeeds.
     pub config_error: Option<String>,
+}
+
+/// What `[[while_running]]` entries and game mode do now.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PowerStatus {
+    /// The entries active now, in the order of the configuration.
+    pub active: Vec<wtm_policy::ActiveEntry>,
+    /// The power plan RustWTM switched to, by name.
+    pub plan: Option<String>,
+    /// Who it is for: an entry's name, `None` for game mode.
+    pub plan_for: Option<String>,
+    /// What is kept awake and for which entries. The service keeps the
+    /// computer awake; the screen is the window's to keep on, as Windows
+    /// refuses that from a service.
+    pub awake: Option<(wtm_policy::KeepAwake, Vec<String>)>,
+    /// Why a wanted plan is not in use.
+    pub note: Option<String>,
 }
 
 /// Game mode while a full-screen app is in front.

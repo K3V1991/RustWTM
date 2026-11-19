@@ -481,6 +481,8 @@ mod tests {
             priority: Some(PriorityClass::High),
             affinity: Some((0b11, 0xF)),
             eco_qos: Some(EcoQos::On),
+            io_priority: None,
+            memory_priority: None,
             critical: Some(true),
             protected: Some("system process".into()),
         };
@@ -502,6 +504,8 @@ mod tests {
             priority: None,
             affinity: None,
             eco_qos: None,
+            io_priority: None,
+            memory_priority: None,
             critical: Some(false),
             protected: None,
         };

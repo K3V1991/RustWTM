@@ -12286,5 +12286,311 @@
     "de": "hat eigene Prozessoren gewählt",
     "fr": "a choisi ses propres processeurs",
     "es": "eligió sus propios procesadores"
+  },
+  "Name at least one program.": {
+    "tr": "En az bir program girin.",
+    "de": "Geben Sie mindestens ein Programm an.",
+    "fr": "Indiquez au moins un programme.",
+    "es": "Indique al menos un programa."
+  },
+  "Choose a power plan or keep the computer awake.": {
+    "tr": "Bir güç planı seçin ya da bilgisayarı uyanık tutun.",
+    "de": "Wählen Sie einen Energieplan oder halten Sie den Computer wach.",
+    "fr": "Choisissez un plan d'alimentation ou gardez l'ordinateur éveillé.",
+    "es": "Elija un plan de energía o mantenga el equipo activo."
+  },
+  "The computer": {
+    "tr": "Bilgisayar",
+    "de": "Computer",
+    "fr": "L'ordinateur",
+    "es": "El equipo"
+  },
+  "The computer and the screen": {
+    "tr": "Bilgisayar ve ekran",
+    "de": "Computer und Bildschirm",
+    "fr": "L'ordinateur et l'écran",
+    "es": "El equipo y la pantalla"
+  },
+  "While one of an entry's programs runs, RustWTM switches to its power plan and can keep the computer awake. When they exit, the previous plan comes back, unless you chose another one meanwhile. Game mode's plan comes first, then the entries in this order.": {
+    "tr": "Bir kuralın programlarından biri çalışırken RustWTM o kuralın güç planına geçer ve bilgisayarı uyanık tutabilir. Programlar kapanınca önceki plan geri gelir; bu arada başka bir plan seçtiyseniz o kalır. Önce oyun modunun planı, sonra buradaki sırayla kurallar geçerli olur.",
+    "de": "Solange eines der Programme eines Eintrags läuft, wechselt RustWTM zu dessen Energieplan und kann den Computer wach halten. Werden sie beendet, kehrt der vorherige Plan zurück, außer Sie haben inzwischen einen anderen gewählt. Der Plan des Spielmodus hat Vorrang, danach folgen die Einträge in dieser Reihenfolge.",
+    "fr": "Tant qu'un des programmes d'une entrée s'exécute, RustWTM passe à son plan d'alimentation et peut garder l'ordinateur éveillé. Quand ils se ferment, le plan précédent revient, sauf si vous en avez choisi un autre entre-temps. Le plan du mode jeu passe en premier, puis les entrées dans cet ordre.",
+    "es": "Mientras se ejecuta uno de los programas de una entrada, RustWTM cambia a su plan de energía y puede mantener el equipo activo. Cuando se cierran, vuelve el plan anterior, salvo que haya elegido otro mientras tanto. Primero va el plan del modo juego y después las entradas en este orden."
+  },
+  "Monitoring only: power plans and keeping awake are only previewed in the event log. Switch to Enforcing in Settings.": {
+    "tr": "Yalnızca izleme: güç planları ve uyanık tutma sadece olay günlüğünde gösterilir. Ayarlar'da \"Uygulanıyor\" seçeneğine geçin.",
+    "de": "Nur Überwachung: Energiepläne und Wachhalten werden nur im Ereignisprotokoll angezeigt. In den Einstellungen auf „Aktiv“ umschalten.",
+    "fr": "Surveillance seule : les plans d'alimentation et le maintien en éveil n'apparaissent que dans le journal des événements. Choisissez « Actif » dans les paramètres.",
+    "es": "Solo supervisión: los cambios de plan de energía y de suspensión solo se muestran en el registro de eventos. Cambie a \"Aplicando\" en Configuración."
+  },
+  "Run RustWTM as administrator to change these entries.": {
+    "tr": "Bu kuralları değiştirmek için RustWTM'i yönetici olarak çalıştırın.",
+    "de": "RustWTM als Administrator starten, um diese Einträge zu ändern.",
+    "fr": "Exécutez RustWTM en administrateur pour modifier ces entrées.",
+    "es": "Ejecute RustWTM como administrador para cambiar estas entradas."
+  },
+  "Now": {
+    "tr": "Şu an",
+    "de": "Jetzt",
+    "fr": "En ce moment",
+    "es": "Ahora"
+  },
+  "Connect to the service to see what is in use.": {
+    "tr": "Neyin kullanımda olduğunu görmek için hizmete bağlanın.",
+    "de": "Mit dem Dienst verbinden, um zu sehen, was aktiv ist.",
+    "fr": "Connectez-vous au service pour voir ce qui est actif.",
+    "es": "Conéctese al servicio para ver qué está en uso."
+  },
+  "Power plan {0} for {1}": {
+    "tr": "{1} için güç planı: {0}",
+    "de": "Energieplan {0} für {1}",
+    "fr": "Plan d'alimentation {0} pour {1}",
+    "es": "Plan de energía {0} para {1}"
+  },
+  "Power plan {0} for game mode": {
+    "tr": "Oyun modu için güç planı: {0}",
+    "de": "Energieplan {0} für den Spielmodus",
+    "fr": "Plan d'alimentation {0} pour le mode jeu",
+    "es": "Plan de energía {0} para el modo juego"
+  },
+  "The computer stays awake for {0}": {
+    "tr": "{0} için bilgisayar uyanık kalıyor",
+    "de": "Der Computer bleibt wach für {0}",
+    "fr": "L'ordinateur reste éveillé pour {0}",
+    "es": "El equipo se mantiene activo por {0}"
+  },
+  "The computer and the screen stay on for {0}": {
+    "tr": "{0} için bilgisayar ve ekran açık kalıyor",
+    "de": "Computer und Bildschirm bleiben an für {0}",
+    "fr": "L'ordinateur et l'écran restent allumés pour {0}",
+    "es": "El equipo y la pantalla siguen encendidos por {0}"
+  },
+  "The screen stays on while the RustWTM window runs, also in the tray.": {
+    "tr": "RustWTM penceresi çalışırken ekran açık kalır, tepsideyken de.",
+    "de": "Der Bildschirm bleibt an, solange das RustWTM-Fenster läuft, auch im Infobereich.",
+    "fr": "L'écran reste allumé tant que la fenêtre de RustWTM est ouverte, même dans la zone de notification.",
+    "es": "La pantalla sigue encendida mientras la ventana de RustWTM esté abierta, también en el área de notificación."
+  },
+  "{0}: its programs just exited": {
+    "tr": "{0}: programları az önce kapandı",
+    "de": "{0}: Programme gerade beendet",
+    "fr": "{0} : ses programmes viennent de se fermer",
+    "es": "{0}: sus programas acaban de cerrarse"
+  },
+  "{0}: {1} running": {
+    "tr": "{0}: {1} çalışıyor",
+    "de": "{0}: {1} aktiv",
+    "fr": "{0} : {1} en cours",
+    "es": "{0}: {1} en ejecución"
+  },
+  "Nothing is switched now.": {
+    "tr": "Şu an hiçbir şey devrede değil.",
+    "de": "Derzeit ist nichts umgeschaltet.",
+    "fr": "Aucun changement en cours.",
+    "es": "Ahora no hay nada activo."
+  },
+  "No entries yet. Add one below: nothing is switched until then.": {
+    "tr": "Henüz kural yok. Aşağıdan ekleyin: o zamana kadar hiçbir şey değişmez.",
+    "de": "Noch keine Einträge. Fügen Sie unten einen hinzu: Bis dahin wird nichts umgeschaltet.",
+    "fr": "Aucune entrée pour l'instant. Ajoutez-en une ci-dessous : d'ici là, rien ne change.",
+    "es": "Aún no hay entradas. Añada una abajo: hasta entonces no se cambia nada."
+  },
+  "Programs": {
+    "tr": "Programlar",
+    "de": "Programme",
+    "fr": "Programmes",
+    "es": "Programas"
+  },
+  "Power plan": {
+    "tr": "Güç planı",
+    "de": "Energieplan",
+    "fr": "Plan d'alimentation",
+    "es": "Plan de energía"
+  },
+  "Keep awake": {
+    "tr": "Uyanık tut",
+    "de": "Wach halten",
+    "fr": "Garder éveillé",
+    "es": "Mantener activo"
+  },
+  "Unchanged": {
+    "tr": "Aynı kalır",
+    "de": "Unverändert",
+    "fr": "Inchangé",
+    "es": "Sin cambios"
+  },
+  "e.g. Render": {
+    "tr": "örn. Render",
+    "de": "z. B. Rendern",
+    "fr": "p. ex. Rendu",
+    "es": "p. ej. Renderizado"
+  },
+  "e.g. blender.exe, HandBrake*.exe": {
+    "tr": "örn. blender.exe, HandBrake*.exe",
+    "de": "z. B. blender.exe, HandBrake*.exe",
+    "fr": "p. ex. blender.exe, HandBrake*.exe",
+    "es": "p. ej. blender.exe, HandBrake*.exe"
+  },
+  "App power": {
+    "tr": "Güç ve uyku",
+    "de": "App-Energie",
+    "fr": "Énergie des applis",
+    "es": "Energía de apps"
+  },
+  "Switch the power plan and stay awake while an app runs": {
+    "tr": "Bir uygulama çalışırken güç planını değiştir, bilgisayarı uyanık tut",
+    "de": "Energieplan wechseln und wach bleiben, solange eine App läuft",
+    "fr": "Changer de plan d'alimentation et rester éveillé pendant qu'une application s'exécute",
+    "es": "Cambiar el plan de energía y mantener el equipo activo mientras se ejecuta una aplicación"
+  },
+  "power plan {0} for '{1}'": {
+    "tr": "'{1}' için güç planı: {0}",
+    "de": "Energieplan {0} für '{1}'",
+    "fr": "plan d'alimentation {0} pour '{1}'",
+    "es": "plan de energía {0} para '{1}'"
+  },
+  "power plan {0} for game mode": {
+    "tr": "oyun modu için güç planı: {0}",
+    "de": "Energieplan {0} für den Spielmodus",
+    "fr": "plan d'alimentation {0} pour le mode jeu",
+    "es": "plan de energía {0} para el modo juego"
+  },
+  "power plan {0} for '{1}' (dry run)": {
+    "tr": "'{1}' için güç planı: {0} (deneme)",
+    "de": "Energieplan {0} für '{1}' (Testmodus)",
+    "fr": "plan d'alimentation {0} pour '{1}' (simulation)",
+    "es": "plan de energía {0} para '{1}' (simulación)"
+  },
+  "power plan {0} for game mode (dry run)": {
+    "tr": "oyun modu için güç planı: {0} (deneme)",
+    "de": "Energieplan {0} für den Spielmodus (Testmodus)",
+    "fr": "plan d'alimentation {0} pour le mode jeu (simulation)",
+    "es": "plan de energía {0} para el modo juego (simulación)"
+  },
+  "power plan {0} chosen meanwhile is kept": {
+    "tr": "bu arada seçilen güç planı korunuyor: {0}",
+    "de": "inzwischen gewählter Energieplan {0} bleibt",
+    "fr": "plan d'alimentation {0} choisi entre-temps conservé",
+    "es": "se mantiene el plan de energía {0} elegido mientras tanto"
+  },
+  "power plan chosen meanwhile is kept": {
+    "tr": "bu arada seçilen güç planı korunuyor",
+    "de": "inzwischen gewählter Energieplan bleibt",
+    "fr": "plan d'alimentation choisi entre-temps conservé",
+    "es": "se mantiene el plan de energía elegido mientras tanto"
+  },
+  "power plan {0} again": {
+    "tr": "güç planı yeniden: {0}",
+    "de": "wieder Energieplan {0}",
+    "fr": "retour au plan d'alimentation {0}",
+    "es": "de nuevo el plan de energía {0}"
+  },
+  "power plan '{0}' for '{1}' is not on this machine": {
+    "tr": "'{1}' için güç planı '{0}' bu bilgisayarda yok",
+    "de": "Energieplan '{0}' für '{1}' ist auf diesem Computer nicht vorhanden",
+    "fr": "plan d'alimentation '{0}' pour '{1}' introuvable sur cet ordinateur",
+    "es": "el plan de energía '{0}' para '{1}' no existe en este equipo"
+  },
+  "power plan '{0}' for game mode is not on this machine": {
+    "tr": "oyun modu için güç planı '{0}' bu bilgisayarda yok",
+    "de": "Energieplan '{0}' für den Spielmodus ist auf diesem Computer nicht vorhanden",
+    "fr": "plan d'alimentation '{0}' pour le mode jeu introuvable sur cet ordinateur",
+    "es": "el plan de energía '{0}' para el modo juego no existe en este equipo"
+  },
+  "power plan {0} could not be set: {1}": {
+    "tr": "güç planı {0} ayarlanamadı: {1}",
+    "de": "Energieplan {0} konnte nicht gesetzt werden: {1}",
+    "fr": "impossible d'appliquer le plan d'alimentation {0} : {1}",
+    "es": "no se pudo aplicar el plan de energía {0}: {1}"
+  },
+  "power plans could not be read: {0}": {
+    "tr": "güç planları okunamadı: {0}",
+    "de": "Energiepläne konnten nicht gelesen werden: {0}",
+    "fr": "impossible de lire les plans d'alimentation : {0}",
+    "es": "no se pudieron leer los planes de energía: {0}"
+  },
+  "power plan unchanged: the current one cannot be remembered: {0}": {
+    "tr": "güç planı değiştirilmedi: geçerli plan hatırlanamıyor: {0}",
+    "de": "Energieplan unverändert: aktueller Plan kann nicht gemerkt werden: {0}",
+    "fr": "plan d'alimentation inchangé : impossible de mémoriser le plan actuel : {0}",
+    "es": "plan de energía sin cambios: no se puede recordar el actual: {0}"
+  },
+  "could not restore the power plan {0}: {1}": {
+    "tr": "güç planı {0} geri yüklenemedi: {1}",
+    "de": "Energieplan {0} konnte nicht wiederhergestellt werden: {1}",
+    "fr": "impossible de restaurer le plan d'alimentation {0} : {1}",
+    "es": "no se pudo restaurar el plan de energía {0}: {1}"
+  },
+  "{0}: power plan given back": {
+    "tr": "{0}: güç planı geri verildi",
+    "de": "{0}: Energieplan zurückgegeben",
+    "fr": "{0} : plan d'alimentation rendu",
+    "es": "{0}: plan de energía devuelto"
+  },
+  "{0} keeps the computer awake": {
+    "tr": "{0} bilgisayarı uyanık tutuyor",
+    "de": "{0} hält den Computer wach",
+    "fr": "{0} garde l'ordinateur éveillé",
+    "es": "{0} mantiene el equipo activo"
+  },
+  "{0} would keep the computer awake (dry run)": {
+    "tr": "{0} bilgisayarı uyanık tutardı (deneme)",
+    "de": "{0} würde den Computer wach halten (Testmodus)",
+    "fr": "{0} garderait l'ordinateur éveillé (simulation)",
+    "es": "{0} mantendría el equipo activo (simulación)"
+  },
+  "the computer may sleep again": {
+    "tr": "bilgisayar yeniden uyku moduna geçebilir",
+    "de": "der Computer darf wieder in den Energiesparmodus",
+    "fr": "l'ordinateur peut de nouveau se mettre en veille",
+    "es": "el equipo puede volver a suspenderse"
+  },
+  "the computer could not be kept awake: {0}": {
+    "tr": "bilgisayar uyanık tutulamadı: {0}",
+    "de": "der Computer konnte nicht wach gehalten werden: {0}",
+    "fr": "impossible de garder l'ordinateur éveillé : {0}",
+    "es": "no se pudo mantener el equipo activo: {0}"
+  },
+  "I/O priority {0}": {
+    "tr": "G/Ç önceliği {0}",
+    "de": "E/A-Priorität {0}",
+    "fr": "priorité d'E/S {0}",
+    "es": "prioridad de E/S {0}"
+  },
+  "memory priority {0}": {
+    "tr": "bellek önceliği {0}",
+    "de": "Speicherpriorität {0}",
+    "fr": "priorité mémoire {0}",
+    "es": "prioridad de memoria {0}"
+  },
+  "very low": {
+    "tr": "çok düşük",
+    "de": "sehr niedrig",
+    "fr": "très faible",
+    "es": "muy baja"
+  },
+  "low": {
+    "tr": "düşük",
+    "de": "niedrig",
+    "fr": "faible",
+    "es": "baja"
+  },
+  "medium": {
+    "tr": "orta",
+    "de": "mittel",
+    "fr": "moyenne",
+    "es": "media"
+  },
+  "below normal": {
+    "tr": "normalin altında",
+    "de": "niedriger als normal",
+    "fr": "inférieure à la normale",
+    "es": "inferior a normal"
+  },
+  "When these programs run": {
+    "tr": "Bu programlar çalışırken",
+    "de": "Wenn diese Programme laufen",
+    "fr": "Quand ces programmes s'exécutent",
+    "es": "Cuando se ejecutan estos programas"
   }
 }
