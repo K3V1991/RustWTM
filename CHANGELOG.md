@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.38.0] - 2026-11-19
+
+[Release scope and validation](docs/0.38.0-review.md)
+
+Ideas taken from Process Lasso: a power plan and keep-awake per app, and
+lower I/O and memory priority in rules.
+
 ### Added
 
 - **App power** ([design and measurements](docs/app-power.md)): a page
@@ -2206,7 +2213,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.37.1...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.38.0...HEAD
+[0.38.0]: https://github.com/rustwtm/rustwtm/compare/v0.37.1...v0.38.0
 [0.37.1]: https://github.com/rustwtm/rustwtm/compare/v0.37.0...v0.37.1
 [0.37.0]: https://github.com/rustwtm/rustwtm/compare/v0.36.4...v0.37.0
 [0.36.4]: https://github.com/rustwtm/rustwtm/compare/v0.36.3...v0.36.4
