@@ -13,7 +13,7 @@ pub struct View {
     project: String,
 }
 fn value(n: Option<f64>) -> String {
-    n.map(wtm_core::format_bytes).unwrap_or_else(|| "—".into())
+    n.map(crate::i18n::bytes).unwrap_or_else(|| "—".into())
 }
 fn rate(n: Option<f64>) -> String {
     n.map(|n| format!("{}/s", crate::i18n::bytes(n)))

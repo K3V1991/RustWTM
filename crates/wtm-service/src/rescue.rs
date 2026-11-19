@@ -478,7 +478,7 @@ impl Rescue {
                 self.events.info(
                     None,
                     format!(
-                        "separate '{}'{would}: cores split between {}",
+                        "keep apart '{}'{would}: cores split between {}",
                         s.entry,
                         apps.join(", ")
                     ),
@@ -490,7 +490,7 @@ impl Rescue {
                 self.events.info(
                     None,
                     format!(
-                        "separate '{}' ended: every app has every core back",
+                        "keep apart '{}' ended: every app has every core back",
                         s.entry
                     ),
                 );
@@ -501,7 +501,7 @@ impl Rescue {
                 self.events.info(
                     None,
                     format!(
-                        "reserve_cores '{}'{would}: CPUs {} kept for its app",
+                        "reserve cores '{}'{would}: CPUs {} kept for its app",
                         r.entry,
                         wtm_policy::processor_numbers(topology, &r.cpus)
                     ),
@@ -511,7 +511,7 @@ impl Rescue {
         for r in &self.reported.reservations {
             if !reservations.iter().any(|n| n.entry == r.entry) {
                 self.events
-                    .info(None, format!("reserve_cores '{}' released", r.entry));
+                    .info(None, format!("reserve cores '{}' released", r.entry));
             }
         }
         for note in notes {
@@ -902,7 +902,7 @@ mod placement_tests {
             messages(&events)
                 .iter()
                 .any(|m| m
-                    == "separate 'Game and stream': cores split between game.exe, obs64.exe"),
+                    == "keep apart 'Game and stream': cores split between game.exe, obs64.exe"),
             "{:?}",
             messages(&events)
         );
@@ -920,7 +920,7 @@ mod placement_tests {
         assert!(
             messages(&events)
                 .iter()
-                .any(|m| m.contains("separate 'Game and stream' ended")),
+                .any(|m| m.contains("keep apart 'Game and stream' ended")),
         );
         assert!(r.written.is_empty());
     }
@@ -970,7 +970,7 @@ cores = 1"
         let game = &status.placed[0];
         assert_eq!(
             (game.target.pid, game.why.clone(), game.cpus.len()),
-            (10, vec!["separate 'Game and stream'".to_owned()], 8)
+            (10, vec!["keep apart 'Game and stream'".to_owned()], 8)
         );
         assert_eq!(status.splits.len(), 1);
         assert_eq!(
@@ -1023,7 +1023,7 @@ cores = 1"
         assert!(fake.take().is_empty());
         assert!(
             messages(&events).iter().any(|m| m
-                == "separate 'Game and stream' (dry run): cores split between game.exe, obs64.exe"),
+                == "keep apart 'Game and stream' (dry run): cores split between game.exe, obs64.exe"),
             "{:?}",
             messages(&events)
         );

@@ -438,9 +438,7 @@ fn message_at_depth(english: &str, depth: usize) -> std::borrow::Cow<'_, str> {
             .filter(|k| {
                 k.contains("{0}")
                     && (k.chars().filter(char::is_ascii_alphabetic).count() >= 4
-                        || k.starts_with("Rule:")
-                        // A core pin, as the service names it in a reason.
-                        || *k == "pin '{0}'")
+                        || k.starts_with("Rule:"))
             })
             .map(String::as_str)
             .collect();
@@ -852,12 +850,14 @@ mod tests {
     fn core_placement_reasons_translate() {
         let _scope = scope(Language::Turkish);
         for reason in [
-            "pin 'Builds'",
-            "separate 'Game and stream'",
-            "reserve_cores 'Audio'",
-            "kept off reserve_cores 'Audio'",
+            "keep on cores 'Builds'",
+            "keep apart 'Game and stream'",
+            "reserve cores 'Audio'",
+            "kept off the cores reserved by 'Audio'",
             "rescue core",
-            "separate 'Game and stream': cores split between game.exe, obs64.exe",
+            "keep apart 'Game and stream': cores split between game.exe, obs64.exe",
+            "reserve cores 'Audio' (dry run): CPUs 0-1 kept for its app",
+            "keep on cores 'Far': cores 40-41 name none of this machine's usable processors",
         ] {
             let shown = message(reason);
             assert_ne!(shown, reason, "{reason}");

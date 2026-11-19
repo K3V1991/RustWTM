@@ -408,7 +408,7 @@ impl View {
         .frame(crate::theme::dialog_frame(ui.ctx()))
         .show(ui.ctx(),|ui|{
     ui.set_max_width(680.0);ui.heading(crate::i18n::tr("Review policy changes"));ui.label(&description);
-    ui.weak(crate::i18n::tr("Existing safety checks and dry-run mode still apply. Matching rules may act on running programs immediately after saving."));
+    ui.weak(crate::i18n::tr("Safety checks and Monitoring only still apply. Matching rules may act on running programs immediately after saving."));
     egui::ScrollArea::vertical().max_height(280.0).show(ui,|ui|{ui.monospace(&next);});
     ui.horizontal(|ui|{save=crate::theme::primary_action(ui,admin&&text==&base,crate::i18n::tr("Save reviewed configuration")).clicked();cancel=ui.button(crate::i18n::tr("Cancel")).clicked();});
     if text!=&base{ui.label(crate::i18n::tr("Configuration changed. Close this review and prepare it again."));}

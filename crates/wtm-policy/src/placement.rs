@@ -484,10 +484,10 @@ impl fmt::Display for Why {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Rescue => f.write_str("rescue core"),
-            Self::Reserved(e) => write!(f, "reserve_cores '{e}'"),
-            Self::KeptOff(e) => write!(f, "kept off reserve_cores '{e}'"),
-            Self::Separated(e) => write!(f, "separate '{e}'"),
-            Self::Pinned(e) => write!(f, "pin '{e}'"),
+            Self::Reserved(e) => write!(f, "reserve cores '{e}'"),
+            Self::KeptOff(e) => write!(f, "kept off the cores reserved by '{e}'"),
+            Self::Separated(e) => write!(f, "keep apart '{e}'"),
+            Self::Pinned(e) => write!(f, "keep on cores '{e}'"),
         }
     }
 }
@@ -850,13 +850,13 @@ impl Placer {
                     }
                 }
                 plan.notes.push(format!(
-                    "reserve_cores '{}': one core left out so everything else keeps one",
+                    "reserve cores '{}': one core left out so everything else keeps one",
                     r.name
                 ));
             }
             if cpus.is_empty() {
                 plan.notes.push(format!(
-                    "reserve_cores '{}': no core left to reserve",
+                    "reserve cores '{}': no core left to reserve",
                     r.name
                 ));
                 reserves.push(None);
@@ -898,7 +898,7 @@ impl Placer {
             let cores = machine.fastest(usize::MAX, &pool);
             if cores.len() < active.len() {
                 plan.notes.push(format!(
-                    "separate '{}': {} apps running but only {} cores to split",
+                    "keep apart '{}': {} apps running but only {} cores to split",
                     s.name,
                     active.len(),
                     cores.len()
@@ -938,7 +938,7 @@ impl Placer {
         for (pin, cpus) in config.pins.iter().zip(&pin_cpus) {
             if cpus.is_empty() {
                 plan.notes.push(format!(
-                    "pin '{}': cores {} name none of this machine's usable processors",
+                    "keep on cores '{}': cores {} name none of this machine's usable processors",
                     pin.name, pin.cores
                 ));
             }
@@ -1381,7 +1381,11 @@ mod tests {
         ));
         let plan = World::new(vec![proc(10, 1, "a.exe")]).plan(&mut placer, Instant::now());
         assert!(plan.placements.is_empty());
-        assert!(plan.notes[0].contains("pin 'Far'"), "{:?}", plan.notes);
+        assert!(
+            plan.notes[0].contains("keep on cores 'Far'"),
+            "{:?}",
+            plan.notes
+        );
     }
 
     const SEPARATE: &str = r#"
@@ -1555,7 +1559,11 @@ mod tests {
             plan.placements[&(10, 10)].why,
             [Why::Separated("Game and stream".into())]
         );
-        assert!(plan.notes[0].contains("pin 'Slow'"), "{:?}", plan.notes);
+        assert!(
+            plan.notes[0].contains("keep on cores 'Slow'"),
+            "{:?}",
+            plan.notes
+        );
     }
 
     #[test]
@@ -1593,6 +1601,10 @@ mod tests {
         }
         let plan = world.plan(&mut placer, Instant::now());
         assert!(plan.placements.is_empty());
-        assert!(plan.notes[0].contains("pin 'E'"), "{:?}", plan.notes);
+        assert!(
+            plan.notes[0].contains("keep on cores 'E'"),
+            "{:?}",
+            plan.notes
+        );
     }
 }

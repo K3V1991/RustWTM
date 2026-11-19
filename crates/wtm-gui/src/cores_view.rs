@@ -568,7 +568,7 @@ pub fn cores_tab(ui: &mut Ui, data: &Data, view: &mut CoresView) -> Vec<UiComman
             ui,
             WARN,
             crate::i18n::tr(
-                "Dry-run mode: core placement is only previewed in the event log. Switch to enforcing in Settings.",
+                "Monitoring only: core placement is only previewed in the event log. Switch to Enforcing in Settings.",
             ),
         );
     }
@@ -676,7 +676,7 @@ fn placed(ui: &mut Ui, p: &PlacementStatus) {
     }
     for (target, why) in &p.left_alone {
         ui.weak(crate::i18n::format(
-            "Left alone: {0} ({1}): {2}",
+            "{0} ({1}) left alone: {2}",
             &[
                 target.name.clone(),
                 target.pid.to_string(),
@@ -705,32 +705,14 @@ fn entry_table(
             .num_columns(6)
             .striped(true)
             .show(ui, |ui| {
+                // The buttons first: a long translation that widens the
+                // table on a narrow window cannot push them out of view.
+                ui.label("");
                 for h in ["Kind", "Name", "Apps", "Cores", "Options"] {
                     ui.label(RichText::new(crate::i18n::tr(h)).strong());
                 }
-                ui.label("");
                 crate::theme::end_row(ui);
                 for entry in all {
-                    ui.label(kind_label(entry.kind()));
-                    ui.label(entry.name());
-                    let (apps, cores) = match entry {
-                        Entry::Pin(p) => (
-                            p.matcher
-                                .name
-                                .clone()
-                                .or(p.matcher.path.clone())
-                                .unwrap_or_default(),
-                            spec_label(&p.cores),
-                        ),
-                        Entry::Separate(s) => (
-                            s.apps.join(", "),
-                            crate::i18n::tr("split while they run together").to_owned(),
-                        ),
-                        Entry::Reserve(r) => (r.app.clone(), spec_label(&r.cores)),
-                    };
-                    ui.label(apps);
-                    ui.label(cores);
-                    ui.label(options_label(entry));
                     ui.horizontal(|ui| {
                         if crate::theme::icon_button(
                             ui,
@@ -755,6 +737,28 @@ fn entry_table(
                                 Err(e) => view.error = Some(e),
                             }
                         }
+                    });
+                    ui.label(kind_label(entry.kind()));
+                    ui.label(entry.name());
+                    let (apps, cores) = match entry {
+                        Entry::Pin(p) => (
+                            p.matcher
+                                .name
+                                .clone()
+                                .or(p.matcher.path.clone())
+                                .unwrap_or_default(),
+                            spec_label(&p.cores),
+                        ),
+                        Entry::Separate(s) => (
+                            s.apps.join(", "),
+                            crate::i18n::tr("split while they run together").to_owned(),
+                        ),
+                        Entry::Reserve(r) => (r.app.clone(), spec_label(&r.cores)),
+                    };
+                    ui.label(apps);
+                    ui.label(cores);
+                    ui.horizontal(|ui| {
+                        ui.label(options_label(entry));
                         crate::theme::fill_row(ui);
                     });
                     crate::theme::end_row(ui);
@@ -903,7 +907,7 @@ fn editor(
             icon::LINK,
             tree,
             crate::i18n::tr(
-                "Windows does not pass core choices on to child processes; this places them too.",
+                "Windows does not pass core choices on to child processes; RustWTM places them as well.",
             ),
             |ui| crate::theme::switch(ui, &mut view.tree, tree),
         );
@@ -919,7 +923,7 @@ fn editor(
             icon::KEY,
             strict,
             crate::i18n::tr(
-                "Binding, and passed on to child processes, but limited to one processor group and it overrides the app's own choice.",
+                "Binding and inherited by child processes, but limited to one processor group; overrides the app's own choice.",
             ),
             |ui| crate::theme::switch(ui, &mut view.strict, strict),
         );
@@ -1009,10 +1013,20 @@ pub(crate) fn fixture() -> PlacementStatus {
     PlacementStatus {
         topology: crate::ui_tests::hybrid_topology(),
         placed: vec![
-            placed(200, "reaper.exe", &[0], "reserve_cores 'Audio'"),
-            placed(210, "game.exe", &[1, 2, 3, 4], "separate 'Game and stream'"),
-            placed(211, "obs64.exe", &[5], "separate 'Game and stream'"),
-            placed(220, "msbuild.exe", &[2, 3, 4, 5], "pin 'Builds on E-cores'"),
+            placed(200, "reaper.exe", &[0], "reserve cores 'Audio'"),
+            placed(
+                210,
+                "game.exe",
+                &[1, 2, 3, 4],
+                "keep apart 'Game and stream'",
+            ),
+            placed(211, "obs64.exe", &[5], "keep apart 'Game and stream'"),
+            placed(
+                220,
+                "msbuild.exe",
+                &[2, 3, 4, 5],
+                "keep on cores 'Builds on E-cores'",
+            ),
         ],
         splits: vec![wtm_policy::Split {
             entry: "Game and stream".into(),
@@ -1045,6 +1059,10 @@ mod tests {
     }
 
     fn page(config: &str) -> Harness<'static, Page> {
+        page_sized(config, [1200.0, 1400.0])
+    }
+
+    fn page_sized(config: &str, size: [f32; 2]) -> Harness<'static, Page> {
         let mut data = crate::ui_tests::data();
         data.mode = Mode::Service {
             admin: true,
@@ -1068,7 +1086,7 @@ mod tests {
         };
         Harness::builder()
             .allow_missing_glyphs()
-            .with_size([1200.0, 1400.0])
+            .with_size(size)
             .build_ui_state(
                 |ui, page: &mut Page| {
                     egui::ScrollArea::vertical().show(ui, |ui| {
@@ -1107,6 +1125,25 @@ mod tests {
     }
 
     #[test]
+    fn entry_buttons_stay_in_view_on_a_narrow_page_in_every_language() {
+        // About the page's width in a compact window beside the navigation.
+        for language in crate::i18n::Language::TRANSLATED {
+            let _language = crate::i18n::scope(language);
+            let mut h = page_sized(REVIEW_ENTRIES, [700.0, 2400.0]);
+            h.run_steps(2);
+            let edits: Vec<_> = h
+                .query_all_by_label(crate::i18n::tr("Edit"))
+                .map(|n| n.rect())
+                .collect();
+            println!("EXPECTED: {language:?} 3 edit buttons inside 700 px; ACTUAL: {edits:?}");
+            assert_eq!(edits.len(), 3, "{language:?}");
+            for rect in edits {
+                assert!(rect.max.x <= 700.0, "{language:?}: {rect:?}");
+            }
+        }
+    }
+
+    #[test]
     fn shows_the_cores_the_plan_and_the_entries() {
         let mut h = page(&format!("dry_run = false\n{REVIEW_ENTRIES}"));
         h.run_steps(2);
@@ -1117,13 +1154,13 @@ mod tests {
         assert!(h.query_by_label("CPU 0").is_some());
         // The plan, with the entries that placed each process.
         assert_eq!(
-            h.query_all_by_label("separate 'Game and stream'").count(),
+            h.query_all_by_label("keep apart 'Game and stream'").count(),
             2,
             "the game and the stream"
         );
         assert!(h.query_by_label("1-4").is_some());
         assert!(
-            h.query_by_label("Left alone: vlc.exe (230): chose its own processors")
+            h.query_by_label("vlc.exe (230) left alone: chose its own processors")
                 .is_some()
         );
         // The entries, in the order the plan applies them.
@@ -1137,14 +1174,14 @@ mod tests {
             assert!(h.query_all_by_label(cores).next().is_some(), "{cores}");
         }
         assert!(h.query_by_label("shares 3:1").is_some());
-        assert!(h.query_by_label_contains("Dry-run mode").is_none());
+        assert!(h.query_by_label_contains("Monitoring only:").is_none());
     }
 
     #[test]
     fn entries_are_added_previewed_edited_and_removed() {
         let mut h = page("dry_run = true\n");
         h.run_steps(2);
-        assert!(h.query_by_label_contains("Dry-run mode").is_some());
+        assert!(h.query_by_label_contains("Monitoring only:").is_some());
         assert!(h.query_by_label_contains("No entries yet").is_some());
 
         // A new separation group, previewed on the apps running now.

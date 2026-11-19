@@ -195,7 +195,7 @@ pub fn limits_tab(ui: &mut Ui, data: &Data, view: &mut LimitsView) -> Vec<UiComm
             ui,
             WARN,
             crate::i18n::tr(
-                "Dry-run mode: limits are only previewed in the event log. Switch to enforcing in Settings.",
+                "Monitoring only: limits are only previewed in the event log. Switch to Enforcing in Settings.",
             ),
         );
     }

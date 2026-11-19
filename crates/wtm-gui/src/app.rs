@@ -1073,22 +1073,34 @@ impl eframe::App for App {
                 let mut message_below = false;
                 ui.horizontal(|ui| {
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        // Right to left: the last action first.
+                        // Right to left: the last action first. Icons on a
+                        // narrow window, so the facts keep their room in
+                        // every language.
+                        let narrow = ui.ctx().content_rect().width() < NAV_AUTO_COLLAPSE;
+                        let action = |ui: &mut Ui, glyph: char, label: &str| {
+                            if narrow {
+                                crate::theme::icon_button(ui, true, glyph, label)
+                            } else {
+                                ui.small_button(label)
+                            }
+                        };
                         if !data.elevated
-                            && ui
-                                .small_button(crate::i18n::tr("Restart as administrator"))
-                                .on_hover_text(crate::i18n::tr(
-                                    "Control every process, including those of other users and services",
-                                ))
-                                .clicked()
+                            && action(
+                                ui,
+                                crate::theme::icon::ADMIN,
+                                crate::i18n::tr("Restart as administrator"),
+                            )
+                            .on_hover_text(crate::i18n::tr(
+                                "Control every process, including those of other users and services",
+                            ))
+                            .clicked()
                         {
                             service_cmds.push(UiCommand::RestartElevated);
                         }
                         if state.tab == Tab::Processes {
                             state.inspector_mode.menu(ui);
                         }
-                        if ui
-                            .small_button(crate::i18n::tr("Run new task"))
+                        if action(ui, crate::theme::icon::RUN, crate::i18n::tr("Run new task"))
                             .on_hover_text(crate::i18n::tr(
                                 "Start a program, folder, document or website",
                             ))
@@ -1122,8 +1134,19 @@ impl eframe::App for App {
                                 crate::backend::service_problem(data.service_error.as_deref()),
                                 stale_age(&data, Instant::now()),
                             );
-                            if !matches!(state.tab, Tab::Hardware | Tab::InstalledApps) {
-                                data_age(ui, &data, Instant::now());
+                            // A narrow window leaves the age of current data
+                            // to the CPU and memory summary's room; data out
+                            // of date still says so.
+                            let now = Instant::now();
+                            let narrow = ui.ctx().content_rect().width() < NAV_AUTO_COLLAPSE;
+                            if !matches!(state.tab, Tab::Hardware | Tab::InstalledApps)
+                                && !(narrow
+                                    && matches!(
+                                        data.sample_freshness(now),
+                                        crate::backend::SampleFreshness::Current(_)
+                                    ))
+                            {
+                                data_age(ui, &data, now);
                             }
                             if let Some(game) = data.status.as_ref().and_then(|s| s.game.as_ref())
                             {
@@ -1169,19 +1192,35 @@ impl eframe::App for App {
                                 }
                             }
                             if let Some(s) = &data.snapshot {
+                                let cpu = format!("{:.0}", s.system.cpu_percent);
+                                let used = format_bytes(s.system.memory_used() as f64);
+                                let total = format_bytes(s.system.memory_total as f64);
                                 let summary = crate::i18n::format(
                                     "CPU {0}%   Memory {1} / {2}",
-                                    &[
-                                        format!("{:.0}", s.system.cpu_percent),
-                                        format_bytes(s.system.memory_used() as f64),
-                                        format_bytes(s.system.memory_total as f64),
-                                    ],
+                                    &[cpu.clone(), used.clone(), total.clone()],
                                 );
+                                // Shorter forms when the whole summary does
+                                // not fit, so the numbers stay readable.
+                                let [short, shortest] = status_summary_short(&cpu, &used, &total);
+                                let shown = [summary.clone(), short]
+                                    .into_iter()
+                                    .find(|text| {
+                                        ui.painter()
+                                            .layout_no_wrap(
+                                                text.clone(),
+                                                egui::FontId::proportional(12.0),
+                                                Color32::WHITE,
+                                            )
+                                            .size()
+                                            .x
+                                            <= room
+                                    })
+                                    .unwrap_or(shortest);
                                 // Shortened, but not to a lone ellipsis.
                                 if room >= STATUS_SUMMARY_MIN_WIDTH {
                                     ui.scope(|ui| {
                                         ui.set_max_width(room);
-                                        ui.add(egui::Label::new(&summary).truncate())
+                                        ui.add(egui::Label::new(&shown).truncate())
                                             .on_hover_text(&summary);
                                     });
                                 }
@@ -2775,6 +2814,20 @@ fn stale_age(data: &Data, now: Instant) -> Option<Option<Duration>> {
 }
 
 /// How old the shown data is: secondary text, a warning once out of date.
+/// The status bar summary for a narrow window: without the word "Memory"
+/// and a unit shared by both amounts, then without the total.
+fn status_summary_short(cpu: &str, used: &str, total: &str) -> [String; 2] {
+    let cpu = format!("CPU {}", crate::i18n::percent(cpu));
+    let amount = match (used.rsplit_once(' '), total.rsplit_once(' ')) {
+        (Some((number, unit)), Some((_, total_unit))) if unit == total_unit => number,
+        _ => used,
+    };
+    [
+        format!("{cpu}   {amount} / {total}"),
+        format!("{cpu}   {used}"),
+    ]
+}
+
 fn data_age(ui: &mut Ui, data: &Data, now: Instant) {
     use crate::backend::SampleFreshness;
     let (age, stale) = match data.sample_freshness(now) {
@@ -4663,8 +4716,10 @@ fn governor_status(ui: &mut Ui, status: &wtm_ipc::Status) {
         .spacing([8.0, 4.0])
         .show(ui, |ui| {
             let mode = if status.dry_run {
-                RichText::new(crate::i18n::tr("Dry-run (decisions are only logged)"))
-                    .color(crate::theme::text_color(ui, WARN))
+                RichText::new(crate::i18n::tr(
+                    "Monitoring only (decisions are only logged)",
+                ))
+                .color(crate::theme::text_color(ui, WARN))
             } else {
                 RichText::new(crate::i18n::tr("Enforcing"))
                     .color(crate::theme::text_color(ui, GOOD))
@@ -6304,11 +6359,24 @@ mod tests {
     }
 
     fn status_app(d: Data, language: crate::i18n::Language, tab: Tab) -> Harness<'static, App> {
+        status_app_with(d, language, tab, false)
+    }
+
+    /// `fonts`: Windows' own fonts as the window uses them, for widths.
+    fn status_app_with(
+        d: Data,
+        language: crate::i18n::Language,
+        tab: Tab,
+        fonts: bool,
+    ) -> Harness<'static, App> {
         let (backend, _rx) = Backend::offline(d);
         let mut h = Harness::builder()
             .allow_missing_glyphs()
             .with_size([820.0, 500.0])
             .build_eframe(|cc| {
+                if fonts {
+                    crate::theme::install_fonts(&cc.egui_ctx);
+                }
                 crate::theme::apply(&cc.egui_ctx);
                 App {
                     backend,
@@ -6427,6 +6495,70 @@ mod tests {
             assert!(
                 version.max.y > 500.0 - 30.0,
                 "{language:?} one line at the bottom: {version:?}"
+            );
+        }
+    }
+
+    #[test]
+    fn the_compact_status_bar_shows_the_memory_numbers_in_every_language() {
+        // As the release review renders it (the rescue core on, a page
+        // without the inspector menu), and at its fullest: the Processes
+        // page's inspector menu and "Restart as administrator". Where the
+        // summary does not fit it drops words before numbers, and is cut
+        // only in its shortest form.
+        assert_eq!(
+            status_summary_short("42", "8.0 GiB", "16.0 GiB"),
+            ["CPU 42%   8.0 / 16.0 GiB", "CPU 42%   8.0 GiB"]
+        );
+        assert_eq!(
+            status_summary_short("42", "900 MiB", "16.0 GiB")[0],
+            "CPU 42%   900 MiB / 16.0 GiB"
+        );
+        let cases = crate::i18n::Language::TRANSLATED
+            .into_iter()
+            .flat_map(|language| {
+                [
+                    (language, Tab::Cores, true),
+                    (language, Tab::Processes, false),
+                ]
+            });
+        for (language, tab, elevated) in cases {
+            let _language = crate::i18n::scope(language);
+            let mut d = data();
+            d.elevated = elevated;
+            let s = d.snapshot.clone().expect("fixture snapshot");
+            let cpu = format!("{:.0}", s.system.cpu_percent);
+            let used = format_bytes(s.system.memory_used() as f64);
+            let total = format_bytes(s.system.memory_total as f64);
+            let full = crate::i18n::format(
+                "CPU {0}%   Memory {1} / {2}",
+                &[cpu.clone(), used.clone(), total.clone()],
+            );
+            let [short, shortest] = status_summary_short(&cpu, &used, &total);
+            let h = status_app_with(d, language, tab, true);
+            let (text, node) = [&full, &short, &shortest]
+                .into_iter()
+                .find_map(|text| h.query_by_label(text).map(|node| (text, node)))
+                .unwrap_or_else(|| panic!("{language:?} {tab:?}: no CPU and memory summary"));
+            let shown = node.rect().width();
+            let width = |text: &str| {
+                h.ctx.fonts_mut(|f| {
+                    f.layout_no_wrap(
+                        text.to_owned(),
+                        egui::FontId::proportional(12.0),
+                        Color32::WHITE,
+                    )
+                    .size()
+                    .x
+                })
+            };
+            println!(
+                "EXPECTED: {language:?} {tab:?} summary uncut; ACTUAL: {text:?} {shown} px of {}",
+                width(text)
+            );
+            assert!(
+                shown + 1.0 >= width(text),
+                "{language:?} {tab:?}: {text:?} is cut to {shown} px"
             );
         }
     }
@@ -7773,7 +7905,7 @@ mod tests {
             });
         h.run_steps(3);
         assert!(
-            h.query_by_label("Dry-run (decisions are only logged)")
+            h.query_by_label("Monitoring only (decisions are only logged)")
                 .is_some()
         );
         assert!(h.query_by_label("Last two minutes").is_some());
@@ -10761,7 +10893,7 @@ o-such-folder",
         // 3.5% of 8 CPUs against a 2-core budget; 1 GiB of 8 GB.
         assert!(h.query_by_label_contains("0.28 cores (14%)").is_some());
         assert!(h.query_by_label_contains("1.0 GiB (12%)").is_some());
-        assert!(h.query_by_label_contains("Dry-run mode").is_some());
+        assert!(h.query_by_label_contains("Monitoring only:").is_some());
         // What was saved, loaded back as the service does after saving.
         let saved = |h: &mut Harness<'_, App>, rx: &std::sync::mpsc::Receiver<UiCommand>| {
             let text = rx.try_iter().find_map(|c| match c {

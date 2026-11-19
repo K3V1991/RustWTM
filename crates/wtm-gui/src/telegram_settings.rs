@@ -182,6 +182,11 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
                 ),
                 &mut form.control,
             );
+        } else {
+            ui.weak(crate::i18n::tr(
+                "This build only reports: the bot cannot end, suspend or resume processes or \
+                 services.",
+            ));
         }
         if !form.token.trim().is_empty() && !token_looks_valid(form.token.trim()) {
             crate::theme::colored(
@@ -393,6 +398,16 @@ mod tests {
                 .query_by_label("Allow ending, suspending and resuming processes and services")
                 .is_some(),
             cfg!(feature = "telegram-control")
+        );
+        // Without the switch the page says why.
+        assert_eq!(
+            harness
+                .query_by_label(
+                    "This build only reports: the bot cannot end, suspend or resume processes \
+                     or services."
+                )
+                .is_some(),
+            !cfg!(feature = "telegram-control")
         );
     }
 }

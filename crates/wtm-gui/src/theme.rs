@@ -159,6 +159,8 @@ pub mod icon {
     pub const KEYBOARD: char = '\u{E765}';
     pub const EDIT: char = '\u{E70F}';
     pub const DELETE: char = '\u{E74D}';
+    /// Open in new window: a program started from the status bar.
+    pub const RUN: char = '\u{E8A7}';
 }
 
 /// A small button showing `glyph` from the Windows icon font, named and

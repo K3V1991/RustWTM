@@ -1086,7 +1086,7 @@
     "es": "Añada programas en la lista o con clic derecho en un proceso."
   },
   "Kill-list entry": {
-    "tr": "Sonlandırma girdisi",
+    "tr": "Sonlandırma kuralı",
     "de": "Beendigungseintrag",
     "fr": "Entrée de la liste d'arrêt",
     "es": "Entrada de finalización"
@@ -1109,11 +1109,11 @@
     "fr": "Réessayer",
     "es": "Reintentar"
   },
-  "Dry-run mode: automatic ends are only logged. The panic button always works.": {
-    "tr": "Deneme modu: otomatik sonlandırmalar yalnızca kaydedilir. Acil düğmesi her zaman çalışır.",
-    "de": "Testmodus: automatische Beendigungen werden nur protokolliert. Not-Aus funktioniert immer.",
-    "fr": "Simulation : les arrêts automatiques sont seulement journalisés. L'urgence reste active.",
-    "es": "Simulación: los cierres automáticos solo se registran. La emergencia siempre funciona."
+  "Monitoring only: automatic ends are only logged. The panic button always works.": {
+    "tr": "Yalnızca izleme: otomatik sonlandırmalar sadece kaydedilir. Acil düğmesi her zaman çalışır.",
+    "de": "Nur Überwachung: Automatische Beendigungen werden nur protokolliert. Not-Aus funktioniert immer.",
+    "fr": "Surveillance seule : les arrêts automatiques sont seulement journalisés. Le bouton panique fonctionne toujours.",
+    "es": "Solo supervisión: los cierres automáticos solo se registran. El botón de pánico siempre funciona."
   },
   "Run RustWTM as administrator to change the kill list.": {
     "tr": "Sonlandırma listesini değiştirmek için yönetici olarak çalıştırın.",
@@ -1164,7 +1164,7 @@
     "es": "La lista está vacía. Añada un programa abajo o con clic derecho."
   },
   "Change entry": {
-    "tr": "Girdiyi değiştir",
+    "tr": "Kuralı değiştir",
     "de": "Eintrag ändern",
     "fr": "Modifier l'entrée",
     "es": "Modificar entrada"
@@ -1218,13 +1218,13 @@
     "es": "No hay procesos coincidentes activos."
   },
   "Save entry": {
-    "tr": "Girdiyi kaydet",
+    "tr": "Kuralı kaydet",
     "de": "Eintrag speichern",
     "fr": "Enregistrer l'entrée",
     "es": "Guardar entrada"
   },
   "Add entry": {
-    "tr": "Girdi ekle",
+    "tr": "Kural ekle",
     "de": "Eintrag hinzufügen",
     "fr": "Ajouter une entrée",
     "es": "Añadir entrada"
@@ -1247,11 +1247,11 @@
     "fr": "L'application et ses processus enfants partagent le budget. Atteindre le plafond mémoire entraîne des erreurs de mémoire insuffisante.",
     "es": "La aplicación y sus procesos hijos comparten el presupuesto. Al alcanzar el límite de memoria se producen errores de memoria insuficiente."
   },
-  "Dry-run mode: limits are only previewed in the event log. Switch to enforcing in Settings.": {
-    "tr": "Deneme modu: sınırlar yalnızca olay günlüğünde gösterilir. Uygulamak için Ayarlar'da \"Uygulanıyor\" seçeneğine geçin.",
-    "de": "Testmodus: Grenzen werden nur protokolliert. In Einstellungen aktivieren.",
-    "fr": "Simulation : limites uniquement journalisées. Activez l'application dans les paramètres.",
-    "es": "Simulación: los límites solo se registran. Active la aplicación en Configuración."
+  "Monitoring only: limits are only previewed in the event log. Switch to Enforcing in Settings.": {
+    "tr": "Yalnızca izleme: sınırlar sadece olay günlüğünde gösterilir. Ayarlar'da \"Uygulanıyor\" seçeneğine geçin.",
+    "de": "Nur Überwachung: Grenzen werden nur im Ereignisprotokoll angezeigt. In den Einstellungen auf „Aktiv“ umschalten.",
+    "fr": "Surveillance seule : les limites n'apparaissent que dans le journal des événements. Choisissez « Actif » dans les paramètres.",
+    "es": "Solo supervisión: los límites solo se muestran en el registro de eventos. Cambie a \"Aplicando\" en Configuración."
   },
   "Run RustWTM as administrator to change limits.": {
     "tr": "Sınırları değiştirmek için yönetici olarak çalıştırın.",
@@ -2765,6 +2765,12 @@
     "fr": "Sinon le bot informe seulement ; les processus Windows protégés ne sont jamais arrêtés",
     "es": "Si no, el bot solo informa; nunca finaliza procesos protegidos de Windows"
   },
+  "This build only reports: the bot cannot end, suspend or resume processes or services.": {
+    "tr": "Bu sürüm yalnızca raporlar: bot işlem ve servisleri sonlandıramaz, askıya alamaz veya sürdüremez.",
+    "de": "Dieser Build meldet nur: Der Bot kann keine Prozesse oder Dienste beenden, anhalten oder fortsetzen.",
+    "fr": "Cette version informe seulement : le bot ne peut ni arrêter, ni suspendre, ni reprendre les processus ou services.",
+    "es": "Esta versión solo informa: el bot no puede finalizar, suspender ni reanudar procesos ni servicios."
+  },
   "This does not look like a bot token (123456789:ABC…).": {
     "tr": "Bu geçerli bir bot anahtarına benzemiyor (123456789:ABC…).",
     "de": "Kein gültiges Bot-Token (123456789:ABC…).",
@@ -4037,11 +4043,11 @@
     "fr": "Mode",
     "es": "Modo"
   },
-  "Dry-run (decisions are only logged)": {
-    "tr": "Deneme (kararlar yalnızca kaydedilir)",
-    "de": "Testmodus (Entscheidungen nur protokolliert)",
-    "fr": "Simulation (décisions uniquement journalisées)",
-    "es": "Simulación (solo registra decisiones)"
+  "Monitoring only (decisions are only logged)": {
+    "tr": "Yalnızca izleme (kararlar sadece kaydedilir)",
+    "de": "Nur Überwachung (Entscheidungen nur protokolliert)",
+    "fr": "Surveillance seule (décisions uniquement journalisées)",
+    "es": "Solo supervisión (solo se registran las decisiones)"
   },
   "Enforcing": {
     "tr": "Uygulanıyor",
@@ -6780,7 +6786,7 @@
     "es": "Pruebe otro puerto, programa o nombre de herramienta."
   },
   "This entry was changed or removed meanwhile; open it again to change it.": {
-    "tr": "Bu girdi bu arada değiştirildi ya da kaldırıldı; değiştirmek için yeniden açın.",
+    "tr": "Bu kural bu arada değiştirildi ya da kaldırıldı; değiştirmek için yeniden açın.",
     "de": "Dieser Eintrag wurde inzwischen geändert oder entfernt; öffnen Sie ihn erneut, um ihn zu ändern.",
     "fr": "Cette entrée a été modifiée ou supprimée entre-temps ; rouvrez-la pour la modifier.",
     "es": "Esta entrada se modificó o eliminó mientras tanto; ábrala de nuevo para cambiarla."
@@ -8015,11 +8021,11 @@
     "fr": "Enregistrer la configuration vérifiée",
     "es": "Guardar configuración revisada"
   },
-  "Existing safety checks and dry-run mode still apply. Matching rules may act on running programs immediately after saving.": {
-    "tr": "Mevcut güvenlik denetimleri ve deneme modu geçerlidir. Eşleşen kurallar kayıttan hemen sonra çalışan programlara uygulanabilir.",
-    "de": "Bestehende Sicherheitsprüfungen und der Testmodus gelten weiterhin. Passende Regeln können sofort nach dem Speichern auf laufende Programme wirken.",
-    "fr": "Les contrôles de sécurité et le mode simulation restent applicables. Les règles peuvent agir sur les programmes actifs dès l’enregistrement.",
-    "es": "Siguen vigentes las comprobaciones de seguridad y el modo de simulación. Las reglas pueden actuar sobre programas activos al guardarse."
+  "Safety checks and Monitoring only still apply. Matching rules may act on running programs immediately after saving.": {
+    "tr": "Güvenlik denetimleri ve \"Yalnızca izleme\" modu yine geçerlidir. Eşleşen kurallar kayıttan hemen sonra çalışan programlara uygulanabilir.",
+    "de": "Sicherheitsprüfungen und „Nur Überwachung“ gelten weiterhin. Passende Regeln können sofort nach dem Speichern auf laufende Programme wirken.",
+    "fr": "Les contrôles de sécurité et « Surveillance seule » restent applicables. Les règles peuvent agir sur les programmes actifs dès l’enregistrement.",
+    "es": "Siguen vigentes las comprobaciones de seguridad y el modo \"Solo supervisión\". Las reglas pueden actuar sobre programas activos al guardarse."
   },
   "Configuration changed. Close this review and prepare it again.": {
     "tr": "Yapılandırma değişti. Bu incelemeyi kapatıp yeniden hazırlayın.",
@@ -11784,16 +11790,16 @@
     "es": "Elija en qué núcleos se ejecutan las aplicaciones"
   },
   "Keep an app on chosen cores, keep apps apart while they run together, or reserve cores for one app while it runs. The service applies this with Windows CPU Sets, after the rescue core.": {
-    "tr": "Bir uygulamayı seçilen çekirdeklerde tutun, birlikte çalışan uygulamaları birbirinden ayrı tutun ya da bir uygulama çalışırken ona çekirdek ayırın. Servis bunu kurtarma çekirdeğinden sonra Windows CPU Sets ile uygular.",
+    "tr": "Bir uygulamayı seçilen çekirdeklerde tutun, birlikte çalışan uygulamaları birbirinden ayrı tutun ya da bir uygulamaya, çalıştığı sürece çekirdek tahsis edin. Servis bunu kurtarma çekirdeğinden sonra Windows CPU Sets ile uygular.",
     "de": "Eine App auf gewählten Kernen halten, Apps getrennt halten, solange sie gleichzeitig laufen, oder Kerne für eine App reservieren, solange sie läuft. Der Dienst setzt dies nach dem Rettungskern mit Windows CPU Sets um.",
-    "fr": "Gardez une application sur des cœurs choisis, séparez des applications quand elles tournent ensemble ou réservez des cœurs à une application pendant qu'elle tourne. Le service l'applique avec les CPU Sets de Windows, après le cœur de secours.",
+    "fr": "Fixez une application sur des cœurs choisis, séparez des applications quand elles tournent ensemble ou réservez des cœurs à une application pendant qu'elle tourne. Le service l'applique avec les CPU Sets de Windows, après le cœur de secours.",
     "es": "Mantenga una aplicación en los núcleos elegidos, separe aplicaciones mientras se ejecutan juntas o reserve núcleos para una aplicación mientras se ejecuta. El servicio lo aplica con los CPU Sets de Windows, después del núcleo de rescate."
   },
-  "Dry-run mode: core placement is only previewed in the event log. Switch to enforcing in Settings.": {
-    "tr": "Deneme modu: çekirdek yerleşimi yalnızca olay günlüğünde gösterilir. Uygulamak için Ayarlar'da \"Uygulanıyor\" seçeneğine geçin.",
-    "de": "Testmodus: Kernzuweisung wird nur protokolliert. In Einstellungen aktivieren.",
-    "fr": "Simulation : placement sur les cœurs uniquement journalisé. Activez l'application dans les paramètres.",
-    "es": "Simulación: la ubicación en núcleos solo se registra. Active la aplicación en Configuración."
+  "Monitoring only: core placement is only previewed in the event log. Switch to Enforcing in Settings.": {
+    "tr": "Yalnızca izleme: çekirdek yerleşimi sadece olay günlüğünde gösterilir. Ayarlar'da \"Uygulanıyor\" seçeneğine geçin.",
+    "de": "Nur Überwachung: Die Kernzuweisung wird nur im Ereignisprotokoll angezeigt. In den Einstellungen auf „Aktiv“ umschalten.",
+    "fr": "Surveillance seule : le placement sur les cœurs n'apparaît que dans le journal des événements. Choisissez « Actif » dans les paramètres.",
+    "es": "Solo supervisión: la ubicación en núcleos solo se muestra en el registro de eventos. Cambie a \"Aplicando\" en Configuración."
   },
   "Run RustWTM as administrator to change core placement.": {
     "tr": "Çekirdek yerleşimini değiştirmek için RustWTM'i yönetici olarak çalıştırın.",
@@ -11826,7 +11832,7 @@
     "es": "El servicio no informa de la ubicación en núcleos. Inicie el servicio RustWTM para verla."
   },
   "Entries": {
-    "tr": "Girdiler",
+    "tr": "Çekirdek kuralları",
     "de": "Einträge",
     "fr": "Entrées",
     "es": "Entradas"
@@ -11879,14 +11885,14 @@
     "fr": "…et {0} de plus",
     "es": "…y {0} más"
   },
-  "Left alone: {0} ({1}): {2}": {
-    "tr": "Dokunulmadı: {0} ({1}): {2}",
-    "de": "Unverändert: {0} ({1}): {2}",
-    "fr": "Laissé tel quel : {0} ({1}) : {2}",
-    "es": "Sin tocar: {0} ({1}): {2}"
+  "{0} ({1}) left alone: {2}": {
+    "tr": "{0} ({1}) dokunulmadı: {2}",
+    "de": "{0} ({1}) unverändert: {2}",
+    "fr": "{0} ({1}) laissé tel quel : {2}",
+    "es": "{0} ({1}) sin cambios: {2}"
   },
   "No entries yet. Add one below: every app keeps every core until then.": {
-    "tr": "Henüz girdi yok. Aşağıdan ekleyin: o zamana kadar her uygulama tüm çekirdekleri kullanır.",
+    "tr": "Henüz kural yok. Aşağıdan ekleyin: o zamana kadar her uygulama tüm çekirdekleri kullanır.",
     "de": "Noch keine Einträge. Fügen Sie unten einen hinzu: Bis dahin behält jede App alle Kerne.",
     "fr": "Aucune entrée pour l'instant. Ajoutez-en une ci-dessous : d'ici là, chaque application garde tous les cœurs.",
     "es": "Aún no hay entradas. Añada una abajo: hasta entonces, cada aplicación conserva todos los núcleos."
@@ -11906,7 +11912,7 @@
   "Keep on cores": {
     "tr": "Çekirdeklerde tut",
     "de": "Auf Kernen halten",
-    "fr": "Garder sur des cœurs",
+    "fr": "Fixer sur des cœurs",
     "es": "Mantener en núcleos"
   },
   "Keep apart": {
@@ -11916,7 +11922,7 @@
     "es": "Separar"
   },
   "Reserve cores": {
-    "tr": "Çekirdek ayır",
+    "tr": "Çekirdek tahsis et",
     "de": "Kerne reservieren",
     "fr": "Réserver des cœurs",
     "es": "Reservar núcleos"
@@ -11964,7 +11970,7 @@
     "es": "p. ej. msbuild.exe o cl*.exe"
   },
   "Shares": {
-    "tr": "Paylar",
+    "tr": "Oran",
     "de": "Anteile",
     "fr": "Parts",
     "es": "Reparto"
@@ -12008,12 +12014,12 @@
   "Performance cores": {
     "tr": "Performans çekirdekleri",
     "de": "Leistungskerne",
-    "fr": "Cœurs performance",
+    "fr": "Cœurs de performance",
     "es": "Núcleos de rendimiento"
   },
   "Efficient cores": {
     "tr": "Verimli çekirdekler",
-    "de": "Effiziente Kerne",
+    "de": "Effizienzkerne",
     "fr": "Cœurs efficaces",
     "es": "Núcleos eficientes"
   },
@@ -12026,26 +12032,26 @@
   "Include the programs it starts": {
     "tr": "Başlattığı programları da dahil et",
     "de": "Gestartete Programme einbeziehen",
-    "fr": "Inclure les programmes qu'elle lance",
+    "fr": "Inclure les programmes qu'il lance",
     "es": "Incluir los programas que inicia"
   },
-  "Windows does not pass core choices on to child processes; this places them too.": {
-    "tr": "Windows çekirdek seçimlerini alt işlemlere aktarmaz; bu seçenek onları da yerleştirir.",
-    "de": "Windows gibt die Kernwahl nicht an Unterprozesse weiter; diese Option weist ihnen die Kerne ebenfalls zu.",
-    "fr": "Windows ne transmet pas le choix des cœurs aux processus enfants ; cette option les place aussi.",
-    "es": "Windows no transmite la elección de núcleos a los procesos hijos; esta opción también los ubica."
+  "Windows does not pass core choices on to child processes; RustWTM places them as well.": {
+    "tr": "Windows çekirdek seçimlerini alt işlemlere aktarmaz; RustWTM onları da yerleştirir.",
+    "de": "Windows gibt die Kernwahl nicht an Unterprozesse weiter; RustWTM weist ihnen die Kerne ebenfalls zu.",
+    "fr": "Windows ne transmet pas le choix des cœurs aux processus enfants ; RustWTM les place aussi.",
+    "es": "Windows no transmite la elección de núcleos a los procesos hijos; RustWTM también los ubica."
   },
   "The app runs only on its reserved cores": {
-    "tr": "Uygulama yalnızca kendisine ayrılan çekirdeklerde çalışır",
+    "tr": "Uygulama yalnızca kendisine tahsis edilen çekirdeklerde çalışır",
     "de": "Die App läuft nur auf ihren reservierten Kernen",
     "fr": "L'application ne tourne que sur ses cœurs réservés",
     "es": "La aplicación solo se ejecuta en sus núcleos reservados"
   },
-  "Binding, and passed on to child processes, but limited to one processor group and it overrides the app's own choice.": {
-    "tr": "Bağlayıcıdır ve alt işlemlere aktarılır, ancak tek bir işlemci grubuyla sınırlıdır ve uygulamanın kendi seçimini geçersiz kılar.",
-    "de": "Verbindlich und wird an Unterprozesse weitergegeben, aber auf eine Prozessorgruppe beschränkt und überschreibt die eigene Wahl der App.",
-    "fr": "Contraignante et transmise aux processus enfants, mais limitée à un seul groupe de processeurs, et elle remplace le choix propre de l'application.",
-    "es": "Obligatoria y se transmite a los procesos hijos, pero se limita a un grupo de procesadores y anula la elección propia de la aplicación."
+  "Binding and inherited by child processes, but limited to one processor group; overrides the app's own choice.": {
+    "tr": "Bağlayıcıdır ve alt işlemlere de geçer, ancak tek bir işlemci grubuyla sınırlıdır; uygulamanın kendi seçimini geçersiz kılar.",
+    "de": "Verbindlich und an Unterprozesse vererbt, aber auf eine Prozessorgruppe beschränkt; überschreibt die eigene Wahl der App.",
+    "fr": "Contraignante et héritée par les processus enfants, mais limitée à un seul groupe de processeurs ; remplace le choix propre de l'application.",
+    "es": "Obligatoria y heredada por los procesos hijos, pero limitada a un grupo de procesadores; anula la elección propia de la aplicación."
   },
   "With the apps running now": {
     "tr": "Şu an çalışan uygulamalarla",
@@ -12054,7 +12060,7 @@
     "es": "Con las aplicaciones en ejecución"
   },
   "Give the entry a name.": {
-    "tr": "Girdiye bir ad verin.",
+    "tr": "Kurala bir ad verin.",
     "de": "Geben Sie dem Eintrag einen Namen.",
     "fr": "Donnez un nom à l'entrée.",
     "es": "Dé un nombre a la entrada."
@@ -12090,7 +12096,7 @@
     "es": "CPU {0}"
   },
   "shares {0}": {
-    "tr": "paylar {0}",
+    "tr": "oran {0}",
     "de": "Anteile {0}",
     "fr": "parts {0}",
     "es": "reparto {0}"
@@ -12104,7 +12110,7 @@
   "not the programs it starts": {
     "tr": "başlattığı programlar hariç",
     "de": "nicht die gestarteten Programme",
-    "fr": "sans les programmes qu'elle lance",
+    "fr": "sans les programmes qu'il lance",
     "es": "sin los programas que inicia"
   },
   "the app may use every core": {
@@ -12120,7 +12126,7 @@
     "es": "Núcleo de rescate"
   },
   "Reserved by Windows": {
-    "tr": "Windows için ayrılmış",
+    "tr": "Windows tarafından ayrılmış",
     "de": "Von Windows reserviert",
     "fr": "Réservé par Windows",
     "es": "Reservado por Windows"
@@ -12156,43 +12162,43 @@
     "es": "{0} otros procesos mantenidos fuera de estos núcleos"
   },
   "Nothing running now matches this entry.": {
-    "tr": "Şu an çalışan hiçbir şey bu girdiyle eşleşmiyor.",
+    "tr": "Şu an çalışan hiçbir şey bu kuralla eşleşmiyor.",
     "de": "Nichts, was gerade läuft, passt zu diesem Eintrag.",
     "fr": "Aucun processus en cours ne correspond à cette entrée.",
     "es": "Nada de lo que se está ejecutando coincide con esta entrada."
   },
-  "separate '{0}': cores split between {1}": {
+  "keep apart '{0}': cores split between {1}": {
     "tr": "ayrı tut '{0}': çekirdekler {1} arasında bölündü",
     "de": "getrennt halten '{0}': Kerne aufgeteilt auf {1}",
     "fr": "séparer '{0}' : cœurs répartis entre {1}",
     "es": "separar '{0}': núcleos repartidos entre {1}"
   },
-  "separate '{0}' (dry run): cores split between {1}": {
+  "keep apart '{0}' (dry run): cores split between {1}": {
     "tr": "ayrı tut '{0}' (deneme): çekirdekler {1} arasında bölünürdü",
     "de": "getrennt halten '{0}' (Testmodus): Kerne aufgeteilt auf {1}",
     "fr": "séparer '{0}' (simulation) : cœurs répartis entre {1}",
     "es": "separar '{0}' (simulación): núcleos repartidos entre {1}"
   },
-  "separate '{0}' ended: every app has every core back": {
+  "keep apart '{0}' ended: every app has every core back": {
     "tr": "ayrı tut '{0}' sona erdi: her uygulama tüm çekirdeklerini geri aldı",
     "de": "getrennt halten '{0}' beendet: Jede App hat wieder alle Kerne",
     "fr": "séparer '{0}' terminé : chaque application récupère tous les cœurs",
     "es": "separar '{0}' terminó: cada aplicación recupera todos los núcleos"
   },
-  "reserve_cores '{0}': CPUs {1} kept for its app": {
-    "tr": "çekirdek ayır '{0}': CPU {1} uygulaması için ayrıldı",
+  "reserve cores '{0}': CPUs {1} kept for its app": {
+    "tr": "çekirdek tahsis et '{0}': CPU {1}, uygulamasına tahsis edildi",
     "de": "Kerne reservieren '{0}': CPUs {1} für ihre App freigehalten",
     "fr": "réserver des cœurs '{0}' : CPU {1} gardés pour son application",
     "es": "reservar núcleos '{0}': CPU {1} reservadas para su aplicación"
   },
-  "reserve_cores '{0}' (dry run): CPUs {1} kept for its app": {
-    "tr": "çekirdek ayır '{0}' (deneme): CPU {1} uygulaması için ayrılırdı",
+  "reserve cores '{0}' (dry run): CPUs {1} kept for its app": {
+    "tr": "çekirdek tahsis et '{0}' (deneme): CPU {1}, uygulamasına tahsis edilirdi",
     "de": "Kerne reservieren '{0}' (Testmodus): CPUs {1} für ihre App freigehalten",
     "fr": "réserver des cœurs '{0}' (simulation) : CPU {1} gardés pour son application",
     "es": "reservar núcleos '{0}' (simulación): CPU {1} reservadas para su aplicación"
   },
-  "reserve_cores '{0}' released": {
-    "tr": "çekirdek ayır '{0}' serbest bırakıldı",
+  "reserve cores '{0}' released": {
+    "tr": "çekirdek tahsis et '{0}': çekirdekler serbest bırakıldı",
     "de": "Kerne reservieren '{0}' freigegeben",
     "fr": "réserver des cœurs '{0}' libéré",
     "es": "reservar núcleos '{0}' liberado"
@@ -12209,26 +12215,26 @@
     "fr": "{0} : tous les cœurs rendus à {1} applications",
     "es": "{0}: todos los núcleos devueltos a {1} aplicaciones"
   },
-  "pin '{0}': cores {1} name none of this machine's usable processors": {
+  "keep on cores '{0}': cores {1} name none of this machine's usable processors": {
     "tr": "çekirdeklerde tut '{0}': {1} çekirdekleri bu makinenin kullanılabilir işlemcilerinden hiçbirine karşılık gelmiyor",
     "de": "auf Kernen halten '{0}': Kerne {1} bezeichnen keinen nutzbaren Prozessor dieses Computers",
-    "fr": "garder sur des cœurs '{0}' : les cœurs {1} ne désignent aucun processeur utilisable de cette machine",
+    "fr": "fixer sur des cœurs '{0}' : les cœurs {1} ne désignent aucun processeur utilisable de cette machine",
     "es": "mantener en núcleos '{0}': los núcleos {1} no corresponden a ningún procesador utilizable de este equipo"
   },
-  "separate '{0}': {1} apps running but only {2} cores to split": {
+  "keep apart '{0}': {1} apps running but only {2} cores to split": {
     "tr": "ayrı tut '{0}': {1} uygulama çalışıyor ama bölünecek yalnızca {2} çekirdek var",
     "de": "getrennt halten '{0}': {1} Apps laufen, aber nur {2} Kerne zum Aufteilen",
     "fr": "séparer '{0}' : {1} applications en cours mais seulement {2} cœurs à répartir",
     "es": "separar '{0}': {1} aplicaciones en ejecución pero solo {2} núcleos para repartir"
   },
-  "reserve_cores '{0}': one core left out so everything else keeps one": {
-    "tr": "çekirdek ayır '{0}': diğer her şeye bir çekirdek kalsın diye bir çekirdek dışarıda bırakıldı",
+  "reserve cores '{0}': one core left out so everything else keeps one": {
+    "tr": "çekirdek tahsis et '{0}': diğer her şeye bir çekirdek kalsın diye bir çekirdek dışarıda bırakıldı",
     "de": "Kerne reservieren '{0}': ein Kern ausgelassen, damit allem anderen einer bleibt",
     "fr": "réserver des cœurs '{0}' : un cœur laissé de côté pour que le reste en garde un",
     "es": "reservar núcleos '{0}': se deja fuera un núcleo para que todo lo demás conserve uno"
   },
-  "reserve_cores '{0}': no core left to reserve": {
-    "tr": "çekirdek ayır '{0}': ayrılacak çekirdek kalmadı",
+  "reserve cores '{0}': no core left to reserve": {
+    "tr": "çekirdek tahsis et '{0}': tahsis edilecek çekirdek kalmadı",
     "de": "Kerne reservieren '{0}': kein Kern mehr zum Reservieren übrig",
     "fr": "réserver des cœurs '{0}' : plus aucun cœur à réserver",
     "es": "reservar núcleos '{0}': no queda ningún núcleo para reservar"
@@ -12251,28 +12257,28 @@
     "fr": "cœur de secours",
     "es": "núcleo de rescate"
   },
-  "reserve_cores '{0}'": {
-    "tr": "çekirdek ayır '{0}'",
+  "reserve cores '{0}'": {
+    "tr": "çekirdek tahsis et '{0}'",
     "de": "Kerne reservieren '{0}'",
     "fr": "réserver des cœurs '{0}'",
     "es": "reservar núcleos '{0}'"
   },
-  "kept off reserve_cores '{0}'": {
-    "tr": "uzak tutuldu (çekirdek ayır '{0}')",
+  "kept off the cores reserved by '{0}'": {
+    "tr": "'{0}' için tahsis edilen çekirdeklerden uzak tutuldu",
     "de": "ferngehalten (Kerne reservieren '{0}')",
     "fr": "tenu à l'écart (réserver des cœurs '{0}')",
     "es": "mantenido fuera (reservar núcleos '{0}')"
   },
-  "separate '{0}'": {
+  "keep apart '{0}'": {
     "tr": "ayrı tut '{0}'",
     "de": "getrennt halten '{0}'",
     "fr": "séparer '{0}'",
     "es": "separar '{0}'"
   },
-  "pin '{0}'": {
+  "keep on cores '{0}'": {
     "tr": "çekirdeklerde tut '{0}'",
     "de": "auf Kernen halten '{0}'",
-    "fr": "garder sur des cœurs '{0}'",
+    "fr": "fixer sur des cœurs '{0}'",
     "es": "mantener en núcleos '{0}'"
   },
   "chose its own processors": {

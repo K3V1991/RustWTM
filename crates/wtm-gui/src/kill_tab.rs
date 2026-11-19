@@ -330,7 +330,7 @@ pub fn kill_tab(ui: &mut Ui, data: &Data, view: &mut KillView, panic: &mut bool)
             ui,
             WARN,
             crate::i18n::tr(
-                "Dry-run mode: automatic ends are only logged. The panic button always works.",
+                "Monitoring only: automatic ends are only logged. The panic button always works.",
             ),
         );
     }

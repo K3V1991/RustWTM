@@ -103,12 +103,12 @@ fn show(status: &PlacementStatus, out: &mut impl Write) -> io::Result<()> {
             .iter()
             .map(|(app, cpus)| format!("{app} on CPUs {}", numbers(cpus)))
             .collect();
-        writeln!(out, "separate '{}': {}", s.entry, parts.join(", "))?;
+        writeln!(out, "keep apart '{}': {}", s.entry, parts.join(", "))?;
     }
     for r in &status.reservations {
         writeln!(
             out,
-            "reserve_cores '{}': CPUs {} kept for its app",
+            "reserve cores '{}': CPUs {} kept for its app",
             r.entry,
             numbers(&r.cpus)
         )?;
@@ -140,7 +140,7 @@ fn show(status: &PlacementStatus, out: &mut impl Write) -> io::Result<()> {
         }
     }
     for (target, why) in &status.left_alone {
-        writeln!(out, "Left alone: {} ({}): {why}", target.name, target.pid)?;
+        writeln!(out, "{} ({}) left alone: {why}", target.name, target.pid)?;
     }
     Ok(())
 }
@@ -202,7 +202,7 @@ mod tests {
                 target: target(10, "game.exe"),
                 cpus: vec![256, 257, 258],
                 strict: false,
-                why: vec!["separate 'Game and stream'".into()],
+                why: vec!["keep apart 'Game and stream'".into()],
             }],
             splits: vec![wtm_policy::Split {
                 entry: "Game and stream".into(),
@@ -210,7 +210,8 @@ mod tests {
             }],
             reservations: Vec::new(),
             notes: vec![
-                "pin 'Far': cores 40-41 name none of this machine's usable processors".into(),
+                "keep on cores 'Far': cores 40-41 name none of this machine's usable processors"
+                    .into(),
             ],
             left_alone: vec![(target(20, "obs64.exe"), "chose its own processors".into())],
             dry_run: false,
@@ -222,7 +223,7 @@ mod tests {
         let s = status();
         assert_eq!(
             explain(&s, 10),
-            "game.exe (10) runs on CPUs 0-2 (CPU Sets): separate 'Game and stream'"
+            "game.exe (10) runs on CPUs 0-2 (CPU Sets): keep apart 'Game and stream'"
         );
         assert_eq!(
             explain(&s, 20),
@@ -237,19 +238,24 @@ mod tests {
         show(&status(), &mut out).unwrap();
         let text = String::from_utf8(out).unwrap();
         assert!(
-            text.contains("separate 'Game and stream': game.exe on CPUs 0-2"),
+            text.contains("keep apart 'Game and stream': game.exe on CPUs 0-2"),
             "{text}"
         );
-        assert!(text.contains("Not met: pin 'Far'"), "{text}");
+        assert!(text.contains("Not met: keep on cores 'Far'"), "{text}");
         let row = text
             .lines()
             .find(|l| l.trim_start().starts_with("10 "))
             .unwrap();
-        for part in ["game.exe", "0-2", "CPU Sets", "separate 'Game and stream'"] {
+        for part in [
+            "game.exe",
+            "0-2",
+            "CPU Sets",
+            "keep apart 'Game and stream'",
+        ] {
             assert!(row.contains(part), "{row}");
         }
         assert!(
-            text.contains("Left alone: obs64.exe (20): chose its own processors"),
+            text.contains("obs64.exe (20) left alone: chose its own processors"),
             "{text}"
         );
     }
