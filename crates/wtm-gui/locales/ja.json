@@ -432,7 +432,7 @@
   "apps at a time": "アプリ",
   "Memory guard": "メモリ ガード",
   "Free memory of the largest apps when RAM runs out": "RAM が不足したら最も大きいアプリのメモリを解放する",
-  "Moves their pages to the standby list; nothing is lost": "ページをスタンバイ リストに移動します。データは失われません",
+  "Switching back to a trimmed app may be slower.": "ワーキングセットを縮小したアプリに戻ると、動作が遅くなることがあります。",
   "When memory use stays above": "メモリ使用率が次の値を超え続けたとき",
   "Swarm warning": "スウォーム警告",
   "Warn when one program runs": "1 つのプログラムの実行数が",

@@ -18,7 +18,7 @@ pub struct TelegramConfig {
     pub chats: Vec<i64>,
     /// Forward alerts (CPU overload, swarms, kill list) to the chats.
     pub notify: bool,
-    /// Allow ending, suspending and resuming processes from Telegram.
+    /// Allow system controls in private chats on a control-enabled service build.
     pub control: bool,
 }
 
@@ -29,7 +29,7 @@ impl Default for TelegramConfig {
             token: String::new(),
             chats: Vec::new(),
             notify: true,
-            control: true,
+            control: false,
         }
     }
 }
@@ -107,6 +107,17 @@ mod tests {
     use super::*;
 
     const TOKEN: &str = "123456789:AAFh3kq_Zx-9yLmnopQRstuVWxyz012345";
+
+    #[test]
+    fn enabling_telegram_without_control_is_report_only() {
+        let text = format!("enabled = true\ntoken = \"{TOKEN}\"\nchats = [42]\n");
+        assert!(
+            TelegramConfig::from_toml(&format!("{text}control = true"))
+                .unwrap()
+                .control
+        );
+        assert!(!TelegramConfig::from_toml(&text).unwrap().control);
+    }
 
     #[test]
     fn a_parse_error_never_quotes_the_token() {

@@ -49,6 +49,9 @@ Assert (Test-Path (Join-Path $InstallDir 'docs/cpu-controls.md')) 'CPU topology 
 Assert (Test-Path (Join-Path $InstallDir 'docs/localization.md')) 'Language support guide installed'
 Assert (Test-Path (Join-Path $InstallDir 'docs/docker.md')) 'Docker monitoring guide installed'
 Assert (Test-Path (Join-Path $InstallDir 'docs/task-manager.md')) 'Task Manager integration guide installed'
+foreach ($guide in 'installation', 'usage', 'configuration', 'memory-guard', 'telegram') {
+    Assert (Test-Path (Join-Path $InstallDir "docs/$guide.md")) "$guide guide installed"
+}
 if ($Mode -eq 'script') {
     # Only SYSTEM and administrators may change what the service runs.
     $sddl = (Get-Acl -LiteralPath $InstallDir).Sddl

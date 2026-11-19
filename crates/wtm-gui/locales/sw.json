@@ -432,7 +432,7 @@
   "apps at a time": "programu kwa wakati mmoja",
   "Memory guard": "Mlinzi wa kumbukumbu",
   "Free memory of the largest apps when RAM runs out": "Achilia kumbukumbu ya programu kubwa zaidi RAM inapokwisha",
-  "Moves their pages to the standby list; nothing is lost": "Huhamisha kurasa zake kwenye orodha ya kusubiri; hakuna kinachopotea",
+  "Switching back to a trimmed app may be slower.": "Kurudi kwenye programu ambayo kumbukumbu yake imepunguzwa kunaweza kuchukua muda zaidi.",
   "When memory use stays above": "Matumizi ya kumbukumbu yakibaki juu ya",
   "Swarm warning": "Onyo la wingi",
   "Warn when one program runs": "Onya programu moja ikiendesha",

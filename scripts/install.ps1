@@ -8,31 +8,36 @@
     the machine PATH, creates a Start Menu shortcut and installs and starts the
     RustWTM service. The service starts in dry-run mode: it only logs what it
     would do until `dry_run = false` is set in %ProgramData%\RustWTM\config.toml.
+    Updates keep existing settings.
 
 .PARAMETER Version
     Release tag such as v0.1.0, or "latest" (default).
 
 .PARAMETER InstallDir
-    Target directory. Default: C:\Program Files\RustWTM.
+    Target directory. Default: C:\Program Files\RustWTM, or
+    %LOCALAPPDATA%\RustWTM\portable with -DownloadOnly.
 
 .PARAMETER FromSource
     Path to a RustWTM checkout to build with `cargo build --release` instead of
     downloading a release.
 
 .PARAMETER NoService
-    Install the GUI and CLI only.
+    Install without registering or starting the service. Requires a machine
+    without an existing RustWTM service. Use -DownloadOnly for a separate copy.
 
 .PARAMETER DownloadOnly
     Only download and extract the binaries into InstallDir (portable use).
     Does not need administrator rights.
 
 .EXAMPLE
-    irm https://raw.githubusercontent.com/rustwtm/rustwtm/main/scripts/install.ps1 | iex
+    .\install.ps1 -Version v0.36.3
+
+    Run a local copy from a verified release ZIP or a reviewed checkout.
 #>
 [CmdletBinding()]
 param(
     [string]$Version = 'latest',
-    [string]$InstallDir = (Join-Path $env:ProgramFiles 'RustWTM'),
+    [ValidateNotNullOrEmpty()][string]$InstallDir,
     [string]$FromSource,
     [switch]$NoService,
     [switch]$DownloadOnly
@@ -80,6 +85,58 @@ function Protect-InstallDir([string]$Dir, [string]$Source) {
 function Test-Admin {
     $principal = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
     $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+}
+
+function Resolve-InstallDirectory([string]$Dir, [switch]$Portable) {
+    if (-not $Dir) {
+        $Dir = if ($Portable) {
+            Join-Path $env:LOCALAPPDATA 'RustWTM\portable'
+        } else {
+            Join-Path $env:ProgramFiles 'RustWTM'
+        }
+    }
+    $full = [IO.Path]::GetFullPath($Dir)
+    $trimmed = $full.TrimEnd('\', '/')
+    if ($trimmed -ieq [IO.Path]::GetPathRoot($full).TrimEnd('\', '/')) {
+        throw 'Choose a RustWTM directory inside the drive or share.'
+    }
+    $trimmed
+}
+
+# The SCM service name is shared by MSI and script installations. Verify its
+# configured executable before stopping it or reusing it for an update.
+function Get-InstallService([string]$Executable, [switch]$WithoutService) {
+    $registration = Get-CimInstance -ClassName Win32_Service -Filter "Name = '$ServiceName'"
+    if (-not $registration) { return }
+    if ($WithoutService) {
+        throw 'A RustWTM service is already registered. Use -DownloadOnly for a separate portable copy.'
+    }
+    $command = [Environment]::ExpandEnvironmentVariables($registration.PathName)
+    if ($command -notmatch '^\s*(?:"([^"]+)"|([^\s"]+))(?=\s|$)') {
+        throw 'Could not identify the registered RustWTM service executable.'
+    }
+    $registered = if ($Matches[1]) { $Matches[1] } else { $Matches[2] }
+    if ($registered -notmatch '^(?:[a-z]:[\\/]|\\\\)' -or
+        [IO.Path]::GetFullPath($registered) -ine $Executable) {
+        throw 'The RustWTM service is registered at a different path. Update that installation or use -DownloadOnly.'
+    }
+    Get-Service -Name $ServiceName
+}
+
+function Close-TargetGui([string]$Dir, [switch]$Portable) {
+    $gui = Join-Path $Dir 'rustwtm.exe'
+    $cli = Join-Path $Dir 'wtm.exe'
+    $service = Join-Path $Dir 'wtm-service.exe'
+    $running = @(Get-Process -Name 'rustwtm', 'wtm', 'wtm-service' -ErrorAction SilentlyContinue |
+        Where-Object { $_.Path -iin @($gui, $cli, $service) })
+    if ($Portable) {
+        if ($running.Count -gt 0) { throw 'Close the RustWTM programs in the portable directory before updating it.' }
+        return
+    }
+    if ($running | Where-Object { $_.Path -ieq $cli }) {
+        throw 'Close the RustWTM CLI in the installation directory before updating it.'
+    }
+    $running | Where-Object { $_.Path -ieq $gui } | Stop-Process -Force
 }
 
 function Get-ReleaseFiles([string]$Tag, [string]$Destination) {
@@ -160,7 +217,9 @@ if (-not $DownloadOnly -and -not (Test-Admin)) {
 }
 
 # A plain absolute path: what is checked is what is installed to.
-$InstallDir = [IO.Path]::GetFullPath($InstallDir).TrimEnd('\')
+$InstallDir = Resolve-InstallDirectory $InstallDir -Portable:$DownloadOnly
+$svcExe = Join-Path $InstallDir 'wtm-service.exe'
+$service = if (-not $DownloadOnly) { Get-InstallService $svcExe -WithoutService:$NoService }
 
 # Elevated, the download is checked and copied from a folder only
 # administrators can change: in the user's own temp folder, anything running
@@ -175,17 +234,12 @@ try {
         if (-not (Test-Path (Join-Path $source $b))) { throw "$b is missing from $source." }
     }
 
-    $service = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
-    if ($service -and $service.Status -ne 'Stopped' -and -not $DownloadOnly) {
+    Close-TargetGui $InstallDir -Portable:$DownloadOnly
+    if ($service -and $service.Status -ne 'Stopped') {
         Write-Step 'Stopping the running service (limits are rolled back)'
         Stop-Service -Name $ServiceName -Force
         (Get-Service $ServiceName).WaitForStatus('Stopped', [TimeSpan]::FromSeconds(30))
     }
-    # A running GUI or CLI would lock its executable.
-    Get-Process -Name 'rustwtm' -ErrorAction SilentlyContinue |
-        Where-Object { $_.Path -like "$InstallDir*" } |
-        Stop-Process -Force
-
     Write-Step "Installing to $InstallDir"
     if ($DownloadOnly) {
         New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
@@ -216,8 +270,7 @@ try {
     New-StartMenuShortcut (Join-Path $InstallDir 'rustwtm.exe')
 
     if (-not $NoService) {
-        $svcExe = Join-Path $InstallDir 'wtm-service.exe'
-        if (-not (Get-Service -Name $ServiceName -ErrorAction SilentlyContinue)) {
+        if (-not (Get-InstallService $svcExe)) {
             Write-Step 'Installing the RustWTM service'
             & $svcExe install
             if ($LASTEXITCODE -ne 0) { throw 'Service installation failed.' }
@@ -234,8 +287,8 @@ try {
     Write-Host "  CLI:     wtm --help"
     if (-not $NoService) {
         Write-Host "  Config:  $config"
-        Write-Host '  The service runs in DRY-RUN mode: it only logs decisions. Review the'
-        Write-Host '  Events tab, then set dry_run = false in the config to enforce.'
+        Write-Host '  New configurations start in dry-run mode. Review the Events tab'
+        Write-Host '  and the current dry_run setting before changing enforcement.'
     }
 } finally {
     # rd never follows a link inside; Remove-Item in Windows PowerShell may.

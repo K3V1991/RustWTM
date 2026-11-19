@@ -432,7 +432,7 @@
   "apps at a time": "програм одночасно",
   "Memory guard": "Захист пам'яті",
   "Free memory of the largest apps when RAM runs out": "Звільняти пам'ять найбільших програм, коли RAM закінчується",
-  "Moves their pages to the standby list; nothing is lost": "Переміщує їхні сторінки в резервний список; нічого не втрачається",
+  "Switching back to a trimmed app may be slower.": "Повернення до програми зі зменшеним робочим набором може тривати довше.",
   "When memory use stays above": "Коли використання пам'яті стабільно вище",
   "Swarm warning": "Попередження про рій процесів",
   "Warn when one program runs": "Попереджати, коли одна програма запущена в",

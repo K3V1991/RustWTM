@@ -1,7 +1,7 @@
 //! Memory guard: when the machine runs low on RAM for a while, the biggest
 //! background apps have their working sets trimmed so the app in front of the
-//! user gets the memory. Nothing is closed and nothing is lost: trimmed pages
-//! move to the standby list and come back on demand.
+//! user gets the memory. Windows faults still-needed pages back into the
+//! working set on demand, which can slow down the trimmed app.
 
 use std::collections::{HashMap, HashSet};
 use std::time::{Duration, Instant};
@@ -33,7 +33,7 @@ pub struct MemoryGuardConfig {
 impl Default for MemoryGuardConfig {
     fn default() -> Self {
         Self {
-            enabled: true,
+            enabled: false,
             high_percent: 90.0,
             sustain_secs: 15,
             max_processes: 3,
@@ -191,8 +191,28 @@ mod tests {
     }
 
     #[test]
+    fn enforcing_does_not_opt_in_to_memory_guard() {
+        let t = Instant::now();
+        for mut cfg in [
+            crate::Config::from_toml("dry_run = false").unwrap(),
+            crate::Config::from_toml(crate::DEFAULT_CONFIG_TOML).unwrap(),
+        ] {
+            let mut default_guard = MemoryGuard::new(cfg.memory_guard.clone());
+            cfg.memory_guard.enabled = true;
+            let mut opted_in = MemoryGuard::new(cfg.memory_guard);
+            for guard in [&mut default_guard, &mut opted_in] {
+                assert!(guard.tick(t, &snap(95)).is_empty());
+            }
+            let sustained = t + Duration::from_secs(20);
+            assert!(!opted_in.tick(sustained, &snap(95)).is_empty());
+            assert!(default_guard.tick(sustained, &snap(95)).is_empty());
+        }
+    }
+
+    #[test]
     fn trims_the_biggest_background_apps_under_sustained_pressure() {
         let mut g = MemoryGuard::new(MemoryGuardConfig {
+            enabled: true,
             max_processes: 2,
             exempt: vec!["keep*".into()],
             ..MemoryGuardConfig::default()
@@ -222,6 +242,7 @@ mod tests {
     #[test]
     fn reenabled_guard_requires_fresh_pressure_and_keeps_trim_cooldowns() {
         let cfg = MemoryGuardConfig {
+            enabled: true,
             max_processes: 10,
             ..MemoryGuardConfig::default()
         };
@@ -289,6 +310,7 @@ mod tests {
         });
         assert!(g.tick(Instant::now(), &snap(99)).is_empty());
         g.set_config(MemoryGuardConfig {
+            enabled: true,
             sustain_secs: 0,
             ..MemoryGuardConfig::default()
         });

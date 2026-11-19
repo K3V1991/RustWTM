@@ -478,7 +478,7 @@ fn form(ui: &mut Ui, c: &wtm_policy::Config, text: &str) -> Option<String> {
         ui,
         icon::MEMORY,
         crate::i18n::tr("Free memory of the largest apps when RAM runs out"),
-        crate::i18n::tr("Moves their pages to the standby list; nothing is lost"),
+        crate::i18n::tr("Switching back to a trimmed app may be slower."),
         m.enabled,
     ) {
         set("memory_guard", "enabled", V::Bool(on));

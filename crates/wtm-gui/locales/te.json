@@ -432,7 +432,7 @@
   "apps at a time": "యాప్‌లను నెమ్మదింపజేయి",
   "Memory guard": "మెమరీ గార్డ్",
   "Free memory of the largest apps when RAM runs out": "RAM అయిపోతున్నప్పుడు అతిపెద్ద యాప్‌ల మెమరీని ఖాళీ చేయి",
-  "Moves their pages to the standby list; nothing is lost": "వాటి పేజీలను స్టాండ్‌బై జాబితాకు తరలిస్తుంది; ఏదీ కోల్పోదు",
+  "Switching back to a trimmed app may be slower.": "మెమరీ తగ్గించిన యాప్‌కు తిరిగి మారడానికి ఎక్కువ సమయం పట్టవచ్చు.",
   "When memory use stays above": "మెమరీ వినియోగం దీని కంటే ఎక్కువగా ఉన్నప్పుడు",
   "Swarm warning": "సమూహ హెచ్చరిక",
   "Warn when one program runs": "ఒక ప్రోగ్రామ్ ఇన్ని",

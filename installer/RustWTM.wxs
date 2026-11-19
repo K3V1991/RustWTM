@@ -57,6 +57,21 @@
           <Component Id="LanguageDocumentation">
             <File Id="LanguageGuide" Source="docs\localization.md" KeyPath="yes" />
           </Component>
+          <Component Id="InstallationDocumentation">
+            <File Id="InstallationGuide" Source="docs\installation.md" KeyPath="yes" />
+          </Component>
+          <Component Id="UsageDocumentation">
+            <File Id="UsageGuide" Source="docs\usage.md" KeyPath="yes" />
+          </Component>
+          <Component Id="ConfigurationDocumentation">
+            <File Id="ConfigurationGuide" Source="docs\configuration.md" KeyPath="yes" />
+          </Component>
+          <Component Id="MemoryGuardDocumentation">
+            <File Id="MemoryGuardGuide" Source="docs\memory-guard.md" KeyPath="yes" />
+          </Component>
+          <Component Id="TelegramDocumentation">
+            <File Id="TelegramGuide" Source="docs\telegram.md" KeyPath="yes" />
+          </Component>
         </Directory>
 
         <Component Id="Cli">
@@ -158,6 +173,11 @@
       <ComponentRef Id="LanguageDocumentation" />
       <ComponentRef Id="DockerDocumentation" />
       <ComponentRef Id="TaskManagerDocumentation" />
+      <ComponentRef Id="InstallationDocumentation" />
+      <ComponentRef Id="UsageDocumentation" />
+      <ComponentRef Id="ConfigurationDocumentation" />
+      <ComponentRef Id="MemoryGuardDocumentation" />
+      <ComponentRef Id="TelegramDocumentation" />
       <ComponentRef Id="Cli" />
       <ComponentRef Id="Service" />
       <ComponentRef Id="Readme" />

@@ -14,6 +14,8 @@ name = "rustwtm"
 path = "src/main.rs"
 
 [features]
+# Show the controls for custom builds of the service with Telegram control.
+telegram-control = []
 # Opt-in GPU rendering for local visual review; regular tests stay headless.
 visual-tests = ["egui_kittest/wgpu"]
 

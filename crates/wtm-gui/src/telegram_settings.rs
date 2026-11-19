@@ -40,11 +40,6 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
     let mut commands = Vec::new();
     crate::theme::option_group(ui, crate::i18n::tr("🔔 Telegram bot"));
     ui.scope(|ui| {
-        ui.weak(crate::i18n::tr(
-            "Check on this PC and control it from your phone: status, busiest processes, ports \
-             and services; end, suspend and resume processes; get alerts when the CPU is \
-             overloaded or a program runs hundreds of copies.",
-        ));
         ui.add_space(0.0);
         match data.mode {
             Mode::Service { admin: true, .. } => {}
@@ -175,15 +170,19 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
             "",
             &mut form.notify,
         );
-        crate::theme::option_switch(
-            ui,
-            icon::ADMIN,
-            crate::i18n::tr("Allow ending, suspending and resuming processes and services"),
-            crate::i18n::tr(
-                "Without it the bot only reports; protected Windows processes are never ended",
-            ),
-            &mut form.control,
-        );
+        if cfg!(feature = "telegram-control")
+            || view.original.as_ref().is_some_and(|cfg| cfg.control)
+        {
+            crate::theme::option_switch(
+                ui,
+                icon::ADMIN,
+                crate::i18n::tr("Allow ending, suspending and resuming processes and services"),
+                crate::i18n::tr(
+                    "Without it the bot only reports; protected Windows processes are never ended",
+                ),
+                &mut form.control,
+            );
+        }
         if !form.token.trim().is_empty() && !token_looks_valid(form.token.trim()) {
             crate::theme::colored(
                 ui,
@@ -378,5 +377,22 @@ mod tests {
         }
         assert_eq!(saved.len(), 1);
         assert_eq!(saved[0].chats, [42, 43]);
+    }
+
+    #[test]
+    fn the_control_switch_matches_the_build_profile() {
+        let mut data = admin();
+        data.telegram = Some(Ok(TelegramConfig::default()));
+        let mut view = TelegramView::default();
+        let mut harness = Harness::builder().allow_missing_glyphs().build_ui(|ui| {
+            telegram(ui, &data, &mut view);
+        });
+        harness.run();
+        assert_eq!(
+            harness
+                .query_by_label("Allow ending, suspending and resuming processes and services")
+                .is_some(),
+            cfg!(feature = "telegram-control")
+        );
     }
 }

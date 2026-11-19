@@ -10935,7 +10935,9 @@ o-such-folder",
 
         h.get_by_label("Turn protection on").click();
         h.run_steps(2);
-        assert!(!saved_config(&rx).expect("saved").dry_run);
+        let enforced = saved_config(&rx).expect("saved");
+        assert!(!enforced.dry_run);
+        assert!(!enforced.memory_guard.enabled);
 
         h.get_by_label("Strict").click();
         h.run_steps(2);
@@ -10978,7 +10980,7 @@ o-such-folder",
         );
         assert!(
             h.query_by_label_contains("memory guard above 90% RAM")
-                .is_some()
+                .is_none()
         );
         h.get_all_by_label("Details").next().unwrap().click();
         h.run_steps(2);

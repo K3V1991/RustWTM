@@ -432,7 +432,7 @@
   "apps at a time": "ऐप्स को एक साथ धीमा करें",
   "Memory guard": "मेमोरी गार्ड",
   "Free memory of the largest apps when RAM runs out": "RAM समाप्त होने पर सबसे बड़े ऐप्स की मेमोरी मुक्त करें",
-  "Moves their pages to the standby list; nothing is lost": "उनके पेज स्टैंडबाय सूची में ले जाता है; कुछ भी नष्ट नहीं होता",
+  "Switching back to a trimmed app may be slower.": "जिस ऐप की मेमोरी कम की गई है उस पर वापस जाने में अधिक समय लग सकता है।",
   "When memory use stays above": "जब मेमोरी उपयोग लगातार इससे ऊपर रहे",
   "Swarm warning": "स्वार्म चेतावनी",
   "Warn when one program runs": "चेतावनी दें जब एक प्रोग्राम की",

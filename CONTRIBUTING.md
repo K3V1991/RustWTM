@@ -31,6 +31,9 @@ cargo test --workspace
 
 CI runs the same checks.
 
+When changing Telegram, also verify the reporting-only default, the
+service without Telegram, and the custom control build. [Build profiles](docs/telegram.md)
+
 ## Guidelines
 
 - All `unsafe` code lives in `wtm-sys`. Every `unsafe` block needs a
@@ -45,7 +48,7 @@ CI runs the same checks.
 ## Releasing
 
 1. Update the root `Cargo.toml`, the hardware provider's project version,
-   `Cargo.lock` workspace entries and the README's MSI examples. Move the
+   and `Cargo.lock` workspace entries. Move the
    **Unreleased** changelog entries under a dated version heading.
 2. Run `scripts/ci/verify-release.ps1 -Tag v0.26.1`, substituting the intended
    tag. It refuses a tag that disagrees with the workspace, hardware provider

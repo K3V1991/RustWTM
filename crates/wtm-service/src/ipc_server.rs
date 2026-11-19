@@ -418,14 +418,21 @@ fn serve(mut conn: PipeConnection, shared: &Shared, engine: &Sender<EngineMsg>) 
             Request::GetTelegram | Request::SetTelegram(_) | Request::TestTelegram if !admin => {
                 Response::Error("administrator rights required (run the client elevated)".into())
             }
+            #[cfg(not(feature = "telegram"))]
+            Request::GetTelegram | Request::SetTelegram(_) | Request::TestTelegram => {
+                Response::Error("Telegram support is disabled in this service build".into())
+            }
+            #[cfg(feature = "telegram")]
             Request::GetTelegram => match telegram_path(shared) {
                 Some(path) => match wtm_policy::TelegramConfig::load(&path) {
-                    Ok(c) => Response::Telegram(c),
+                    Ok(c) => Response::Telegram(crate::telegram::effective_config(c)),
                     Err(e) => Response::Error(e),
                 },
                 None => Response::Error("configuration is not available yet".into()),
             },
+            #[cfg(feature = "telegram")]
             Request::SetTelegram(cfg) => set_telegram(shared, &cfg),
+            #[cfg(feature = "telegram")]
             Request::TestTelegram => match telegram_path(shared)
                 .ok_or_else(|| "configuration is not available yet".to_owned())
                 .and_then(|p| wtm_policy::TelegramConfig::load(&p))
@@ -601,13 +608,18 @@ fn set_config(shared: &Shared, toml: &str) -> Response {
 }
 
 /// `telegram.toml` next to the configuration file.
+#[cfg(feature = "telegram")]
 fn telegram_path(shared: &Shared) -> Option<std::path::PathBuf> {
     config_path(shared).map(|p| p.with_file_name("telegram.toml"))
 }
 
 /// Validates `cfg` and replaces `telegram.toml`, readable only by SYSTEM
 /// and administrators before it gets its name.
+#[cfg(feature = "telegram")]
 fn set_telegram(shared: &Shared, cfg: &wtm_policy::TelegramConfig) -> Response {
+    if cfg.control && !cfg!(feature = "telegram-control") {
+        return Response::Error("Telegram control is disabled in this service build".into());
+    }
     if let Err(e) = cfg.validate() {
         return Response::Error(e);
     }
@@ -811,7 +823,13 @@ mod tests {
         let refusal = error(call(&mut f, &control).unwrap());
         let expected = if admin { "stopping" } else { "administrator" };
         assert!(refusal.contains(expected), "{refusal}");
-        let expected = if admin { no_config } else { "administrator" };
+        let expected = if !admin {
+            "administrator"
+        } else if cfg!(feature = "telegram") {
+            no_config
+        } else {
+            "Telegram support is disabled"
+        };
         let set = Request::SetTelegram(wtm_policy::TelegramConfig::default());
         for request in [Request::GetTelegram, set, Request::TestTelegram] {
             let refusal = error(call(&mut f, &request).unwrap());
@@ -848,14 +866,16 @@ mod tests {
         );
         assert!(read_frame::<Response>(&mut f).is_err(), "closed");
 
-        // A different protocol version gets the server's version, then EOF.
-        let mut f = open(&pipe);
-        let r = call(&mut f, &Request::Hello { version: 0 }).unwrap();
-        assert!(
-            matches!(r, Response::Hello { version, .. } if version == PROTOCOL_VERSION),
-            "{r:?}"
-        );
-        assert!(call(&mut f, &Request::Status).is_err(), "closed");
+        // Previous and newer clients receive the server's version, then EOF.
+        for version in [0, PROTOCOL_VERSION - 1, PROTOCOL_VERSION + 1] {
+            let mut f = open(&pipe);
+            let r = call(&mut f, &Request::Hello { version }).unwrap();
+            assert!(
+                matches!(r, Response::Hello { version, .. } if version == PROTOCOL_VERSION),
+                "{r:?}"
+            );
+            assert!(call(&mut f, &Request::Status).is_err(), "closed");
+        }
 
         // A client that vanishes before the handshake reply does no harm.
         let mut f = open(&pipe);
@@ -867,7 +887,11 @@ mod tests {
         )
         .unwrap();
         drop(f);
-        hello(&pipe);
+        let (mut f, _) = hello(&pipe);
+        assert!(matches!(
+            call(&mut f, &Request::Status),
+            Ok(Response::Status(_))
+        ));
         server.shutdown();
     }
 
@@ -1068,6 +1092,16 @@ mod tests {
         assert!(error(set_config(&shared, DEFAULT_CONFIG_TOML)).starts_with("writing"));
         assert!(!path.with_extension("toml.new").exists());
         std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[cfg(all(feature = "telegram", not(feature = "telegram-control")))]
+    #[test]
+    fn reporting_build_rejects_enabling_telegram_control_over_ipc() {
+        let shared = Shared::default();
+        let mut cfg = wtm_policy::TelegramConfig::default();
+        assert!(error(set_telegram(&shared, &cfg)).contains("configuration is not available"));
+        cfg.control = true;
+        assert!(error(set_telegram(&shared, &cfg)).contains("Telegram control is disabled"));
     }
 
     #[test]

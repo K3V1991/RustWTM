@@ -30,12 +30,15 @@ the GUI frame or the governor's process-sampling loop. Discovery/update is
 roughly every two seconds; device calls can take longer. Samples older than
 ten seconds are marked stale and cannot authorize software fan control.
 
-CPU/motherboard access depends on administrator rights, supported chips and
-hardware-access driver compatibility. The helper uses LibreHardwareMonitor's
-normal access path; RustWTM does not install a separate driver package or
-change Windows security settings. Restart the application/service after a
-provider failure or after adding the helper. Mixed 0.12/0.13 clients and services
-are rejected by the protocol handshake; update them together (IPC version 10).
+The pinned LibreHardwareMonitor library uses PawnIO for CPU and motherboard
+features that need kernel access. The upstream project replaced WinRing0
+before 0.9.6. The RustWTM ZIP and MSI ship the user-mode helper and library
+notices. PawnIO-dependent sensors need a compatible PawnIO driver already
+installed, a supported chip and administrator access. Missing readings stay
+unavailable. Restart the application or service after adding the helper or
+after a provider failure.
+[Upstream driver change](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/pull/1857) ·
+[Pinned PawnIO source](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/3d331e3370efb858411f19511373eff65a218701/LibreHardwareMonitorLib/PawnIo/PawnIo.cs)
 
 ## Controls
 
