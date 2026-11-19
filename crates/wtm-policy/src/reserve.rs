@@ -66,9 +66,19 @@ impl ReserveConfig {
 
     /// Whether a process is moved off the rescue core while it is engaged.
     pub fn confines(&self, pid: u32, name: &str) -> bool {
-        protection_reason(pid, name).is_none()
-            && !OWN_IMAGES.iter().any(|n| n.eq_ignore_ascii_case(name))
-            && !self.exempt.iter().any(|g| glob_match(g, name))
+        !Self::untouchable(pid, name) && !self.exempts(name)
+    }
+
+    /// Protected processes and RustWTM itself: never placed on cores.
+    pub fn untouchable(pid: u32, name: &str) -> bool {
+        protection_reason(pid, name).is_some()
+            || OWN_IMAGES.iter().any(|n| n.eq_ignore_ascii_case(name))
+    }
+
+    /// Programs the settings let keep every core while others are kept
+    /// off the rescue core or reserved cores.
+    pub fn exempts(&self, name: &str) -> bool {
+        self.exempt.iter().any(|g| glob_match(g, name))
     }
 }
 

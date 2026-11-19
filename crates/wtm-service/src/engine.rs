@@ -35,6 +35,8 @@ pub struct Paths {
     pub telegram: PathBuf,
     /// The power plan game mode replaced, while it is replaced.
     pub power_plan: PathBuf,
+    /// Processes placed on cores, so a restart gives them every core back.
+    pub placement: PathBuf,
     /// Named pipe served for clients (overridden in tests).
     pub pipe: String,
     /// Where blocked programs are registered.
@@ -60,6 +62,7 @@ impl Paths {
             history: data_dir.join("history.sqlite"),
             telegram: data_dir.join("telegram.toml"),
             power_plan: data_dir.join("power-plan.txt"),
+            placement: data_dir.join("placement.json"),
             pipe: wtm_ipc::PIPE_NAME.to_owned(),
             block_root: BlockRoot::System,
             block_debugger: block_debugger(),
@@ -302,6 +305,8 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         config.dry_run,
         shared.events.clone(),
     );
+    rescue.recover(&paths.placement);
+    rescue.set_placement(config.placement());
     let mut device_keys =
         crate::device_keys::Keys::new(crate::device_keys::Worker::new(crate::device_keys::Windows));
     let mut history = match History::open(&paths.history) {
@@ -472,6 +477,7 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
                         }
                     }
                     rescue.configure(new.reserve.clone(), new.dry_run);
+                    rescue.set_placement(new.placement());
                     game_mode.set_config(new.game_mode.clone());
                     watch_starts.store(watches_starts(&new), Ordering::Relaxed);
                     sync_blocks(blocker.as_ref(), &new, &shared.events);
@@ -511,7 +517,9 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         live.clear();
         live.extend(snap.processes.iter().map(|p| (p.pid, p.create_time)));
         executor.forget_exited(&live);
-        rescue.tick(Instant::now(), &snap, &live);
+        rescue.tick_with(Instant::now(), &snap, &live, &mut |p, d| {
+            lookup(&mut paths_cache, &mut cmdline_cache, p, d)
+        });
         if snap.interval.is_some() {
             let mut recent = shared
                 .recent

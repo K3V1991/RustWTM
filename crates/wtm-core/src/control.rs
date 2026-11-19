@@ -156,6 +156,97 @@ pub fn release_cpu_sets(target: &ProcessRef, ids: &[u32]) -> ControlResult<()> {
     Ok(())
 }
 
+/// What [`place_cpu_sets`] and [`place_affinity`] did.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Placed {
+    /// Confined; for hard affinity, the mask written and the one to put
+    /// back.
+    Done { affinity: Option<(u64, u64)> },
+    /// The process chose its processors itself; nothing was changed.
+    OwnChoice,
+}
+
+fn sorted(ids: &[u32]) -> Vec<u32> {
+    let mut ids = ids.to_vec();
+    ids.sort_unstable();
+    ids
+}
+
+/// Confines `target` to the CPU Sets `ids`. `ours` is what the service last
+/// gave it, if anything. Changes nothing when the process chose processors
+/// itself: CPU Sets other than `ours`, or an affinity narrower than its
+/// processor group, which Windows honours over CPU Sets.
+pub fn place_cpu_sets(
+    target: &ProcessRef,
+    ids: &[u32],
+    ours: Option<&[u32]>,
+) -> ControlResult<Placed> {
+    let h = open_controlled(target, Access::SET_LIMITED_INFORMATION)?;
+    let current = sorted(&sys(target.pid, h.default_cpu_sets())?);
+    if current != sorted(ours.unwrap_or_default()) {
+        return Ok(Placed::OwnChoice);
+    }
+    let (mask, system) = sys(target.pid, h.affinity())?;
+    if mask != system {
+        return Ok(Placed::OwnChoice);
+    }
+    sys(target.pid, h.set_default_cpu_sets(ids))?;
+    Ok(Placed::Done { affinity: None })
+}
+
+/// Confines `target` with hard affinity to `mask` in processor `group`.
+/// `ours` is the mask the service last gave it and the one to put back.
+/// A process with an affinity of its own, or CPU Sets of its own, is left
+/// alone; one that already has `mask` inherited it from a parent the
+/// service confined, and gets its group's whole mask back on release.
+pub fn place_affinity(
+    target: &ProcessRef,
+    group: u16,
+    mask: u64,
+    ours: Option<(u64, u64)>,
+) -> ControlResult<Placed> {
+    let h = open_controlled(target, Access::SET_INFORMATION)?;
+    let groups = sys(target.pid, h.groups())?;
+    if groups != [group] {
+        return Err(ControlError::Affinity {
+            pid: target.pid,
+            reason: format!("runs in processor groups {groups:?}, not only in group {group}"),
+        });
+    }
+    let (current, system) = sys(target.pid, h.affinity())?;
+    let original = match ours {
+        Some((ours, original)) if current == ours => original,
+        Some(_) => return Ok(Placed::OwnChoice),
+        None if current == system || current == mask => system,
+        None => return Ok(Placed::OwnChoice),
+    };
+    if ours.is_none() && !sys(target.pid, h.default_cpu_sets())?.is_empty() {
+        return Ok(Placed::OwnChoice);
+    }
+    if mask & system == 0 {
+        return Err(ControlError::Affinity {
+            pid: target.pid,
+            reason: "none of the chosen processors is available to it".into(),
+        });
+    }
+    let written = mask & system;
+    sys(target.pid, h.set_affinity(written))?;
+    Ok(Placed::Done {
+        affinity: Some((written, original)),
+    })
+}
+
+/// Undoes [`place_affinity`], unless the process has since chosen another
+/// affinity itself.
+pub fn release_affinity(target: &ProcessRef, ours: u64, original: u64) -> ControlResult<()> {
+    let h = open_verified(target, Access::SET_INFORMATION)?;
+    let (current, _) = sys(target.pid, h.affinity())?;
+    if current == ours {
+        sys(target.pid, h.set_affinity(original))?;
+    }
+    Ok(())
+}
+
 fn open_verified(target: &ProcessRef, access: Access) -> ControlResult<ProcessHandle> {
     let pid = target.pid;
     let handle = ProcessHandle::open(pid, access | Access::QUERY)

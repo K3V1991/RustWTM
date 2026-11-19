@@ -135,14 +135,19 @@ pub(crate) fn matches_every_program(pattern: &str, probes: &[&str]) -> bool {
 
 impl Matcher {
     /// The image-name part, which needs nothing but the snapshot entry.
-    fn name_matches(&self, p: &ProcessInfo) -> bool {
+    pub(crate) fn name_matches(&self, p: &ProcessInfo) -> bool {
         self.name
             .as_deref()
             .is_none_or(|name| glob_match(name, &p.name))
     }
 
     /// The path and command-line parts; `i` is the process's index.
-    fn details_match(&self, i: usize, p: &ProcessInfo, details: &mut Details<'_>) -> bool {
+    pub(crate) fn details_match(
+        &self,
+        i: usize,
+        p: &ProcessInfo,
+        details: &mut Details<'_>,
+    ) -> bool {
         if let Some(pattern) = &self.path
             && !details
                 .get(i, p, Detail::Path)
@@ -160,7 +165,7 @@ impl Matcher {
 
 /// Paths and command lines resolved during one evaluation, so several rules
 /// looking at the same process ask (and allocate) only once.
-struct Details<'a> {
+pub(crate) struct Details<'a> {
     lookup: &'a mut dyn FnMut(&ProcessInfo, Detail) -> Option<String>,
     procs: usize,
     /// Per process: path, command line; `None` while not asked yet. Only
@@ -168,7 +173,18 @@ struct Details<'a> {
     resolved: Vec<[Option<Option<String>>; 2]>,
 }
 
-impl Details<'_> {
+impl<'a> Details<'a> {
+    pub(crate) fn new(
+        lookup: &'a mut dyn FnMut(&ProcessInfo, Detail) -> Option<String>,
+        procs: usize,
+    ) -> Self {
+        Self {
+            lookup,
+            procs,
+            resolved: Vec::new(),
+        }
+    }
+
     fn get(&mut self, i: usize, p: &ProcessInfo, d: Detail) -> Option<&str> {
         if self.resolved.is_empty() {
             self.resolved.resize(self.procs, [None, None]);

@@ -1,76 +1,250 @@
-//! Applies the rescue core: while the machine is overloaded, every ordinary
-//! process is confined to the other cores with CPU Sets, so RustWTM and
-//! Windows always have a core to run on. Released when the load recovers.
+//! Applies core placement: the rescue core, which keeps a core free for
+//! RustWTM and Windows while the machine is overloaded, and the `[[pin]]`,
+//! `[[separate]]` and `[[reserve_cores]]` entries. One plan
+//! ([`wtm_policy::Placer`]) says where each process runs; this writes it
+//! with CPU Sets (hard affinity for `strict` entries), gives processes every
+//! core back when the plan lets them go, and records each write so that a
+//! crashed service's confinements are undone when it starts again.
 
 use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
 use std::time::Instant;
 
-use wtm_core::Snapshot;
-use wtm_core::control::{self, ProcessRef};
-use wtm_core::cpu::RescueSplit;
+use serde::{Deserialize, Serialize};
+use wtm_core::control::{self, Placed, ProcessRef};
+use wtm_core::cpu::{RescueSplit, Topology};
+use wtm_core::{ProcessInfo, Snapshot};
 use wtm_ipc::RescueStatus;
-use wtm_policy::{RescueCore, RescueStep, ReserveConfig};
+use wtm_policy::{
+    CoreSpec, Detail, Inputs, Placement, PlacementConfig, Placer, RescueCore, RescueStep,
+    Reservation, ReserveConfig, Split, Why,
+};
 
 use crate::events::EventLog;
 
-/// Processes confined per tick, so a huge process count cannot stall the
+/// Processes placed per tick, so a huge process count cannot stall the
 /// engine; the rest follow on the next ticks.
 const PER_TICK: usize = 500;
 
 type Key = (u32, i64);
 
+/// What the service gave a process, to compare and to undo.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Written {
+    pub target: ProcessRef,
+    /// CPU Set ids, ascending.
+    pub cpus: Vec<u32>,
+    /// Hard affinity: the mask written and the one to put back.
+    pub affinity: Option<(u64, u64)>,
+    /// Hard affinity was asked for; the masks are known once written.
+    pub strict: bool,
+    /// Moved off the rescue core (among other reasons, perhaps).
+    pub rescue: bool,
+    /// Placed for a reason besides the rescue core.
+    pub entries: bool,
+}
+
+/// How a placement is written.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum How {
+    CpuSets,
+    /// Hard affinity in one processor group.
+    Affinity {
+        group: u16,
+        mask: u64,
+    },
+}
+
+/// Writes placements; tests pass one that records instead.
+pub trait CpuWriter: Send {
+    /// Confines `target` to `cpus`; `ours` is what was last written to it.
+    fn place(
+        &mut self,
+        target: &ProcessRef,
+        cpus: &[u32],
+        how: How,
+        ours: Option<&Written>,
+    ) -> Result<Placed, String>;
+    /// Gives `target` back what `written` took, unless it has changed
+    /// its processors itself since.
+    fn release(&mut self, written: &Written) -> Result<(), String>;
+}
+
+/// The real thing.
+struct System;
+
+impl CpuWriter for System {
+    fn place(
+        &mut self,
+        target: &ProcessRef,
+        cpus: &[u32],
+        how: How,
+        ours: Option<&Written>,
+    ) -> Result<Placed, String> {
+        match how {
+            How::CpuSets => control::place_cpu_sets(
+                target,
+                cpus,
+                ours.filter(|w| !w.strict).map(|w| w.cpus.as_slice()),
+            ),
+            How::Affinity { group, mask } => {
+                control::place_affinity(target, group, mask, ours.and_then(|w| w.affinity))
+            }
+        }
+        .map_err(|e| e.to_string())
+    }
+
+    fn release(&mut self, written: &Written) -> Result<(), String> {
+        match (written.strict, written.affinity) {
+            (true, Some((ours, original))) => {
+                control::release_affinity(&written.target, ours, original)
+            }
+            // Recorded before a write that never completed.
+            (true, None) => Ok(()),
+            (false, _) => control::release_cpu_sets(&written.target, &written.cpus),
+        }
+        .map_err(|e| e.to_string())
+    }
+}
+
+/// What was last said about the plan, so each change is said once.
+#[derive(Debug, Default)]
+struct Reported {
+    splits: Vec<Split>,
+    reservations: Vec<Reservation>,
+    notes: Vec<String>,
+}
+
 pub struct Rescue {
     policy: RescueCore,
+    topology: Option<Topology>,
     split: Option<RescueSplit>,
+    placer: Placer,
     dry_run: bool,
     events: EventLog,
-    confined: HashMap<Key, ProcessRef>,
-    /// Refused, or already confined by their own choice: left alone.
-    skipped: HashSet<Key>,
+    writer: Box<dyn CpuWriter>,
+    written: HashMap<Key, Written>,
+    /// Refused, or confined by their own choice: left alone.
+    own: HashSet<Key>,
+    /// Where writes are recorded; `None` in tests that need no record.
+    record: Option<PathBuf>,
+    reported: Reported,
 }
 
 impl Rescue {
     pub fn new(cfg: ReserveConfig, dry_run: bool, events: EventLog) -> Self {
-        let split = wtm_core::cpu::topology()
-            .ok()
-            .and_then(|t| t.rescue_split());
+        Self::with(
+            cfg,
+            dry_run,
+            events,
+            wtm_core::cpu::topology().ok(),
+            Box::new(System),
+        )
+    }
+
+    fn with(
+        cfg: ReserveConfig,
+        dry_run: bool,
+        events: EventLog,
+        topology: Option<Topology>,
+        writer: Box<dyn CpuWriter>,
+    ) -> Self {
+        let split = topology.as_ref().and_then(Topology::rescue_split);
         if split.is_none() && cfg.rescue_core {
             events.warn(None, "rescue core unavailable on this processor layout");
         }
         Self {
             policy: RescueCore::new(cfg),
+            topology,
             split,
+            placer: Placer::default(),
             dry_run,
             events,
-            confined: HashMap::new(),
-            skipped: HashSet::new(),
+            writer,
+            written: HashMap::new(),
+            own: HashSet::new(),
+            record: None,
+            reported: Reported::default(),
+        }
+    }
+
+    /// Gives back what a previous run recorded and did not undo (it
+    /// crashed or was killed), then records this run's writes at `path`.
+    pub fn recover(&mut self, path: &Path) {
+        let left: Vec<Written> = std::fs::read(path)
+            .ok()
+            .and_then(|bytes| serde_json::from_slice(&bytes).ok())
+            .unwrap_or_default();
+        let mut given_back = 0;
+        for w in &left {
+            // The creation time in `target` makes a reused PID fail.
+            if self.writer.release(w).is_ok() {
+                given_back += 1;
+            }
+        }
+        if given_back > 0 {
+            self.events.info(
+                None,
+                format!("every core given back to {given_back} apps placed before a restart"),
+            );
+        }
+        self.record = Some(path.to_owned());
+        self.save();
+    }
+
+    /// Writes the record of what is placed now.
+    fn save(&self) {
+        let Some(path) = &self.record else {
+            return;
+        };
+        let written: Vec<&Written> = self.written.values().collect();
+        let result = serde_json::to_vec(&written)
+            .map_err(std::io::Error::other)
+            .and_then(|bytes| {
+                let temp = path.with_extension("json.tmp");
+                std::fs::write(&temp, bytes)?;
+                std::fs::rename(&temp, path)
+            });
+        if let Err(e) = result {
+            tracing::warn!(error = %e, "placement record not written");
         }
     }
 
     pub fn configure(&mut self, cfg: ReserveConfig, dry_run: bool) {
-        if dry_run != self.dry_run && self.policy.engaged() {
-            // Hand the core back under the old mode, engage afresh under the new.
-            self.policy.set_config(ReserveConfig {
-                rescue_core: false,
-                ..cfg.clone()
-            });
-            self.policy.tick(Instant::now(), 0.0);
+        if dry_run != self.dry_run {
+            if self.policy.engaged() {
+                // Hand the core back under the old mode, engage afresh under the new.
+                self.policy.set_config(ReserveConfig {
+                    rescue_core: false,
+                    ..cfg.clone()
+                });
+                self.policy.tick(Instant::now(), 0.0);
+            }
             self.release_all("configuration changed");
         }
         self.dry_run = dry_run;
         self.policy.set_config(cfg);
         // Programs the new settings leave alone (newly exempt) get every
         // core back now, not when the load recovers.
-        if let Some(split) = &self.split {
-            let cfg = self.policy.config();
-            self.confined.retain(|_, t| {
-                let keep = cfg.confines(t.pid, &t.name);
-                if !keep {
-                    let _ = control::release_cpu_sets(t, &split.others);
-                }
-                keep
-            });
+        let cfg = self.policy.config().clone();
+        let freed: Vec<Key> = self
+            .written
+            .iter()
+            .filter(|(_, w)| w.rescue && !w.entries && !cfg.confines(w.target.pid, &w.target.name))
+            .map(|(k, _)| *k)
+            .collect();
+        for key in freed {
+            if let Some(w) = self.written.remove(&key) {
+                let _ = self.writer.release(&w);
+            }
         }
+        self.save();
+    }
+
+    /// Replaces the `[[pin]]`, `[[separate]]` and `[[reserve_cores]]`
+    /// entries; the next tick applies them.
+    pub fn set_placement(&mut self, config: PlacementConfig) {
+        self.placer.set_config(config);
     }
 
     /// What clients show while the rescue core is engaged.
@@ -78,83 +252,311 @@ impl Rescue {
         let split = self.split.as_ref().filter(|_| self.policy.engaged())?;
         Some(RescueStatus {
             cpus: split.reserved_indices.clone(),
-            moved: self.confined.len(),
+            moved: self.written.values().filter(|w| w.rescue).count(),
         })
     }
 
     /// `live` holds the processes running in `snap`.
+    #[cfg(test)]
     pub fn tick(&mut self, now: Instant, snap: &Snapshot, live: &HashSet<Key>) {
-        let Some(split) = &self.split else {
+        self.tick_with(now, snap, live, &mut |_, _| None);
+    }
+
+    /// As [`tick`](Self::tick); `lookup` resolves image paths and command
+    /// lines for pins that match on them.
+    pub fn tick_with(
+        &mut self,
+        now: Instant,
+        snap: &Snapshot,
+        live: &HashSet<Key>,
+        lookup: &mut dyn FnMut(&ProcessInfo, Detail) -> Option<String>,
+    ) {
+        let Some(topology) = self.topology.clone() else {
             return;
         };
-        match self.policy.tick(now, snap.system.cpu_percent) {
-            Some(RescueStep::Engage) => self.events.alert(
-                None,
-                format!(
-                    "CPU overloaded: {} {} free for RustWTM and Windows",
-                    cpu_names(split),
-                    if self.dry_run {
-                        "would be kept (dry run)"
-                    } else {
-                        "kept"
-                    }
-                ),
-            ),
-            Some(RescueStep::Release) => self.release_all("load recovered"),
-            None => {}
-        }
-        self.confined.retain(|k, _| live.contains(k));
-        self.skipped.retain(|k| live.contains(k));
-        if !self.policy.engaged() || self.dry_run {
-            return;
-        }
-        let Some(split) = &self.split else {
-            return;
+        let step = match &self.split {
+            Some(split) => {
+                let step = self.policy.tick(now, snap.system.cpu_percent);
+                if step == Some(RescueStep::Engage) {
+                    self.events.alert(
+                        None,
+                        format!(
+                            "CPU overloaded: {} {} free for RustWTM and Windows",
+                            cpu_names(split),
+                            if self.dry_run {
+                                "would be kept (dry run)"
+                            } else {
+                                "kept"
+                            }
+                        ),
+                    );
+                }
+                step
+            }
+            None => None,
         };
-        let cfg = self.policy.config();
-        let fresh: Vec<_> = snap
+        let before = self.written.len();
+        self.written.retain(|k, _| live.contains(k));
+        self.own.retain(|k| live.contains(k));
+        let mut changed = self.written.len() != before;
+
+        let engaged = self.policy.engaged() && !self.dry_run;
+        let rescue: Option<Vec<u32>> = self
+            .split
+            .as_ref()
+            .filter(|_| engaged)
+            .map(|s| s.reserved.clone());
+        let cfg = self.policy.config().clone();
+        let untouchable = |p: &ProcessInfo| ReserveConfig::untouchable(p.pid, &p.name);
+        let keeps_all = |p: &ProcessInfo| cfg.exempts(&p.name);
+        let inputs = Inputs {
+            now,
+            topology: &topology,
+            processes: &snap.processes,
+            own_choice: &self.own,
+            rescue: rescue.as_deref(),
+            untouchable: &untouchable,
+            keeps_all: &keeps_all,
+        };
+        let plan = self.placer.plan(&inputs, lookup);
+        self.report(&topology, &plan.splits, &plan.reservations, &plan.notes);
+        if self.dry_run {
+            changed |= !self.written.is_empty();
+            self.release_all("dry run");
+            if changed {
+                self.save();
+            }
+            return;
+        }
+
+        // Let go of what the plan no longer places.
+        let mut handed_back = 0;
+        let gone: Vec<Key> = self
+            .written
+            .keys()
+            .filter(|k| !plan.placements.contains_key(k))
+            .copied()
+            .collect();
+        for key in gone {
+            if let Some(w) = self.written.remove(&key) {
+                handed_back += usize::from(w.rescue);
+                let _ = self.writer.release(&w);
+                changed = true;
+            }
+        }
+
+        let by_key: HashMap<Key, &ProcessInfo> = snap
             .processes
             .iter()
-            .filter(|p| {
-                let key = (p.pid, p.create_time);
-                !self.confined.contains_key(&key)
-                    && !self.skipped.contains(&key)
-                    && cfg.confines(p.pid, &p.name)
-            })
-            .take(PER_TICK)
-            .map(ProcessRef::from)
+            .map(|p| ((p.pid, p.create_time), p))
             .collect();
-        for target in fresh {
-            let key = (target.pid, target.create_time);
-            match control::confine_cpu_sets(&target, &split.others) {
-                Ok(true) => {
-                    self.confined.insert(key, target);
+        let mut keys: Vec<&Key> = plan.placements.keys().collect();
+        keys.sort_unstable();
+        let mut writes = 0;
+        for key in keys {
+            let placement = &plan.placements[key];
+            if self.own.contains(key) {
+                continue;
+            }
+            let how = how(&topology, placement);
+            let wanted = written(by_key[key], placement, how);
+            // The same processors for other reasons: only the record changes.
+            if let Some(w) = self.written.get_mut(key)
+                && w.cpus == wanted.cpus
+                && w.strict == wanted.strict
+            {
+                if (w.rescue, w.entries) != (wanted.rescue, wanted.entries) {
+                    (w.rescue, w.entries) = (wanted.rescue, wanted.entries);
+                    changed = true;
                 }
-                Ok(false) | Err(_) => {
-                    self.skipped.insert(key);
+                continue;
+            }
+            let ours = self.written.get(key);
+            if writes >= PER_TICK {
+                break;
+            }
+            writes += 1;
+            changed = true;
+            // Switching between CPU Sets and affinity: undo the other first.
+            let mut ours = ours.cloned();
+            if ours.as_ref().is_some_and(|w| w.strict != wanted.strict) {
+                if let Some(w) = self.written.remove(key) {
+                    let _ = self.writer.release(&w);
+                }
+                ours = None;
+            }
+            // Recorded before it is written, so a crash in between still
+            // gives it back.
+            self.written.insert(
+                *key,
+                Written {
+                    affinity: ours.as_ref().and_then(|w| w.affinity),
+                    ..wanted.clone()
+                },
+            );
+            self.save();
+            match self
+                .writer
+                .place(&wanted.target, &wanted.cpus, how, ours.as_ref())
+            {
+                Ok(Placed::Done { affinity }) => {
+                    self.written.insert(*key, Written { affinity, ..wanted });
+                }
+                Ok(Placed::OwnChoice) | Err(_) => {
+                    self.written.remove(key);
+                    self.own.insert(*key);
                 }
             }
         }
+        if changed {
+            self.save();
+        }
+        if step == Some(RescueStep::Release)
+            && let Some(split) = &self.split
+        {
+            self.events.info(
+                None,
+                format!(
+                    "load recovered: {} handed back to {handed_back} apps",
+                    cpu_names(split)
+                ),
+            );
+        }
     }
 
-    /// Hands the core back to every process moved off it.
-    pub fn release_all(&mut self, reason: &str) {
-        self.skipped.clear();
-        let Some(split) = &self.split else {
-            return;
+    /// Says what changed in the plan: splits and reservations that start,
+    /// change or end, and entries that cannot be met.
+    fn report(
+        &mut self,
+        topology: &Topology,
+        splits: &[Split],
+        reservations: &[Reservation],
+        notes: &[String],
+    ) {
+        let would = if self.dry_run { " (dry run)" } else { "" };
+        for s in splits {
+            if !self.reported.splits.contains(s) {
+                let parts: Vec<String> = s
+                    .parts
+                    .iter()
+                    .map(|(app, cpus)| format!("{app} on CPUs {}", numbers(topology, cpus)))
+                    .collect();
+                self.events.info(
+                    None,
+                    format!("separate '{}'{would}: {}", s.entry, parts.join(", ")),
+                );
+            }
+        }
+        for s in &self.reported.splits {
+            if !splits.iter().any(|n| n.entry == s.entry) {
+                self.events.info(
+                    None,
+                    format!(
+                        "separate '{}' ended: every app has every core back",
+                        s.entry
+                    ),
+                );
+            }
+        }
+        for r in reservations {
+            if !self.reported.reservations.contains(r) {
+                self.events.info(
+                    None,
+                    format!(
+                        "reserve_cores '{}'{would}: CPUs {} kept for its app",
+                        r.entry,
+                        numbers(topology, &r.cpus)
+                    ),
+                );
+            }
+        }
+        for r in &self.reported.reservations {
+            if !reservations.iter().any(|n| n.entry == r.entry) {
+                self.events
+                    .info(None, format!("reserve_cores '{}' released", r.entry));
+            }
+        }
+        for note in notes {
+            if !self.reported.notes.contains(note) {
+                self.events.warn(None, note.clone());
+            }
+        }
+        self.reported = Reported {
+            splits: splits.to_vec(),
+            reservations: reservations.to_vec(),
+            notes: notes.to_vec(),
         };
-        if self.confined.is_empty() {
+    }
+
+    /// Gives every placed process every core back.
+    pub fn release_all(&mut self, reason: &str) {
+        self.own.clear();
+        if self.written.is_empty() {
             return;
         }
-        let count = self.confined.len();
-        for (_, target) in self.confined.drain() {
-            let _ = control::release_cpu_sets(&target, &split.others);
+        let mut rescued = 0;
+        let count = self.written.len();
+        for (_, w) in self.written.drain() {
+            rescued += usize::from(w.rescue);
+            let _ = self.writer.release(&w);
         }
-        self.events.info(
-            None,
-            format!("{reason}: {} handed back to {count} apps", cpu_names(split)),
-        );
+        self.save();
+        match &self.split {
+            Some(split) if rescued == count => self.events.info(
+                None,
+                format!("{reason}: {} handed back to {count} apps", cpu_names(split)),
+            ),
+            _ => self.events.info(
+                None,
+                format!("{reason}: every core given back to {count} apps"),
+            ),
+        }
     }
+}
+
+/// How `placement` is written: hard affinity when it asks for it and its
+/// processors share a group, CPU Sets otherwise.
+fn how(topology: &Topology, placement: &Placement) -> How {
+    if !placement.strict {
+        return How::CpuSets;
+    }
+    let cpus: Vec<_> = topology
+        .cpus
+        .iter()
+        .filter(|c| placement.cpus.contains(&c.id) && c.index < 64)
+        .collect();
+    match cpus.first() {
+        Some(first) if cpus.iter().all(|c| c.group == first.group) => How::Affinity {
+            group: first.group,
+            mask: cpus.iter().fold(0u64, |m, c| m | (1u64 << c.index)),
+        },
+        _ => How::CpuSets,
+    }
+}
+
+/// What writing `placement` to `p` records.
+fn written(p: &ProcessInfo, placement: &Placement, how: How) -> Written {
+    Written {
+        target: ProcessRef::from(p),
+        cpus: placement.cpus.clone(),
+        affinity: None,
+        strict: matches!(how, How::Affinity { .. }),
+        rescue: placement.why.contains(&Why::Rescue),
+        entries: placement.why.iter().any(|w| *w != Why::Rescue),
+    }
+}
+
+/// CPU Set ids as processor numbers across groups, ranges joined: `0-3,8`.
+fn numbers(topology: &Topology, ids: &[u32]) -> String {
+    let mut all: Vec<_> = topology.cpus.iter().collect();
+    all.sort_by_key(|c| (c.group, c.index));
+    let list = all
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| ids.contains(&c.id))
+        .filter_map(|(i, _)| u16::try_from(i).ok())
+        .collect();
+    CoreSpec::List(list).to_string()
 }
 
 fn cpu_names(split: &RescueSplit) -> String {
@@ -307,5 +709,408 @@ mod tests {
         }
         let _ = child.kill();
         let _ = child.wait();
+    }
+}
+
+#[cfg(test)]
+mod placement_tests {
+    use super::*;
+    use std::sync::{Arc, Mutex};
+    use std::time::Duration;
+    use wtm_core::cpu::LogicalCpu;
+
+    /// Records what would be written; refuses the PIDs in `own`.
+    #[derive(Clone, Default)]
+    struct Fake {
+        log: Arc<Mutex<Vec<String>>>,
+        own: Arc<Mutex<HashSet<u32>>>,
+    }
+
+    impl Fake {
+        fn take(&self) -> Vec<String> {
+            std::mem::take(&mut *self.log.lock().unwrap())
+        }
+    }
+
+    impl CpuWriter for Fake {
+        fn place(
+            &mut self,
+            target: &ProcessRef,
+            cpus: &[u32],
+            how: How,
+            ours: Option<&Written>,
+        ) -> Result<Placed, String> {
+            if self.own.lock().unwrap().contains(&target.pid) {
+                return Ok(Placed::OwnChoice);
+            }
+            let again = if ours.is_some() { " again" } else { "" };
+            self.log
+                .lock()
+                .unwrap()
+                .push(format!("place {}{again} {cpus:?} {how:?}", target.pid));
+            Ok(Placed::Done {
+                affinity: match how {
+                    How::Affinity { mask, .. } => Some((mask, 0xfff)),
+                    How::CpuSets => None,
+                },
+            })
+        }
+
+        fn release(&mut self, written: &Written) -> Result<(), String> {
+            self.log
+                .lock()
+                .unwrap()
+                .push(format!("release {}", written.target.pid));
+            Ok(())
+        }
+    }
+
+    /// Four P-cores with two threads each (ids 256-263), four E-cores
+    /// (ids 264-267).
+    fn hybrid() -> Topology {
+        let cpu = |i: u8, core: u8, class: u8| LogicalCpu {
+            id: 256 + u32::from(i),
+            group: 0,
+            index: i,
+            core,
+            efficiency_class: class,
+            parked: false,
+            reserved_elsewhere: false,
+        };
+        let mut cpus: Vec<_> = (0..8).map(|i| cpu(i, i / 2, 1)).collect();
+        cpus.extend((8..12).map(|i| cpu(i, i - 4, 0)));
+        Topology { cpus }
+    }
+
+    fn proc(pid: u32, name: &str) -> ProcessInfo {
+        ProcessInfo {
+            io: Default::default(),
+            cycle_percent: 0.0,
+            pid,
+            parent_pid: 1,
+            name: name.into(),
+            cpu_percent: 0.0,
+            cpu_time: Duration::ZERO,
+            working_set: 0,
+            private_working_set: 0,
+            private_bytes: 0,
+            thread_count: 1,
+            handle_count: 1,
+            session_id: 1,
+            base_priority: 8,
+            gpu_percent: 0.0,
+            gpu_memory: 0,
+            io_read_rate: 0.0,
+            io_write_rate: 0.0,
+            net_rx_rate: 0.0,
+            net_tx_rate: 0.0,
+            suspended: false,
+            create_time: i64::from(pid),
+            memory: Default::default(),
+            gpu_detail: Default::default(),
+        }
+    }
+
+    fn snapshot(cpu: f32, procs: Vec<ProcessInfo>) -> Snapshot {
+        let mut s = wtm_core::Sampler::new().sample().unwrap();
+        s.system.cpu_percent = cpu;
+        s.processes = procs;
+        s
+    }
+
+    fn tick(r: &mut Rescue, now: Instant, snap: &Snapshot) {
+        let live = snap
+            .processes
+            .iter()
+            .map(|p| (p.pid, p.create_time))
+            .collect();
+        r.tick(now, snap, &live);
+    }
+
+    fn placement(toml: &str) -> PlacementConfig {
+        wtm_policy::Config::from_toml(toml).unwrap().placement()
+    }
+
+    const SEPARATE: &str = r#"
+        [[separate]]
+        name = "Game and stream"
+        apps = ["game.exe", "obs64.exe"]
+        hold_secs = 0
+    "#;
+
+    fn rescue(fake: &Fake, events: &EventLog) -> Rescue {
+        let cfg = ReserveConfig {
+            rescue_core: false,
+            ..ReserveConfig::default()
+        };
+        Rescue::with(
+            cfg,
+            false,
+            events.clone(),
+            Some(hybrid()),
+            Box::new(fake.clone()),
+        )
+    }
+
+    fn messages(events: &EventLog) -> Vec<String> {
+        events.after(0).into_iter().map(|e| e.message).collect()
+    }
+
+    #[test]
+    fn a_split_is_written_once_and_undone_when_it_ends() {
+        let fake = Fake::default();
+        let events = EventLog::default();
+        let mut r = rescue(&fake, &events);
+        r.set_placement(placement(SEPARATE));
+        let both = snapshot(10.0, vec![proc(10, "game.exe"), proc(20, "obs64.exe")]);
+        let t = Instant::now();
+        tick(&mut r, t, &both);
+        assert_eq!(
+            fake.take(),
+            [
+                "place 10 [256, 257, 258, 259, 260, 261, 262, 263] CpuSets",
+                "place 20 [264, 265, 266, 267] CpuSets",
+            ]
+        );
+        assert!(
+            messages(&events)
+                .iter()
+                .any(|m| m
+                    == "separate 'Game and stream': game.exe on CPUs 0-7, obs64.exe on CPUs 8-11"),
+            "{:?}",
+            messages(&events)
+        );
+        // Nothing changed: nothing written.
+        tick(&mut r, t + Duration::from_secs(1), &both);
+        assert!(fake.take().is_empty());
+
+        // The stream exits: the game gets every core back.
+        tick(
+            &mut r,
+            t + Duration::from_secs(2),
+            &snapshot(10.0, vec![proc(10, "game.exe")]),
+        );
+        assert_eq!(fake.take(), ["release 10"]);
+        assert!(
+            messages(&events)
+                .iter()
+                .any(|m| m.contains("separate 'Game and stream' ended")),
+        );
+        assert!(r.written.is_empty());
+    }
+
+    #[test]
+    fn a_process_that_chose_its_own_cores_is_not_asked_again() {
+        let fake = Fake::default();
+        fake.own.lock().unwrap().insert(20);
+        let mut r = rescue(&fake, &EventLog::default());
+        r.set_placement(placement(SEPARATE));
+        let both = snapshot(10.0, vec![proc(10, "game.exe"), proc(20, "obs64.exe")]);
+        let t = Instant::now();
+        tick(&mut r, t, &both);
+        assert_eq!(fake.take().len(), 1, "the game placed, the stream refused");
+        // Next tick the stream is left out of the split: the game alone
+        // keeps every core.
+        tick(&mut r, t + Duration::from_secs(1), &both);
+        assert_eq!(fake.take(), ["release 10"]);
+    }
+
+    #[test]
+    fn strict_entries_write_hard_affinity_in_one_group() {
+        let fake = Fake::default();
+        let mut r = rescue(&fake, &EventLog::default());
+        r.set_placement(placement(
+            "[[pin]]\nname = \"Hard\"\nmatch = { name = \"a.exe\" }\ncores = \"8-9\"\nstrict = true",
+        ));
+        tick(
+            &mut r,
+            Instant::now(),
+            &snapshot(10.0, vec![proc(10, "a.exe")]),
+        );
+        assert_eq!(
+            fake.take(),
+            ["place 10 [264, 265] Affinity { group: 0, mask: 768 }"]
+        );
+        assert_eq!(r.written[&(10, 10)].affinity, Some((768, 0xfff)));
+    }
+
+    #[test]
+    fn dry_run_writes_nothing_and_says_what_it_would_do() {
+        let fake = Fake::default();
+        let events = EventLog::default();
+        let mut r = rescue(&fake, &events);
+        r.configure(
+            ReserveConfig {
+                rescue_core: false,
+                ..ReserveConfig::default()
+            },
+            true,
+        );
+        r.set_placement(placement(SEPARATE));
+        tick(
+            &mut r,
+            Instant::now(),
+            &snapshot(10.0, vec![proc(10, "game.exe"), proc(20, "obs64.exe")]),
+        );
+        assert!(fake.take().is_empty());
+        assert!(
+            messages(&events)
+                .iter()
+                .any(|m| m.starts_with("separate 'Game and stream' (dry run): game.exe")),
+            "{:?}",
+            messages(&events)
+        );
+    }
+
+    #[test]
+    fn a_huge_process_count_is_placed_over_several_ticks() {
+        let fake = Fake::default();
+        let mut r = rescue(&fake, &EventLog::default());
+        r.set_placement(placement(
+            "[[reserve_cores]]\nname = \"Audio\"\napp = \"reaper.exe\"\ncores = 1\nhold_secs = 0",
+        ));
+        // PIDs low enough to be Windows' own are protected: start higher.
+        let mut procs = vec![proc(1000, "reaper.exe")];
+        procs.extend((1001..1700).map(|pid| proc(pid, "worker.exe")));
+        let snap = snapshot(10.0, procs);
+        let t = Instant::now();
+        tick(&mut r, t, &snap);
+        assert_eq!(fake.take().len(), PER_TICK);
+        tick(&mut r, t + Duration::from_secs(1), &snap);
+        assert_eq!(fake.take().len(), 700 - PER_TICK);
+    }
+
+    #[test]
+    fn writes_are_recorded_and_given_back_after_a_crash() {
+        let dir = std::env::temp_dir().join(format!("rustwtm-placement-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("placement.json");
+        let _ = std::fs::remove_file(&path);
+
+        let fake = Fake::default();
+        let mut r = rescue(&fake, &EventLog::default());
+        r.recover(&path);
+        r.set_placement(placement(SEPARATE));
+        tick(
+            &mut r,
+            Instant::now(),
+            &snapshot(10.0, vec![proc(10, "game.exe"), proc(20, "obs64.exe")]),
+        );
+        fake.take();
+        // The service dies without giving anything back.
+        drop(r);
+
+        let events = EventLog::default();
+        let mut next = rescue(&fake, &events);
+        next.recover(&path);
+        let mut given: Vec<String> = fake.take();
+        given.sort();
+        assert_eq!(given, ["release 10", "release 20"]);
+        assert!(
+            messages(&events)
+                .iter()
+                .any(|m| m == "every core given back to 2 apps placed before a restart")
+        );
+        // And the record is empty again.
+        let left: Vec<Written> = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+        assert!(left.is_empty());
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn a_pin_confines_a_real_process_and_lets_it_go() {
+        let mut child = std::process::Command::new("ping")
+            .args(["-n", "30", "127.0.0.1"])
+            .stdout(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        let pid = child.id();
+        let ping = crate::test_util::wait_for("ping sampled", || {
+            wtm_core::Sampler::new()
+                .sample()
+                .unwrap()
+                .processes
+                .into_iter()
+                .find(|p| p.pid == pid)
+        });
+        let sets = || {
+            wtm_sys::control::ProcessHandle::open(pid, wtm_sys::control::Access::QUERY)
+                .unwrap()
+                .default_cpu_sets()
+                .unwrap()
+        };
+        let cfg = ReserveConfig {
+            rescue_core: false,
+            ..ReserveConfig::default()
+        };
+        let mut r = Rescue::new(cfg, false, EventLog::default());
+        let usable = r.topology.as_ref().map_or(0, |t| {
+            t.cpus.iter().filter(|c| !c.reserved_elsewhere).count()
+        });
+        if usable >= 2 {
+            r.set_placement(placement(&format!(
+                "[[pin]]
+name = \"Ping\"
+match = {{ name = \"{}\" }}
+cores = 1",
+                ping.name
+            )));
+            let snap = snapshot(10.0, vec![ping.clone()]);
+            let t = Instant::now();
+            tick(&mut r, t, &snap);
+            let pinned = sets();
+            assert!(!pinned.is_empty() && pinned.len() < usable, "{pinned:?}");
+            assert_eq!(pinned, r.written[&(pid, ping.create_time)].cpus);
+
+            r.set_placement(PlacementConfig::default());
+            tick(&mut r, t + Duration::from_secs(1), &snap);
+            assert!(sets().is_empty());
+            assert!(r.written.is_empty());
+        }
+        let _ = child.kill();
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn the_rescue_core_and_entries_share_one_plan() {
+        let fake = Fake::default();
+        let cfg = ReserveConfig {
+            sustain_secs: 0,
+            release_secs: 0,
+            ..ReserveConfig::default()
+        };
+        let mut r = Rescue::with(
+            cfg,
+            false,
+            EventLog::default(),
+            Some(hybrid()),
+            Box::new(fake.clone()),
+        );
+        r.set_placement(placement(SEPARATE));
+        let procs = vec![
+            proc(10, "game.exe"),
+            proc(20, "obs64.exe"),
+            proc(30, "other.exe"),
+        ];
+        let t = Instant::now();
+        tick(&mut r, t, &snapshot(99.0, procs.clone()));
+        let reserved = r.split.clone().unwrap().reserved;
+        for w in r.written.values() {
+            assert!(
+                !w.cpus.iter().any(|id| reserved.contains(id)),
+                "{w:?} kept off the rescue core"
+            );
+        }
+        assert_eq!(r.summary().unwrap().moved, 3);
+        // Load recovers: the split stays, the rescue core is handed back.
+        fake.take();
+        tick(&mut r, t + Duration::from_secs(1), &snapshot(10.0, procs));
+        let log = fake.take();
+        assert!(
+            log.iter().any(|l| l.starts_with("place 10 again")),
+            "{log:?}"
+        );
+        assert!(log.contains(&"release 30".to_owned()), "{log:?}");
+        assert!(r.summary().is_none());
     }
 }

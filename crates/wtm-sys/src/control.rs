@@ -783,10 +783,8 @@ impl ProcessHandle {
         Ok(())
     }
 
-    pub fn core_affinity(
-        &self,
-        selection: crate::cpu::CoreSelection,
-    ) -> std::result::Result<u64, String> {
+    /// The processor groups the process's threads run in.
+    pub fn groups(&self) -> Result<Vec<u16>> {
         let mut groups = vec![0u16; 64];
         let mut count = 64u16;
         // SAFETY: the group array is writable for count elements; handle is live.
@@ -796,10 +794,18 @@ impl ProcessHandle {
                 &mut count,
                 groups.as_mut_ptr(),
             )
-            .ok()
-        }
-        .map_err(|e| e.to_string())?;
-        if count != 1 {
+            .ok()?
+        };
+        groups.truncate(usize::from(count));
+        Ok(groups)
+    }
+
+    pub fn core_affinity(
+        &self,
+        selection: crate::cpu::CoreSelection,
+    ) -> std::result::Result<u64, String> {
+        let groups = self.groups().map_err(|e| e.to_string())?;
+        if groups.len() != 1 {
             return Err("Core-type affinity requires a process in one processor group; cross-group masks are not supported".into());
         }
         let topology = crate::cpu::query(Some(self.raw())).map_err(|e| e.to_string())?;

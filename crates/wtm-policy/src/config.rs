@@ -42,6 +42,13 @@ pub struct Config {
     /// Processes that may be ended: automatically when they misbehave, or
     /// all at once with the panic button.
     pub kill: Vec<KillEntry>,
+    /// Apps kept on chosen cores.
+    #[serde(rename = "pin")]
+    pub pins: Vec<crate::Pin>,
+    /// Apps that share no core while they run together.
+    pub separate: Vec<crate::Separate>,
+    /// Cores kept for one app while it runs.
+    pub reserve_cores: Vec<crate::ReserveCores>,
 }
 
 impl Default for Config {
@@ -60,6 +67,9 @@ impl Default for Config {
             rules: Vec::new(),
             limits: Vec::new(),
             kill: Vec::new(),
+            pins: Vec::new(),
+            separate: Vec::new(),
+            reserve_cores: Vec::new(),
         }
     }
 }
@@ -127,6 +137,15 @@ pub enum ConfigError {
 }
 
 impl Config {
+    /// The core placement entries.
+    pub fn placement(&self) -> crate::PlacementConfig {
+        crate::PlacementConfig {
+            pins: self.pins.clone(),
+            separate: self.separate.clone(),
+            reserve: self.reserve_cores.clone(),
+        }
+    }
+
     pub fn from_toml(text: &str) -> Result<Self, ConfigError> {
         let config: Config = toml::from_str(text)?;
         config.validate().map_err(ConfigError::Invalid)?;
@@ -188,6 +207,7 @@ impl Config {
             k.validate()
                 .map_err(|e| format!("kill '{}': {e}", k.label()))?;
         }
+        self.placement().validate()?;
         for r in &self.rules {
             r.validate()
                 .map_err(|e| format!("rule '{}': {e}", r.name))?;

@@ -18,6 +18,7 @@ mod insights;
 mod kill;
 mod limits;
 mod memory_guard;
+mod placement;
 mod presets;
 mod reserve;
 pub mod rule_editor;
@@ -43,6 +44,10 @@ pub use limits::{
     AppLimit, GroupId, GroupUsage, LimitPlanner, LimitScope, remove_app_limit, set_app_limit,
 };
 pub use memory_guard::{MemoryGuard, MemoryGuardConfig};
+pub use placement::{
+    CoreSpec, Inputs, Pin, Placement, PlacementConfig, Placer, Plan, Reservation, ReserveCores,
+    Separate, Split, Tier, Why,
+};
 pub use presets::{Preset, set_preset};
 pub use reserve::{RescueCore, RescueStep, ReserveConfig};
 pub use rules::{Condition, Detail, Matcher, Rule, RuleEngine};
