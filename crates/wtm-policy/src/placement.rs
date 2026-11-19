@@ -308,6 +308,163 @@ impl PlacementConfig {
     }
 }
 
+/// One `[[pin]]`, `[[separate]]` or `[[reserve_cores]]` entry, for the
+/// editors below.
+#[derive(Debug, Clone, PartialEq)]
+pub enum Entry {
+    Pin(Pin),
+    Separate(Separate),
+    Reserve(ReserveCores),
+}
+
+/// The kind of an [`Entry`]: its table name in TOML.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum EntryKind {
+    Pin,
+    Separate,
+    Reserve,
+}
+
+impl EntryKind {
+    pub fn table(self) -> &'static str {
+        match self {
+            Self::Pin => "pin",
+            Self::Separate => "separate",
+            Self::Reserve => "reserve_cores",
+        }
+    }
+}
+
+impl Entry {
+    pub fn kind(&self) -> EntryKind {
+        match self {
+            Self::Pin(_) => EntryKind::Pin,
+            Self::Separate(_) => EntryKind::Separate,
+            Self::Reserve(_) => EntryKind::Reserve,
+        }
+    }
+
+    pub fn name(&self) -> &str {
+        match self {
+            Self::Pin(p) => &p.name,
+            Self::Separate(s) => &s.name,
+            Self::Reserve(r) => &r.name,
+        }
+    }
+
+    fn table(&self) -> toml_edit::Table {
+        fn cores(spec: &CoreSpec) -> toml_edit::Item {
+            match spec {
+                CoreSpec::Count(n) => toml_edit::value(i64::from(*n)),
+                other => toml_edit::value(other.to_string()),
+            }
+        }
+        fn flags(t: &mut toml_edit::Table, strict: bool, tree: bool) {
+            if strict {
+                t.insert("strict", toml_edit::value(true));
+            }
+            if !tree {
+                t.insert("tree", toml_edit::value(false));
+            }
+        }
+        let mut t = toml_edit::Table::new();
+        match self {
+            Self::Pin(p) => {
+                t.insert("name", toml_edit::value(p.name.clone()));
+                let mut m = toml_edit::InlineTable::new();
+                for (key, value) in [
+                    ("name", &p.matcher.name),
+                    ("path", &p.matcher.path),
+                    ("cmdline", &p.matcher.cmdline),
+                ] {
+                    if let Some(v) = value {
+                        m.insert(key, v.as_str().into());
+                    }
+                }
+                t.insert("match", toml_edit::value(m));
+                t.insert("cores", cores(&p.cores));
+                flags(&mut t, p.strict, p.tree);
+            }
+            Self::Separate(s) => {
+                t.insert("name", toml_edit::value(s.name.clone()));
+                let apps: toml_edit::Array = s.apps.iter().map(String::as_str).collect();
+                t.insert("apps", toml_edit::value(apps));
+                if !s.weights.is_empty() {
+                    let weights: toml_edit::Array =
+                        s.weights.iter().map(|&w| i64::from(w)).collect();
+                    t.insert("weights", toml_edit::value(weights));
+                }
+                flags(&mut t, s.strict, s.tree);
+                if s.hold_secs != DEFAULT_HOLD_SECS {
+                    t.insert("hold_secs", toml_edit::value(s.hold_secs as i64));
+                }
+            }
+            Self::Reserve(r) => {
+                t.insert("name", toml_edit::value(r.name.clone()));
+                t.insert("app", toml_edit::value(r.app.clone()));
+                t.insert("cores", cores(&r.cores));
+                if !r.owner_only {
+                    t.insert("owner_only", toml_edit::value(false));
+                }
+                flags(&mut t, r.strict, r.tree);
+                if r.hold_secs != DEFAULT_HOLD_SECS {
+                    t.insert("hold_secs", toml_edit::value(r.hold_secs as i64));
+                }
+            }
+        }
+        t
+    }
+}
+
+/// Saves `entry` into a configuration text: in place of the entry of its
+/// kind named `replacing` (or its own name), else at the end. Comments and
+/// formatting elsewhere are kept; the result must load.
+pub fn set_entry(text: &str, entry: &Entry, replacing: Option<&str>) -> Result<String, String> {
+    let mut doc: toml_edit::DocumentMut = text.parse().map_err(|e| format!("{e}"))?;
+    let key = entry.kind().table();
+    let tables = doc
+        .entry(key)
+        .or_insert_with(|| toml_edit::Item::ArrayOfTables(Default::default()))
+        .as_array_of_tables_mut()
+        .ok_or_else(|| format!("`{key}` must be an array of tables ([[{key}]])"))?;
+    let name_of = |t: &toml_edit::Table| {
+        t.get("name")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_owned()
+    };
+    let old = replacing.unwrap_or(entry.name());
+    if replacing.is_some_and(|r| r != entry.name())
+        && tables.iter().any(|t| name_of(t) == entry.name())
+    {
+        return Err(format!("another {key} entry is named '{}'", entry.name()));
+    }
+    let found = tables.iter().position(|t| name_of(t) == old);
+    match found {
+        Some(i) => *tables.get_mut(i).expect("found above") = entry.table(),
+        None => tables.push(entry.table()),
+    }
+    let text = doc.to_string();
+    crate::Config::from_toml(&text).map_err(|e| e.to_string())?;
+    Ok(text)
+}
+
+/// Removes the entry of `kind` named `name`; unchanged text if there is none.
+pub fn remove_entry(text: &str, kind: EntryKind, name: &str) -> Result<String, String> {
+    let mut doc: toml_edit::DocumentMut = text.parse().map_err(|e| format!("{e}"))?;
+    let key = kind.table();
+    if doc.get(key).is_some_and(|i| !i.is_array_of_tables()) {
+        return Err(format!("`{key}` must be an array of tables ([[{key}]])"));
+    }
+    if let Some(tables) = doc.get_mut(key).and_then(|i| i.as_array_of_tables_mut()) {
+        tables.retain(|t| t.get("name").and_then(|v| v.as_str()) != Some(name));
+        if tables.is_empty() {
+            doc.remove(key);
+        }
+    }
+    Ok(doc.to_string())
+}
+
 /// Why a process runs on fewer than all processors.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Why {
@@ -1063,6 +1220,77 @@ mod tests {
         assert!(c.pins[1].strict && c.pins[0].tree && !c.pins[0].strict);
         assert_eq!(c.separate[0].hold_secs, DEFAULT_HOLD_SECS);
         assert!(c.reserve[0].owner_only && c.reserve[0].tree);
+    }
+
+    #[test]
+    fn entries_are_saved_replaced_and_removed_keeping_the_rest() {
+        let text = "# my settings\ndry_run = false\n";
+        let c = config(
+            r#"
+            [[pin]]
+            name = "Builds"
+            match = { name = "msbuild.exe", cmdline = "-m" }
+            cores = "efficient"
+            strict = true
+            tree = false
+
+            [[separate]]
+            name = "Game and stream"
+            apps = ["game.exe", "obs64.exe"]
+            weights = [3, 1]
+            hold_secs = 10
+
+            [[reserve_cores]]
+            name = "Audio"
+            app = "reaper.exe"
+            cores = 2
+            owner_only = false
+            "#,
+        );
+        let entries = [
+            Entry::Pin(c.pins[0].clone()),
+            Entry::Separate(c.separate[0].clone()),
+            Entry::Reserve(c.reserve[0].clone()),
+        ];
+        let mut saved = text.to_owned();
+        for e in &entries {
+            saved = set_entry(&saved, e, None).unwrap();
+        }
+        assert!(saved.starts_with("# my settings"), "{saved}");
+        assert_eq!(Config::from_toml(&saved).unwrap().placement(), c, "{saved}");
+
+        // Replacing under a new name, and refusing a name already taken.
+        let mut renamed = c.pins[0].clone();
+        renamed.name = "MSBuild".into();
+        renamed.cores = CoreSpec::List(vec![0, 1, 8]);
+        let saved = set_entry(&saved, &Entry::Pin(renamed), Some("Builds")).unwrap();
+        let pins = Config::from_toml(&saved).unwrap().pins;
+        assert_eq!((pins.len(), pins[0].name.as_str()), (1, "MSBuild"));
+        assert!(saved.contains("cores = \"0-1,8\""), "{saved}");
+        let mut clash = c.separate[0].clone();
+        clash.name = "Other".into();
+        let with_other = set_entry(&saved, &Entry::Separate(clash.clone()), None).unwrap();
+        clash.name = "Game and stream".into();
+        assert!(set_entry(&with_other, &Entry::Separate(clash), Some("Other")).is_err());
+
+        // An entry the configuration would refuse is not saved.
+        let mut bad = c.separate[0].clone();
+        bad.apps.truncate(1);
+        bad.weights.clear();
+        assert!(set_entry(&saved, &Entry::Separate(bad), None).is_err());
+
+        let removed = remove_entry(&saved, EntryKind::Reserve, "Audio").unwrap();
+        assert!(
+            Config::from_toml(&removed)
+                .unwrap()
+                .reserve_cores
+                .is_empty()
+        );
+        assert!(!removed.contains("reserve_cores"), "{removed}");
+        assert_eq!(
+            remove_entry(&removed, EntryKind::Reserve, "Audio").unwrap(),
+            removed
+        );
     }
 
     #[test]

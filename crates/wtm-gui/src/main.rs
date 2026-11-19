@@ -13,6 +13,7 @@ mod container_alerts;
 mod container_history;
 mod containers;
 mod context_actions;
+mod cores_view;
 mod device_facts;
 mod device_history;
 mod devices;

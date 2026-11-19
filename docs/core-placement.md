@@ -1,6 +1,6 @@
 # Core placement: design
 
-Status: proposal, for 0.37.0. Nothing here is implemented yet.
+Status: implemented for 0.37.0 (phases 0-4 below); not yet released.
 
 ## Goal
 
@@ -173,21 +173,27 @@ reserved cores that would leave fewer than one core for everything else.
   recorded and undone is an open question.
 - `wtm cores` prints the topology and the current plan; `wtm cores
   explain <pid>` says why a process has its cores.
-- A **Cores** page under *Protect*: physical cores as tiles (tier, SMT
-  threads, load), coloured by the app holding them; the entries with
-  editors (`rule_editor`-style TOML edits, as Rules and Limits do today);
-  the plan as a table; a dry-run preview of a new entry before it is
-  saved. In all 26 languages.
+- A **Cores** page under *Protect*: physical cores as tiles (tier,
+  processor numbers, load), outlined in the colour of the reservation or
+  app holding them; the plan as a table (processors, CPU Sets or hard
+  affinity, the entries that placed it), what cannot be met and what is
+  left alone; the entries with an editor (`wtm_policy::set_entry` /
+  `remove_entry`, TOML-preserving as Limits' editor is). Before an entry
+  is saved the editor runs the plan on the processes running now and says
+  which apps would get which processors. The page calls the three kinds
+  *Keep on cores*, *Keep apart* and *Reserve cores*; the event log and
+  `wtm cores` keep the TOML names (`pin`, `separate`, `reserve_cores`),
+  which the window translates. In all 26 languages.
 
 ## Phases
 
 0. Hardware checks above: done; they make `tree` necessary.
-1. `wtm-policy`: entry types, validation, the plan and its tests.
+1. `wtm-policy`: entry types, validation, the plan and its tests. Done.
 2. `wtm-service` placement executor with its crash record, the rescue
    core's writes moved into it (its tests unchanged), events and restore
-   paths.
-3. Protocol 19, status, `wtm cores`.
-4. The Cores page and its editors; translations.
+   paths. Done.
+3. Protocol 19, status, `wtm cores`. Done.
+4. The Cores page, its editor and preview; translations. Done.
 5. Review renders in English, Turkish and German; 0.37.0.
 
 Tests prove failure paths through seams (a CPU Set writer passed in), not

@@ -292,8 +292,8 @@ impl Rescue {
         self.tick_with(now, snap, live, &mut |_, _| None);
     }
 
-    /// As [`tick`](Self::tick); `lookup` resolves image paths and command
-    /// lines for pins that match on them.
+    /// Updates placement for the live processes in the snapshot.
+    /// `lookup` resolves image paths and command lines for matching pins.
     pub fn tick_with(
         &mut self,
         now: Instant,
@@ -473,19 +473,15 @@ impl Rescue {
         let would = if self.dry_run { " (dry run)" } else { "" };
         for s in splits {
             if !self.reported.splits.contains(s) {
-                let parts: Vec<String> = s
-                    .parts
-                    .iter()
-                    .map(|(app, cpus)| {
-                        format!(
-                            "{app} on CPUs {}",
-                            wtm_policy::processor_numbers(topology, cpus)
-                        )
-                    })
-                    .collect();
+                // Which processors each got is on the Cores page.
+                let apps: Vec<&str> = s.parts.iter().map(|(app, _)| app.as_str()).collect();
                 self.events.info(
                     None,
-                    format!("separate '{}'{would}: {}", s.entry, parts.join(", ")),
+                    format!(
+                        "separate '{}'{would}: cores split between {}",
+                        s.entry,
+                        apps.join(", ")
+                    ),
                 );
             }
         }
@@ -906,7 +902,7 @@ mod placement_tests {
             messages(&events)
                 .iter()
                 .any(|m| m
-                    == "separate 'Game and stream': game.exe on CPUs 0-7, obs64.exe on CPUs 8-11"),
+                    == "separate 'Game and stream': cores split between game.exe, obs64.exe"),
             "{:?}",
             messages(&events)
         );
@@ -1026,9 +1022,8 @@ cores = 1"
         );
         assert!(fake.take().is_empty());
         assert!(
-            messages(&events)
-                .iter()
-                .any(|m| m.starts_with("separate 'Game and stream' (dry run): game.exe")),
+            messages(&events).iter().any(|m| m
+                == "separate 'Game and stream' (dry run): cores split between game.exe, obs64.exe"),
             "{:?}",
             messages(&events)
         );

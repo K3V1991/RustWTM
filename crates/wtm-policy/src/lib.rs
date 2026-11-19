@@ -45,8 +45,8 @@ pub use limits::{
 };
 pub use memory_guard::{MemoryGuard, MemoryGuardConfig};
 pub use placement::{
-    CoreSpec, Inputs, Pin, Placement, PlacementConfig, Placer, Plan, Reservation, ReserveCores,
-    Separate, Split, Tier, Why, processor_numbers,
+    CoreSpec, Entry, EntryKind, Inputs, Pin, Placement, PlacementConfig, Placer, Plan, Reservation,
+    ReserveCores, Separate, Split, Tier, Why, processor_numbers, remove_entry, set_entry,
 };
 pub use presets::{Preset, set_preset};
 pub use reserve::{RescueCore, RescueStep, ReserveConfig};

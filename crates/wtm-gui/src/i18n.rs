@@ -438,7 +438,9 @@ fn message_at_depth(english: &str, depth: usize) -> std::borrow::Cow<'_, str> {
             .filter(|k| {
                 k.contains("{0}")
                     && (k.chars().filter(char::is_ascii_alphabetic).count() >= 4
-                        || k.starts_with("Rule:"))
+                        || k.starts_with("Rule:")
+                        // A core pin, as the service names it in a reason.
+                        || *k == "pin '{0}'")
             })
             .map(String::as_str)
             .collect();
@@ -847,6 +849,27 @@ mod tests {
     }
 
     #[test]
+    fn core_placement_reasons_translate() {
+        let _scope = scope(Language::Turkish);
+        for reason in [
+            "pin 'Builds'",
+            "separate 'Game and stream'",
+            "reserve_cores 'Audio'",
+            "kept off reserve_cores 'Audio'",
+            "rescue core",
+            "separate 'Game and stream': cores split between game.exe, obs64.exe",
+        ] {
+            let shown = message(reason);
+            assert_ne!(shown, reason, "{reason}");
+            for name in ["Builds", "Game and stream", "Audio", "game.exe, obs64.exe"] {
+                if reason.contains(name) {
+                    assert!(shown.contains(name), "{shown}");
+                }
+            }
+        }
+    }
+
+    #[test]
     fn english_names_priority_classes_in_words() {
         let _scope = scope(Language::English);
         assert_eq!(
@@ -1098,6 +1121,7 @@ mod tests {
             include_str!("backend.rs"),
             include_str!("kill_tab.rs"),
             include_str!("limits_tab.rs"),
+            include_str!("cores_view.rs"),
             include_str!("overview.rs"),
             include_str!("overview_layout.rs"),
             include_str!("support_bundle.rs"),

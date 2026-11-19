@@ -39,10 +39,11 @@ enum Tab {
     KillList,
     Settings,
     About,
+    Cores,
 }
 
 /// Navigation follows the task: observe, protect, inspect the system, configure.
-const NAV: [(Tab, crate::navigation::Icon, &str); 20] = {
+const NAV: [(Tab, crate::navigation::Icon, &str); 21] = {
     use crate::navigation::Icon as I;
     [
         (Tab::Overview, I::Overview, "Overview"),
@@ -55,6 +56,7 @@ const NAV: [(Tab, crate::navigation::Icon, &str); 20] = {
         (Tab::Containers, I::Containers, "Containers"),
         (Tab::Governor, I::Shield, "Governor"),
         (Tab::Limits, I::Limits, "Limits"),
+        (Tab::Cores, I::Cpu, "Cores"),
         (Tab::KillList, I::Stop, "Kill list"),
         (Tab::Events, I::Events, "Events"),
         (Tab::InstalledApps, I::Containers, "Installed apps"),
@@ -265,6 +267,7 @@ impl Tab {
             Self::History => crate::i18n::tr("Understand resource usage over time"),
             Self::Governor => crate::i18n::tr("How automatic protection keeps your PC responsive"),
             Self::Limits => crate::i18n::tr("Give each app a predictable resource budget"),
+            Self::Cores => crate::i18n::tr("Choose which cores apps run on"),
             Self::KillList => crate::i18n::tr("Choose which background tasks may be ended"),
             Self::Events => crate::i18n::tr("A record of decisions and actions"),
             Self::Startup => crate::i18n::tr("Choose what starts when you sign in"),
@@ -458,6 +461,7 @@ struct UiState {
     ai_settings: crate::ai_assistant::AiSettingsView,
     ai: crate::ai_assistant::AiChat,
     limits: crate::limits_tab::LimitsView,
+    cores: crate::cores_view::CoresView,
     kill: crate::kill_tab::KillView,
     ports: crate::ports_tab::PortsView,
     disks: crate::disks_tab::DisksView,
@@ -846,6 +850,7 @@ impl Default for UiState {
             ai_settings: Default::default(),
             ai: Default::default(),
             limits: crate::limits_tab::LimitsView::default(),
+            cores: crate::cores_view::CoresView::default(),
             kill: crate::kill_tab::KillView::default(),
             ports: crate::ports_tab::PortsView::default(),
             disks: crate::disks_tab::DisksView::default(),
@@ -1322,6 +1327,7 @@ impl eframe::App for App {
                             | Tab::Sensors
                             | Tab::Governor
                             | Tab::Limits
+                            | Tab::Cores
                             | Tab::KillList
                             | Tab::Hardware
                             | Tab::InstalledApps
@@ -1593,6 +1599,13 @@ impl eframe::App for App {
                             ui,
                             &data,
                             &mut state.limits,
+                        ));
+                    }
+                    Tab::Cores => {
+                        service_cmds.extend(crate::cores_view::cores_tab(
+                            ui,
+                            &data,
+                            &mut state.cores,
                         ));
                     }
                     Tab::KillList => {
@@ -2182,7 +2195,7 @@ impl eframe::App for App {
             Tab::Services => Some((Panel::Services, Duration::from_secs(5))),
             Tab::History => None,
             Tab::Startup => Some((Panel::Startup, Duration::from_secs(10))),
-            Tab::Settings | Tab::Limits | Tab::Overview | Tab::KillList => {
+            Tab::Settings | Tab::Limits | Tab::Cores | Tab::Overview | Tab::KillList => {
                 Some((Panel::Config, Duration::from_secs(30)))
             }
             // The panic button needs the kill list on every tab.
@@ -12249,6 +12262,7 @@ o-such-folder",
                         Tab::Settings,
                         Tab::Governor,
                         Tab::Limits,
+                        Tab::Cores,
                         Tab::Events,
                         Tab::Services,
                         Tab::Startup,
@@ -12278,6 +12292,19 @@ o-such-folder",
                             "config.toml".into(),
                             wtm_policy::DEFAULT_CONFIG_TOML.into(),
                         )));
+                        if tab == Tab::Cores {
+                            d.config = Some(Ok((
+                                "config.toml".into(),
+                                format!(
+                                    "{}{}",
+                                    wtm_policy::DEFAULT_CONFIG_TOML,
+                                    crate::cores_view::REVIEW_ENTRIES
+                                ),
+                            )));
+                            if let Some(s) = d.status.as_mut() {
+                                s.placement = Some(crate::cores_view::fixture());
+                            }
+                        }
                         d.telegram = Some(Ok(wtm_policy::TelegramConfig::default()));
                         d.task_manager = Some(Ok(wtm_core::task_manager::State::Windows));
                         let mut snap = d.snapshot.as_deref().unwrap().clone();

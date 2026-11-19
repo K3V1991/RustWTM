@@ -11776,5 +11776,509 @@
     "de": "Lädt das Installationsprogramm herunter, prüft es anhand seiner veröffentlichten SHA-256 und, wenn dieses RustWTM signiert ist, ob derselbe Herausgeber es signiert hat, installiert es (Windows fragt nach Administratorrechten) und startet RustWTM neu",
     "fr": "Télécharge le programme d'installation, le vérifie avec son SHA-256 publié et, si ce RustWTM est signé, vérifie que le même éditeur l'a signé, l'installe (Windows demande les droits d'administrateur) et redémarre RustWTM",
     "es": "Descarga el instalador, lo comprueba con su SHA-256 publicado y, si este RustWTM está firmado, que lo firmó el mismo editor, lo instala (Windows pide permisos de administrador) y reinicia RustWTM"
+  },
+  "Choose which cores apps run on": {
+    "tr": "Uygulamaların hangi çekirdeklerde çalışacağını seçin",
+    "de": "Festlegen, auf welchen Kernen Apps laufen",
+    "fr": "Choisir les cœurs utilisés par les applications",
+    "es": "Elija en qué núcleos se ejecutan las aplicaciones"
+  },
+  "Keep an app on chosen cores, keep apps apart while they run together, or reserve cores for one app while it runs. The service applies this with Windows CPU Sets, after the rescue core.": {
+    "tr": "Bir uygulamayı seçilen çekirdeklerde tutun, birlikte çalışan uygulamaları birbirinden ayrı tutun ya da bir uygulama çalışırken ona çekirdek ayırın. Servis bunu kurtarma çekirdeğinden sonra Windows CPU Sets ile uygular.",
+    "de": "Eine App auf gewählten Kernen halten, Apps getrennt halten, solange sie gleichzeitig laufen, oder Kerne für eine App reservieren, solange sie läuft. Der Dienst setzt dies nach dem Rettungskern mit Windows CPU Sets um.",
+    "fr": "Gardez une application sur des cœurs choisis, séparez des applications quand elles tournent ensemble ou réservez des cœurs à une application pendant qu'elle tourne. Le service l'applique avec les CPU Sets de Windows, après le cœur de secours.",
+    "es": "Mantenga una aplicación en los núcleos elegidos, separe aplicaciones mientras se ejecutan juntas o reserve núcleos para una aplicación mientras se ejecuta. El servicio lo aplica con los CPU Sets de Windows, después del núcleo de rescate."
+  },
+  "Dry-run mode: core placement is only previewed in the event log. Switch to enforcing in Settings.": {
+    "tr": "Deneme modu: çekirdek yerleşimi yalnızca olay günlüğünde gösterilir. Uygulamak için Ayarlar'da \"Uygulanıyor\" seçeneğine geçin.",
+    "de": "Testmodus: Kernzuweisung wird nur protokolliert. In Einstellungen aktivieren.",
+    "fr": "Simulation : placement sur les cœurs uniquement journalisé. Activez l'application dans les paramètres.",
+    "es": "Simulación: la ubicación en núcleos solo se registra. Active la aplicación en Configuración."
+  },
+  "Run RustWTM as administrator to change core placement.": {
+    "tr": "Çekirdek yerleşimini değiştirmek için RustWTM'i yönetici olarak çalıştırın.",
+    "de": "RustWTM als Administrator starten, um die Kernzuweisung zu ändern.",
+    "fr": "Exécutez RustWTM en administrateur pour modifier le placement sur les cœurs.",
+    "es": "Ejecute RustWTM como administrador para cambiar la ubicación en núcleos."
+  },
+  "Processors": {
+    "tr": "İşlemciler",
+    "de": "Prozessoren",
+    "fr": "Processeurs",
+    "es": "Procesadores"
+  },
+  "The processor layout could not be read.": {
+    "tr": "İşlemci düzeni okunamadı.",
+    "de": "Die Prozessoranordnung konnte nicht gelesen werden.",
+    "fr": "Impossible de lire la disposition des processeurs.",
+    "es": "No se pudo leer la disposición de los procesadores."
+  },
+  "Placed now": {
+    "tr": "Şu an yerleştirilenler",
+    "de": "Aktuell zugewiesen",
+    "fr": "Placés actuellement",
+    "es": "Ubicados ahora"
+  },
+  "The service does not report core placement. Start the RustWTM service to see it.": {
+    "tr": "Servis çekirdek yerleşimini bildirmiyor. Görmek için RustWTM servisini başlatın.",
+    "de": "Der Dienst meldet keine Kernzuweisung. Starten Sie den RustWTM-Dienst, um sie zu sehen.",
+    "fr": "Le service ne signale aucun placement sur les cœurs. Démarrez le service RustWTM pour le voir.",
+    "es": "El servicio no informa de la ubicación en núcleos. Inicie el servicio RustWTM para verla."
+  },
+  "Entries": {
+    "tr": "Girdiler",
+    "de": "Einträge",
+    "fr": "Entrées",
+    "es": "Entradas"
+  },
+  "Not met: {0}": {
+    "tr": "Karşılanmadı: {0}",
+    "de": "Nicht erfüllt: {0}",
+    "fr": "Non satisfait : {0}",
+    "es": "No se cumple: {0}"
+  },
+  "No process is placed: every process may use every processor.": {
+    "tr": "Yerleştirilmiş işlem yok: her işlem her işlemciyi kullanabilir.",
+    "de": "Kein Prozess ist zugewiesen: Jeder Prozess darf jeden Prozessor nutzen.",
+    "fr": "Aucun processus placé : chaque processus peut utiliser tous les processeurs.",
+    "es": "Ningún proceso está ubicado: todos los procesos pueden usar todos los procesadores."
+  },
+  "CPUs": {
+    "tr": "CPU'lar",
+    "de": "CPUs",
+    "fr": "CPU",
+    "es": "CPU"
+  },
+  "How": {
+    "tr": "Yöntem",
+    "de": "Methode",
+    "fr": "Méthode",
+    "es": "Método"
+  },
+  "Why": {
+    "tr": "Neden",
+    "de": "Grund",
+    "fr": "Raison",
+    "es": "Motivo"
+  },
+  "Hard affinity": {
+    "tr": "Zorunlu çekirdek ilişkisi",
+    "de": "Harte Affinität",
+    "fr": "Affinité stricte",
+    "es": "Afinidad estricta"
+  },
+  "CPU Sets": {
+    "tr": "CPU Sets",
+    "de": "CPU Sets",
+    "fr": "CPU Sets",
+    "es": "CPU Sets"
+  },
+  "…and {0} more": {
+    "tr": "…ve {0} tane daha",
+    "de": "…und {0} weitere",
+    "fr": "…et {0} de plus",
+    "es": "…y {0} más"
+  },
+  "Left alone: {0} ({1}): {2}": {
+    "tr": "Dokunulmadı: {0} ({1}): {2}",
+    "de": "Unverändert: {0} ({1}): {2}",
+    "fr": "Laissé tel quel : {0} ({1}) : {2}",
+    "es": "Sin tocar: {0} ({1}): {2}"
+  },
+  "No entries yet. Add one below: every app keeps every core until then.": {
+    "tr": "Henüz girdi yok. Aşağıdan ekleyin: o zamana kadar her uygulama tüm çekirdekleri kullanır.",
+    "de": "Noch keine Einträge. Fügen Sie unten einen hinzu: Bis dahin behält jede App alle Kerne.",
+    "fr": "Aucune entrée pour l'instant. Ajoutez-en une ci-dessous : d'ici là, chaque application garde tous les cœurs.",
+    "es": "Aún no hay entradas. Añada una abajo: hasta entonces, cada aplicación conserva todos los núcleos."
+  },
+  "Options": {
+    "tr": "Seçenekler",
+    "de": "Optionen",
+    "fr": "Options",
+    "es": "Opciones"
+  },
+  "split while they run together": {
+    "tr": "birlikte çalışırken ayrılır",
+    "de": "getrennt, solange sie gleichzeitig laufen",
+    "fr": "séparées quand elles tournent ensemble",
+    "es": "separadas mientras se ejecutan juntas"
+  },
+  "Keep on cores": {
+    "tr": "Çekirdeklerde tut",
+    "de": "Auf Kernen halten",
+    "fr": "Garder sur des cœurs",
+    "es": "Mantener en núcleos"
+  },
+  "Keep apart": {
+    "tr": "Ayrı tut",
+    "de": "Getrennt halten",
+    "fr": "Séparer",
+    "es": "Separar"
+  },
+  "Reserve cores": {
+    "tr": "Çekirdek ayır",
+    "de": "Kerne reservieren",
+    "fr": "Réserver des cœurs",
+    "es": "Reservar núcleos"
+  },
+  "Runs the app on the cores you choose.": {
+    "tr": "Uygulamayı seçtiğiniz çekirdeklerde çalıştırır.",
+    "de": "Führt die App auf den gewählten Kernen aus.",
+    "fr": "Exécute l'application sur les cœurs choisis.",
+    "es": "Ejecuta la aplicación en los núcleos que elija."
+  },
+  "While two or more of these apps run, each gets cores of its own; the first gets the fastest.": {
+    "tr": "Bu uygulamalardan iki veya daha fazlası çalışırken her biri kendi çekirdeklerini alır; ilki en hızlılarını alır.",
+    "de": "Laufen zwei oder mehr dieser Apps, erhält jede eigene Kerne; die erste bekommt die schnellsten.",
+    "fr": "Quand au moins deux de ces applications tournent, chacune reçoit ses propres cœurs ; la première reçoit les plus rapides.",
+    "es": "Mientras se ejecuten dos o más de estas aplicaciones, cada una recibe sus propios núcleos; la primera recibe los más rápidos."
+  },
+  "While the app runs, these cores are its own: everything else is kept off them.": {
+    "tr": "Uygulama çalışırken bu çekirdekler yalnızca onundur: diğer her şey bu çekirdeklerden uzak tutulur.",
+    "de": "Solange die App läuft, gehören ihr diese Kerne allein: Alles andere wird davon ferngehalten.",
+    "fr": "Pendant que l'application tourne, ces cœurs lui sont réservés : tout le reste en est tenu à l'écart.",
+    "es": "Mientras la aplicación se ejecuta, estos núcleos son solo suyos: todo lo demás se mantiene fuera de ellos."
+  },
+  "e.g. Game and stream": {
+    "tr": "ör. Oyun ve yayın",
+    "de": "z. B. Spiel und Stream",
+    "fr": "p. ex. Jeu et stream",
+    "es": "p. ej. Juego y stream"
+  },
+  "e.g. game.exe, obs64.exe": {
+    "tr": "ör. game.exe, obs64.exe",
+    "de": "z. B. game.exe, obs64.exe",
+    "fr": "p. ex. game.exe, obs64.exe",
+    "es": "p. ej. game.exe, obs64.exe"
+  },
+  "e.g. reaper.exe": {
+    "tr": "ör. reaper.exe",
+    "de": "z. B. reaper.exe",
+    "fr": "p. ex. reaper.exe",
+    "es": "p. ej. reaper.exe"
+  },
+  "e.g. msbuild.exe or cl*.exe": {
+    "tr": "ör. msbuild.exe veya cl*.exe",
+    "de": "z. B. msbuild.exe oder cl*.exe",
+    "fr": "p. ex. msbuild.exe ou cl*.exe",
+    "es": "p. ej. msbuild.exe o cl*.exe"
+  },
+  "Shares": {
+    "tr": "Paylar",
+    "de": "Anteile",
+    "fr": "Parts",
+    "es": "Reparto"
+  },
+  "e.g. 3, 1": {
+    "tr": "ör. 3, 1",
+    "de": "z. B. 3, 1",
+    "fr": "p. ex. 3, 1",
+    "es": "p. ej. 3, 1"
+  },
+  "Equal when empty.": {
+    "tr": "Boşsa eşit.",
+    "de": "Leer bedeutet gleich verteilt.",
+    "fr": "Parts égales si vide.",
+    "es": "A partes iguales si está vacío."
+  },
+  "By type": {
+    "tr": "Türe göre",
+    "de": "Nach Typ",
+    "fr": "Par type",
+    "es": "Por tipo"
+  },
+  "The fastest": {
+    "tr": "En hızlılar",
+    "de": "Die schnellsten",
+    "fr": "Les plus rapides",
+    "es": "Los más rápidos"
+  },
+  "By number": {
+    "tr": "Numaraya göre",
+    "de": "Nach Nummer",
+    "fr": "Par numéro",
+    "es": "Por número"
+  },
+  "e.g. 0-3,8": {
+    "tr": "ör. 0-3,8",
+    "de": "z. B. 0-3,8",
+    "fr": "p. ex. 0-3,8",
+    "es": "p. ej. 0-3,8"
+  },
+  "Performance cores": {
+    "tr": "Performans çekirdekleri",
+    "de": "Leistungskerne",
+    "fr": "Cœurs performance",
+    "es": "Núcleos de rendimiento"
+  },
+  "Efficient cores": {
+    "tr": "Verimli çekirdekler",
+    "de": "Effiziente Kerne",
+    "fr": "Cœurs efficaces",
+    "es": "Núcleos eficientes"
+  },
+  "Low-power cores": {
+    "tr": "Düşük güçlü çekirdekler",
+    "de": "Stromsparkerne",
+    "fr": "Cœurs basse consommation",
+    "es": "Núcleos de bajo consumo"
+  },
+  "Include the programs it starts": {
+    "tr": "Başlattığı programları da dahil et",
+    "de": "Gestartete Programme einbeziehen",
+    "fr": "Inclure les programmes qu'elle lance",
+    "es": "Incluir los programas que inicia"
+  },
+  "Windows does not pass core choices on to child processes; this places them too.": {
+    "tr": "Windows çekirdek seçimlerini alt işlemlere aktarmaz; bu seçenek onları da yerleştirir.",
+    "de": "Windows gibt die Kernwahl nicht an Unterprozesse weiter; diese Option weist ihnen die Kerne ebenfalls zu.",
+    "fr": "Windows ne transmet pas le choix des cœurs aux processus enfants ; cette option les place aussi.",
+    "es": "Windows no transmite la elección de núcleos a los procesos hijos; esta opción también los ubica."
+  },
+  "The app runs only on its reserved cores": {
+    "tr": "Uygulama yalnızca kendisine ayrılan çekirdeklerde çalışır",
+    "de": "Die App läuft nur auf ihren reservierten Kernen",
+    "fr": "L'application ne tourne que sur ses cœurs réservés",
+    "es": "La aplicación solo se ejecuta en sus núcleos reservados"
+  },
+  "Binding, and passed on to child processes, but limited to one processor group and it overrides the app's own choice.": {
+    "tr": "Bağlayıcıdır ve alt işlemlere aktarılır, ancak tek bir işlemci grubuyla sınırlıdır ve uygulamanın kendi seçimini geçersiz kılar.",
+    "de": "Verbindlich und wird an Unterprozesse weitergegeben, aber auf eine Prozessorgruppe beschränkt und überschreibt die eigene Wahl der App.",
+    "fr": "Contraignante et transmise aux processus enfants, mais limitée à un seul groupe de processeurs, et elle remplace le choix propre de l'application.",
+    "es": "Obligatoria y se transmite a los procesos hijos, pero se limita a un grupo de procesadores y anula la elección propia de la aplicación."
+  },
+  "With the apps running now": {
+    "tr": "Şu an çalışan uygulamalarla",
+    "de": "Mit den aktuell laufenden Apps",
+    "fr": "Avec les applications en cours d'exécution",
+    "es": "Con las aplicaciones en ejecución"
+  },
+  "Give the entry a name.": {
+    "tr": "Girdiye bir ad verin.",
+    "de": "Geben Sie dem Eintrag einen Namen.",
+    "fr": "Donnez un nom à l'entrée.",
+    "es": "Dé un nombre a la entrada."
+  },
+  "Name the program, e.g. game.exe.": {
+    "tr": "Programı belirtin, ör. game.exe.",
+    "de": "Geben Sie das Programm an, z. B. game.exe.",
+    "fr": "Indiquez le programme, p. ex. game.exe.",
+    "es": "Indique el programa, p. ej. game.exe."
+  },
+  "Weights are whole numbers, one per app.": {
+    "tr": "Ağırlıklar tam sayıdır, her uygulama için bir tane.",
+    "de": "Gewichte sind ganze Zahlen, eine pro App.",
+    "fr": "Les poids sont des nombres entiers, un par application.",
+    "es": "Los pesos son números enteros, uno por aplicación."
+  },
+  "the fastest core": {
+    "tr": "en hızlı çekirdek",
+    "de": "der schnellste Kern",
+    "fr": "le cœur le plus rapide",
+    "es": "el núcleo más rápido"
+  },
+  "the {0} fastest cores": {
+    "tr": "en hızlı {0} çekirdek",
+    "de": "die {0} schnellsten Kerne",
+    "fr": "les {0} cœurs les plus rapides",
+    "es": "los {0} núcleos más rápidos"
+  },
+  "CPUs {0}": {
+    "tr": "CPU {0}",
+    "de": "CPUs {0}",
+    "fr": "CPU {0}",
+    "es": "CPU {0}"
+  },
+  "shares {0}": {
+    "tr": "paylar {0}",
+    "de": "Anteile {0}",
+    "fr": "parts {0}",
+    "es": "reparto {0}"
+  },
+  "hard affinity": {
+    "tr": "zorunlu çekirdek ilişkisi",
+    "de": "harte Affinität",
+    "fr": "affinité stricte",
+    "es": "afinidad estricta"
+  },
+  "not the programs it starts": {
+    "tr": "başlattığı programlar hariç",
+    "de": "nicht die gestarteten Programme",
+    "fr": "sans les programmes qu'elle lance",
+    "es": "sin los programas que inicia"
+  },
+  "the app may use every core": {
+    "tr": "uygulama tüm çekirdekleri kullanabilir",
+    "de": "die App darf jeden Kern nutzen",
+    "fr": "l'application peut utiliser tous les cœurs",
+    "es": "la aplicación puede usar todos los núcleos"
+  },
+  "Rescue core": {
+    "tr": "Kurtarma çekirdeği",
+    "de": "Rettungskern",
+    "fr": "Cœur de secours",
+    "es": "Núcleo de rescate"
+  },
+  "Reserved by Windows": {
+    "tr": "Windows için ayrılmış",
+    "de": "Von Windows reserviert",
+    "fr": "Réservé par Windows",
+    "es": "Reservado por Windows"
+  },
+  "Shared": {
+    "tr": "Paylaşılan",
+    "de": "Gemeinsam",
+    "fr": "Partagé",
+    "es": "Compartido"
+  },
+  "{0} on CPUs {1}": {
+    "tr": "{0}, CPU {1} üzerinde",
+    "de": "{0} auf CPUs {1}",
+    "fr": "{0} sur les CPU {1}",
+    "es": "{0} en CPU {1}"
+  },
+  "{0} ({2} processes) on CPUs {1}": {
+    "tr": "{0} ({2} işlem), CPU {1} üzerinde",
+    "de": "{0} ({2} Prozesse) auf CPUs {1}",
+    "fr": "{0} ({2} processus) sur les CPU {1}",
+    "es": "{0} ({2} procesos) en CPU {1}"
+  },
+  "{0} other process kept off these cores": {
+    "tr": "{0} başka işlem bu çekirdeklerden uzak tutuluyor",
+    "de": "{0} anderer Prozess von diesen Kernen ferngehalten",
+    "fr": "{0} autre processus tenu à l'écart de ces cœurs",
+    "es": "{0} otro proceso mantenido fuera de estos núcleos"
+  },
+  "{0} other processes kept off these cores": {
+    "tr": "{0} başka işlem bu çekirdeklerden uzak tutuluyor",
+    "de": "{0} andere Prozesse von diesen Kernen ferngehalten",
+    "fr": "{0} autres processus tenus à l'écart de ces cœurs",
+    "es": "{0} otros procesos mantenidos fuera de estos núcleos"
+  },
+  "Nothing running now matches this entry.": {
+    "tr": "Şu an çalışan hiçbir şey bu girdiyle eşleşmiyor.",
+    "de": "Nichts, was gerade läuft, passt zu diesem Eintrag.",
+    "fr": "Aucun processus en cours ne correspond à cette entrée.",
+    "es": "Nada de lo que se está ejecutando coincide con esta entrada."
+  },
+  "separate '{0}': cores split between {1}": {
+    "tr": "ayrı tut '{0}': çekirdekler {1} arasında bölündü",
+    "de": "getrennt halten '{0}': Kerne aufgeteilt auf {1}",
+    "fr": "séparer '{0}' : cœurs répartis entre {1}",
+    "es": "separar '{0}': núcleos repartidos entre {1}"
+  },
+  "separate '{0}' (dry run): cores split between {1}": {
+    "tr": "ayrı tut '{0}' (deneme): çekirdekler {1} arasında bölünürdü",
+    "de": "getrennt halten '{0}' (Testmodus): Kerne aufgeteilt auf {1}",
+    "fr": "séparer '{0}' (simulation) : cœurs répartis entre {1}",
+    "es": "separar '{0}' (simulación): núcleos repartidos entre {1}"
+  },
+  "separate '{0}' ended: every app has every core back": {
+    "tr": "ayrı tut '{0}' sona erdi: her uygulama tüm çekirdeklerini geri aldı",
+    "de": "getrennt halten '{0}' beendet: Jede App hat wieder alle Kerne",
+    "fr": "séparer '{0}' terminé : chaque application récupère tous les cœurs",
+    "es": "separar '{0}' terminó: cada aplicación recupera todos los núcleos"
+  },
+  "reserve_cores '{0}': CPUs {1} kept for its app": {
+    "tr": "çekirdek ayır '{0}': CPU {1} uygulaması için ayrıldı",
+    "de": "Kerne reservieren '{0}': CPUs {1} für ihre App freigehalten",
+    "fr": "réserver des cœurs '{0}' : CPU {1} gardés pour son application",
+    "es": "reservar núcleos '{0}': CPU {1} reservadas para su aplicación"
+  },
+  "reserve_cores '{0}' (dry run): CPUs {1} kept for its app": {
+    "tr": "çekirdek ayır '{0}' (deneme): CPU {1} uygulaması için ayrılırdı",
+    "de": "Kerne reservieren '{0}' (Testmodus): CPUs {1} für ihre App freigehalten",
+    "fr": "réserver des cœurs '{0}' (simulation) : CPU {1} gardés pour son application",
+    "es": "reservar núcleos '{0}' (simulación): CPU {1} reservadas para su aplicación"
+  },
+  "reserve_cores '{0}' released": {
+    "tr": "çekirdek ayır '{0}' serbest bırakıldı",
+    "de": "Kerne reservieren '{0}' freigegeben",
+    "fr": "réserver des cœurs '{0}' libéré",
+    "es": "reservar núcleos '{0}' liberado"
+  },
+  "every core given back to {0} apps placed before a restart": {
+    "tr": "yeniden başlatmadan önce yerleştirilen {0} uygulamaya tüm çekirdekler geri verildi",
+    "de": "Alle Kerne an {0} Apps zurückgegeben, die vor einem Neustart zugewiesen waren",
+    "fr": "tous les cœurs rendus à {0} applications placées avant un redémarrage",
+    "es": "todos los núcleos devueltos a {0} aplicaciones ubicadas antes de un reinicio"
+  },
+  "{0}: every core given back to {1} apps": {
+    "tr": "{0}: {1} uygulamaya tüm çekirdekler geri verildi",
+    "de": "{0}: alle Kerne an {1} Apps zurückgegeben",
+    "fr": "{0} : tous les cœurs rendus à {1} applications",
+    "es": "{0}: todos los núcleos devueltos a {1} aplicaciones"
+  },
+  "pin '{0}': cores {1} name none of this machine's usable processors": {
+    "tr": "çekirdeklerde tut '{0}': {1} çekirdekleri bu makinenin kullanılabilir işlemcilerinden hiçbirine karşılık gelmiyor",
+    "de": "auf Kernen halten '{0}': Kerne {1} bezeichnen keinen nutzbaren Prozessor dieses Computers",
+    "fr": "garder sur des cœurs '{0}' : les cœurs {1} ne désignent aucun processeur utilisable de cette machine",
+    "es": "mantener en núcleos '{0}': los núcleos {1} no corresponden a ningún procesador utilizable de este equipo"
+  },
+  "separate '{0}': {1} apps running but only {2} cores to split": {
+    "tr": "ayrı tut '{0}': {1} uygulama çalışıyor ama bölünecek yalnızca {2} çekirdek var",
+    "de": "getrennt halten '{0}': {1} Apps laufen, aber nur {2} Kerne zum Aufteilen",
+    "fr": "séparer '{0}' : {1} applications en cours mais seulement {2} cœurs à répartir",
+    "es": "separar '{0}': {1} aplicaciones en ejecución pero solo {2} núcleos para repartir"
+  },
+  "reserve_cores '{0}': one core left out so everything else keeps one": {
+    "tr": "çekirdek ayır '{0}': diğer her şeye bir çekirdek kalsın diye bir çekirdek dışarıda bırakıldı",
+    "de": "Kerne reservieren '{0}': ein Kern ausgelassen, damit allem anderen einer bleibt",
+    "fr": "réserver des cœurs '{0}' : un cœur laissé de côté pour que le reste en garde un",
+    "es": "reservar núcleos '{0}': se deja fuera un núcleo para que todo lo demás conserve uno"
+  },
+  "reserve_cores '{0}': no core left to reserve": {
+    "tr": "çekirdek ayır '{0}': ayrılacak çekirdek kalmadı",
+    "de": "Kerne reservieren '{0}': kein Kern mehr zum Reservieren übrig",
+    "fr": "réserver des cœurs '{0}' : plus aucun cœur à réserver",
+    "es": "reservar núcleos '{0}': no queda ningún núcleo para reservar"
+  },
+  "{0} would leave a process no processor; skipped for it": {
+    "tr": "{0} bir işlemi işlemcisiz bırakırdı; o işlem için atlandı",
+    "de": "{0} würde einem Prozess keinen Prozessor lassen; für ihn übersprungen",
+    "fr": "{0} laisserait un processus sans processeur ; ignoré pour celui-ci",
+    "es": "{0} dejaría un proceso sin procesador; se omite para él"
+  },
+  "fewer than two cores: nothing to place": {
+    "tr": "ikiden az çekirdek: yerleştirilecek bir şey yok",
+    "de": "weniger als zwei Kerne: nichts zuzuweisen",
+    "fr": "moins de deux cœurs : rien à placer",
+    "es": "menos de dos núcleos: nada que ubicar"
+  },
+  "rescue core": {
+    "tr": "kurtarma çekirdeği",
+    "de": "Rettungskern",
+    "fr": "cœur de secours",
+    "es": "núcleo de rescate"
+  },
+  "reserve_cores '{0}'": {
+    "tr": "çekirdek ayır '{0}'",
+    "de": "Kerne reservieren '{0}'",
+    "fr": "réserver des cœurs '{0}'",
+    "es": "reservar núcleos '{0}'"
+  },
+  "kept off reserve_cores '{0}'": {
+    "tr": "uzak tutuldu (çekirdek ayır '{0}')",
+    "de": "ferngehalten (Kerne reservieren '{0}')",
+    "fr": "tenu à l'écart (réserver des cœurs '{0}')",
+    "es": "mantenido fuera (reservar núcleos '{0}')"
+  },
+  "separate '{0}'": {
+    "tr": "ayrı tut '{0}'",
+    "de": "getrennt halten '{0}'",
+    "fr": "séparer '{0}'",
+    "es": "separar '{0}'"
+  },
+  "pin '{0}'": {
+    "tr": "çekirdeklerde tut '{0}'",
+    "de": "auf Kernen halten '{0}'",
+    "fr": "garder sur des cœurs '{0}'",
+    "es": "mantener en núcleos '{0}'"
+  },
+  "chose its own processors": {
+    "tr": "kendi işlemcilerini seçti",
+    "de": "hat eigene Prozessoren gewählt",
+    "fr": "a choisi ses propres processeurs",
+    "es": "eligió sus propios procesadores"
   }
 }
