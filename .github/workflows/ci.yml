@@ -49,6 +49,17 @@ jobs:
           RUSTWTM_SCM_TESTS: '1'
           RUSTWTM_ALLOW_ANY_INSTALL_DIR: '1'
 
+      - name: Telegram build profiles
+        shell: pwsh
+        run: |
+          cargo test --locked -p wtm-service --no-default-features ipc_server::tests
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo clippy --locked -p wtm-service -p wtm-gui --all-targets --features telegram-control -- -D warnings
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --locked -p wtm-service --features telegram-control telegram::tests
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cargo test --locked -p wtm-gui --features telegram-control telegram_settings::tests
+
       - name: Hardware provider and watchdog checks
         shell: pwsh
         run: scripts/build-hardware.ps1
@@ -69,6 +80,10 @@ jobs:
       - name: Transfer-safe release discovery controls
         shell: pwsh
         run: scripts/ci/test-release-discovery.ps1
+
+      - name: Installer lifecycle controls
+        shell: pwsh
+        run: scripts/ci/test-install-lifecycle.ps1
 
       - name: Website package publication controls
         run: python scripts/ci/test-publish-website-media.py

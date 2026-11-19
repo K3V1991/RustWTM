@@ -432,7 +432,7 @@
   "apps at a time": "ứng dụng mỗi lần",
   "Memory guard": "Bảo vệ bộ nhớ",
   "Free memory of the largest apps when RAM runs out": "Giải phóng bộ nhớ của các ứng dụng lớn nhất khi hết RAM",
-  "Moves their pages to the standby list; nothing is lost": "Chuyển các trang của chúng sang danh sách chờ; không mất gì",
+  "Switching back to a trimmed app may be slower.": "Việc chuyển lại sang ứng dụng đã bị giảm bộ nhớ thường trú có thể chậm hơn.",
   "When memory use stays above": "Khi mức dùng bộ nhớ duy trì trên",
   "Swarm warning": "Cảnh báo bầy tiến trình",
   "Warn when one program runs": "Cảnh báo khi một chương trình chạy",

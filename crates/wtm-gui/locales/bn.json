@@ -432,7 +432,7 @@
   "apps at a time": "অ্যাপের গতি কমান",
   "Memory guard": "মেমরি গার্ড",
   "Free memory of the largest apps when RAM runs out": "RAM ফুরিয়ে গেলে সবচেয়ে বড় অ্যাপগুলোর মেমরি মুক্ত করুন",
-  "Moves their pages to the standby list; nothing is lost": "তাদের পেজগুলো স্ট্যান্ডবাই তালিকায় সরায়; কিছুই হারায় না",
+  "Switching back to a trimmed app may be slower.": "মেমরি কমানো অ্যাপে ফিরে যেতে বেশি সময় লাগতে পারে।",
   "When memory use stays above": "মেমরি ব্যবহার যখন এর উপরে থাকে",
   "Swarm warning": "ঝাঁক সতর্কতা",
   "Warn when one program runs": "সতর্ক করুন যখন একটি প্রোগ্রামের",

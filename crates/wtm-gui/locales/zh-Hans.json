@@ -432,7 +432,7 @@
   "apps at a time": "个应用",
   "Memory guard": "内存守护",
   "Free memory of the largest apps when RAM runs out": "RAM 不足时释放最大应用的内存",
-  "Moves their pages to the standby list; nothing is lost": "将其页面移至备用列表；不会丢失任何数据",
+  "Switching back to a trimmed app may be slower.": "切回工作集已缩减的应用时，响应可能会变慢。",
   "When memory use stays above": "内存使用率持续高于",
   "Swarm warning": "进程群警告",
   "Warn when one program runs": "当一个程序运行",

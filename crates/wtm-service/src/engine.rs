@@ -32,6 +32,7 @@ pub struct Paths {
     pub logs: PathBuf,
     pub history: PathBuf,
     /// Telegram bot settings (holds the bot token).
+    #[cfg(feature = "telegram")]
     pub telegram: PathBuf,
     /// The power plan game mode replaced, while it is replaced.
     pub power_plan: PathBuf,
@@ -60,6 +61,7 @@ impl Paths {
             config: data_dir.join("config.toml"),
             logs: data_dir.join("logs"),
             history: data_dir.join("history.sqlite"),
+            #[cfg(feature = "telegram")]
             telegram: data_dir.join("telegram.toml"),
             power_plan: data_dir.join("power-plan.txt"),
             placement: data_dir.join("placement.json"),
@@ -274,10 +276,13 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
         }
     };
 
+    #[cfg(feature = "telegram")]
     let telegram_stop = Arc::new(AtomicBool::new(false));
+    #[cfg(feature = "telegram")]
     if let Err(e) = crate::telegram::spawn(
         paths.telegram.clone(),
         shared.clone(),
+        #[cfg(feature = "telegram-control")]
         tx.clone(),
         telegram_stop.clone(),
     ) {
@@ -685,6 +690,7 @@ pub fn run(paths: &Paths, tx: Sender<EngineMsg>, rx: &Receiver<EngineMsg>) -> an
     }
     watcher_stop.store(true, Ordering::SeqCst);
     // Not joined: it may be waiting on Telegram for a few seconds.
+    #[cfg(feature = "telegram")]
     telegram_stop.store(true, Ordering::SeqCst);
     let _ = watcher.join();
     if let Some(s) = server {

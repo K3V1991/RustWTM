@@ -6,7 +6,28 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- Standard builds now limit Telegram to reporting. A service built with
+  `telegram-control` requires local opt-in and an allowed private chat for
+  system actions. Process arguments are excluded from Telegram's `/info`.
+- Telegram checks for configuration changes before handling polled updates.
+  Confirmation buttons enforce their five-minute deadline and belong to the
+  original chat and message.
+- Memory Guard is opt-in in new configurations. Existing explicit settings
+  are retained. See the [working-set measurements](docs/memory-guard.md).
+- The [installation guide](docs/installation.md) uses a versioned MSI,
+  checksum and release workflow attestation. The README links to these release
+  notes and the product guides. The MSI includes the installation, usage,
+  configuration, Memory Guard and Telegram guides.
+- The PowerShell installer checks the registered service path before an
+  upgrade and selects running programs by their exact executable paths.
+  Portable downloads default to the user profile and ask users to close
+  running programs in the target directory.
+
 ## [0.36.4] - 2026-11-19
+
+[Release scope and validation](docs/0.36.4-review.md)
 
 The layout details left from the 0.36.2 review, singular counts in the
 remaining catalogs, and numbers in the service's messages. IPC stays at
@@ -34,6 +55,8 @@ protocol 18, so a 0.36.x service and a 0.36.4 window work together.
 
 ## [0.36.3] - 2026-11-19
 
+[Release scope and validation](docs/0.36.3-review.md)
+
 A fix for the memory map of a process that has just started, and three
 display details left from the 0.36.2 review. IPC stays at protocol 18, so
 a 0.36.x service and a 0.36.3 window work together.
@@ -51,6 +74,8 @@ a 0.36.x service and a 0.36.3 window work together.
   the process table do.
 
 ## [0.36.2] - 2026-11-18
+
+[Release scope and validation](docs/0.36.2-review.md)
 
 Fixes from the visual review of the pages 0.36.x had not looked at
 (Processes, Disks, Sensors, Governor, Limits, Kill list, Network, Ports,
@@ -85,6 +110,8 @@ protocol 18, so a 0.36.x service and a 0.36.2 window work together.
 
 ## [0.36.1] - 2026-11-18
 
+[Release scope and validation](docs/0.36.1-review.md)
+
 Lengths of time and period buttons are written in the window's language,
 found by the visual review of 0.36.0's new pages in English, Turkish and
 German. IPC stays at protocol 18, so a 0.36.0 service and a 0.36.1 window
@@ -103,6 +130,8 @@ work together.
   says the text below is saved as shown.
 
 ## [0.36.0] - 2026-11-18
+
+[Release scope and validation](docs/0.36.0-review.md)
 
 The service keeps a week of per-minute history for each disk, network
 adapter and GPU, containers keep their last 24 hours and can raise CPU and
@@ -221,6 +250,8 @@ service of different protocols refuse each other, as before.
 
 ## [0.35.0] - 2026-11-16
 
+[Release scope and validation](docs/0.35.0-review.md)
+
 A review release: every page was gone over visually and functionally.
 Settings no longer rewrites config.toml when it is only opened, a save
 made from an older text is refused instead of undoing the other change,
@@ -324,6 +355,8 @@ so the GUI and the service of 0.34.0 and 0.35.0 work together.
 
 ## [0.34.0] - 2026-11-15
 
+[Release scope and validation](docs/0.34.0-review.md)
+
 More of Process Explorer and System Informer: a system-wide Find handle or
 DLL, Find Window's Process, a Windows list, heaps and stacks named in the
 memory map, and I/O, network and GPU graphs in the process inspector; and
@@ -391,6 +424,8 @@ so the GUI and the service of 0.33.0 and 0.34.0 work together.
 
 ## [0.33.0] - 2026-11-15
 
+[Release scope and validation](docs/0.33.0-review.md)
+
 The process inspector gains Process Explorer's and System Informer's
 process views: Security (the token's groups and privileges), Environment,
 Handles and a Memory map. Each is read on request, with this window's own
@@ -439,6 +474,8 @@ and the service of 0.32.0 and 0.33.0 work together.
   lsass.exe and lsaiso.exe are refused.
 
 ## [0.32.0] - 2026-11-14
+
+[Release scope and validation](docs/0.32.0-review.md)
 
 Performance reaches Windows Task Manager parity: every disk, network adapter
 and GPU has its own page and graphs, and each page lists what Task Manager
@@ -604,6 +641,8 @@ the GUI and the service must be updated together.
 
 ## [0.31.0] - 2026-11-13
 
+[Release scope and validation](docs/0.31.0-review.md)
+
 A visual redesign after the Windows 11 (Fluent) look. No setting, default or
 policy changes; IPC remains protocol 16.
 
@@ -659,6 +698,8 @@ under 0.30.3 and 0.30.2.
   which have no interactive desktop.
 
 ## [0.30.2] - 2026-11-13
+
+[Release scope and validation](docs/0.30.2-review.md)
 
 ### Added
 
@@ -739,6 +780,8 @@ under 0.30.3 and 0.30.2.
 
 ## [0.30.1] - 2026-11-12
 
+[Release scope and validation](docs/0.30.1-review.md)
+
 ### Added
 
 - AI assistant with your own API key. Right-click a process → *Diagnostics* →
@@ -804,6 +847,8 @@ under 0.30.3 and 0.30.2.
 
 ## [0.30.0] - 2026-11-11
 
+[Release scope and validation](docs/0.30.0-review.md)
+
 ### Added
 
 - A skippable five-step quick setup opens on first use and once after each
@@ -846,6 +891,8 @@ under 0.30.3 and 0.30.2.
   scope labels use readable account names and the selected-entry toolbar wraps.
 
 ## [0.29.0] - 2026-11-11
+
+[Release scope and validation](docs/0.29.0-review.md)
 
 ### Added
 
@@ -907,6 +954,8 @@ under 0.30.3 and 0.30.2.
   growth retries even when an API reports an unreasonable required size.
 
 ## [0.28.0] - 2026-11-10
+
+[Release scope and validation](docs/0.28.0-review.md)
 
 ### Changed
 

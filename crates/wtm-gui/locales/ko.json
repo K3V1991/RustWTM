@@ -432,7 +432,7 @@
   "apps at a time": "개 앱 속도 낮추기",
   "Memory guard": "메모리 보호",
   "Free memory of the largest apps when RAM runs out": "RAM이 부족하면 가장 큰 앱의 메모리 확보",
-  "Moves their pages to the standby list; nothing is lost": "페이지를 대기 목록으로 이동하며, 손실되는 것은 없습니다",
+  "Switching back to a trimmed app may be slower.": "작업 집합을 줄인 앱으로 돌아갈 때 더 느릴 수 있습니다.",
   "When memory use stays above": "메모리 사용률이 계속 다음보다 높을 때",
   "Swarm warning": "프로세스 스웜 경고",
   "Warn when one program runs": "한 프로그램이 다음 개수 이상 실행되면 경고:",

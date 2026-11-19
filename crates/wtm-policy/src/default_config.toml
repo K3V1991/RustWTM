@@ -92,11 +92,10 @@ thread_min = 500
 
 exempt = ["explorer.exe", "Taskmgr.exe"]
 
-# Memory guard: when physical memory stays above high_percent, the biggest
-# background apps (never the foreground app) have their working sets trimmed.
-# Nothing is closed or lost; trimmed pages come back when the app needs them.
+# Optional working-set trimming for the largest background apps under sustained
+# memory pressure. Reloading reclaimed pages can slow an app down.
 [memory_guard]
-enabled = true
+enabled = false
 high_percent = 90.0
 sustain_secs = 15
 max_processes = 3

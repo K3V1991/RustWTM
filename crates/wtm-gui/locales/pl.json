@@ -432,7 +432,7 @@
   "apps at a time": "aplikacji naraz",
   "Memory guard": "Ochrona pamięci",
   "Free memory of the largest apps when RAM runs out": "Zwalniaj pamięć największych aplikacji, gdy brakuje RAM",
-  "Moves their pages to the standby list; nothing is lost": "Przenosi ich strony na listę rezerwową; nic nie zostaje utracone",
+  "Switching back to a trimmed app may be slower.": "Powrót do aplikacji, której zestaw roboczy został zmniejszony, może trwać dłużej.",
   "When memory use stays above": "Gdy użycie pamięci stale przekracza",
   "Swarm warning": "Ostrzeżenie o roju procesów",
   "Warn when one program runs": "Ostrzegaj, gdy liczba kopii jednego programu wynosi",

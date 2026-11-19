@@ -432,7 +432,7 @@
   "apps at a time": "பயன்பாடுகளை மெதுவாக்கு",
   "Memory guard": "நினைவகக் காவலர்",
   "Free memory of the largest apps when RAM runs out": "RAM தீரும்போது பெரிய பயன்பாடுகளின் நினைவகத்தை விடுவி",
-  "Moves their pages to the standby list; nothing is lost": "அவற்றின் பக்கங்களை standby பட்டியலுக்கு நகர்த்துகிறது; எதுவும் இழக்கப்படாது",
+  "Switching back to a trimmed app may be slower.": "நினைவகம் குறைக்கப்பட்ட செயலிக்குத் திரும்ப அதிக நேரம் ஆகலாம்.",
   "When memory use stays above": "நினைவகப் பயன்பாடு தொடர்ந்து இதற்கு மேல் இருந்தால்",
   "Swarm warning": "கூட்ட எச்சரிக்கை",
   "Warn when one program runs": "ஒரு நிரல் இயங்கும்போது எச்சரி:",

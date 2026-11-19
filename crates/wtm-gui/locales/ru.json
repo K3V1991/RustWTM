@@ -432,7 +432,7 @@
   "apps at a time": "приложений одновременно",
   "Memory guard": "Защита памяти",
   "Free memory of the largest apps when RAM runs out": "Освобождать память крупнейших приложений при нехватке RAM",
-  "Moves their pages to the standby list; nothing is lost": "Перемещает их страницы в резервный список; ничего не теряется",
+  "Switching back to a trimmed app may be slower.": "Возврат к приложению с уменьшенным рабочим набором может занять больше времени.",
   "When memory use stays above": "Когда использование памяти дольше выше",
   "Swarm warning": "Предупреждение о рое процессов",
   "Warn when one program runs": "Предупреждать, когда у программы",

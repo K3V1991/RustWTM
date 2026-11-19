@@ -67,6 +67,10 @@ jobs:
         shell: pwsh
         run: scripts/ci/test-release-discovery.ps1
 
+      - name: Installer lifecycle controls
+        shell: pwsh
+        run: scripts/ci/test-install-lifecycle.ps1
+
       - name: Build
         run: cargo build --locked --release --workspace
 

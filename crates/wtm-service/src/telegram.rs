@@ -5,6 +5,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
+#[cfg(feature = "telegram-control")]
 use std::sync::mpsc::{self, Sender};
 use std::sync::{Arc, PoisonError};
 use std::thread::JoinHandle;
@@ -18,7 +19,9 @@ use wtm_core::{ProcessInfo, ServiceEntry, ServiceState, Snapshot, format_bytes};
 use wtm_ipc::{Command, Event, EventLevel, Outcome, Status};
 use wtm_policy::{Config, TelegramConfig};
 
-use crate::ipc_server::{EngineMsg, Shared};
+#[cfg(feature = "telegram-control")]
+use crate::ipc_server::EngineMsg;
+use crate::ipc_server::Shared;
 
 const USER_AGENT: &str = concat!("RustWTM/", env!("CARGO_PKG_VERSION"));
 /// How long `getUpdates` waits for a message; also how often alerts go out.
@@ -132,6 +135,7 @@ pub trait Host {
 
 pub struct ServiceHost {
     shared: Arc<Shared>,
+    #[cfg(feature = "telegram-control")]
     engine: Sender<EngineMsg>,
 }
 
@@ -164,6 +168,7 @@ impl Host for ServiceHost {
         self.shared.events.after(id)
     }
 
+    #[cfg(feature = "telegram-control")]
     fn control(&self, target: &ProcessRef, command: Command) -> Vec<Outcome> {
         let (reply, rx) = mpsc::channel();
         let failed = |e: &str| {
@@ -187,8 +192,22 @@ impl Host for ServiceHost {
             .unwrap_or_else(|_| failed("the service did not answer in time"))
     }
 
+    #[cfg(not(feature = "telegram-control"))]
+    fn control(&self, target: &ProcessRef, _: Command) -> Vec<Outcome> {
+        vec![Outcome {
+            target: target.clone(),
+            result: Err(CONTROL_OFF.into()),
+        }]
+    }
+
+    #[cfg(feature = "telegram-control")]
     fn command_line(&self, p: &ProcessInfo) -> Option<String> {
         control::command_line(&ProcessRef::from(p)).ok()
+    }
+
+    #[cfg(not(feature = "telegram-control"))]
+    fn command_line(&self, _: &ProcessInfo) -> Option<String> {
+        None
     }
 
     fn image_path(&self, p: &ProcessInfo) -> Option<String> {
@@ -205,6 +224,7 @@ impl Host for ServiceHost {
         wtm_core::list_services().map_err(|e| e.to_string())
     }
 
+    #[cfg(feature = "telegram-control")]
     fn set_service(&self, name: &str, op: ServiceOp) -> Result<(), String> {
         match op {
             ServiceOp::Start => wtm_core::start_service(name),
@@ -212,6 +232,11 @@ impl Host for ServiceHost {
             ServiceOp::Restart => wtm_core::restart_service(name, Duration::from_secs(30)),
         }
         .map_err(|e| e.to_string())
+    }
+
+    #[cfg(not(feature = "telegram-control"))]
+    fn set_service(&self, _: &str, _: ServiceOp) -> Result<(), String> {
+        Err(CONTROL_OFF.into())
     }
 
     fn note(&self, message: String) {
@@ -241,6 +266,7 @@ const MAX_WAITS: usize = 50;
 pub struct Reply {
     pub text: String,
     pub buttons: Vec<Vec<(String, String)>>,
+    confirmation: Option<u64>,
 }
 
 impl Reply {
@@ -248,6 +274,7 @@ impl Reply {
         Self {
             text: text.into(),
             buttons: Vec::new(),
+            confirmation: None,
         }
     }
 }
@@ -266,10 +293,11 @@ enum Pressed {
 /// Processes waiting for "End" to be confirmed.
 struct Pending {
     chat: i64,
+    message_id: Option<i64>,
     targets: Vec<ProcessRef>,
     /// Suspend the targets on confirmation instead of ending them.
     suspend: bool,
-    created: Instant,
+    expires_at: Instant,
 }
 
 pub struct Bot<A, H> {
@@ -391,7 +419,26 @@ fn count(arg: &str, default: usize, max: usize) -> usize {
     arg.parse::<usize>().map_or(default, |n| n.clamp(1, max))
 }
 
-const CONTROL_OFF: &str = "Control from Telegram is turned off in RustWTM → Settings → Telegram.";
+const CONTROL_OFF: &str = "Control from Telegram is turned off. It requires a control-enabled RustWTM service and local opt-in.";
+const PRIVATE_CONTROL: &str = "Control is available only in an allowed private chat with the bot.";
+
+fn control_command(cmd: &str) -> bool {
+    matches!(
+        cmd,
+        "kill"
+            | "end"
+            | "tree"
+            | "suspend"
+            | "resume"
+            | "free"
+            | "panic"
+            | "start_service"
+            | "stop_service"
+            | "startsvc"
+            | "stopsvc"
+            | "restartsvc"
+    )
+}
 
 impl<A: Api, H: Host> Bot<A, H> {
     pub fn new(api: A, host: H, cfg: TelegramConfig, computer: String) -> Self {
@@ -419,7 +466,11 @@ impl<A: Api, H: Host> Bot<A, H> {
     /// confirmations) goes with them.
     pub fn set_config(&mut self, cfg: TelegramConfig) {
         self.waits.retain(|w| cfg.chats.contains(&w.chat));
-        self.pending.retain(|_, p| cfg.chats.contains(&p.chat));
+        self.pending
+            .retain(|_, p| cfg.control && cfg.chats.contains(&p.chat));
+        if !cfg.control {
+            self.swarm_names.clear();
+        }
         self.cfg = cfg;
     }
 
@@ -466,6 +517,7 @@ impl<A: Api, H: Host> Bot<A, H> {
     pub fn introduce(&mut self) -> Result<(), ApiError> {
         let commands: Vec<Value> = MENU
             .iter()
+            .filter(|(c, _)| !control_command(c))
             .map(|(c, d)| json!({"command": c, "description": d}))
             .collect();
         self.call("setMyCommands", json!({ "commands": commands }))?;
@@ -476,8 +528,18 @@ impl<A: Api, H: Host> Bot<A, H> {
         self.send_all(&hello)
     }
 
-    /// One round: forward new alerts, then wait briefly for messages.
+    #[cfg(test)]
     pub fn tick(&mut self) -> Result<(), ApiError> {
+        let cfg = self.cfg.clone();
+        self.tick_with_config(|| Some(cfg.clone())).map(drop)
+    }
+
+    /// Forward alerts and check current settings before handling each polled update.
+    /// Returns false when the worker needs to reload or stop.
+    fn tick_with_config(
+        &mut self,
+        mut current: impl FnMut() -> Option<TelegramConfig>,
+    ) -> Result<bool, ApiError> {
         self.catch_up()?;
         self.forward_alerts()?;
         self.report_exits()?;
@@ -491,6 +553,16 @@ impl<A: Api, H: Host> Bot<A, H> {
             Duration::from_secs(POLL_SECS + 15),
         )?;
         for update in updates.as_array().into_iter().flatten() {
+            let Some(cfg) = current().filter(|cfg| cfg.enabled && cfg.token == self.cfg.token)
+            else {
+                self.pending.clear();
+                self.swarm_names.clear();
+                self.waits.clear();
+                return Ok(false);
+            };
+            if cfg != self.cfg {
+                self.set_config(cfg);
+            }
             if let Some(id) = update["update_id"].as_i64() {
                 self.offset = self.offset.max(id + 1);
             }
@@ -500,13 +572,12 @@ impl<A: Api, H: Host> Bot<A, H> {
             }
         }
         let now = Instant::now();
-        self.pending
-            .retain(|_, p| now.duration_since(p.created) < PENDING_TTL);
+        self.pending.retain(|_, p| now < p.expires_at);
         self.told
             .retain(|_, t| now.duration_since(*t) < TELL_ID_EVERY);
         self.swarm_names
             .retain(|_, (_, t)| now.duration_since(*t) < PENDING_TTL);
-        Ok(())
+        Ok(true)
     }
 
     fn call(&mut self, method: &str, body: Value) -> Result<Value, ApiError> {
@@ -527,7 +598,7 @@ impl<A: Api, H: Host> Bot<A, H> {
     }
 
     fn send(&mut self, chat: i64, reply: &Reply) -> Result<(), ApiError> {
-        self.call(
+        let sent = self.call(
             "sendMessage",
             json!({
                 "chat_id": chat,
@@ -536,8 +607,13 @@ impl<A: Api, H: Host> Bot<A, H> {
                 "link_preview_options": {"is_disabled": true},
                 "reply_markup": Self::markup(reply),
             }),
-        )
-        .map(drop)
+        )?;
+        if let Some(pending) = reply.confirmation.and_then(|id| self.pending.get_mut(&id)) {
+            // A prompt number can be reused after the bot is restarted. The
+            // message ID binds its buttons to the prompt Telegram delivered.
+            pending.message_id = sent["message_id"].as_i64().filter(|id| *id > 0);
+        }
+        Ok(())
     }
 
     fn allowed(&self, chat: i64) -> bool {
@@ -557,14 +633,14 @@ impl<A: Api, H: Host> Bot<A, H> {
             return Ok(());
         }
         // In a group only commands are for the bot; other talk is not.
-        let private = msg["chat"]["type"].as_str().is_none_or(|t| t == "private");
+        let private = msg["chat"]["type"].as_str() == Some("private");
         if !private && parse_command(text).is_none() {
             return Ok(());
         }
         if !self.allowed(chat) {
             return self.tell_id(chat, &msg["from"]);
         }
-        let reply = self.command(chat, text);
+        let reply = self.command(chat, private, text);
         self.send(chat, &reply)
     }
 
@@ -633,44 +709,34 @@ impl<A: Api, H: Host> Bot<A, H> {
     }
 
     /// The answer to a text message.
-    fn command(&mut self, chat: i64, text: &str) -> Reply {
+    fn command(&mut self, chat: i64, private: bool, text: &str) -> Reply {
         let Some((cmd, arg)) = parse_command(text) else {
             return Reply::text("Send /help for the list of commands.");
         };
-        let controls = matches!(
-            cmd.as_str(),
-            "kill"
-                | "end"
-                | "tree"
-                | "suspend"
-                | "resume"
-                | "free"
-                | "panic"
-                | "start_service"
-                | "stop_service"
-                | "startsvc"
-                | "stopsvc"
-                | "restartsvc"
-        );
-        if controls && !self.cfg.control {
-            return Reply::text(CONTROL_OFF);
+        let can_control = self.cfg.control && private;
+        if control_command(&cmd) && !can_control {
+            return Reply::text(if private {
+                CONTROL_OFF
+            } else {
+                PRIVATE_CONTROL
+            });
         }
         let Some(snap) = self.host.snapshot() else {
             return Reply::text("RustWTM is still starting; try again in a few seconds.");
         };
         let procs = &snap.processes;
         match cmd.as_str() {
-            "start" | "help" => self.help(),
+            "start" | "help" => self.help(private),
             "status" => self.status(&snap),
-            "top" => self.top(procs, count(&arg, 10, 30), false),
-            "mem" => self.top(procs, count(&arg, 10, 30), true),
-            "find" => self.find(procs, &arg),
-            "info" => self.info(procs, &arg),
+            "top" => self.top(procs, count(&arg, 10, 30), false, can_control),
+            "mem" => self.top(procs, count(&arg, 10, 30), true, can_control),
+            "find" => self.find(procs, &arg, can_control),
+            "info" => self.info(procs, &arg, can_control),
             "kill" | "end" => self.end_cmd(chat, procs, &arg, false),
             "tree" => self.end_cmd(chat, procs, &arg, true),
             "suspend" => self.pause_cmd(chat, procs, &arg, Command::Suspend),
             "resume" => self.pause_cmd(chat, procs, &arg, Command::Resume),
-            "ports" => self.ports(procs),
+            "ports" => self.ports(procs, can_control),
             "free" => self.free(chat, procs, &arg),
             "services" => self.services(&arg),
             "startsvc" | "start_service" => self.service_cmd(&arg, ServiceOp::Start),
@@ -682,7 +748,7 @@ impl<A: Api, H: Host> Bot<A, H> {
                 self.waits.retain(|w| w.chat != chat);
                 Reply::text(format!("Stopped {} wait(s).", before - self.waits.len()))
             }
-            "swarms" => self.swarms(procs),
+            "swarms" => self.swarms(procs, can_control),
             "panic" => self.panic(chat, procs),
             "events" => self.events(count(&arg, 10, 50)),
             "mute" => {
@@ -703,14 +769,22 @@ impl<A: Api, H: Host> Bot<A, H> {
         }
     }
 
-    fn help(&self) -> Reply {
+    fn help(&self, private: bool) -> Reply {
         let mut text = format!("<b>RustWTM</b> on <b>{}</b>\n\n", esc(&self.computer));
+        let can_control = self.cfg.control && private;
         for (c, d) in MENU {
-            text.push_str(&format!("/{c} – {}\n", esc(d)));
+            if can_control || !control_command(c) {
+                text.push_str(&format!("/{c} – {}\n", esc(d)));
+            }
         }
         text.push_str("\nProcesses can be named by PID or by name (chrome or chrome.exe).");
-        if !self.cfg.control {
-            text.push_str(&format!("\n\n{CONTROL_OFF}"));
+        if !can_control {
+            let message = if private {
+                CONTROL_OFF
+            } else {
+                PRIVATE_CONTROL
+            };
+            text.push_str(&format!("\n\n{message}"));
         }
         Reply::text(text)
     }
@@ -815,7 +889,7 @@ impl<A: Api, H: Host> Bot<A, H> {
         lines
     }
 
-    fn top(&self, procs: &[ProcessInfo], n: usize, by_memory: bool) -> Reply {
+    fn top(&self, procs: &[ProcessInfo], n: usize, by_memory: bool, can_control: bool) -> Reply {
         let mut list: Vec<&ProcessInfo> = procs.iter().filter(|p| p.pid > 4).collect();
         if by_memory {
             list.sort_by_key(|p| std::cmp::Reverse(p.private_working_set));
@@ -829,13 +903,13 @@ impl<A: Api, H: Host> Bot<A, H> {
             esc(&self.computer),
             pre(&Self::table(&list))
         ));
-        if self.cfg.control {
+        if can_control {
             reply.buttons = Self::end_buttons(&list);
         }
         reply
     }
 
-    fn find(&self, procs: &[ProcessInfo], arg: &str) -> Reply {
+    fn find(&self, procs: &[ProcessInfo], arg: &str, can_control: bool) -> Reply {
         if arg.is_empty() {
             return Reply::text("Which processes? e.g. /find chrome");
         }
@@ -858,7 +932,7 @@ impl<A: Api, H: Host> Bot<A, H> {
             format_bytes(memory as f64),
             pre(&Self::table(&list))
         ));
-        if self.cfg.control {
+        if can_control {
             reply.buttons = Self::end_buttons(&list);
         }
         reply
@@ -897,13 +971,13 @@ impl<A: Api, H: Host> Bot<A, H> {
         }
     }
 
-    fn info(&self, procs: &[ProcessInfo], arg: &str) -> Reply {
+    fn info(&self, procs: &[ProcessInfo], arg: &str, can_control: bool) -> Reply {
         let list = match Self::resolve(procs, arg) {
             Ok(l) => l,
             Err(e) => return Reply::text(e),
         };
         if list.len() > 1 {
-            return self.find(procs, arg);
+            return self.find(procs, arg, can_control);
         }
         let p = list[0];
         let parent = procs
@@ -931,16 +1005,13 @@ impl<A: Api, H: Host> Bot<A, H> {
         if let Some(path) = self.host.image_path(p) {
             lines.push(format!("Path     {path}"));
         }
-        if let Some(cmd) = self.host.command_line(p) {
-            lines.push(format!("Command  {}", clip(&cmd, 600)));
-        }
         let mut reply = Reply::text(format!("<b>{}</b>\n{}", esc(&p.name), pre(&lines)));
         let key = format!("{}:{}", p.pid, p.create_time);
         reply.buttons = vec![vec![(
             "🔔 Tell me when it exits".into(),
             format!("x:{key}"),
         )]];
-        if self.cfg.control {
+        if can_control {
             reply.buttons.extend([
                 vec![
                     ("✖ End".into(), format!("e:{key}")),
@@ -1092,9 +1163,10 @@ impl<A: Api, H: Host> Bot<A, H> {
             id,
             Pending {
                 chat,
+                message_id: None,
                 targets: targets.iter().map(|p| ProcessRef::from(*p)).collect(),
                 suspend: false,
-                created: Instant::now(),
+                expires_at: Instant::now() + PENDING_TTL,
             },
         );
         let mut first = vec![("✅ End".to_owned(), format!("y:{id}:{}", u8::from(tree)))];
@@ -1104,6 +1176,7 @@ impl<A: Api, H: Host> Bot<A, H> {
         Reply {
             text: format!("{what}{tree_text}{notes_text}"),
             buttons: vec![first, vec![("Cancel".into(), format!("n:{id}"))]],
+            confirmation: Some(id),
         }
     }
 
@@ -1219,9 +1292,10 @@ impl<A: Api, H: Host> Bot<A, H> {
                 id,
                 Pending {
                     chat,
+                    message_id: None,
                     targets: targets.iter().map(|p| ProcessRef::from(*p)).collect(),
                     suspend: true,
-                    created: Instant::now(),
+                    expires_at: Instant::now() + PENDING_TTL,
                 },
             );
             return Reply {
@@ -1230,6 +1304,7 @@ impl<A: Api, H: Host> Bot<A, H> {
                     ("⏸ Suspend".to_owned(), format!("y:{id}:s")),
                     ("Cancel".to_owned(), format!("n:{id}")),
                 ]],
+                confirmation: Some(id),
             };
         }
         let lines: Vec<String> = targets
@@ -1244,7 +1319,7 @@ impl<A: Api, H: Host> Bot<A, H> {
         )
     }
 
-    fn ports(&self, procs: &[ProcessInfo]) -> Reply {
+    fn ports(&self, procs: &[ProcessInfo], can_control: bool) -> Reply {
         let uses = match self.host.port_uses() {
             Ok(u) => u,
             Err(e) => return Reply::text(format!("Cannot read ports: {}", esc(&e))),
@@ -1273,12 +1348,16 @@ impl<A: Api, H: Host> Bot<A, H> {
                 u.exposure().label()
             )
         }));
-        Reply::text(format!(
-            "<b>{}</b> listening TCP ports on {}\n{}\n/free PORT ends what uses one.",
+        let mut text = format!(
+            "<b>{}</b> listening TCP ports on {}\n{}",
             tcp.len(),
             esc(&self.computer),
             pre(&lines)
-        ))
+        );
+        if can_control {
+            text.push_str("\n/free PORT ends what uses one.");
+        }
+        Reply::text(text)
     }
 
     fn free(&mut self, chat: i64, procs: &[ProcessInfo], arg: &str) -> Reply {
@@ -1368,7 +1447,7 @@ impl<A: Api, H: Host> Bot<A, H> {
         }
     }
 
-    fn swarms(&mut self, procs: &[ProcessInfo]) -> Reply {
+    fn swarms(&mut self, procs: &[ProcessInfo], can_control: bool) -> Reply {
         let cfg = self.host.config().swarm;
         let swarms = wtm_policy::find_swarms(procs, &cfg);
         if swarms.is_empty() {
@@ -1385,7 +1464,7 @@ impl<A: Api, H: Host> Bot<A, H> {
                 format_bytes(s.memory as f64),
                 esc(&s.parents_text())
             ));
-            if self.cfg.control {
+            if can_control {
                 let id = self.next_pending;
                 self.next_pending += 1;
                 self.swarm_names
@@ -1405,6 +1484,7 @@ impl<A: Api, H: Host> Bot<A, H> {
         Reply {
             text: text.trim_end().to_owned(),
             buttons,
+            confirmation: None,
         }
     }
 
@@ -1445,13 +1525,14 @@ impl<A: Api, H: Host> Bot<A, H> {
 
     fn handle_press(&mut self, q: &Value) -> Result<(), ApiError> {
         let id = q["id"].as_str().unwrap_or_default().to_owned();
-        let chat = q["message"]["chat"]["id"].as_i64().unwrap_or_default();
+        let chat_info = &q["message"]["chat"];
+        let chat = chat_info["id"].as_i64();
+        let private = chat_info["type"].as_str() == Some("private");
         let message_id = q["message"]["message_id"].as_i64();
         let data = q["data"].as_str().unwrap_or_default();
-        let pressed = if self.allowed(chat) {
-            self.press(chat, data)
-        } else {
-            Pressed::Toast("This chat is not allowed.".into())
+        let pressed = match chat.filter(|&chat| self.allowed(chat)) {
+            Some(chat) => self.press(chat, private, message_id, data),
+            None => Pressed::Toast("This chat is not allowed.".into()),
         };
         let toast = match &pressed {
             Pressed::Toast(t) => t.clone(),
@@ -1466,6 +1547,7 @@ impl<A: Api, H: Host> Bot<A, H> {
             Err(ApiError::Other(e)) => debug!(error = %e, "telegram answer failed"),
             other => drop(other?),
         }
+        let Some(chat) = chat else { return Ok(()) };
         match pressed {
             Pressed::Edit(reply) => match message_id {
                 Some(message_id) => self
@@ -1487,16 +1569,31 @@ impl<A: Api, H: Host> Bot<A, H> {
         }
     }
 
+    fn take_confirmation(
+        &mut self,
+        id: &str,
+        chat: i64,
+        message_id: Option<i64>,
+    ) -> Option<Pending> {
+        let message_id = message_id?;
+        let id = id.parse::<u64>().ok()?;
+        self.pending.get(&id).filter(|p| {
+            p.chat == chat && p.message_id == Some(message_id) && Instant::now() < p.expires_at
+        })?;
+        self.pending.remove(&id)
+    }
+
     /// What a button with callback `data` does.
-    fn press(&mut self, chat: i64, data: &str) -> Pressed {
+    fn press(&mut self, chat: i64, private: bool, message_id: Option<i64>, data: &str) -> Pressed {
         let (kind, rest) = data.split_once(':').unwrap_or((data, ""));
+        if !private && kind != "x" {
+            return Pressed::Toast(PRIVATE_CONTROL.into());
+        }
         if kind == "n" {
-            if let Ok(id) = rest.parse::<u64>()
-                && self.pending.get(&id).is_some_and(|p| p.chat == chat)
-            {
-                self.pending.remove(&id);
+            if self.take_confirmation(rest, chat, message_id).is_some() {
+                return Pressed::Edit(Reply::text("Cancelled; nothing was ended."));
             }
-            return Pressed::Edit(Reply::text("Cancelled; nothing was ended."));
+            return Pressed::Toast("This question expired. Ask again.".into());
         }
         if kind == "x" {
             let mut parts = rest.split(':');
@@ -1518,11 +1615,7 @@ impl<A: Api, H: Host> Bot<A, H> {
         }
         if kind == "y" {
             let (id, tree) = rest.split_once(':').unwrap_or((rest, "0"));
-            let pending = id
-                .parse::<u64>()
-                .ok()
-                .and_then(|id| self.pending.remove(&id))
-                .filter(|p| p.chat == chat);
+            let pending = self.take_confirmation(id, chat, message_id);
             return match pending {
                 Some(p) if p.suspend => {
                     let lines: Vec<String> = p
@@ -1551,6 +1644,7 @@ impl<A: Api, H: Host> Bot<A, H> {
                     .parse::<u64>()
                     .ok()
                     .and_then(|id| self.swarm_names.get(&id))
+                    .filter(|(_, created)| created.elapsed() < PENDING_TTL)
                     .map(|(name, _)| name.clone());
                 let Some(s) = swarms.iter().find(|s| Some(&s.name) == name.as_ref()) else {
                     return Pressed::Toast("That swarm is gone.".into());
@@ -1658,15 +1752,33 @@ fn modified(path: &Path) -> Option<SystemTime> {
 pub fn spawn(
     path: PathBuf,
     shared: Arc<Shared>,
-    engine: Sender<EngineMsg>,
+    #[cfg(feature = "telegram-control")] engine: Sender<EngineMsg>,
     stop: Arc<AtomicBool>,
 ) -> std::io::Result<JoinHandle<()>> {
     std::thread::Builder::new()
         .name("telegram".into())
-        .spawn(move || run(&path, &shared, &engine, &stop))
+        .spawn(move || {
+            run(
+                &path,
+                &shared,
+                #[cfg(feature = "telegram-control")]
+                &engine,
+                &stop,
+            );
+        })
 }
 
-fn run(path: &Path, shared: &Arc<Shared>, engine: &Sender<EngineMsg>, stop: &AtomicBool) {
+pub fn effective_config(mut cfg: TelegramConfig) -> TelegramConfig {
+    cfg.control &= cfg!(feature = "telegram-control");
+    cfg
+}
+
+fn run(
+    path: &Path,
+    shared: &Arc<Shared>,
+    #[cfg(feature = "telegram-control")] engine: &Sender<EngineMsg>,
+    stop: &AtomicBool,
+) {
     let computer = computer_name();
     let events = &shared.events;
     let mut seen: Option<Option<SystemTime>> = None;
@@ -1686,12 +1798,14 @@ fn run(path: &Path, shared: &Arc<Shared>, engine: &Sender<EngineMsg>, stop: &Ato
             }
             match TelegramConfig::load(path) {
                 Ok(cfg) if cfg.enabled => {
+                    let cfg = effective_config(cfg);
                     let chats = cfg.chats.len();
                     match bot.as_mut().filter(|b| b.token() == cfg.token) {
                         Some(b) => b.set_config(cfg),
                         None => {
                             let host = ServiceHost {
                                 shared: shared.clone(),
+                                #[cfg(feature = "telegram-control")]
                                 engine: engine.clone(),
                             };
                             let mut b =
@@ -1720,8 +1834,23 @@ fn run(path: &Path, shared: &Arc<Shared>, engine: &Sender<EngineMsg>, stop: &Ato
             std::thread::sleep(Duration::from_secs(2));
             continue;
         };
-        match b.tick() {
-            Ok(()) => backoff = Duration::from_secs(5),
+        match b.tick_with_config(|| {
+            if stop.load(Ordering::SeqCst) {
+                None
+            } else {
+                TelegramConfig::load(path).ok().map(effective_config)
+            }
+        }) {
+            Ok(true) => backoff = Duration::from_secs(5),
+            Ok(false) => {
+                // Reinitialization catches up to the current queue, even if
+                // the same token is re-enabled before the next iteration.
+                bot = None;
+                seen = None;
+                if !stop.load(Ordering::SeqCst) {
+                    events.info(None, "Telegram polling stopped after settings changed");
+                }
+            }
             Err(ApiError::Unauthorized) => {
                 events.warn(
                     None,
@@ -1783,6 +1912,7 @@ mod tests {
         backlog: Vec<Value>,
         /// Chats whose messages fail.
         unreachable: Vec<i64>,
+        before_poll_reply: Option<Box<dyn FnOnce()>>,
     }
 
     impl Api for FakeApi {
@@ -1795,7 +1925,12 @@ mod tests {
                 "getUpdates" if body["offset"] == -1 => Ok(Value::Array(
                     self.backlog.last().cloned().into_iter().collect(),
                 )),
-                "getUpdates" => Ok(Value::Array(self.updates.drain(..).collect())),
+                "getUpdates" => {
+                    if let Some(change) = self.before_poll_reply.take() {
+                        change();
+                    }
+                    Ok(Value::Array(self.updates.drain(..).collect()))
+                }
                 "sendMessage"
                     if self
                         .unreachable
@@ -1805,6 +1940,7 @@ mod tests {
                         "Forbidden: bot was blocked by the user".into(),
                     ))
                 }
+                "sendMessage" => Ok(json!({ "message_id": 7 })),
                 _ => Ok(json!(true)),
             }
         }
@@ -1962,11 +2098,11 @@ mod tests {
     }
 
     fn message(update: i64, chat: i64, text: &str) -> Value {
-        json!({"update_id": update, "message": {"chat": {"id": chat}, "from": {"username": "ersin"}, "text": text}})
+        json!({"update_id": update, "message": {"chat": {"id": chat, "type": "private"}, "from": {"username": "ersin"}, "text": text}})
     }
 
     fn press(update: i64, chat: i64, data: &str) -> Value {
-        json!({"update_id": update, "callback_query": {"id": "q", "data": data, "message": {"message_id": 7, "chat": {"id": chat}}}})
+        json!({"update_id": update, "callback_query": {"id": "q", "data": data, "message": {"message_id": 7, "chat": {"id": chat, "type": "private"}}}})
     }
 
     /// Texts sent or edited, in order.
@@ -2032,6 +2168,41 @@ mod tests {
         b.tick().unwrap();
         assert_eq!(texts(&calls).len(), 1, "its own name, any case");
         assert!(addressed_to("/top", None) && !addressed_to("/top@x", None));
+    }
+
+    #[test]
+    fn allowed_groups_report_but_cannot_control_the_pc() {
+        let (mut bot, calls) = bot(true);
+        let group = -100123;
+        bot.cfg.chats.push(group);
+        let mut report = message(1, group, "/top");
+        report["message"]["chat"]["type"] = json!("supergroup");
+        bot.handle(&report).unwrap();
+        assert!(texts(&calls)[0].contains("Busiest"));
+        assert!(last_buttons(&calls).is_empty());
+        let mut control = message(2, group, "/resume node");
+        control["message"]["chat"]["type"] = json!("supergroup");
+        bot.handle(&control).unwrap();
+        assert!(bot.host.controls.borrow().is_empty());
+        assert!(texts(&calls)[1].contains("only in an allowed private chat"));
+
+        let mut callback = press(3, group, "r:200:2000");
+        callback["callback_query"]["message"]["chat"]["type"] = json!("supergroup");
+        bot.handle(&callback).unwrap();
+        assert!(bot.host.controls.borrow().is_empty());
+        bot.handle(&message(4, ME, "/resume node")).unwrap();
+        assert_eq!(*bot.host.controls.borrow(), [(200, Command::Resume)]);
+    }
+
+    #[test]
+    fn production_config_requires_both_build_support_and_runtime_opt_in() {
+        for control in [false, true] {
+            let cfg = effective_config(TelegramConfig {
+                control,
+                ..TelegramConfig::default()
+            });
+            assert_eq!(cfg.control, control && cfg!(feature = "telegram-control"));
+        }
     }
 
     #[test]
@@ -2117,6 +2288,95 @@ mod tests {
     }
 
     #[test]
+    fn a_confirmation_past_its_deadline_does_not_reach_the_host() {
+        let (mut bot, calls) = bot(true);
+        bot.handle(&message(1, ME, "/kill chrome")).unwrap();
+        let current = last_buttons(&calls)[0].clone();
+        bot.handle(&message(2, ME, "/kill chrome")).unwrap();
+        let expired = last_buttons(&calls)[0].clone();
+        bot.pending.get_mut(&2).unwrap().expires_at = Instant::now();
+
+        bot.handle(&press(3, ME, &expired)).unwrap();
+        assert!(bot.host.controls.borrow().is_empty());
+        assert!(texts(&calls).last().unwrap().contains("expired"));
+
+        bot.handle(&press(4, ME, &current)).unwrap();
+        assert_eq!(bot.host.controls.borrow().len(), 2);
+    }
+
+    #[test]
+    fn a_confirmation_remains_available_to_its_original_chat() {
+        let (mut bot, calls) = bot(true);
+        let other = 99;
+        bot.cfg.chats.push(other);
+        bot.handle(&message(1, ME, "/kill chrome")).unwrap();
+        let confirmation = last_buttons(&calls)[0].clone();
+        bot.handle(&press(2, other, &confirmation)).unwrap();
+        assert!(bot.host.controls.borrow().is_empty());
+        bot.handle(&press(3, ME, &confirmation)).unwrap();
+        assert_eq!(bot.host.controls.borrow().len(), 2);
+    }
+
+    #[test]
+    fn a_confirmation_requires_the_message_that_issued_it() {
+        let (mut bot, calls) = bot(true);
+        bot.handle(&message(1, ME, "/kill chrome")).unwrap();
+        let confirmation = last_buttons(&calls)[0].clone();
+        let mut old_message = press(2, ME, &confirmation);
+        old_message["callback_query"]["message"]["message_id"] = json!(6);
+        bot.handle(&old_message).unwrap();
+        assert!(bot.host.controls.borrow().is_empty());
+
+        bot.handle(&press(3, ME, &confirmation)).unwrap();
+        assert_eq!(bot.host.controls.borrow().len(), 2);
+    }
+
+    #[test]
+    fn settings_changed_during_polling_apply_to_the_returned_updates() {
+        let (mut bot, calls) = bot(true);
+        bot.handle(&message(1, ME, "/kill chrome")).unwrap();
+        let confirmation = last_buttons(&calls)[0].clone();
+        let settings = Rc::new(RefCell::new(bot.cfg.clone()));
+        let saved = settings.clone();
+        bot.api.before_poll_reply = Some(Box::new(move || saved.borrow_mut().control = false));
+        bot.api
+            .updates
+            .extend([press(2, ME, &confirmation), message(3, ME, "/top")]);
+
+        assert!(
+            bot.tick_with_config(|| Some(settings.borrow().clone()))
+                .unwrap()
+        );
+        assert!(bot.host.controls.borrow().is_empty());
+        assert!(bot.pending.is_empty());
+        assert!(texts(&calls).last().unwrap().contains("Busiest"));
+        assert!(last_buttons(&calls).is_empty());
+    }
+
+    #[test]
+    fn stopping_or_replacing_the_bot_discards_pending_updates() {
+        for change in ["stop", "disable", "rotate"] {
+            let (mut bot, calls) = bot(true);
+            bot.handle(&message(1, ME, "/kill chrome")).unwrap();
+            let confirmation = last_buttons(&calls)[0].clone();
+            bot.api.updates.push_back(press(2, ME, &confirmation));
+            let mut cfg = bot.cfg.clone();
+            match change {
+                "disable" => cfg.enabled = false,
+                "rotate" => cfg.token = "2:y".into(),
+                _ => {}
+            }
+
+            assert!(
+                !bot.tick_with_config(|| (change != "stop").then(|| cfg.clone()))
+                    .unwrap()
+            );
+            assert!(bot.host.controls.borrow().is_empty());
+            assert!(bot.pending.is_empty());
+        }
+    }
+
+    #[test]
     fn commands_are_parsed() {
         assert_eq!(
             parse_command("/top@RustWtmBot 15"),
@@ -2189,7 +2449,8 @@ mod tests {
         );
         assert!(!sent[1].contains("stubborn"), "only the top 2: {}", sent[1]);
         assert!(sent[2].contains("<b>2</b> matching"), "{}", sent[2]);
-        assert!(sent[3].contains("node.exe --flag"), "{}", sent[3]);
+        assert!(sent[3].contains("node.exe"), "{}", sent[3]);
+        assert!(!sent[3].contains("--flag"), "{}", sent[3]);
         assert!(sent[4].contains("/kill"), "{}", sent[4]);
         assert!(sent[5].contains("Unknown command"), "{}", sent[5]);
         assert_eq!(
@@ -2492,7 +2753,13 @@ mod tests {
         b.introduce().unwrap();
         let calls = calls.borrow();
         assert_eq!(calls[0].0, "setMyCommands");
-        assert_eq!(calls[0].1["commands"].as_array().unwrap().len(), MENU.len());
+        let commands = calls[0].1["commands"].as_array().unwrap();
+        assert!(commands.iter().any(|c| c["command"] == "status"));
+        assert!(
+            commands
+                .iter()
+                .all(|c| !control_command(c["command"].as_str().unwrap()))
+        );
         assert_eq!(calls[1].1["chat_id"], ME);
     }
 }

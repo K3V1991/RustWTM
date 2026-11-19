@@ -9,6 +9,11 @@ license.workspace = true
 authors.workspace = true
 repository.workspace = true
 
+[features]
+default = ["telegram"]
+telegram = []
+telegram-control = ["telegram"]
+
 [dependencies]
 wtm-core.workspace = true
 wtm-policy.workspace = true

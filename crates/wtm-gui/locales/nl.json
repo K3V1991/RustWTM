@@ -432,7 +432,7 @@
   "apps at a time": "apps tegelijk vertragen",
   "Memory guard": "Geheugenbewaking",
   "Free memory of the largest apps when RAM runs out": "Geheugen van de grootste apps vrijmaken wanneer het RAM opraakt",
-  "Moves their pages to the standby list; nothing is lost": "Verplaatst hun pagina's naar de stand-bylijst; er gaat niets verloren",
+  "Switching back to a trimmed app may be slower.": "Terugschakelen naar een app waarvan de werkset is verkleind, kan langer duren.",
   "When memory use stays above": "Als het geheugengebruik boven blijft",
   "Swarm warning": "Zwermwaarschuwing",
   "Warn when one program runs": "Waarschuwen als één programma",

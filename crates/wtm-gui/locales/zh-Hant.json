@@ -432,7 +432,7 @@
   "apps at a time": "個應用程式",
   "Memory guard": "記憶體防護",
   "Free memory of the largest apps when RAM runs out": "RAM 不足時釋放最大應用程式的記憶體",
-  "Moves their pages to the standby list; nothing is lost": "將其分頁移至待命清單；不會遺失任何資料",
+  "Switching back to a trimmed app may be slower.": "切回工作集已縮減的應用程式時，反應可能會變慢。",
   "When memory use stays above": "當記憶體使用量持續高於",
   "Swarm warning": "大量複本警告",
   "Warn when one program runs": "當一個程式執行",

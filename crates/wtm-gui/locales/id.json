@@ -432,7 +432,7 @@
   "apps at a time": "aplikasi sekaligus",
   "Memory guard": "Penjaga memori",
   "Free memory of the largest apps when RAM runs out": "Bebaskan memori aplikasi terbesar saat RAM hampir habis",
-  "Moves their pages to the standby list; nothing is lost": "Memindahkan halamannya ke daftar siaga; tidak ada yang hilang",
+  "Switching back to a trimmed app may be slower.": "Beralih kembali ke aplikasi yang memorinya dikurangi mungkin lebih lambat.",
   "When memory use stays above": "Saat penggunaan memori tetap di atas",
   "Swarm warning": "Peringatan kerumunan",
   "Warn when one program runs": "Peringatkan saat satu program menjalankan",

@@ -23,6 +23,7 @@ mod ipc_server;
 mod logging;
 mod rescue;
 mod service;
+#[cfg(feature = "telegram")]
 mod telegram;
 
 #[cfg(test)]

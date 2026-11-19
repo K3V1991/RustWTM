@@ -108,15 +108,15 @@ actions = ["eco_qos", { cpu_cap_relative = 0.5 }]
 
 ## `[memory_guard]`
 
-When physical memory stays above `high_percent`, the biggest background apps
-have their working sets trimmed: their pages move to the standby list, so the
-app in front of you gets the RAM. Nothing is closed and no data is lost; a
-trimmed app reloads pages as it needs them. The foreground app is never
-trimmed. Manual equivalent: *Free memory* in the GUI, `wtm trim <target>`.
+When enabled, sustained physical-memory pressure lets the service trim large
+background processes. A trimmed process faults pages back in when it needs
+them. The policy excludes the reported foreground app. The same operation
+can be requested manually with *Free memory* or `wtm trim <target>`.
+[Measurement and upgrade behavior](memory-guard.md)
 
 | Key | Default | Meaning |
 |---|---|---|
-| `enabled` | `true` | |
+| `enabled` | `false` | Set to `true` to opt in to automatic trimming. |
 | `high_percent` | `90.0` | Memory in use that counts as pressure... |
 | `sustain_secs` | `15` | ...for this long. |
 | `max_processes` | `3` | Trim at most this many processes per round, largest first. |

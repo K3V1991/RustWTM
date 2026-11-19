@@ -432,7 +432,7 @@
   "apps at a time": "app nang sabay-sabay",
   "Memory guard": "Memory guard",
   "Free memory of the largest apps when RAM runs out": "Magbakante ng memory ng pinakamalalaking app kapag nauubos ang RAM",
-  "Moves their pages to the standby list; nothing is lost": "Inililipat ang mga page nila sa standby list; walang nawawala",
+  "Switching back to a trimmed app may be slower.": "Maaaring bumagal ang pagbalik sa app na binawasan ang memory.",
   "When memory use stays above": "Kapag nananatili ang paggamit ng memory sa itaas ng",
   "Swarm warning": "Babala sa swarm",
   "Warn when one program runs": "Magbabala kapag nagpapatakbo ang isang program ng",

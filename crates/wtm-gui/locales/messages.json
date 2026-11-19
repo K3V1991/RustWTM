@@ -2597,11 +2597,11 @@
     "fr": "Libérer la mémoire des grosses applications si la RAM manque",
     "es": "Liberar memoria de aplicaciones grandes si falta RAM"
   },
-  "Moves their pages to the standby list; nothing is lost": {
-    "tr": "Sayfaları bekleme listesine taşır; veri kaybolmaz",
-    "de": "Verschiebt Seiten in die Standby-Liste; kein Datenverlust",
-    "fr": "Déplace les pages vers la liste d'attente ; aucune perte",
-    "es": "Mueve páginas a la lista de espera; sin pérdida de datos"
+  "Switching back to a trimmed app may be slower.": {
+    "tr": "Belleği azaltılan uygulamaya dönmek daha yavaş olabilir.",
+    "de": "Der Wechsel zurück zu einer Anwendung mit verkleinertem Arbeitssatz kann länger dauern.",
+    "fr": "Revenir à une application dont la mémoire résidente a été réduite peut prendre plus de temps.",
+    "es": "Volver a una aplicación cuya memoria residente se ha reducido puede ser más lento."
   },
   "When memory use stays above": {
     "tr": "Bellek kullanımı şu değerin üzerinde kalınca",
