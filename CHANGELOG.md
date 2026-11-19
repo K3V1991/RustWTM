@@ -6,6 +6,24 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.36.3] - 2026-11-19
+
+A fix for the memory map of a process that has just started, and three
+display details left from the 0.36.2 review. IPC stays at protocol 18, so
+a 0.36.x service and a 0.36.3 window work together.
+
+### Fixed
+
+- The process inspector's memory map named no heap, stack, PEB or TEB of
+  a process that was still starting, and said the process refused to be
+  read: such a process has no heap list yet. Everything else is named
+  now and the default heap is left out until it exists.
+- German wrote some percentages with a space ("100 %") and most without;
+  all are written "100%" now.
+- Disks groups the file and folder counts of a scan ("1 204 311 files").
+- The process inspector's CPU row shows one decimal, as its header and
+  the process table do.
+
 ## [0.36.2] - 2026-11-18
 
 Fixes from the visual review of the pages 0.36.x had not looked at
@@ -2028,7 +2046,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.2...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.3...HEAD
+[0.36.3]: https://github.com/rustwtm/rustwtm/compare/v0.36.2...v0.36.3
 [0.36.2]: https://github.com/rustwtm/rustwtm/compare/v0.36.1...v0.36.2
 [0.36.1]: https://github.com/rustwtm/rustwtm/compare/v0.36.0...v0.36.1
 [0.36.0]: https://github.com/rustwtm/rustwtm/compare/v0.35.0...v0.36.0

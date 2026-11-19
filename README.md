@@ -43,7 +43,18 @@ usage history.
 
 [Product completion roadmap](docs/product-roadmap.md) · [Windows signing setup](docs/signing.md)
 
-## New in 0.36.2
+## New in 0.36.3
+
+[Release scope and validation](docs/0.36.3-review.md)
+
+- **Memory map of a starting process:** heaps, stacks, the PEB and TEBs
+  are named for a process that has just started, instead of the map
+  saying it could not be read. German percentages, Disks' file counts
+  and the inspector's CPU row are tidied.
+
+IPC stays at protocol 18, so a 0.36.x service keeps working with this GUI.
+
+## Included since 0.36.2
 
 [Release scope and validation](docs/0.36.2-review.md)
 
@@ -581,8 +592,8 @@ Start Menu shortcut. Uninstall it from *Settings → Apps*; configuration and
 history in `%ProgramData%\RustWTM` are kept.
 
 ```powershell
-msiexec /i RustWTM-0.36.2-x64.msi            # interactive
-msiexec /i RustWTM-0.36.2-x64.msi /qn        # silent
+msiexec /i RustWTM-0.36.3-x64.msi            # interactive
+msiexec /i RustWTM-0.36.3-x64.msi /qn        # silent
 ```
 
 ### Open with Ctrl+Shift+Esc
