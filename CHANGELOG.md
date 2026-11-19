@@ -6,6 +6,38 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.37.1] - 2026-11-19
+
+[Release scope and validation](docs/0.37.1-review.md)
+
+Fixes from the 0.37.0 visual review.
+
+### Changed
+
+- The Cores page's *Why* column, the plan's notes, the service's event
+  lines and `wtm cores` name entries as the page does (*keep apart*,
+  *reserve cores*, *keep on cores*), not by their `config.toml` table
+  names.
+- Governor and the Cores, Limits, Kill list and Rules hints name the mode
+  as Settings does: *Monitoring only* and *Enforcing* instead of
+  *Dry-run*.
+- The Cores entry table shows its edit and delete buttons first.
+- Telegram settings say that a standard build only reports.
+- Clearer wording for the *Hard affinity* and *Include the programs it
+  starts* switches and the line about processes left alone; the Cores
+  page's translations corrected in every language (among them Turkish
+  *Çekirdek kuralları* and *Çekirdek tahsis et*, German *Effizienzkerne*,
+  and one word each for "reserve" and "save" in Bengali and Swahili).
+
+### Fixed
+
+- In a narrow window the status bar keeps the CPU and memory numbers in
+  every language: the summary drops the word "Memory", then the total,
+  before it is cut; *Run new task* and *Restart as administrator* become
+  icons; and the age of current data is left out (data out of date still
+  says so).
+- Docker memory values use the language's decimal separator.
+
 ## [0.37.0] - 2026-11-19
 
 [Release scope and validation](docs/0.37.0-review.md)
@@ -2156,7 +2188,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.37.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.37.1...HEAD
+[0.37.1]: https://github.com/rustwtm/rustwtm/compare/v0.37.0...v0.37.1
 [0.37.0]: https://github.com/rustwtm/rustwtm/compare/v0.36.4...v0.37.0
 [0.36.4]: https://github.com/rustwtm/rustwtm/compare/v0.36.3...v0.36.4
 [0.36.3]: https://github.com/rustwtm/rustwtm/compare/v0.36.2...v0.36.3
