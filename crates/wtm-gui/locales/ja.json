@@ -1876,7 +1876,7 @@
   "{0}%": "{0}%",
   "{0} of {1} event": "{1} 件中 {0} 件のイベント",
   "{0} TCP port listening": "{0} 個の TCP ポートがリッスン中",
-  "{0} well-known tool or server running": "{0} 個の既知のツールとサーバーが実行中",
+  "{0} well-known tool or server running": "{0} 個の既知のツールまたはサーバーが実行中",
   "{0} startup app, {1} enabled": "スタートアップ アプリ {0} 個、有効 {1} 個",
   "{0} window, {1} visible": "ウィンドウ {0} 個、表示 {1} 個",
   " s": " 秒",

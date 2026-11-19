@@ -1876,7 +1876,7 @@
   "{0}%": "{0}%",
   "{0} of {1} event": "이벤트 {1}개 중 {0}개",
   "{0} TCP port listening": "수신 대기 중인 TCP 포트 {0}개",
-  "{0} well-known tool or server running": "실행 중인 잘 알려진 도구 및 서버 {0}개",
+  "{0} well-known tool or server running": "실행 중인 잘 알려진 도구 또는 서버 {0}개",
   "{0} startup app, {1} enabled": "시작 앱 {0}개, 사용 {1}개",
   "{0} window, {1} visible": "창 {0}개, 표시 {1}개",
   " s": " 초",

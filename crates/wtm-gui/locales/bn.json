@@ -1876,7 +1876,7 @@
   "{0}%": "{0}%",
   "{0} of {1} event": "{1}টির মধ্যে {0}টি ইভেন্ট",
   "{0} TCP port listening": "{0}টি TCP পোর্ট শুনছে",
-  "{0} well-known tool or server running": "{0}টি পরিচিত টুল ও সার্ভার চলছে",
+  "{0} well-known tool or server running": "{0}টি পরিচিত টুল বা সার্ভার চলছে",
   "{0} startup app, {1} enabled": "{0}টি স্টার্টআপ অ্যাপ, {1}টি সক্ষম",
   "{0} window, {1} visible": "{0}টি উইন্ডো, {1}টি দৃশ্যমান",
   " s": " s",

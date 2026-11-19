@@ -1876,7 +1876,7 @@
   "{0}%": "{0}%",
   "{0} of {1} event": "{0} dari {1} peristiwa",
   "{0} TCP port listening": "{0} port TCP mendengarkan",
-  "{0} well-known tool or server running": "{0} alat dan server terkenal berjalan",
+  "{0} well-known tool or server running": "{0} alat atau server terkenal berjalan",
   "{0} startup app, {1} enabled": "{0} aplikasi startup, {1} diaktifkan",
   "{0} window, {1} visible": "{0} jendela, {1} terlihat",
   " s": " s",
