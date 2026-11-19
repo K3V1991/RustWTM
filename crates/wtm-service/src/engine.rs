@@ -201,6 +201,7 @@ fn status(
         app_limits: app_limits.to_vec(),
         foreground: foreground.map(str::to_owned),
         rescue_core: rescue.summary(),
+        placement: rescue.placement_status(),
         game: game.game().map(|name| wtm_ipc::GameStatus {
             name: name.to_owned(),
             calmed: game.calmed(),

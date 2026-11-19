@@ -476,6 +476,7 @@ pub fn data() -> Data {
                 cpus: vec![14, 15],
                 moved: 42,
             }),
+            placement: None,
             game: None,
             config_error: None,
         }),

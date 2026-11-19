@@ -3,6 +3,7 @@
 mod actions;
 mod ai;
 mod config;
+mod cores;
 mod kill;
 mod mcp;
 mod parse;
@@ -43,10 +44,13 @@ enum Command {
         #[command(subcommand)]
         action: Option<power::PowerCommand>,
     },
-    /// List CPU Sets, processor groups and relative P/E/LP-E tiers
+    /// List CPU Sets, processor groups and relative P/E/LP-E tiers, and
+    /// where the service runs the processes it placed on cores
     Cores {
         #[arg(long)]
         json: bool,
+        #[command(subcommand)]
+        action: Option<cores::CoresAction>,
     },
     /// Temperatures, fan RPM/duty, power, voltage and clocks (read-only)
     Sensors {
@@ -375,37 +379,13 @@ fn main() -> anyhow::Result<ExitCode> {
         Command::Power { action } => {
             power::run(action.unwrap_or(power::PowerCommand::Show { json: false }))
         }
-        Command::Cores { json } => {
-            let topology = wtm_core::cpu::topology()?;
-            if json {
-                serde_json::to_writer_pretty(io::stdout().lock(), &topology)?;
-                println!();
-            } else {
-                println!("GROUP  CPU  CORE  CLASS  TIER     CPU SET  STATE");
-                for c in &topology.cpus {
-                    println!(
-                        "{:>5}  {:>3}  {:>4}  {:>5}  {:<7}  {:>7}  {}",
-                        c.group,
-                        c.index,
-                        c.core,
-                        c.efficiency_class,
-                        topology.tier(c.efficiency_class),
-                        c.id,
-                        if c.reserved_elsewhere {
-                            "reserved"
-                        } else if c.parked {
-                            "parked"
-                        } else {
-                            "available"
-                        }
-                    );
-                }
-                println!(
-                    "Tiers are relative Windows EfficiencyClass values; higher classes are faster. Indices are group-relative."
-                );
-            }
-            Ok(ExitCode::SUCCESS)
-        }
+        Command::Cores { json, action } => cores::run(
+            json,
+            action,
+            || Ok(wtm_core::cpu::topology()?),
+            wtm_ipc::Client::connect,
+            &mut io::stdout().lock(),
+        ),
         Command::List {
             sort,
             limit,

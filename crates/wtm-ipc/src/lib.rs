@@ -30,7 +30,7 @@ pub const SERVICE_NAME: &str = "RustWTM";
 /// nobody else can serve its name alongside the service.
 pub const PIPE_SDDL: &str = "D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;OW)(A;;0x12008b;;;IU)";
 
-pub const PROTOCOL_VERSION: u32 = 18;
+pub const PROTOCOL_VERSION: u32 = 19;
 
 const MAX_FRAME: usize = 32 * 1024 * 1024;
 
@@ -258,6 +258,10 @@ pub struct Status {
     pub foreground: Option<String>,
     /// What the rescue core keeps free while it is engaged.
     pub rescue_core: Option<RescueStatus>,
+    /// The processors and where the service runs each process it placed;
+    /// `None` when the processor layout could not be read.
+    #[serde(default)]
+    pub placement: Option<PlacementStatus>,
     /// The game in front while game mode is active.
     pub game: Option<GameStatus>,
     /// Why the configuration file was not loaded: at start the service then
@@ -281,6 +285,39 @@ pub struct RescueStatus {
     pub cpus: Vec<u8>,
     /// Processes currently moved off them.
     pub moved: usize,
+}
+
+/// Core placement: the processors, and where the service runs each
+/// process it placed (`[[pin]]`, `[[separate]]`, `[[reserve_cores]]` and
+/// the rescue core).
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PlacementStatus {
+    pub topology: wtm_core::cpu::Topology,
+    pub placed: Vec<PlacedProcess>,
+    /// Separation groups splitting the cores now.
+    pub splits: Vec<wtm_policy::Split>,
+    /// Cores kept for a running app now.
+    pub reservations: Vec<wtm_policy::Reservation>,
+    /// Entries that cannot be met, and why.
+    pub notes: Vec<String>,
+    /// Processes left alone, and why: they chose their own processors, or
+    /// refused to be changed.
+    pub left_alone: Vec<(ProcessRef, String)>,
+    /// Nothing is written: the service is in dry run.
+    pub dry_run: bool,
+}
+
+/// A process running on fewer than all processors.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PlacedProcess {
+    pub target: ProcessRef,
+    /// CPU Set ids, ascending.
+    pub cpus: Vec<u32>,
+    /// Hard affinity instead of CPU Sets.
+    pub strict: bool,
+    /// The entries that placed it, highest priority first, e.g.
+    /// "separate 'Game and stream'".
+    pub why: Vec<String>,
 }
 
 /// A process the service currently holds limits on.

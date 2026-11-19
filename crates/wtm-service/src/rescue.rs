@@ -14,10 +14,10 @@ use serde::{Deserialize, Serialize};
 use wtm_core::control::{self, Placed, ProcessRef};
 use wtm_core::cpu::{RescueSplit, Topology};
 use wtm_core::{ProcessInfo, Snapshot};
-use wtm_ipc::RescueStatus;
+use wtm_ipc::{PlacedProcess, PlacementStatus, RescueStatus};
 use wtm_policy::{
-    CoreSpec, Detail, Inputs, Placement, PlacementConfig, Placer, RescueCore, RescueStep,
-    Reservation, ReserveConfig, Split, Why,
+    Detail, Inputs, Placement, PlacementConfig, Placer, RescueCore, RescueStep, Reservation,
+    ReserveConfig, Split, Why,
 };
 
 use crate::events::EventLog;
@@ -42,6 +42,9 @@ pub struct Written {
     pub rescue: bool,
     /// Placed for a reason besides the rescue core.
     pub entries: bool,
+    /// The entries that placed it, highest priority first.
+    #[serde(default)]
+    pub why: Vec<String>,
 }
 
 /// How a placement is written.
@@ -124,8 +127,8 @@ pub struct Rescue {
     events: EventLog,
     writer: Box<dyn CpuWriter>,
     written: HashMap<Key, Written>,
-    /// Refused, or confined by their own choice: left alone.
-    own: HashSet<Key>,
+    /// Refused, or confined by their own choice: left alone, and why.
+    own: HashMap<Key, (ProcessRef, String)>,
     /// Where writes are recorded; `None` in tests that need no record.
     record: Option<PathBuf>,
     reported: Reported,
@@ -162,7 +165,7 @@ impl Rescue {
             events,
             writer,
             written: HashMap::new(),
-            own: HashSet::new(),
+            own: HashMap::new(),
             record: None,
             reported: Reported::default(),
         }
@@ -247,6 +250,33 @@ impl Rescue {
         self.placer.set_config(config);
     }
 
+    /// The processors and where each placed process runs, for clients.
+    pub fn placement_status(&self) -> Option<PlacementStatus> {
+        let topology = self.topology.clone()?;
+        let mut placed: Vec<PlacedProcess> = self
+            .written
+            .values()
+            .map(|w| PlacedProcess {
+                target: w.target.clone(),
+                cpus: w.cpus.clone(),
+                strict: w.strict,
+                why: w.why.clone(),
+            })
+            .collect();
+        placed.sort_by_key(|p| (p.target.pid, p.target.create_time));
+        let mut left_alone: Vec<(ProcessRef, String)> = self.own.values().cloned().collect();
+        left_alone.sort_by_key(|(t, _)| (t.pid, t.create_time));
+        Some(PlacementStatus {
+            topology,
+            placed,
+            splits: self.reported.splits.clone(),
+            reservations: self.reported.reservations.clone(),
+            notes: self.reported.notes.clone(),
+            left_alone,
+            dry_run: self.dry_run,
+        })
+    }
+
     /// What clients show while the rescue core is engaged.
     pub fn summary(&self) -> Option<RescueStatus> {
         let split = self.split.as_ref().filter(|_| self.policy.engaged())?;
@@ -297,7 +327,7 @@ impl Rescue {
         };
         let before = self.written.len();
         self.written.retain(|k, _| live.contains(k));
-        self.own.retain(|k| live.contains(k));
+        self.own.retain(|k, _| live.contains(k));
         let mut changed = self.written.len() != before;
 
         let engaged = self.policy.engaged() && !self.dry_run;
@@ -309,11 +339,12 @@ impl Rescue {
         let cfg = self.policy.config().clone();
         let untouchable = |p: &ProcessInfo| ReserveConfig::untouchable(p.pid, &p.name);
         let keeps_all = |p: &ProcessInfo| cfg.exempts(&p.name);
+        let own: HashSet<Key> = self.own.keys().copied().collect();
         let inputs = Inputs {
             now,
             topology: &topology,
             processes: &snap.processes,
-            own_choice: &self.own,
+            own_choice: &own,
             rescue: rescue.as_deref(),
             untouchable: &untouchable,
             keeps_all: &keeps_all,
@@ -355,7 +386,7 @@ impl Rescue {
         let mut writes = 0;
         for key in keys {
             let placement = &plan.placements[key];
-            if self.own.contains(key) {
+            if self.own.contains_key(key) {
                 continue;
             }
             let how = how(&topology, placement);
@@ -365,8 +396,9 @@ impl Rescue {
                 && w.cpus == wanted.cpus
                 && w.strict == wanted.strict
             {
-                if (w.rescue, w.entries) != (wanted.rescue, wanted.entries) {
+                if (w.rescue, w.entries, &w.why) != (wanted.rescue, wanted.entries, &wanted.why) {
                     (w.rescue, w.entries) = (wanted.rescue, wanted.entries);
+                    w.why = wanted.why;
                     changed = true;
                 }
                 continue;
@@ -402,9 +434,14 @@ impl Rescue {
                 Ok(Placed::Done { affinity }) => {
                     self.written.insert(*key, Written { affinity, ..wanted });
                 }
-                Ok(Placed::OwnChoice) | Err(_) => {
+                Ok(Placed::OwnChoice) => {
                     self.written.remove(key);
-                    self.own.insert(*key);
+                    let why = "chose its own processors".to_owned();
+                    self.own.insert(*key, (wanted.target, why));
+                }
+                Err(e) => {
+                    self.written.remove(key);
+                    self.own.insert(*key, (wanted.target, e));
                 }
             }
         }
@@ -439,7 +476,12 @@ impl Rescue {
                 let parts: Vec<String> = s
                     .parts
                     .iter()
-                    .map(|(app, cpus)| format!("{app} on CPUs {}", numbers(topology, cpus)))
+                    .map(|(app, cpus)| {
+                        format!(
+                            "{app} on CPUs {}",
+                            wtm_policy::processor_numbers(topology, cpus)
+                        )
+                    })
                     .collect();
                 self.events.info(
                     None,
@@ -465,7 +507,7 @@ impl Rescue {
                     format!(
                         "reserve_cores '{}'{would}: CPUs {} kept for its app",
                         r.entry,
-                        numbers(topology, &r.cpus)
+                        wtm_policy::processor_numbers(topology, &r.cpus)
                     ),
                 );
             }
@@ -543,20 +585,8 @@ fn written(p: &ProcessInfo, placement: &Placement, how: How) -> Written {
         strict: matches!(how, How::Affinity { .. }),
         rescue: placement.why.contains(&Why::Rescue),
         entries: placement.why.iter().any(|w| *w != Why::Rescue),
+        why: placement.why.iter().map(Why::to_string).collect(),
     }
-}
-
-/// CPU Set ids as processor numbers across groups, ranges joined: `0-3,8`.
-fn numbers(topology: &Topology, ids: &[u32]) -> String {
-    let mut all: Vec<_> = topology.cpus.iter().collect();
-    all.sort_by_key(|c| (c.group, c.index));
-    let list = all
-        .iter()
-        .enumerate()
-        .filter(|(_, c)| ids.contains(&c.id))
-        .filter_map(|(i, _)| u16::try_from(i).ok())
-        .collect();
-    CoreSpec::List(list).to_string()
 }
 
 fn cpu_names(split: &RescueSplit) -> String {
@@ -913,6 +943,48 @@ mod placement_tests {
         // keeps every core.
         tick(&mut r, t + Duration::from_secs(1), &both);
         assert_eq!(fake.take(), ["release 10"]);
+    }
+
+    #[test]
+    fn the_status_says_where_each_process_runs_and_why() {
+        let fake = Fake::default();
+        fake.own.lock().unwrap().insert(30);
+        let mut r = rescue(&fake, &EventLog::default());
+        r.set_placement(placement(&format!(
+            "{SEPARATE}
+[[pin]]
+name = \"Other\"
+match = {{ name = \"other.exe\" }}
+cores = 1"
+        )));
+        tick(
+            &mut r,
+            Instant::now(),
+            &snapshot(
+                10.0,
+                vec![
+                    proc(10, "game.exe"),
+                    proc(20, "obs64.exe"),
+                    proc(30, "other.exe"),
+                ],
+            ),
+        );
+        let status = r.placement_status().unwrap();
+        assert_eq!(status.topology, hybrid());
+        let game = &status.placed[0];
+        assert_eq!(
+            (game.target.pid, game.why.clone(), game.cpus.len()),
+            (10, vec!["separate 'Game and stream'".to_owned()], 8)
+        );
+        assert_eq!(status.splits.len(), 1);
+        assert_eq!(
+            status.left_alone,
+            [(
+                ProcessRef::from(&proc(30, "other.exe")),
+                "chose its own processors".to_owned()
+            )]
+        );
+        assert!(!status.dry_run);
     }
 
     #[test]

@@ -12,7 +12,7 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 use std::fmt;
 use std::time::{Duration, Instant};
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use wtm_core::ProcessInfo;
 use wtm_core::cpu::Topology;
 
@@ -347,7 +347,7 @@ pub struct Placement {
 }
 
 /// A separation group's split while two or more of its apps run.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Split {
     pub entry: String,
     /// The app pattern of each running member and its CPU Set ids.
@@ -355,7 +355,7 @@ pub struct Split {
 }
 
 /// Cores reserved for a running owner.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Reservation {
     pub entry: String,
     pub cpus: Vec<u32>,
@@ -516,6 +516,21 @@ struct ActiveSplit {
 struct ActiveReserve {
     cpus: BTreeSet<u32>,
     owners: Vec<bool>,
+}
+
+/// CPU Set ids as logical processor numbers, counted across processor
+/// groups in order and with ranges joined: `0-3,8`. The numbering of
+/// [`CoreSpec::List`].
+pub fn processor_numbers(topology: &Topology, ids: &[u32]) -> String {
+    let mut all: Vec<_> = topology.cpus.iter().collect();
+    all.sort_by_key(|c| (c.group, c.index));
+    let list = all
+        .iter()
+        .enumerate()
+        .filter(|(_, c)| ids.contains(&c.id))
+        .filter_map(|(i, _)| u16::try_from(i).ok())
+        .collect();
+    CoreSpec::List(list).to_string()
 }
 
 /// Splits `total` cores by `weights` (`total` is at least their count):
