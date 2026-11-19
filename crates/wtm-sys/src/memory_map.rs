@@ -243,7 +243,9 @@ impl ProcessHandle {
     /// header, the default heap by the PEB), the PEB and, for each of
     /// `threads` (thread IDs; at most 4,096), its TEB and stack. Needs the
     /// right to read the process's memory: without it this fails and
-    /// names nothing. A thread that exits or refuses to be opened meanwhile
+    /// names nothing. A process still starting may have no default heap
+    /// yet, which is then left unnamed. A thread that exits or refuses to
+    /// be opened meanwhile
     /// is left out; at `deadline` naming stops and the map is marked
     /// incomplete.
     pub fn name_usage(
@@ -255,14 +257,24 @@ impl ProcessHandle {
         let mut marks = Vec::new();
         let peb = self.peb_address()?;
         marks.push((peb as u64, Usage::Peb { wow64: false }));
-        let default = self.remote_word(self.remote_word(peb + PEB_PROCESS_HEAPS)?)? as u64;
-        marks.push((
-            default,
-            Usage::Heap {
-                default: true,
-                wow64: false,
-            },
-        ));
+        // Reading the PEB fails without the right to read the process. A
+        // process still starting, before its loader ran, has no heap list
+        // yet: its PEB and threads are still named.
+        let heaps = self.remote_word(peb + PEB_PROCESS_HEAPS)?;
+        let default = (heaps != 0)
+            .then(|| self.remote_word(heaps).ok())
+            .flatten()
+            .filter(|&heap| heap != 0)
+            .map(|heap| heap as u64);
+        if let Some(heap) = default {
+            marks.push((
+                heap,
+                Usage::Heap {
+                    default: true,
+                    wow64: false,
+                },
+            ));
+        }
         let peb32 = self.peb32_address().ok().flatten();
         let mut default32 = None;
         if let Some(peb32) = peb32 {
@@ -290,7 +302,7 @@ impl ProcessHandle {
             // Heaps Windows shares between processes (such as the one for
             // talking to csrss) live in shared memory without a file.
             let heap_kind = matches!(a.kind, MemoryKind::Private | MemoryKind::Shareable);
-            if !heap_kind || a.committed == 0 || a.base == default {
+            if !heap_kind || a.committed == 0 || Some(a.base) == default {
                 continue;
             }
             if Instant::now() > deadline {
@@ -709,6 +721,34 @@ mod tests {
                     wow64: false
                 }
             ]
+        );
+    }
+
+    #[test]
+    fn a_process_still_starting_has_its_peb_named_without_a_heap() {
+        // Started suspended, before its loader ran: the PEB exists but its
+        // heap list does not yet. One small child, ended below.
+        use std::os::windows::process::CommandExt;
+        const CREATE_SUSPENDED: u32 = 0x4;
+        let mut child = std::process::Command::new(r"C:\Windows\System32\cmd.exe")
+            .args(["/d", "/c", "exit"])
+            .creation_flags(CREATE_SUSPENDED)
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::null())
+            .spawn()
+            .unwrap();
+        let pid = child.id();
+        let h = ProcessHandle::open(pid, Access::READ_PARAMETERS).unwrap();
+        let mut map = h.memory_map().unwrap();
+        let deadline = Instant::now() + Duration::from_secs(10);
+        let named = h.name_usage(&mut map, &thread_ids(pid), deadline);
+        let _ = child.kill();
+        let _ = child.wait();
+        named.unwrap();
+        assert!(all_usage(&map).any(|(_, u)| u == Usage::Peb { wow64: false }));
+        assert!(
+            !all_usage(&map).any(|(_, u)| matches!(u, Usage::Heap { default: true, .. })),
+            "{map:?}"
         );
     }
 

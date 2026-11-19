@@ -727,7 +727,7 @@
   },
   "CPU uses Docker conventions: 100% per core on Linux.": {
     "tr": "CPU, Docker ölçümünü kullanır: Linux üzerinde çekirdek başına %100.",
-    "de": "CPU nach Docker-Konvention: 100 % pro Kern unter Linux.",
+    "de": "CPU nach Docker-Konvention: 100% pro Kern unter Linux.",
     "fr": "CPU selon Docker : 100 % par cœur sous Linux.",
     "es": "CPU según Docker: 100 % por núcleo en Linux."
   },
@@ -1987,7 +1987,7 @@
   },
   "At least 5% of the whole machine; excludes the idle process": {
     "tr": "Bilgisayarın en az %5'i; boşta işlemi hariç",
-    "de": "Mindestens 5 % des PCs; ohne Leerlaufprozess",
+    "de": "Mindestens 5% des PCs; ohne Leerlaufprozess",
     "fr": "Au moins 5 % du PC ; hors processus inactif",
     "es": "Al menos 5 % del equipo; excluye el proceso inactivo"
   },
@@ -3049,7 +3049,7 @@
   },
   "Never stuck at 100% CPU": {
     "tr": "CPU hiçbir zaman %100'de takılmaz",
-    "de": "Nie bei 100 % CPU stecken bleiben",
+    "de": "Nie bei 100% CPU stecken bleiben",
     "fr": "Ne restez plus à 100 % de CPU",
     "es": "Sin bloqueos al 100 % de CPU"
   },
@@ -5071,19 +5071,19 @@
   },
   "Above 95% CPU for 10 s: lower the priority and use efficiency mode for the top 2 apps.": {
     "tr": "10 sn boyunca %95 üzeri: en yoğun 2 uygulamaya düşük öncelik ve verimlilik modu.",
-    "de": "Über 95 % CPU für 10 s: niedrigere Priorität und Effizienzmodus für die 2 stärksten Apps.",
+    "de": "Über 95% CPU für 10 s: niedrigere Priorität und Effizienzmodus für die 2 stärksten Apps.",
     "fr": "CPU > 95 % pendant 10 s : priorité réduite et efficacité pour les 2 applications les plus actives.",
     "es": "CPU > 95 % durante 10 s: prioridad reducida y eficiencia para las 2 aplicaciones más activas."
   },
   "Above 90% CPU for 5 s: lower priority, efficiency mode, then cap the top 3 apps to half, then a quarter.": {
     "tr": "5 sn boyunca %90 üzeri: en yoğun 3 uygulamaya düşük öncelik, verimlilik, ardından yarım ve çeyrek sınır.",
-    "de": "Über 90 % CPU für 5 s: Priorität, Effizienzmodus, dann halbe und viertel CPU für die 3 stärksten Apps.",
+    "de": "Über 90% CPU für 5 s: Priorität, Effizienzmodus, dann halbe und viertel CPU für die 3 stärksten Apps.",
     "fr": "CPU > 90 % pendant 5 s : priorité, efficacité, puis moitié et quart pour les 3 applications les plus actives.",
     "es": "CPU > 90 % durante 5 s: prioridad, eficiencia y luego mitad y cuarto para las 3 aplicaciones más activas."
   },
   "Above 80% CPU for 3 s: idle priority, efficiency mode, then caps down to a tenth for the top 5 apps.": {
     "tr": "3 sn boyunca %80 üzeri: en yoğun 5 uygulamaya boşta önceliği, verimlilik ve onda bire inen sınır.",
-    "de": "Über 80 % CPU für 3 s: Leerlaufpriorität, Effizienzmodus und bis zu einem Zehntel für die 5 stärksten Apps.",
+    "de": "Über 80% CPU für 3 s: Leerlaufpriorität, Effizienzmodus und bis zu einem Zehntel für die 5 stärksten Apps.",
     "fr": "CPU > 80 % pendant 3 s : priorité inactive, efficacité et limites jusqu'au dixième pour les 5 applications les plus actives.",
     "es": "CPU > 80 % durante 3 s: prioridad inactiva, eficiencia y límites hasta un décimo para las 5 aplicaciones más activas."
   },
@@ -5707,7 +5707,7 @@
   },
   "Window drawing: {0} ms on average, {1} ms for 95% of frames, {2} ms at worst": {
     "tr": "Pencere çizimi: ortalama {0} ms, karelerin %95'inde {1} ms, en kötü {2} ms",
-    "de": "Fensteraufbau: im Schnitt {0} ms, {1} ms bei 95 % der Frames, höchstens {2} ms",
+    "de": "Fensteraufbau: im Schnitt {0} ms, {1} ms bei 95% der Frames, höchstens {2} ms",
     "fr": "Affichage de la fenêtre : {0} ms en moyenne, {1} ms pour 95 % des images, {2} ms au pire",
     "es": "Dibujo de la ventana: {0} ms de media, {1} ms en el 95 % de los fotogramas, {2} ms en el peor caso"
   },
@@ -5815,7 +5815,7 @@
   },
   "GPU active (5% or more)": {
     "tr": "GPU etkin (%5 veya fazla)",
-    "de": "GPU aktiv (ab 5 %)",
+    "de": "GPU aktiv (ab 5%)",
     "fr": "GPU actif (5 % ou plus)",
     "es": "GPU activa (5 % o más)"
   },
@@ -6157,7 +6157,7 @@
   },
   "{0}% busy": {
     "tr": "%{0} meşgul",
-    "de": "{0} % ausgelastet",
+    "de": "{0}% ausgelastet",
     "fr": "{0} % occupé",
     "es": "{0} % ocupado"
   },
@@ -11491,7 +11491,7 @@
   },
   "Docker shows {0} (100% per core).": {
     "tr": "Docker {0} gösteriyor (çekirdek başına %100).",
-    "de": "Docker zeigt {0} (100 % pro Kern).",
+    "de": "Docker zeigt {0} (100% pro Kern).",
     "fr": "Docker affiche {0} (100 % par cœur).",
     "es": "Docker muestra {0} (100 % por núcleo)."
   },
@@ -11593,7 +11593,7 @@
   },
   "CPU (100% per core)": {
     "tr": "CPU (çekirdek başına %100)",
-    "de": "CPU (100 % pro Kern)",
+    "de": "CPU (100% pro Kern)",
     "fr": "CPU (100 % par cœur)",
     "es": "CPU (100 % por núcleo)"
   },

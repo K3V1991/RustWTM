@@ -3565,7 +3565,7 @@ fn details_panel(
             row(crate::i18n::tr("Parent PID"), p.parent_pid.to_string());
             row(crate::i18n::tr("Session"), p.session_id.to_string());
             row(crate::i18n::tr("Uptime"), uptime(p.start_time()));
-            row("CPU", crate::i18n::percent(format!("{:.2}", p.cpu_percent)));
+            row("CPU", crate::i18n::percent(format!("{:.1}", p.cpu_percent)));
             row(
                 crate::i18n::tr("CPU time"),
                 crate::i18n::decimal(format!("{:.1} s", p.cpu_time.as_secs_f64())),

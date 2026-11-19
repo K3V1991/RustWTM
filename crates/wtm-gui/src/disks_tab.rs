@@ -683,9 +683,9 @@ fn analysis(ui: &mut Ui, view: &mut DisksView) {
                 "Scanning {0}: {1} files, {2} in {3} folders ({4} s)",
                 &[
                     scan.path.display().to_string(),
-                    p.files.load(Ordering::Relaxed).to_string(),
+                    crate::perf_pages::count(p.files.load(Ordering::Relaxed) as f64),
                     format_bytes(p.bytes.load(Ordering::Relaxed) as f64),
-                    p.folders.load(Ordering::Relaxed).to_string(),
+                    crate::perf_pages::count(p.folders.load(Ordering::Relaxed) as f64),
                     scan.started.elapsed().as_secs().to_string(),
                 ],
             ));
@@ -726,8 +726,8 @@ fn summary(ui: &mut Ui, r: &ScanResult) {
         "{0} in {1} files and {2} folders, scanned in {3} s",
         &[
             format_bytes(r.root.size as f64),
-            r.root.files.to_string(),
-            r.folders.to_string(),
+            crate::perf_pages::count(r.root.files as f64),
+            crate::perf_pages::count(r.folders as f64),
             crate::i18n::decimal(format!("{:.1}", r.elapsed.as_secs_f64())),
         ],
     );
