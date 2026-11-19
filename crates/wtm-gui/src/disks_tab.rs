@@ -848,7 +848,7 @@ fn size_cells(row: &mut egui_extras::TableRow<'_, '_>, size: u64, files: u64, pa
     row.col(|ui| {
         crate::theme::table_cell(ui, |ui| {
             ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
-                ui.label(files.to_string());
+                ui.label(crate::perf_pages::count(files as f64));
             });
         })
     });
@@ -1193,7 +1193,7 @@ fn types(ui: &mut Ui, r: &ScanResult) {
                         bar(ui, s, 160.0, ACCENT);
                         ui.label(crate::i18n::percent(format!("{:.1}", s * 100.0)));
                     });
-                    ui.label(t.files.to_string());
+                    ui.label(crate::perf_pages::count(t.files as f64));
                     crate::theme::end_row(ui);
                 }
             });
