@@ -73,9 +73,34 @@ fn group_title(title: &str) -> &str {
     }
 }
 
-/// `**bold**`, `*emphasis*` and `` `code` `` spans of an entry as plain text.
+/// `**bold**`, `*emphasis*`, `` `code` `` spans and `[text](target)` links of
+/// an entry as plain text; a link shows its text.
 fn plain(entry: &str) -> String {
-    entry.replace("**", "").replace(['*', '`'], "")
+    let text = entry.replace("**", "").replace(['*', '`'], "");
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text.as_str();
+    while let Some(open) = rest.find('[') {
+        let after = &rest[open + 1..];
+        let link = after.find("](").and_then(|close| {
+            let shown = &after[..close];
+            let end = after[close + 2..].find(')')?;
+            // Not a link: brackets inside, as in a TOML table name.
+            (!shown.contains(['[', ']'])).then_some((close, close + 2 + end + 1))
+        });
+        match link {
+            Some((close, next)) => {
+                out.push_str(&rest[..open]);
+                out.push_str(&after[..close]);
+                rest = &after[next..];
+            }
+            None => {
+                out.push_str(&rest[..=open]);
+                rest = after;
+            }
+        }
+    }
+    out.push_str(rest);
+    out
 }
 
 /// A card with the notes of this version, its groups expandable.
@@ -155,6 +180,12 @@ mod tests {
         assert_eq!(groups[1].entries, ["A fix."]);
         assert_eq!(plain(&groups[0].entries[1]), "code second.");
         assert_eq!(plain("*Settings* → **AI**"), "Settings → AI");
+        assert_eq!(
+            plain(
+                "**Core placement** ([design](docs/core-placement.md)). `[[pin]]` keeps [a](b) [c]"
+            ),
+            "Core placement (design). [[pin]] keeps a [c]"
+        );
         assert_eq!(
             section(SAMPLE, "Unreleased").unwrap().1[0].entries,
             ["Next thing."]
