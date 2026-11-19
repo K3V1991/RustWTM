@@ -42,6 +42,9 @@ extract the release ZIP and open `rustwtm.exe`.
 - **Protect responsiveness.** Preview CPU throttling, per-app budgets, rules
   and optional working-set trimming before enabling enforcement.
   [Configuration](docs/configuration.md) · [Memory Guard measurements](docs/memory-guard.md)
+- **Place apps on cores.** Keep an app on chosen cores, keep apps apart
+  while they run together, or reserve cores for one app.
+  [Core placement](docs/core-placement.md)
 - **Manage Windows and local workloads.** Review startup entries, services,
   installed apps and packages, inspect disk usage and monitor local Docker
   containers. [Installed apps](docs/inventory-app-management.md) · [Docker](docs/docker.md)

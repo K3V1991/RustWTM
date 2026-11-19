@@ -6,8 +6,43 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.37.0] - 2026-11-19
+
+[Release scope and validation](docs/0.37.0-review.md)
+
+Core placement: keep an app on chosen cores, keep apps apart while they
+run together, or reserve cores for one app while it runs. Telegram reports
+only in standard builds and Memory Guard is opt-in in new configurations.
+IPC moves to protocol 19: update the service and the window together (the
+MSI does both).
+
+### Added
+
+- **Core placement** ([design and measurements](docs/core-placement.md)).
+  `[[pin]]` keeps an app on chosen cores: processor numbers (`"0-3,8"`),
+  a tier (`"performance"`, `"efficient"`) or a count of the fastest
+  physical cores. `[[separate]]` splits the cores between apps that run
+  together, by weights, the first app getting the fastest cores, and gives
+  them back when one exits. `[[reserve_cores]]` keeps cores for one app
+  while it runs and everything else off them. The service writes Windows
+  CPU Sets (hard affinity for `strict` entries), by physical core, after
+  the rescue core; programs an app starts count as part of it, since
+  Windows does not pass CPU Sets on to them. A process that chose its own
+  processors is left alone. Every write is recorded, so a restart after a
+  crash gives the cores back.
+- A **Cores** page under *Protect*: the processors as tiles with who holds
+  each, the processes placed and why, and an editor for *Keep on cores*,
+  *Keep apart* and *Reserve cores* that previews an entry on the apps
+  running now before it is saved. In all 26 languages.
+- `wtm cores` shows the service's plan under the processor layout;
+  `wtm cores explain <pid>` says why a process has its processors.
+
 ### Changed
 
+- IPC protocol 19: the status carries the core plan. A 0.36 service and a
+  0.37 window refuse each other until both are updated.
+- The rescue core is applied through the core plan: pinned and separated
+  apps move off it too while it is engaged.
 - Standard builds now limit Telegram to reporting. A service built with
   `telegram-control` requires local opt-in and an allowed private chat for
   system actions. Process arguments are excluded from Telegram's `/info`.
@@ -2121,7 +2156,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.36.4...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.37.0...HEAD
+[0.37.0]: https://github.com/rustwtm/rustwtm/compare/v0.36.4...v0.37.0
 [0.36.4]: https://github.com/rustwtm/rustwtm/compare/v0.36.3...v0.36.4
 [0.36.3]: https://github.com/rustwtm/rustwtm/compare/v0.36.2...v0.36.3
 [0.36.2]: https://github.com/rustwtm/rustwtm/compare/v0.36.1...v0.36.2
