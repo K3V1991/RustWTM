@@ -439,7 +439,10 @@ pub fn data() -> Data {
     };
     let mut d = Data {
         mode: Mode::Local,
-        sample_received_at: Some(Instant::now()),
+        // Received "later" so the sample never ages into the out-of-date
+        // banner during a test: on a slow runner the banner appeared between
+        // finding a row and clicking it, and the click missed the row.
+        sample_received_at: Some(Instant::now() + Duration::from_secs(86_400)),
         snapshot: Some(Arc::new(snapshot())),
         status: Some(Status {
             dry_run: true,
@@ -603,6 +606,17 @@ pub fn data() -> Data {
         d.history.gpu.push_back(3.0);
     }
     d
+}
+
+#[test]
+fn the_fixture_sample_stays_current_however_long_a_test_runs() {
+    let d = data();
+    for later in [0, 5, 60, 3600] {
+        assert!(matches!(
+            d.sample_freshness(Instant::now() + Duration::from_secs(later)),
+            crate::backend::SampleFreshness::Current(_)
+        ));
+    }
 }
 
 struct ProcState {
