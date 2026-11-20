@@ -6,6 +6,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Turning on *Always open RustWTM as administrator* no longer fails with
+  "Windows Task Scheduler request timed out" on a slow or freshly started
+  machine: Windows PowerShell gets 60 seconds instead of 15 to register,
+  remove or start RustWTM's administrator tasks.
+
 ## [0.38.1] - 2026-11-20
 
 [Release scope and validation](docs/0.38.1-review.md)

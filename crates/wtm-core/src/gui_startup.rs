@@ -11,6 +11,11 @@ const RUN: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 const MARKER: &str = "RustWTM administrator launch v1";
 pub const SCHEDULED_OPEN: &str = "--scheduled-open";
 const SCHEDULED_BACKGROUND: &str = "--scheduled-open --background";
+/// How long Windows PowerShell gets to register or remove the tasks. Its
+/// first start on a fresh machine, with the ScheduledTasks module loading,
+/// took longer than the 15 s allowed before on CI runners (killed at
+/// exactly 15 s in 8 of 21 upgrade jobs).
+const TASK_SCHEDULER_TIMEOUT: Duration = Duration::from_secs(60);
 
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, serde::Serialize)]
 pub struct Settings {
@@ -109,7 +114,7 @@ fn run(script: &str) -> Result<(), String> {
         })
         .spawn()
         .map_err(|e| e.to_string())?;
-    let until = Instant::now() + Duration::from_secs(15);
+    let until = Instant::now() + TASK_SCHEDULER_TIMEOUT;
     loop {
         match child.try_wait() {
             Ok(Some(status)) => {
