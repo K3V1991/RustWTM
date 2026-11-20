@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.38.2] - 2026-11-20
+
+[Release scope and validation](docs/0.38.2-review.md)
+
 ### Fixed
 
 - Turning on *Always open RustWTM as administrator* no longer fails with
@@ -2242,7 +2246,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.38.1...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.38.2...HEAD
+[0.38.2]: https://github.com/rustwtm/rustwtm/compare/v0.38.1...v0.38.2
 [0.38.1]: https://github.com/rustwtm/rustwtm/compare/v0.38.0...v0.38.1
 [0.38.0]: https://github.com/rustwtm/rustwtm/compare/v0.37.1...v0.38.0
 [0.37.1]: https://github.com/rustwtm/rustwtm/compare/v0.37.0...v0.37.1
