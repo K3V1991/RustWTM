@@ -508,6 +508,10 @@ struct UiState {
     /// When the Processes tab last asked for the service list (service host
     /// names); apart from `last_load`, so opening Services still loads it.
     hosted_services_loaded: Option<Instant>,
+    /// Stops the reload timers in a test that compares the commands sent:
+    /// on a slow runner they added reloads to the list.
+    #[cfg(test)]
+    frozen_now: Option<Instant>,
     /// The Limits column of the process table, for this data revision and
     /// language.
     limit_labels: Option<((u64, crate::i18n::Language), ManagedMap)>,
@@ -884,8 +888,21 @@ impl Default for UiState {
             last_update_check: None,
             last_load: HashMap::new(),
             hosted_services_loaded: None,
+            #[cfg(test)]
+            frozen_now: None,
             limit_labels: None,
         }
+    }
+}
+
+impl UiState {
+    /// Now, for the timers that reload a page's data.
+    fn reload_now(&self) -> Instant {
+        #[cfg(test)]
+        if let Some(now) = self.frozen_now {
+            return now;
+        }
+        Instant::now()
     }
 }
 
@@ -946,14 +963,15 @@ impl eframe::App for App {
         }
         tray.set_numbers(ctx, &self.state.numeric_tray, readings);
         drop(data);
+        let now = self.state.reload_now();
         if tray.temperature_active()
             && self
                 .state
                 .last_load
                 .get(&Panel::Sensors)
-                .is_none_or(|at| at.elapsed() >= Duration::from_secs(2))
+                .is_none_or(|at| now.saturating_duration_since(*at) >= Duration::from_secs(2))
         {
-            self.state.last_load.insert(Panel::Sensors, Instant::now());
+            self.state.last_load.insert(Panel::Sensors, now);
             self.backend.send(UiCommand::Load(Panel::Sensors));
         }
     }
@@ -2223,14 +2241,15 @@ impl eframe::App for App {
                 backend.send(UiCommand::LoadDeviceHistory { device, hours });
             }
         }
+        let now = state.reload_now();
         if state.tab == Tab::History {
             let stale = state
                 .last_load
                 .get(&Panel::History)
-                .is_none_or(|t| t.elapsed() >= Duration::from_secs(60));
+                .is_none_or(|t| now.saturating_duration_since(*t) >= Duration::from_secs(60));
             if stale || state.history_dirty {
                 state.history_dirty = false;
-                state.last_load.insert(Panel::History, Instant::now());
+                state.last_load.insert(Panel::History, now);
                 let hours = state.history.hours;
                 backend.send(UiCommand::LoadHistory { hours });
                 if let Some(app) = state.history.selected.clone() {
@@ -2266,9 +2285,9 @@ impl eframe::App for App {
             && state
                 .last_load
                 .get(&panel)
-                .is_none_or(|t| t.elapsed() >= every)
+                .is_none_or(|t| now.saturating_duration_since(*t) >= every)
         {
-            state.last_load.insert(panel, Instant::now());
+            state.last_load.insert(panel, now);
             backend.send(UiCommand::Load(panel));
         }
         // The details panel lists the selected process's ports.
@@ -2277,18 +2296,18 @@ impl eframe::App for App {
             && state
                 .last_load
                 .get(&Panel::Network)
-                .is_none_or(|t| t.elapsed() >= Duration::from_secs(5))
+                .is_none_or(|t| now.saturating_duration_since(*t) >= Duration::from_secs(5))
         {
-            state.last_load.insert(Panel::Network, Instant::now());
+            state.last_load.insert(Panel::Network, now);
             backend.send(UiCommand::Load(Panel::Network));
         }
         // Service host rows name the services they run.
         if state.tab == Tab::Processes
             && state
                 .hosted_services_loaded
-                .is_none_or(|t| t.elapsed() >= Duration::from_secs(15))
+                .is_none_or(|t| now.saturating_duration_since(t) >= Duration::from_secs(15))
         {
-            state.hosted_services_loaded = Some(Instant::now());
+            state.hosted_services_loaded = Some(now);
             backend.send(UiCommand::Load(Panel::Services));
         }
         for intent in intents {
@@ -10582,6 +10601,7 @@ o-such-folder",
                     tab: Tab::Processes,
                     // Its command list is compared exactly.
                     check_updates: false,
+                    frozen_now: Some(Instant::now()),
                     ..Default::default()
                 },
                 tray: None,
@@ -10747,6 +10767,36 @@ o-such-folder",
                 "service Fax Start",
             ]
         );
+    }
+
+    #[test]
+    fn page_reloads_follow_the_clock_a_test_can_freeze() {
+        let start = Instant::now();
+        let (backend, rx) = Backend::offline(data());
+        let mut h = Harness::builder()
+            .allow_missing_glyphs()
+            .with_size([1400.0, 900.0])
+            .build_eframe(|_| App {
+                backend,
+                state: UiState {
+                    tab: Tab::Services,
+                    check_updates: false,
+                    frozen_now: Some(start),
+                    ..Default::default()
+                },
+                tray: None,
+                frames: Default::default(),
+            });
+        let sent = |h: &mut Harness<'_, App>| {
+            h.run_steps(2);
+            rx.try_iter().map(describe_command).collect::<Vec<_>>()
+        };
+        assert_eq!(sent(&mut h), ["load Services"]);
+        // Held still, however long the runner takes: no reload.
+        assert!(sent(&mut h).is_empty());
+        // Five seconds on, Services reloads.
+        h.state_mut().state.frozen_now = Some(start + Duration::from_secs(6));
+        assert_eq!(sent(&mut h), ["load Services"]);
     }
 
     #[test]
