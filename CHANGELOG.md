@@ -6,6 +6,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The PowerShell uninstaller verifies the service's executable path and
+  closes only programs from the selected installation. A native removal
+  or cleanup failure stops teardown before files or shortcuts are removed.
+  Paths containing brackets are handled literally, and a failed launch
+  cleans up the temporary uninstaller.
+
 ## [0.38.0] - 2026-11-19
 
 [Release scope and validation](docs/0.38.0-review.md)

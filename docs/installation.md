@@ -54,6 +54,11 @@ verified above, launch that MSI directly.
 The first and third commands require an elevated PowerShell. For a
 script-installed copy, run `uninstall.ps1` from its installed directory.
 Add `-RemoveData` only to remove saved configuration and history as well.
+For a custom script installation, pass its directory with `-InstallDir`.
+The script checks installation ownership before it stops services or removes
+files. If native cleanup fails, it reports the error and keeps the files
+available for a retry. Remove a portable copy by closing its programs and
+deleting its own directory.
 
 `-DownloadOnly` defaults to `%LOCALAPPDATA%\RustWTM\portable`. Close programs
 running from that directory before updating the portable files. Use a separate

@@ -85,6 +85,10 @@ jobs:
         shell: pwsh
         run: scripts/ci/test-install-lifecycle.ps1
 
+      - name: Uninstaller lifecycle controls
+        shell: pwsh
+        run: scripts/ci/test-uninstall-lifecycle.ps1
+
       - name: Website package publication controls
         run: python scripts/ci/test-publish-website-media.py
 
