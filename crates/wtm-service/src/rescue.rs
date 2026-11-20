@@ -1036,15 +1036,21 @@ cores = 1"
         r.set_placement(placement(
             "[[reserve_cores]]\nname = \"Audio\"\napp = \"reaper.exe\"\ncores = 1\nhold_secs = 0",
         ));
-        // PIDs low enough to be Windows' own are protected: start higher.
-        let mut procs = vec![proc(1000, "reaper.exe")];
-        procs.extend((1001..1700).map(|pid| proc(pid, "worker.exe")));
+        const ELIGIBLE: usize = 700;
+        let self_pid = std::process::id();
+        let mut pids = (1000..=1700).filter(|pid| *pid != self_pid);
+        // Include the protected test process alongside 700 eligible fixtures.
+        let mut procs = vec![
+            proc(pids.next().unwrap(), "reaper.exe"),
+            proc(self_pid, "worker.exe"),
+        ];
+        procs.extend(pids.take(ELIGIBLE - 1).map(|pid| proc(pid, "worker.exe")));
         let snap = snapshot(10.0, procs);
         let t = Instant::now();
         tick(&mut r, t, &snap);
         assert_eq!(fake.take().len(), PER_TICK);
         tick(&mut r, t + Duration::from_secs(1), &snap);
-        assert_eq!(fake.take().len(), 700 - PER_TICK);
+        assert_eq!(fake.take().len(), ELIGIBLE - PER_TICK);
     }
 
     #[test]
