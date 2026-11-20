@@ -6,8 +6,22 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.38.1] - 2026-11-20
+
+[Release scope and validation](docs/0.38.1-review.md)
+
+Fixes found by running App power against a real power plan, and a safer
+PowerShell uninstaller.
+
 ### Fixed
 
+- Game mode no longer reports switching to High performance and back
+  when that plan is already in use; nothing is switched, saved or
+  logged then.
+- After you chose another power plan while an App power entry was
+  active, a game starting next got no power plan; it now switches as
+  usual and gives your plan back afterwards. The *App power* page no
+  longer names RustWTM's plan once you chose another.
 - The PowerShell uninstaller verifies the service's executable path and
   closes only programs from the selected installation. A native removal
   or cleanup failure stops teardown before files or shortcuts are removed.
@@ -2221,7 +2235,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.38.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.38.1...HEAD
+[0.38.1]: https://github.com/rustwtm/rustwtm/compare/v0.38.0...v0.38.1
 [0.38.0]: https://github.com/rustwtm/rustwtm/compare/v0.37.1...v0.38.0
 [0.37.1]: https://github.com/rustwtm/rustwtm/compare/v0.37.0...v0.37.1
 [0.37.0]: https://github.com/rustwtm/rustwtm/compare/v0.36.4...v0.37.0
