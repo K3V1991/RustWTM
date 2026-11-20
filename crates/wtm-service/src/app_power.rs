@@ -170,6 +170,8 @@ impl PowerKeeper {
         }
     }
 
+    /// The plan in force for the request served now; none once the user
+    /// chose another.
     pub fn switched(&self) -> Option<Switched> {
         let (_, name) = self.applied.as_ref()?;
         Some(Switched {
@@ -255,12 +257,20 @@ impl PowerKeeper {
                 self.events
                     .info(None, format!("power plan {kept} chosen meanwhile is kept"));
                 self.forget_original();
+                // Nothing of RustWTM's is in force any more: the next
+                // request starts from the user's plan.
+                self.applied = None;
                 self.overridden = Some(request);
                 return;
             }
             if same(applied, &guid) {
                 return;
             }
+        } else if same(&active, &guid) {
+            // Already in use: nothing to switch or to give back, but a plan
+            // the user chooses meanwhile is still theirs to keep.
+            self.applied = Some((guid, name));
+            return;
         }
         if self.original.is_none() {
             // Written first: a crash right after switching still finds it.
@@ -382,7 +392,8 @@ impl PowerKeeper {
     /// Gives the plan back and lets the computer sleep (the service stops,
     /// or monitoring only).
     pub fn release(&mut self, reason: &str) {
-        if self.applied.is_some() {
+        // Only a plan RustWTM replaced has anything to give back.
+        if self.applied.is_some() && self.original.is_some() {
             self.events
                 .info(None, format!("{reason}: power plan given back"));
         }
@@ -539,6 +550,8 @@ mod tests {
         k.tick(render, None);
         assert_eq!(fake.active(), SAVER);
         assert!(!path.exists());
+        // The window does not name a plan that is no longer in force.
+        assert_eq!(k.switched(), None);
         k.tick(None, None);
         assert_eq!(fake.active(), SAVER);
         // A later request is served again.
@@ -552,6 +565,78 @@ mod tests {
         assert_eq!(
             log(&events).last().unwrap(),
             "power plan chosen meanwhile is kept"
+        );
+    }
+
+    #[test]
+    fn a_plan_already_in_use_is_neither_switched_nor_given_back() {
+        // Seen on a machine on High performance: every game logged a switch
+        // to it and back, and wrote the plan to disk for nothing.
+        let (fake, path) = (Fake::new(), file("already"));
+        fake.user_chooses(HIGH);
+        let (mut k, events) = keeper(&fake, &path, false);
+        let game = ask(None, HIGH);
+        k.tick(game.clone(), None);
+        k.tick(game.clone(), None);
+        assert!(!path.exists());
+        assert_eq!(
+            k.switched(),
+            Some(Switched {
+                name: "High performance".into(),
+                entry: None
+            })
+        );
+        k.tick(None, None);
+        k.release("service stopping");
+        assert!(fake.0.lock().unwrap().sets.is_empty());
+        assert!(log(&events).is_empty(), "{:?}", log(&events));
+
+        // Another plan asked for later is switched to and back to this one.
+        k.tick(game.clone(), None);
+        k.tick(ask(Some("Saver"), SAVER), None);
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), HIGH);
+        k.tick(None, None);
+        assert_eq!(fake.active(), HIGH);
+        assert_eq!(fake.0.lock().unwrap().sets, [SAVER, HIGH]);
+
+        // A plan the user chooses while it is in use is still kept.
+        k.tick(game.clone(), None);
+        fake.user_chooses(BALANCED);
+        k.tick(game, None);
+        k.tick(None, None);
+        assert_eq!(fake.active(), BALANCED);
+        assert_eq!(
+            log(&events),
+            [
+                "power plan Power saver for 'Saver'",
+                "power plan High performance again",
+                "power plan Balanced chosen meanwhile is kept",
+            ]
+        );
+    }
+
+    #[test]
+    fn a_request_after_an_override_is_served() {
+        let (fake, path) = (Fake::new(), file("after-override"));
+        let (mut k, events) = keeper(&fake, &path, false);
+        let render = ask(Some("Render"), HIGH);
+        k.tick(render.clone(), None);
+        fake.user_chooses(SAVER);
+        k.tick(render, None);
+        // A game starts while the entry still runs: game mode comes first.
+        k.tick(ask(None, BALANCED), None);
+        assert_eq!(fake.active(), BALANCED);
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), SAVER);
+        k.tick(None, None);
+        assert_eq!(fake.active(), SAVER);
+        assert_eq!(
+            log(&events),
+            [
+                "power plan High performance for 'Render'",
+                "power plan Power saver chosen meanwhile is kept",
+                "power plan Balanced for game mode",
+                "power plan Power saver again",
+            ]
         );
     }
 

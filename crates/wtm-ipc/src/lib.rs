@@ -277,7 +277,8 @@ pub struct Status {
 pub struct PowerStatus {
     /// The entries active now, in the order of the configuration.
     pub active: Vec<wtm_policy::ActiveEntry>,
-    /// The power plan RustWTM switched to, by name.
+    /// The power plan in force for the request, by name: switched to, or
+    /// already in use. `None` once the user chose another.
     pub plan: Option<String>,
     /// Who it is for: an entry's name, `None` for game mode.
     pub plan_for: Option<String>,
