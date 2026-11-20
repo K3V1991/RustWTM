@@ -7,6 +7,11 @@ use std::time::{Duration, Instant};
 
 const MAX_REPLY: usize = 1024 * 1024;
 static ACTIVE: AtomicUsize = AtomicUsize::new(0);
+/// How long a test gives Windows PowerShell to answer. Its first start on
+/// a fresh CI runner can take longer than the 10 s allowed before (a
+/// release CI job timed out on a one-line script).
+#[cfg(test)]
+pub(crate) const TEST_TIMEOUT: Duration = Duration::from_secs(60);
 struct Slot;
 impl Drop for Slot {
     fn drop(&mut self) {
@@ -110,7 +115,7 @@ mod tests {
     #[test]
     fn query_input_roundtrips_unicode_without_using_the_console_code_page() {
         let value = serde_json::json!({"version":"1.0-β","label":"Türkçe 測試"});
-        let output=super::json("[Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); [Console]::In.ReadToEnd() | ConvertFrom-Json | ConvertTo-Json -Compress",&value,std::time::Duration::from_secs(10)).unwrap();
+        let output=super::json("[Console]::OutputEncoding=New-Object System.Text.UTF8Encoding($false); [Console]::In.ReadToEnd() | ConvertFrom-Json | ConvertTo-Json -Compress",&value,super::TEST_TIMEOUT).unwrap();
         assert_eq!(output, value);
         assert!(
             super::json(

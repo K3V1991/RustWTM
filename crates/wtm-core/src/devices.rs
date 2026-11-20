@@ -605,7 +605,7 @@ mod tests {
         let result = crate::probe::json(
             &script,
             &serde_json::Value::Null,
-            std::time::Duration::from_secs(10),
+            crate::probe::TEST_TIMEOUT,
         )
         .unwrap();
         assert_eq!(result["used"].as_f64(), Some(103079215104.0));
