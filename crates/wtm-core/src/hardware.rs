@@ -78,6 +78,14 @@ pub struct HardwareReport {
 }
 
 impl HardwareReport {
+    /// A failed collection has no current readings or control state.
+    pub fn collection_failed(error: &str) -> Self {
+        Self {
+            notice: format!("Sensor collection failed: {error}"),
+            ..Self::default()
+        }
+    }
+
     pub fn fresh(&self, now: u64) -> bool {
         self.sampled_at_ms != 0
             && self.sampled_at_ms <= now.saturating_add(1000)
@@ -211,14 +219,23 @@ fn receive_reply(
 
 impl Drop for Bridge {
     fn drop(&mut self) {
-        // Normal shutdown requests defaults first. If the provider is stuck,
-        // its leases can only help while its watchdog/device API is responsive.
-        let _ = self.call(
-            serde_json::json!({"op":"restore_all"}),
-            Duration::from_secs(2),
-        );
+        // A failed restore keeps its lease. Give the responsive provider
+        // another attempt before stopping its watchdog.
+        restore_fans_on_shutdown(Instant::now() + Duration::from_secs(2), |remaining| {
+            self.call(serde_json::json!({"op":"restore_all"}), remaining)
+                .is_ok()
+        });
         let _ = self.child.kill();
         let _ = self.child.wait();
+    }
+}
+
+fn restore_fans_on_shutdown(deadline: Instant, mut restore: impl FnMut(Duration) -> bool) {
+    for _ in 0..2 {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() || restore(remaining) {
+            break;
+        }
     }
 }
 
@@ -266,10 +283,7 @@ impl LocalHardware {
                 let mut data = published
                     .write()
                     .unwrap_or_else(std::sync::PoisonError::into_inner);
-                match result {
-                    Ok(r) => *data = r,
-                    Err(e) => data.notice = format!("Sensor collection failed: {e}"),
-                }
+                *data = result.unwrap_or_else(|e| HardwareReport::collection_failed(&e));
                 drop(data);
                 for _ in 0..20 {
                     if stopped.load(std::sync::atomic::Ordering::Relaxed) {
@@ -308,9 +322,8 @@ impl HardwareReader {
     }
 
     /// [`Self::sample`] with the provider found by `helper`, at `now`. A
-    /// provider that timed out or crashed (heavy load, resume from sleep, a
-    /// hung sensor driver) is started again later, so sensors and fan
-    /// control come back without restarting the service.
+    /// provider that failed to return a report is started again later, so
+    /// sensors and fan control can come back without restarting the service.
     fn sample_with(
         &mut self,
         helper: impl FnOnce() -> Option<PathBuf>,
@@ -330,20 +343,33 @@ impl HardwareReader {
         }
         if let Some(bridge) = &mut self.bridge {
             let result = bridge.call(serde_json::json!({"op":"sample"}), Duration::from_secs(20));
-            match result {
-                Ok(reply) => {
-                    let mut report = reply.report.ok_or("Provider omitted its report")?;
-                    report.validate();
-                    return Ok(report);
-                }
-                Err(e) => {
-                    self.bridge = None;
-                    self.next_start = Some(now + PROVIDER_RETRY);
-                    return Err(e);
-                }
-            }
+            return self.finish_provider_sample(now, result);
         }
         nvidia_snapshot()
+    }
+
+    fn finish_provider_sample(
+        &mut self,
+        now: Instant,
+        result: Result<Reply, String>,
+    ) -> Result<HardwareReport, String> {
+        // Control acknowledgements can omit the report. A sample reply cannot.
+        let report = result.and_then(|reply| {
+            reply
+                .report
+                .ok_or_else(|| "Provider omitted its report".into())
+        });
+        match report {
+            Ok(mut report) => {
+                report.validate();
+                Ok(report)
+            }
+            Err(error) => {
+                self.bridge = None;
+                self.next_start = Some(now + PROVIDER_RETRY);
+                Err(error)
+            }
+        }
     }
 
     pub fn set(&mut self, channel: &str, duty: Option<f32>) -> Result<(), String> {
@@ -441,6 +467,53 @@ mod tests {
     use super::*;
 
     #[test]
+    fn a_collection_error_publishes_only_the_failure_notice() {
+        let status = HardwareReport::collection_failed("injected provider failure");
+        assert!(!status.fresh(1000));
+        assert!(status.sensors.is_empty());
+        assert!(status.channels.is_empty());
+        assert!(status.cooling.is_empty());
+        assert_eq!(
+            status.notice,
+            "Sensor collection failed: injected provider failure"
+        );
+    }
+
+    #[test]
+    fn shutdown_retries_a_failed_restore_with_the_remaining_budget() {
+        let deadline = Instant::now() + Duration::from_secs(2);
+        let mut budgets = Vec::new();
+        restore_fans_on_shutdown(deadline, |remaining| {
+            budgets.push(remaining);
+            budgets.len() == 2
+        });
+        assert_eq!(budgets.len(), 2);
+        assert!(budgets[0] <= Duration::from_secs(2));
+        assert!(budgets[1] <= budgets[0]);
+    }
+
+    #[test]
+    fn shutdown_stops_after_success_two_failures_or_an_expired_budget() {
+        let mut attempts = 0;
+        let deadline = Instant::now() + Duration::from_secs(2);
+        restore_fans_on_shutdown(deadline, |_| {
+            attempts += 1;
+            true
+        });
+        assert_eq!(attempts, 1);
+
+        attempts = 0;
+        let deadline = Instant::now() + Duration::from_secs(2);
+        restore_fans_on_shutdown(deadline, |_| {
+            attempts += 1;
+            false
+        });
+        assert_eq!(attempts, 2);
+
+        restore_fans_on_shutdown(Instant::now(), |_| panic!("shutdown budget expired"));
+    }
+
+    #[test]
     fn a_failed_provider_is_started_again_later() {
         // Not a program: starting it fails at once.
         let broken = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Cargo.toml");
@@ -467,6 +540,24 @@ mod tests {
         let mut reader = HardwareReader::new(false);
         let _ = reader.sample_with(|| None, Instant::now());
         assert_eq!(reader.next_start, None);
+    }
+
+    #[test]
+    fn a_missing_sample_report_schedules_reconnection() {
+        let mut reader = HardwareReader::new(false);
+        let at = Instant::now();
+        for payload in [
+            r#"{"protocol":2,"request_id":1}"#,
+            r#"{"protocol":2,"request_id":1,"report":null}"#,
+        ] {
+            reader.next_start = None;
+            let reply = serde_json::from_str(payload).unwrap();
+            assert_eq!(
+                reader.finish_provider_sample(at, Ok(reply)).unwrap_err(),
+                "Provider omitted its report"
+            );
+            assert_eq!(reader.next_start, Some(at + PROVIDER_RETRY));
+        }
     }
 
     #[test]

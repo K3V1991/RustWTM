@@ -28,15 +28,17 @@ The GUI reads cached data from the service, or starts a dedicated read-only
 worker in local mode. The CLI reads locally. Neither collection path runs on
 the GUI frame or the governor's process-sampling loop. Discovery/update is
 roughly every two seconds; device calls can take longer. Samples older than
-ten seconds are marked stale and cannot authorize software fan control.
+ten seconds are marked stale and cannot authorize software fan control. A
+collection error immediately clears cached readings and cooling status.
 
 The pinned LibreHardwareMonitor library uses PawnIO for CPU and motherboard
 features that need kernel access. The upstream project replaced WinRing0
 before 0.9.6. The RustWTM ZIP and MSI ship the user-mode helper and library
 notices. PawnIO-dependent sensors need a compatible PawnIO driver already
 installed, a supported chip and administrator access. Missing readings stay
-unavailable. Restart the application or service after adding the helper or
-after a provider failure.
+unavailable. Restart the application or service after adding the helper.
+When a running helper fails to return a report, the reader closes the
+connection and schedules a new launch.
 [Upstream driver change](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/pull/1857) ·
 [Pinned PawnIO source](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/blob/3d331e3370efb858411f19511373eff65a218701/LibreHardwareMonitorLib/PawnIo/PawnIo.cs)
 
@@ -53,30 +55,40 @@ source and confirm the physical change. Enforcing also enables the configured
 process policies. Editing controls or reopening the program applies nothing.
 Profiles are saved as GUI drafts, while active control is session-only in the
 service. Hardware automatic explicitly requests the provider's default mode.
+Entering monitoring discards active fan profiles and requests hardware defaults.
+Switching back to enforcing requires applying the desired profile again.
 
 Curves have 2–12 ordered temperature points and nondecreasing duties. Upward
 changes are immediate; decreases use a 3% deadband and at most five percentage
 points per second. At the selected critical temperature (60–95 °C), both manual
-and curve modes request 100%. Missing, nonfinite or stale temperature requests
-hardware defaults. Explicit profile requests and errors appear in Events.
+and curve modes request 100%. Missing, nonfinite or stale temperature and a
+missing or no longer eligible channel cause the service to request hardware
+defaults. Explicit profile requests and errors appear in Events.
 
 While the helper runs (the Sensors page is open or a fan is controlled), the
 service also logs lasting changes in Events and in recorded incidents: sensor
 reading failing and resuming, and a controlled fan going back to hardware
-automatic because its temperature is missing or stale, failing, or coming back
-under software control. A change is logged once it has lasted three readings
+automatic because a temperature or channel is unavailable, failing, or coming
+back under software control. A change is logged once it has lasted three readings
 (about six seconds), so the logged time is up to that much after the change; a
 change shorter than that is not logged. A restarted helper starts without a
 known state, so its first normal reading logs nothing. Nothing is logged while
-the helper is stopped.
+the helper is stopped. A replacement for an idle helper starts without readings
+and publishes only its own samples.
 
 The provider records a rollback lease before writing to a device, renews it on
 each accepted duty request and attempts defaults after eight seconds without
-renewal. It retries failed expiry restores while running, and also attempts
-restoration on closed input and normal shutdown. The watchdog shares the
-hardware-operation lock: a hung device API, forcibly terminated helper, driver
-failure or OS failure can prevent restoration. These mechanisms are not a
-hardware fail-safe and do not replace firmware thermal protection.
+renewal. Each lease follows the control instance that received the duty. If
+a channel starts reporting a different control instance, the helper restores
+the previous one before accepting software control on the replacement.
+It retries failed expiry restores while running, and also attempts
+restoration on closed input and normal shutdown. At shutdown the helper retries
+failed restores once and returns an error exit status if any lease remains.
+When closing the helper, the Rust client can retry a failed restore once within
+its two-second reply budget.
+The watchdog shares the hardware-operation lock. A hung device API, forcibly
+terminated helper, driver failure or OS failure can prevent restoration.
+Firmware thermal protection remains necessary for hardware fail-safe behavior.
 
 ## Validation on this workstation
 

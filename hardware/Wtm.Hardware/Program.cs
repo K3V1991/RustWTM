@@ -24,6 +24,7 @@ internal static class Program
         bool writable = args.Contains("--control") && admin;
         var computer = new Computer { IsCpuEnabled = true, IsGpuEnabled = true,
             IsMotherboardEnabled = admin, IsStorageEnabled = true, IsControllerEnabled = admin };
+        int exitCode = 0;
         try
         {
             computer.Open();
@@ -52,7 +53,7 @@ internal static class Program
                                 var percent = root.GetProperty("percent");
                                 if (percent.ValueKind == JsonValueKind.Null)
                                 {
-                                    control.SetDefault(); Leases.Forget(id);
+                                    if (!Leases.RestoreApplied(id)) control.SetDefault();
                                 }
                                 else
                                 {
@@ -61,8 +62,7 @@ internal static class Program
                                     ValidateDuty(value, Math.Max(30, control.MinSoftwareValue), Math.Min(100, control.MaxSoftwareValue));
                                     // Register rollback before entering the device API, including
                                     // the case where it partially writes and then throws.
-                                    Leases.Applied(id, control.SetDefault);
-                                    control.SetSoftware(value);
+                                    Leases.Apply(id, control.SetDefault, () => control.SetSoftware(value));
                                 }
                                 break;
                             default: throw new InvalidOperationException("Unknown hardware request");
@@ -72,13 +72,21 @@ internal static class Program
                 }
                 catch (Exception e) { Console.WriteLine(JsonSerializer.Serialize(new { protocol = 2, request_id = requestId, error = e.Message }, Json)); }
             }
-            return 0;
         }
-        catch (Exception e) { Console.WriteLine(JsonSerializer.Serialize(new { protocol = 2, request_id = 0, error = e.Message }, Json)); return 1; }
+        catch (Exception e)
+        {
+            Console.WriteLine(JsonSerializer.Serialize(new { protocol = 2, request_id = 0, error = e.Message }, Json));
+            exitCode = 1;
+        }
         finally
         {
-            lock (Gate) { Leases.RestoreAll(); computer.Close(); }
+            lock (Gate)
+            {
+                if (!Leases.RestoreOnExit()) exitCode = 1;
+                computer.Close();
+            }
         }
+        return exitCode;
     }
 
     internal static void ValidateDuty(float value, float min, float max)

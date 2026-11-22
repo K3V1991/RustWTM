@@ -16,30 +16,62 @@ use wtm_ipc::EventLevel;
 const SETTLE: u8 = 3;
 
 enum Message {
-    Set(String, CoolingProfile, Instant, Sender<Result<(), String>>),
+    Set(
+        String,
+        CoolingProfile,
+        u64,
+        Instant,
+        Sender<Result<(), String>>,
+    ),
+    RevokeCooling,
     Stop(Sender<()>),
+}
+
+#[derive(Debug, Clone, Copy)]
+struct CoolingAccess {
+    dry_run: bool,
+    revision: u64,
+}
+
+impl CoolingAccess {
+    fn allows(self, revision: u64) -> bool {
+        !self.dry_run && self.revision == revision
+    }
+}
+
+const COOLING_ACCESS_CHANGED: &str = "Cooling authorization changed. Apply the profile again.";
+
+#[derive(Clone, Debug)]
+struct Worker {
+    sender: Sender<Message>,
+    state: Arc<WorkerState>,
+}
+
+#[derive(Debug, Default)]
+struct WorkerState {
+    report: RwLock<HardwareReport>,
+    /// This worker is holding a fan profile, which must keep being renewed.
+    controlling: AtomicBool,
 }
 
 #[derive(Debug)]
 pub struct HardwareHub {
-    report: Arc<RwLock<HardwareReport>>,
-    dry_run: Arc<AtomicBool>,
-    worker: Mutex<Option<Sender<Message>>>,
+    access: Arc<Mutex<CoolingAccess>>,
+    worker: Mutex<Option<Worker>>,
     /// When a client last asked for sensors or a fan setting.
     last_request: Mutex<Instant>,
-    /// The worker is holding a fan profile, which must keep being renewed.
-    controlling: Arc<AtomicBool>,
     /// Where lasting sensor and cooling changes are logged.
     events: OnceLock<EventLog>,
 }
 impl Default for HardwareHub {
     fn default() -> Self {
         Self {
-            report: Arc::new(RwLock::new(HardwareReport::default())),
-            dry_run: Arc::new(AtomicBool::new(true)),
+            access: Arc::new(Mutex::new(CoolingAccess {
+                dry_run: true,
+                revision: 0,
+            })),
             worker: Mutex::new(None),
             last_request: Mutex::new(Instant::now()),
-            controlling: Arc::new(AtomicBool::new(false)),
             events: OnceLock::new(),
         }
     }
@@ -49,8 +81,7 @@ impl Default for HardwareHub {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum Cooling {
     Software,
-    /// Left to the hardware: the profile's temperature sensor is missing or
-    /// stale.
+    /// Left to the hardware because the temperature or channel is unavailable.
     Automatic,
     Failed,
 }
@@ -134,8 +165,7 @@ impl Changes {
                 Some((_, Cooling::Automatic)) => lines.push((
                     EventLevel::Warn,
                     format!(
-                        "Cooling {name}: back on hardware automatic, its temperature sensor \
-                         is missing or stale"
+                        "Cooling {name}: back on hardware automatic, temperature or channel unavailable"
                     ),
                 )),
                 Some((_, Cooling::Failed)) => lines.push((
@@ -166,52 +196,118 @@ fn idle(last_request: Instant, controlling: bool, after: Duration) -> bool {
     !controlling && last_request.elapsed() >= after
 }
 
+fn requested_duty(
+    snapshot: &HardwareReport,
+    id: &str,
+    profile: &CoolingProfile,
+    now: u64,
+) -> Result<f32, String> {
+    let channel = snapshot
+        .channels
+        .iter()
+        .find(|channel| channel.id == id)
+        .ok_or("Cooling channel is no longer available")?;
+    profile.validate(channel)?;
+    profile
+        .duty(snapshot, now)
+        .ok_or_else(|| "Temperature sensor is missing or stale".into())
+}
+
 impl HardwareHub {
     pub fn dry_run(&self, dry: bool) {
-        self.dry_run.store(dry, Ordering::Relaxed);
+        let mut access = self.access.lock().unwrap_or_else(PoisonError::into_inner);
+        let revoke = dry && !access.dry_run;
+        access.dry_run = dry;
+        if revoke {
+            access.revision = access.revision.wrapping_add(1);
+        }
+        drop(access);
+        if revoke
+            && let Some(worker) = self
+                .worker
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner)
+                .as_ref()
+        {
+            let _ = worker.sender.send(Message::RevokeCooling);
+        }
     }
     /// Logs lasting sensor and cooling changes to `events` from the next
     /// start of the helper on.
     pub fn log_to(&self, events: EventLog) {
         let _ = self.events.set(events);
     }
-    fn sender(&self) -> Sender<Message> {
-        let mut worker = self.worker.lock().unwrap_or_else(PoisonError::into_inner);
-        worker.get_or_insert_with(|| {
+    fn worker(&self) -> Worker {
+        let mut current = self.worker.lock().unwrap_or_else(PoisonError::into_inner);
+        current.get_or_insert_with(|| {
             let (tx, rx) = mpsc::channel();
-            let (report, dry_run) = (self.report.clone(), self.dry_run.clone());
-            let controlling = self.controlling.clone();
+            // A retiring worker may still finish a reading after a restart.
+            // The replacement owns a fresh report and controlling flag.
+            let worker = Worker { sender: tx, state: Arc::default() };
+            let state = worker.state.clone();
+            let access_state = self.access.clone();
             let events = self.events.get().cloned();
             std::thread::spawn(move || {
+                let report = &state.report;
+                let controlling = &state.controlling;
                 let mut reader = HardwareReader::new(true);
                 let mut changes = Changes::default();
                 let mut profiles: HashMap<String, CoolingProfile> = HashMap::new();
                 let mut applied: HashMap<String, (f32, Instant)> = HashMap::new();
+                let access = || *access_state.lock().unwrap_or_else(PoisonError::into_inner);
+                let mut revision = access().revision;
+                let mut revoke_if_needed = |reader: &mut HardwareReader,
+                                            profiles: &mut HashMap<String, CoolingProfile>,
+                                            applied: &mut HashMap<String, (f32, Instant)>| {
+                    let current = access().revision;
+                    if revision != current {
+                        revision = current;
+                        report.write().unwrap_or_else(PoisonError::into_inner).cooling.clear();
+                        for (id, _) in profiles.drain() {
+                            let _ = reader.set(&id, None);
+                        }
+                        applied.clear();
+                        controlling.store(false, Ordering::Relaxed);
+                    }
+                    current
+                };
                 loop {
-                    match rx.recv_timeout(Duration::from_secs(2)) {
+                    let message = rx.recv_timeout(Duration::from_secs(2));
+                    let authorized_revision = revoke_if_needed(&mut reader, &mut profiles, &mut applied);
+                    match message {
                         Ok(Message::Stop(reply)) => { for id in profiles.keys() {let _=reader.set(id,None);} drop(reader); let _=reply.send(()); return; }
+                        Ok(Message::RevokeCooling) => continue,
                         Err(mpsc::RecvTimeoutError::Disconnected) => break,
-                        Ok(Message::Set(id, profile, deadline, reply)) => {
+                        Ok(Message::Set(id, profile, request_revision, deadline, reply)) => {
                             if Instant::now() >= deadline {let _=reply.send(Err("Cooling request expired before execution".into()));continue;}
-                            let r = if profile.mode == CoolingMode::Automatic {
+                            let automatic = profile.mode == CoolingMode::Automatic;
+                            if !automatic && (request_revision != authorized_revision || !access().allows(request_revision)) {
+                                let _ = reply.send(Err(COOLING_ACCESS_CHANGED.into()));
+                                continue;
+                            }
+                            let r = if automatic {
                                 // Remove the request even when restoring fails; future leases
                                 // must not re-apply a setting the user just disabled.
                                 profiles.remove(&id); applied.remove(&id);
                                 reader.set(&id, None)
-                            } else if dry_run.load(Ordering::Relaxed) {
-                                Err("Switch the service from monitoring to enforcing before controlling fans".into())
                             } else {
                                 let snapshot = report.read().unwrap_or_else(PoisonError::into_inner).clone();
-                                match snapshot.channels.iter().find(|c| c.id == id) {
-                                    None => Err("Cooling channel is no longer available".into()),
-                                    Some(channel) => profile.validate(channel).and_then(|()| {
-                                        let duty = profile.duty(&snapshot, unix_ms()).ok_or("Temperature sensor is missing or stale")?;
-                                        reader.set(&id, Some(duty))?;
-                                        applied.insert(id.clone(), (duty, Instant::now()));
-                                        profiles.insert(id.clone(), profile);
-                                        Ok(())
-                                    }),
-                                }
+                                requested_duty(&snapshot, &id, &profile, unix_ms()).and_then(|duty| {
+                                    if !access().allows(request_revision) {
+                                        return Err(COOLING_ACCESS_CHANGED.into());
+                                    }
+                                    let written = reader.set(&id, Some(duty));
+                                    if !access().allows(request_revision) {
+                                        profiles.remove(&id);
+                                        applied.remove(&id);
+                                        let _ = reader.set(&id, None);
+                                        return Err(COOLING_ACCESS_CHANGED.into());
+                                    }
+                                    written?;
+                                    applied.insert(id.clone(), (duty, Instant::now()));
+                                    profiles.insert(id.clone(), profile);
+                                    Ok(())
+                                })
                             };
                             if reply.send(r).is_err() {
                                 // Do not keep renewing an operation whose caller timed out.
@@ -224,41 +320,47 @@ impl HardwareHub {
                     controlling.store(!profiles.is_empty(), Ordering::Relaxed);
                     match reader.sample() {
                         Ok(mut snapshot) => {
+                            let authorized_revision = revoke_if_needed(&mut reader, &mut profiles, &mut applied);
                             let now = unix_ms();
                             let mut states = Vec::new();
                             for (id, profile) in &profiles {
-                                let requested = if dry_run.load(Ordering::Relaxed) { None } else { profile.duty(&snapshot, now) };
+                                let requested = if !access().allows(authorized_revision) { None } else { requested_duty(&snapshot, id, profile, now).ok() };
                                 let duty = requested.map(|v| applied.get(id).map_or(v, |(old, at)| smooth_duty(*old, v, at.elapsed().as_secs_f32())));
                                 let result = reader.set(id, duty);
                                 let (state, error) = match &result { Ok(()) if duty.is_some() => (Cooling::Software, String::new()), Ok(()) => (Cooling::Automatic, String::new()), Err(e) => (Cooling::Failed, e.clone()) };
                                 let label = match (result, duty) {
                                     (Ok(()), Some(v)) => { applied.insert(id.clone(), (v, Instant::now())); format!("Software · {v:.0}%") },
-                                    (Ok(()), None) => { applied.remove(id); "Hardware automatic · sensor unavailable or monitoring only".into() },
+                                    (Ok(()), None) => { applied.remove(id); "Hardware automatic · temperature or channel unavailable, or monitoring only".into() },
                                     (Err(e), _) => format!("Control failed: {e}"),
                                 };
                                 snapshot.cooling.push((id.clone(),label));
                                 let name = snapshot.channels.iter().find(|c| &c.id == id).map_or_else(|| id.clone(), |c| c.name.clone());
                                 states.push((id.clone(), name, state, error));
                             }
-                            // Monitoring mode releases every fan: not a fault.
-                            if dry_run.load(Ordering::Relaxed) {profiles.clear();applied.clear();states.clear();}
-                            log(events.as_ref(), changes.read(&states));
+                            if access().allows(authorized_revision) {
+                                log(events.as_ref(), changes.read(&states));
+                            } else {
+                                snapshot.cooling.clear();
+                                log(events.as_ref(), changes.read(&[]));
+                            }
                             controlling.store(!profiles.is_empty(), Ordering::Relaxed);
                             *report.write().unwrap_or_else(PoisonError::into_inner) = snapshot;
                         }
                         Err(e) => {
+                            *report.write().unwrap_or_else(PoisonError::into_inner) =
+                                HardwareReport::collection_failed(&e);
+                            revoke_if_needed(&mut reader, &mut profiles, &mut applied);
                             // Restore immediately on failed collection, and allow the helper's
                             // lease deadline to retry if communication itself is broken.
                             for id in profiles.keys() { let _ = reader.set(id,None); }
                             applied.clear();
-                            log(events.as_ref(), changes.failed(&e.to_string()));
-                            report.write().unwrap_or_else(PoisonError::into_inner).notice = format!("Sensor collection failed: {e}");
+                            log(events.as_ref(), changes.failed(&e));
                         }
                     }
                 }
                 for id in profiles.keys() { let _ = reader.set(id,None); }
             });
-            tx
+            worker
         }).clone()
     }
     fn requested(&self) {
@@ -269,24 +371,28 @@ impl HardwareHub {
     }
     pub fn snapshot(&self) -> HardwareReport {
         self.requested();
-        self.sender();
-        self.report
+        self.worker()
+            .state
+            .report
             .read()
             .unwrap_or_else(PoisonError::into_inner)
             .clone()
     }
     pub fn set(&self, id: String, profile: CoolingProfile) -> Result<(), String> {
-        if profile.mode != CoolingMode::Automatic && self.dry_run.load(Ordering::Relaxed) {
+        let access = *self.access.lock().unwrap_or_else(PoisonError::into_inner);
+        if profile.mode != CoolingMode::Automatic && access.dry_run {
             return Err(
                 "Switch the service from monitoring to enforcing before controlling fans".into(),
             );
         }
         self.requested();
         let (reply, rx) = mpsc::channel();
-        self.sender()
+        self.worker()
+            .sender
             .send(Message::Set(
                 id,
                 profile,
+                access.revision,
                 Instant::now() + Duration::from_secs(6),
                 reply,
             ))
@@ -300,29 +406,31 @@ impl HardwareHub {
     /// request starts it again. Does not wait for the helper to exit.
     pub fn stop_if_idle(&self, after: Duration) {
         let mut worker = self.worker.lock().unwrap_or_else(PoisonError::into_inner);
+        let Some(active) = worker.as_ref() else {
+            return;
+        };
         let last = *self
             .last_request
             .lock()
             .unwrap_or_else(PoisonError::into_inner);
-        if worker.is_none() || !idle(last, self.controlling.load(Ordering::Relaxed), after) {
+        let controlling = active.state.controlling.load(Ordering::Relaxed);
+        if !idle(last, controlling, after) {
             return;
         }
-        if let Some(tx) = worker.take() {
+        if let Some(retiring) = worker.take() {
             let (reply, _) = mpsc::channel();
-            let _ = tx.send(Message::Stop(reply));
+            let _ = retiring.sender.send(Message::Stop(reply));
         }
-        // A reading kept from before the pause would look current.
-        *self.report.write().unwrap_or_else(PoisonError::into_inner) = HardwareReport::default();
     }
     pub fn stop(&self) {
-        if let Some(tx) = self
+        if let Some(retiring) = self
             .worker
             .lock()
             .unwrap_or_else(PoisonError::into_inner)
             .take()
         {
             let (reply, rx) = mpsc::channel();
-            let _ = tx.send(Message::Stop(reply));
+            let _ = retiring.sender.send(Message::Stop(reply));
             let _ = rx.recv_timeout(Duration::from_secs(5));
         }
     }
@@ -350,6 +458,81 @@ mod tests {
                 .contains("monitoring")
         );
         assert!(hub.worker.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn entering_monitoring_revokes_the_previous_permission_and_wakes_the_worker() {
+        let hub = HardwareHub::default();
+        hub.dry_run(false);
+        let previous = *hub.access.lock().unwrap();
+        assert!(previous.allows(previous.revision));
+
+        let (sender, messages) = mpsc::channel();
+        *hub.worker.lock().unwrap() = Some(Worker {
+            sender,
+            state: Arc::default(),
+        });
+        hub.dry_run(true);
+        hub.dry_run(true);
+        hub.dry_run(false);
+        let current = *hub.access.lock().unwrap();
+        assert!(!current.allows(previous.revision));
+        assert!(current.allows(current.revision));
+        assert!(matches!(messages.try_recv(), Ok(Message::RevokeCooling)));
+        assert!(matches!(
+            messages.try_recv(),
+            Err(mpsc::TryRecvError::Empty)
+        ));
+
+        hub.stop_if_idle(Duration::ZERO);
+        assert!(matches!(messages.try_recv(), Ok(Message::Stop(_))));
+    }
+
+    #[test]
+    fn cooling_requires_a_current_temperature_and_an_eligible_channel() {
+        use wtm_core::hardware::{FanChannel, Sensor, SensorKind};
+
+        let profile = CoolingProfile {
+            mode: CoolingMode::Manual(42.0),
+            sensor_id: "temp".into(),
+            ..Default::default()
+        };
+        let now = 20_000;
+        let mut report = HardwareReport {
+            sampled_at_ms: now,
+            sensors: vec![Sensor {
+                id: "temp".into(),
+                device: "Fixture".into(),
+                name: "Temperature".into(),
+                kind: SensorKind::Temperature,
+                value: Some(50.0),
+            }],
+            channels: vec![FanChannel {
+                id: "fan".into(),
+                device: "Fixture".into(),
+                name: "Fan".into(),
+                min_percent: 30.0,
+                max_percent: 100.0,
+                writable: true,
+                reason: "Channel unavailable".into(),
+            }],
+            ..Default::default()
+        };
+
+        assert_eq!(requested_duty(&report, "fan", &profile, now), Ok(42.0));
+        assert!(requested_duty(&report, "missing", &profile, now).is_err());
+        report.channels[0].writable = false;
+        assert!(requested_duty(&report, "fan", &profile, now).is_err());
+        report.channels[0].writable = true;
+        report.channels[0].min_percent = 50.0;
+        assert!(requested_duty(&report, "fan", &profile, now).is_err());
+        report.channels[0].min_percent = 30.0;
+        let unavailable = HardwareReport::collection_failed("injected failure");
+        assert!(requested_duty(&unavailable, "fan", &profile, now).is_err());
+        let stale = now + wtm_core::hardware::STALE_MS + 1;
+        assert!(requested_duty(&report, "fan", &profile, stale).is_err());
+        report.sensors[0].value = Some(95.0);
+        assert_eq!(requested_duty(&report, "fan", &profile, now), Ok(100.0));
     }
 
     fn channel(state: Cooling) -> Vec<(String, String, Cooling, String)> {
@@ -404,9 +587,7 @@ mod tests {
         }
         assert_eq!(
             messages(logged),
-            [
-                "Cooling CPU Fan: back on hardware automatic, its temperature sensor is missing or stale"
-            ]
+            ["Cooling CPU Fan: back on hardware automatic, temperature or channel unavailable"]
         );
         let mut logged = Vec::new();
         for _ in 0..6 {
@@ -484,6 +665,47 @@ mod tests {
     }
 
     #[test]
+    fn a_retired_worker_cannot_replace_current_readings_or_control_state() {
+        let hub = HardwareHub::default();
+        let install_worker = |provider: &str| {
+            let (sender, messages) = mpsc::channel();
+            let worker = Worker {
+                sender,
+                state: Arc::default(),
+            };
+            worker.state.report.write().unwrap().provider = provider.into();
+            *hub.worker.lock().unwrap() = Some(worker.clone());
+            (worker, messages)
+        };
+        let (old, old_messages) = install_worker("old");
+        let (finish, wait_to_finish) = mpsc::channel();
+        let late_sample = std::thread::spawn(move || {
+            wait_to_finish.recv_timeout(Duration::from_secs(5)).unwrap();
+            old.state.report.write().unwrap().provider = "late old sample".into();
+            old.state.controlling.store(false, Ordering::Relaxed);
+        });
+
+        hub.stop_if_idle(Duration::ZERO);
+        assert!(matches!(old_messages.try_recv(), Ok(Message::Stop(_))));
+        let (new, new_messages) = install_worker("new");
+        new.state.controlling.store(true, Ordering::Relaxed);
+
+        finish.send(()).unwrap();
+        late_sample.join().unwrap();
+        assert_eq!(hub.snapshot().provider, "new");
+        hub.stop_if_idle(Duration::ZERO);
+        assert!(hub.worker.lock().unwrap().is_some());
+        assert!(matches!(
+            new_messages.try_recv(),
+            Err(mpsc::TryRecvError::Empty)
+        ));
+
+        new.state.controlling.store(false, Ordering::Relaxed);
+        hub.stop_if_idle(Duration::ZERO);
+        assert!(matches!(new_messages.try_recv(), Ok(Message::Stop(_))));
+    }
+
+    #[test]
     fn the_helper_stops_when_idle_and_restarts_on_request() {
         let hub = HardwareHub::default();
         // Never started: nothing to stop.
@@ -496,10 +718,11 @@ mod tests {
         hub.stop_if_idle(Duration::from_secs(30));
         assert!(hub.worker.lock().unwrap().is_some());
         // Driving a fan keeps it running however long nobody asks.
-        hub.controlling.store(true, Ordering::Relaxed);
+        let first = hub.worker();
+        first.state.controlling.store(true, Ordering::Relaxed);
         hub.stop_if_idle(Duration::ZERO);
         assert!(hub.worker.lock().unwrap().is_some());
-        hub.controlling.store(false, Ordering::Relaxed);
+        first.state.controlling.store(false, Ordering::Relaxed);
         hub.stop_if_idle(Duration::ZERO);
         assert!(hub.worker.lock().unwrap().is_none());
         let _ = hub.snapshot();
