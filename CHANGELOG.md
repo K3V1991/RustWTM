@@ -6,6 +6,51 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- When the window loses the RustWTM service it works locally until the
+  service is back, and no longer shows the previous service's
+  configuration, kill list, Telegram settings, recorded history or
+  incident replay. They are loaded again from the service it reconnects
+  to; unsaved Telegram edits are discarded then.
+- Switching the service to monitoring ends software fan control at once
+  and asks the hardware for its defaults. Apply the fan profile again
+  after switching back to enforcing.
+
+### Fixed
+
+- A Telegram save or test message started before the connection to the
+  service changed is no longer sent to the service that answers now.
+- `wtm` and the window say which side to update when the installed
+  service speaks another protocol version: the installed package when
+  the service is older, `wtm.exe` from the service's release when it is
+  newer.
+- Sizes such as `1.5G` are computed exactly instead of in floating point,
+  and a size larger than the maximum byte count is refused instead of
+  being cut down to it.
+- A failed sensor reading no longer leaves the previous readings and
+  cooling state shown as current. A fan whose channel disappears or is
+  no longer eligible goes back to hardware automatic.
+- The hardware helper is started again when it answers a reading without
+  a report. When a fan channel reports a different control, the previous
+  control is given back to the hardware before the new one is driven.
+  On shutdown a failed fan restore is tried once more, and the helper
+  exits with an error if a fan is still under software control.
+- App power keeps a power plan restore pending while the active plan
+  cannot be read, instead of restoring without knowing whether you chose
+  another plan; a request that fails to switch keeps the previous one in
+  force and named; and a new request is served while a plan you chose
+  is kept.
+- Core placement keeps a failed restore and retries it on the next pass
+  instead of forgetting it, and when an update fails it keeps the record
+  of the last placement that worked, so that one is still given back.
+- The file locks page and incident replay no longer show a late result
+  for an earlier path or an earlier service connection.
+- `install.ps1` stops when it cannot remove the previous version's
+  directory instead of copying over it, and `uninstall.ps1` removes the
+  service's executable and itself last, so a removal that fails half way
+  can be run again.
+
 ## [0.38.2] - 2026-11-20
 
 [Release scope and validation](docs/0.38.2-review.md)
