@@ -1,13 +1,17 @@
 //! Argument parsers for sizes, percentages and CPU lists.
 
 /// Parses `512M`, `1.5G`, `800MB`, `2GiB`, `64K` or plain bytes (binary units).
+/// Truncates fractional bytes and rejects counts outside `1..=u64::MAX` after truncation.
 pub fn size(s: &str) -> Result<u64, String> {
     let s = s.trim();
     let split = s
         .find(|c: char| !(c.is_ascii_digit() || c == '.'))
         .unwrap_or(s.len());
     let (num, unit) = s.split_at(split);
-    let value: f64 = num.parse().map_err(|_| format!("invalid size: {s}"))?;
+    let (whole, fraction) = num.split_once('.').unwrap_or((num, ""));
+    if (whole.is_empty() && fraction.is_empty()) || !fraction.bytes().all(|b| b.is_ascii_digit()) {
+        return Err(format!("invalid size: {s}"));
+    }
     let multiplier: u64 = match unit.trim().to_ascii_uppercase().as_str() {
         "" | "B" => 1,
         "K" | "KB" | "KIB" => 1 << 10,
@@ -16,11 +20,25 @@ pub fn size(s: &str) -> Result<u64, String> {
         "T" | "TB" | "TIB" => 1 << 40,
         other => return Err(format!("unknown size unit: {other}")),
     };
-    let bytes = value * multiplier as f64;
-    if bytes < 1.0 {
+    const OVERFLOW: &str = "size exceeds the maximum byte count";
+    let whole = if whole.is_empty() {
+        0
+    } else {
+        whole.parse::<u64>().map_err(|_| OVERFLOW)?
+    };
+    // Multiply the decimal fraction right to left, retaining only the carry.
+    // The final carry is the whole-byte part, even for long fractions.
+    let fractional_bytes = fraction.bytes().rev().fold(0, |carry, digit| {
+        (u64::from(digit - b'0') * multiplier + carry) / 10
+    });
+    let bytes = whole
+        .checked_mul(multiplier)
+        .and_then(|bytes| bytes.checked_add(fractional_bytes))
+        .ok_or(OVERFLOW)?;
+    if bytes == 0 {
         return Err("size must be at least 1 byte".into());
     }
-    Ok(bytes as u64)
+    Ok(bytes)
 }
 
 /// Parses `20` or `20%`; must be in (0, 100].
@@ -118,6 +136,19 @@ mod tests {
         assert!(size("abc").is_err());
         assert_eq!(size("0"), Err("size must be at least 1 byte".into()));
         assert!(size("0.5").is_err());
+    }
+
+    #[test]
+    fn parses_sizes_without_rounding_or_saturating() {
+        assert_eq!(size("1.5KiB"), Ok(1536));
+        assert_eq!(size("9007199254740993"), Ok(9_007_199_254_740_993));
+        assert_eq!(size("18446744073709551615"), Ok(u64::MAX));
+        assert_eq!(size("16777215.99999999999999999999TiB"), Ok(u64::MAX));
+        assert!(size("18446744073709551616").is_err());
+        assert!(size("16777216TiB").is_err());
+        assert_eq!(size(".1K"), Ok(102));
+        assert_eq!(size("1.K"), Ok(1024));
+        assert!(size("1.2.3K").is_err());
     }
 
     #[test]
