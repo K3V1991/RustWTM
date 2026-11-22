@@ -34,6 +34,12 @@ upgrade the GUI, CLI and service together, close the GUI and run the new MSI.
 Uninstall from **Settings → Apps**. The installer preserves configuration and
 history in `%ProgramData%\RustWTM` across upgrades and removal.
 
+The GUI and CLI require a matching service protocol. If the installed service
+is newer than the open window, close the window and reopen RustWTM from the
+installed shortcut. Update a portable copy to the matching release. If the
+service is older, update the installed package. If `wtm` reports a newer
+service, run `wtm.exe` from the same release as the installed service.
+
 ## Portable ZIP and install script
 
 The release also includes `rustwtm-x86_64-pc-windows-msvc.zip`, its checksum and

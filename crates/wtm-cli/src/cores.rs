@@ -19,7 +19,7 @@ pub enum CoresAction {
 
 /// The service's plan; `Err` says why it is not known.
 fn placement(client: impl FnOnce() -> io::Result<Client>) -> Result<PlacementStatus, String> {
-    let mut client = client().map_err(|e| format!("RustWTM service not reachable ({e})"))?;
+    let mut client = client().map_err(|e| crate::service_connection_message(&e))?;
     match client.call(&Request::Status) {
         Ok(Response::Status(s)) => s
             .placement

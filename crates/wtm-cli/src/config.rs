@@ -172,7 +172,7 @@ fn read_valid(file: &Path) -> anyhow::Result<(String, Config)> {
 }
 
 fn connect(client: impl FnOnce() -> io::Result<Client>) -> anyhow::Result<Client> {
-    client().map_err(|e| anyhow::anyhow!("RustWTM service not reachable ({e})"))
+    client().map_err(|e| anyhow::Error::msg(crate::service_connection_message(&e)))
 }
 
 /// `client` is only called by the actions that need the service.

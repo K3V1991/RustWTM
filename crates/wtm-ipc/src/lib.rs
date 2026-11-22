@@ -32,6 +32,25 @@ pub const PIPE_SDDL: &str = "D:P(A;;GA;;;SY)(A;;GA;;;BA)(A;;GA;;;OW)(A;;0x12008b
 
 pub const PROTOCOL_VERSION: u32 = 20;
 
+/// A service answered Hello with a different protocol version.
+#[derive(Debug)]
+pub struct ProtocolMismatch {
+    pub service: u32,
+    pub client: u32,
+}
+
+impl std::fmt::Display for ProtocolMismatch {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "service speaks protocol {}, client {}",
+            self.service, self.client
+        )
+    }
+}
+
+impl std::error::Error for ProtocolMismatch {}
+
 const MAX_FRAME: usize = 32 * 1024 * 1024;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -479,9 +498,13 @@ impl Client {
                 client.admin = admin;
                 Ok(client)
             }
-            Response::Hello { version, .. } => Err(invalid(format!(
-                "service speaks protocol {version}, client {PROTOCOL_VERSION}"
-            ))),
+            Response::Hello { version, .. } => Err(io::Error::new(
+                io::ErrorKind::InvalidData,
+                ProtocolMismatch {
+                    service: version,
+                    client: PROTOCOL_VERSION,
+                },
+            )),
             other => Err(invalid(format!("unexpected handshake reply: {other:?}"))),
         }
     }
@@ -764,7 +787,19 @@ mod tests {
         );
         let e = Client::connect_checked(&name, Presence::Missing).unwrap_err();
         assert_eq!(e.kind(), io::ErrorKind::InvalidData);
-        assert!(e.to_string().contains("protocol"), "{e}");
+        let mismatch = e
+            .get_ref()
+            .and_then(|error| error.downcast_ref::<ProtocolMismatch>())
+            .unwrap();
+        assert_eq!(mismatch.service, PROTOCOL_VERSION + 1);
+        assert_eq!(mismatch.client, PROTOCOL_VERSION);
+        assert_eq!(
+            e.to_string(),
+            format!(
+                "service speaks protocol {}, client {PROTOCOL_VERSION}",
+                PROTOCOL_VERSION + 1
+            )
+        );
 
         let name = pipe_name();
         let _server = serve(

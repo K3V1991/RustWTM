@@ -58,7 +58,7 @@ fn store(client: &mut Client, toml: String) -> anyhow::Result<()> {
 }
 
 fn connect(client: impl FnOnce() -> io::Result<Client>) -> anyhow::Result<Client> {
-    client().map_err(|e| anyhow::anyhow!("RustWTM service not reachable ({e})"))
+    client().map_err(|e| anyhow::Error::msg(crate::service_connection_message(&e)))
 }
 
 pub fn kill_list(

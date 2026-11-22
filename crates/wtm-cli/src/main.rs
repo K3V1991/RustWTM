@@ -300,11 +300,27 @@ impl From<EcoArg> for EcoQos {
     }
 }
 
+fn service_connection_message(error: &io::Error) -> String {
+    let mismatch = error
+        .get_ref()
+        .and_then(|cause| cause.downcast_ref::<wtm_ipc::ProtocolMismatch>());
+    if let Some(mismatch) = mismatch {
+        let recovery = if mismatch.service < mismatch.client {
+            "Update the installed RustWTM package to match this CLI"
+        } else {
+            "Run wtm.exe from the same release as the service"
+        };
+        format!("RustWTM service protocol mismatch ({error}). {recovery}")
+    } else {
+        format!("RustWTM service not reachable ({error})")
+    }
+}
+
 /// Ends the kill list: through the service when this prompt is elevated
 /// (it can end anything), otherwise directly with our own rights.
 fn run_panic(yes: bool) -> anyhow::Result<ExitCode> {
     let mut client = wtm_ipc::Client::connect()
-        .map_err(|e| anyhow::anyhow!("RustWTM service not reachable ({e})"))?;
+        .map_err(|e| anyhow::Error::msg(service_connection_message(&e)))?;
     // The kill list decides what is ended, perhaps with our administrator
     // rights: only the real service may hand it over, not a program that
     // took the pipe's name while the service is not running.
@@ -640,7 +656,10 @@ fn history(
 ) -> anyhow::Result<()> {
     use wtm_ipc::{Request, Response};
     let mut client = client.map_err(|e| {
-        anyhow::anyhow!("RustWTM service not reachable ({e}); history is recorded by the service")
+        anyhow::anyhow!(
+            "{}. History is recorded by the service.",
+            service_connection_message(&e)
+        )
     })?;
     let (stats, findings) = match client.call(&Request::History { hours })? {
         Response::History { stats, findings } => (stats, findings),
@@ -942,6 +961,14 @@ mod tests {
         replies: Vec<Response>,
         f: impl FnOnce(io::Result<Client>) -> R,
     ) -> (Vec<Request>, R) {
+        with_protocol(PROTOCOL_VERSION, replies, f)
+    }
+
+    fn with_protocol<R>(
+        version: u32,
+        replies: Vec<Response>,
+        f: impl FnOnce(io::Result<Client>) -> R,
+    ) -> (Vec<Request>, R) {
         static NEXT: AtomicU32 = AtomicU32::new(0);
         let name = format!(
             r"\\.\pipe\wtm-cli-test-{}-{}",
@@ -963,7 +990,7 @@ mod tests {
             };
             assert!(matches!(hello, Request::Hello { .. }));
             let hello = Response::Hello {
-                version: PROTOCOL_VERSION,
+                version,
                 admin: false,
             };
             if write_frame(&mut conn, &hello).is_err() {
@@ -1112,6 +1139,61 @@ mod tests {
         assert!(
             e.to_string().contains("service not reachable (no pipe)"),
             "{e}"
+        );
+    }
+
+    #[test]
+    fn history_points_to_the_right_recovery_for_both_protocol_mismatches() {
+        let mut failures = Vec::new();
+        for (version, guidance) in [
+            (PROTOCOL_VERSION - 1, "Update the installed RustWTM package"),
+            (
+                PROTOCOL_VERSION + 1,
+                "Run wtm.exe from the same release as the service",
+            ),
+        ] {
+            let mut out = Vec::new();
+            let (requests, result) = with_protocol(
+                version,
+                vec![Response::Error("unexpected history request".into())],
+                |client| history(client, 1, 1, &mut out),
+            );
+            assert!(requests.is_empty(), "{requests:?}");
+            assert!(out.is_empty());
+            let error = result.unwrap_err().to_string();
+            assert!(error.contains(&format!("service speaks protocol {version}")));
+            assert!(error.contains(&format!("client {PROTOCOL_VERSION}")));
+            if !error.contains(guidance) || error.contains("not reachable") {
+                failures.push(format!("EXPECTED: {guidance}; ACTUAL: {error}"));
+            }
+        }
+        assert!(failures.is_empty(), "{}", failures.join("\n"));
+    }
+
+    #[test]
+    fn core_placement_mismatch_keeps_the_local_topology_available() {
+        let mut out = Vec::new();
+        let (requests, result) = with_protocol(
+            PROTOCOL_VERSION + 1,
+            vec![Response::Error("unexpected status request".into())],
+            |client| {
+                cores::run(
+                    false,
+                    None,
+                    || Ok(wtm_core::cpu::Topology::default()),
+                    || client,
+                    &mut out,
+                )
+            },
+        );
+        assert!(requests.is_empty(), "{requests:?}");
+        assert_eq!(result.unwrap(), ExitCode::SUCCESS);
+        let text = String::from_utf8(out).unwrap();
+        assert!(text.contains("GROUP  CPU  CORE"), "{text}");
+        assert!(text.contains("Core placement unknown"), "{text}");
+        assert!(
+            text.contains("Run wtm.exe from the same release as the service"),
+            "{text}"
         );
     }
 }
