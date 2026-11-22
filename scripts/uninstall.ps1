@@ -105,7 +105,7 @@ function Stop-TargetPrograms($Target) {
         Stop-Process -Force
 }
 
-function Remove-Tree([string]$Path) {
+function Remove-Tree([string]$Path, [string[]]$KeepUntilLast) {
     $item = Get-Item -LiteralPath $Path -Force
     if (-not $item.PSIsContainer) {
         Remove-Item -LiteralPath $item.FullName -Force
@@ -114,8 +114,16 @@ function Remove-Tree([string]$Path) {
     # Remove a junction as a leaf. Windows PowerShell's recursive directory
     # removal can fail on a junction even when its parent can be removed.
     if (-not ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+        $deferred = @{}
         foreach ($child in Get-ChildItem -LiteralPath $item.FullName -Force) {
-            Remove-Tree $child.FullName
+            if ($child.FullName -in $KeepUntilLast) {
+                $deferred[$child.FullName] = $child.FullName
+            } else {
+                Remove-Tree $child.FullName
+            }
+        }
+        foreach ($leaf in $KeepUntilLast) {
+            if ($deferred.ContainsKey($leaf)) { Remove-Tree $deferred[$leaf] }
         }
     }
     [IO.Directory]::Delete($item.FullName, $false)
@@ -166,7 +174,8 @@ Remove-RustWTMRegistration $target
 Stop-TargetPrograms $target
 
 if (Test-Path -LiteralPath $InstallDir) {
-    Remove-Tree $InstallDir
+    # A failed removal can be retried from the installed script and helper.
+    Remove-Tree $InstallDir -KeepUntilLast @($target.Executable, (Join-Path $InstallDir 'uninstall.ps1'))
     Write-Step "Removed $InstallDir"
 }
 

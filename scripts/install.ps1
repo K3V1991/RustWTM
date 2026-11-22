@@ -256,7 +256,15 @@ try {
         if (Test-Path -LiteralPath $from) {
             # Replaced whole, so nothing of an older version stays behind.
             $to = Join-Path $InstallDir $dir
-            if (Test-Path -LiteralPath $to) { cmd.exe /c rd /s /q "$to" }
+            if (Test-Path -LiteralPath $to) {
+                & {
+                    $PSNativeCommandUseErrorActionPreference = $false
+                    cmd.exe /c rd /s /q "$to"
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Could not remove the previous directory at $to (exit code $LASTEXITCODE). Close any programs using it and retry."
+                    }
+                }
+            }
             Copy-Item -LiteralPath $from -Destination $InstallDir -Recurse -Force
         }
     }

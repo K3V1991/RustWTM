@@ -39,6 +39,85 @@ function Assert-Rejected([scriptblock]$Action, [string]$Message) {
     throw "Expected refusal: $Message"
 }
 
+function Invoke-PartialRemovalFixture($UninstallerAst, [string[]]$FileOrder, [string]$BlockedFile) {
+    foreach ($name in 'Get-UninstallTarget', 'Remove-Tree') {
+        $definition = $UninstallerAst.Find({
+            param($node)
+            $node -is [System.Management.Automation.Language.FunctionDefinitionAst] -and $node.Name -eq $name
+        }, $true)
+        if (-not $definition) { throw "Missing tree fixture definition $name" }
+        $body = $definition.Extent.Text
+        if ($name -eq 'Remove-Tree') {
+            $directoryDelete = '[IO.Directory]::Delete($item.FullName, $false)'
+            if (-not $body.Contains($directoryDelete)) { throw 'Directory deletion seam has changed' }
+            $body = $body.Replace($directoryDelete, 'Remove-EmptyFixtureDirectory $item.FullName')
+        }
+        if ($body -match '(?i)::(?:Delete|SetEnvironmentVariable)\(') { throw 'Tree fixture contains a direct host mutation' }
+        . ([scriptblock]::Create($body))
+    }
+    $statement = $UninstallerAst.EndBlock.Statements |
+        Where-Object { $_.Extent.Text.StartsWith('if (Test-Path -LiteralPath $InstallDir) {') }
+    if (@($statement).Count -ne 1) { throw 'Install directory teardown statement not found' }
+    $action = [scriptblock]::Create($statement.Extent.Text)
+    if ($action.ToString() -match '(?i)::(?:Delete|SetEnvironmentVariable)\(') { throw 'Teardown fixture contains a direct host mutation' }
+    $ServiceName = 'RustWTM'
+    $InstallDir = 'C:\fixture-uninstall'
+    $state = @{ Files = [Collections.Generic.List[string]]::new(); Blocked = $BlockedFile; Present = $true }
+    foreach ($name in $FileOrder) { $state.Files.Add($name) }
+    function Get-CimInstance { param($ClassName, $Filter) }
+    function Get-InstallPathEntries { $InstallDir }
+    function Test-InstalledShortcut { param($Link, $Gui) $true }
+    function Test-Path {
+        param($LiteralPath, $PathType)
+        if ($LiteralPath -ieq $InstallDir) { return $state.Present }
+        if ($LiteralPath -like '*.lnk') { return $true }
+        $state.Files.Contains((Split-Path $LiteralPath -Leaf))
+    }
+    function Get-Item {
+        param($LiteralPath, [switch]$Force)
+        [pscustomobject]@{ FullName = $LiteralPath; PSIsContainer = $LiteralPath -ieq $InstallDir; Attributes = 0 }
+    }
+    function Get-ChildItem {
+        param($LiteralPath, [switch]$Force)
+        if ($LiteralPath -ine $InstallDir) { throw 'Unexpected directory enumeration' }
+        foreach ($name in $state.Files) { [pscustomobject]@{ FullName = Join-Path $InstallDir $name } }
+    }
+    function Remove-Item {
+        param($LiteralPath, [switch]$Force)
+        $name = Split-Path $LiteralPath -Leaf
+        if ($name -ieq $state.Blocked) { throw "Fixture locked $name" }
+        if (-not $state.Files.Remove($name)) { throw "Unexpected leaf deletion $name" }
+    }
+    function Remove-EmptyFixtureDirectory {
+        param($Path)
+        if ($Path -ine $InstallDir -or $state.Files.Count) { throw 'Removed a non-empty fixture directory' }
+        $state.Present = $false
+    }
+    function Write-Step { param($Message) }
+    $target = Get-UninstallTarget $InstallDir
+    $failure = $null
+    try { & $action }
+    catch { $failure = $_.Exception.Message }
+    $remaining = $state.Files -join '|'
+    $retryFailure = $null
+    if ($failure) {
+        $state.Blocked = ''
+        try {
+            $target = Get-UninstallTarget $InstallDir
+            & $action
+        }
+        catch { $retryFailure = $_.Exception.Message }
+    }
+    [pscustomobject]@{ Failure = $failure; Remaining = $remaining; RetryFailure = $retryFailure; Complete = -not $state.Present }
+}
+
+$removalResult = Invoke-PartialRemovalFixture $ast @('wtm-service.exe', 'uninstall.ps1', 'rustwtm.exe') 'rustwtm.exe'
+if ($removalResult.Failure -cne 'Fixture locked rustwtm.exe' -or
+    $removalResult.Remaining -cne 'wtm-service.exe|uninstall.ps1|rustwtm.exe' -or
+    $removalResult.RetryFailure -or -not $removalResult.Complete) {
+    throw "Uninstall could not resume after partial removal: $($removalResult | ConvertTo-Json -Compress)"
+}
+
 $ServiceName = 'RustWTM'
 $dir = Join-Path $env:ProgramFiles 'RustWTM [preview]'
 $gui = Join-Path $dir 'rustwtm.exe'

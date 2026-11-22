@@ -1,5 +1,5 @@
-# Load only the installer's preflight functions. All process and service
-# operations below are doubles. The installer entry point is never invoked.
+# Load the installer's preflight functions and directory-copy loop.
+# Process, service and file operations are doubles.
 $ErrorActionPreference = 'Stop'
 $installer = Join-Path (Split-Path $PSScriptRoot -Parent) 'install.ps1'
 $parseErrors = $null
@@ -20,6 +20,51 @@ function Assert-Rejected([scriptblock]$Action, [string]$ExpectedMessage) {
         return
     }
     throw "Expected refusal: $ExpectedMessage"
+}
+
+function Invoke-InstallTreeFixture([scriptblock]$Action, [string[]]$Sources, [string[]]$Existing, [int]$DeleteExit) {
+    $source = 'C:\fixture-source'
+    $InstallDir = 'C:\fixture-install'
+    $trace = [Collections.Generic.List[string]]::new()
+    function Test-Path {
+        param($LiteralPath)
+        if ($LiteralPath -in @($Sources | ForEach-Object { Join-Path $source $_ })) { return $true }
+        $LiteralPath -in @($Existing | ForEach-Object { Join-Path $InstallDir $_ })
+    }
+    function cmd.exe {
+        if ($args.Count -ne 5 -or ($args[0..3] -join ' ') -cne '/c rd /s /q' -or
+            $args[4] -notin @($Existing | ForEach-Object { Join-Path $InstallDir $_ })) {
+            throw 'Unexpected directory deletion request'
+        }
+        $trace.Add("delete:$(Split-Path $args[4] -Leaf)")
+        $global:LASTEXITCODE = $DeleteExit
+    }
+    function Copy-Item {
+        param($LiteralPath, $Destination, [switch]$Recurse, [switch]$Force)
+        if ($LiteralPath -notin @($Sources | ForEach-Object { Join-Path $source $_ }) -or
+            $Destination -ine $InstallDir -or -not $Recurse -or -not $Force) {
+            throw 'Unexpected installation copy request'
+        }
+        $trace.Add("copy:$(Split-Path $LiteralPath -Leaf)")
+    }
+    $previousExit = $global:LASTEXITCODE
+    $failure = $null
+    try { & $Action }
+    catch { $failure = $_.Exception.Message }
+    finally { $global:LASTEXITCODE = $previousExit }
+    [pscustomobject]@{ Trace = $trace -join '|'; Failure = $failure }
+}
+
+$copyTree = $ast.Find({
+    param($node)
+    $node -is [System.Management.Automation.Language.ForEachStatementAst] -and
+        $node.Extent.Text.StartsWith("foreach (`$dir in 'hardware', 'docs')")
+}, $true)
+if (-not $copyTree) { throw 'Missing installation directory copy loop' }
+$copyAction = [scriptblock]::Create($copyTree.Extent.Text)
+$replaceResult = Invoke-InstallTreeFixture $copyAction @('hardware', 'docs') @('hardware') 5
+if ($replaceResult.Trace -cne 'delete:hardware' -or $replaceResult.Failure -notlike '*exit code 5*') {
+    throw "Installer copied after deleting the old directory failed: $($replaceResult | ConvertTo-Json -Compress)"
 }
 
 $ServiceName = 'RustWTM'
