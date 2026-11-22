@@ -1891,6 +1891,7 @@
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} 的分析停止后将立即分析 {1}。",
   "No usage of this app was recorded in this period.": "此期间未记录此应用的使用情况。",
   "the configuration changed since this page read it; nothing was saved, try again": "自此页面读取后配置已更改；未保存任何内容，请重试",
+  "The service connection changed. Run the test again.": "服务连接已更改。请重新运行测试。",
   "The settings changed while this was open; it cannot be applied now.": "打开期间设置已更改；现在无法应用。",
   "Not running": "未运行",
   "Blocked programs could not be read: {0}": "无法读取被阻止的程序：{0}",

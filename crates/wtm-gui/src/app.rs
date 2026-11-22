@@ -460,6 +460,8 @@ struct UiState {
     startup_filter: String,
     history: views::HistoryView,
     history_dirty: bool,
+    /// The connection last observed by the recorded-history views.
+    history_session: Option<u64>,
     selected_service: Option<String>,
     config: crate::settings::ConfigView,
     telegram: crate::telegram_settings::TelegramView,
@@ -854,6 +856,7 @@ impl Default for UiState {
             startup_filter: String::new(),
             history: views::HistoryView::default(),
             history_dirty: true,
+            history_session: None,
             selected_service: None,
             config: crate::settings::ConfigView::default(),
             telegram: crate::telegram_settings::TelegramView::default(),
@@ -1019,6 +1022,12 @@ impl eframe::App for App {
             tray.localize();
         }
         let service_mode = matches!(data.mode, Mode::Service { .. });
+        let history_session = service_mode.then_some(data.service_session);
+        if state.history_session != history_session {
+            state.history_session = history_session;
+            state.history_dirty = true;
+            state.performance.history.reset_request();
+        }
         data.alert_watch.settings = state.alerts;
         data.container_alerts.settings = state.container_alerts;
         if state.hide_frames > 0 && tray.is_none() {
@@ -2231,17 +2240,13 @@ impl eframe::App for App {
         } else if state.container_alerts.enabled {
             backend.watch_containers();
         }
+        let now = state.reload_now();
         if state.tab == Tab::Performance {
             let device = crate::device_history::wanted(&state.performance).map(str::to_owned);
-            if let Some((device, hours)) = state
-                .performance
-                .history
-                .due(device.as_deref(), Instant::now())
-            {
+            if let Some((device, hours)) = state.performance.history.due(device.as_deref(), now) {
                 backend.send(UiCommand::LoadDeviceHistory { device, hours });
             }
         }
-        let now = state.reload_now();
         if state.tab == Tab::History {
             let stale = state
                 .last_load
@@ -6928,6 +6933,61 @@ mod tests {
     }
 
     #[test]
+    fn recorded_history_refreshes_for_a_replacement_service() {
+        use egui::accesskit::Role;
+        let mut d = crate::ui_tests::device_data();
+        d.mode = Mode::Service {
+            admin: true,
+            verified: true,
+        };
+        d.service_session = 1;
+        let (mut h, rx) = overview_app(d);
+        h.state_mut().state.frozen_now = Some(Instant::now());
+        h.state_mut().state.tab = Tab::History;
+        h.state_mut().state.history.selected = Some("fixture.exe".into());
+        let history_commands = || {
+            rx.try_iter()
+                .filter(|c| {
+                    matches!(
+                        c,
+                        UiCommand::LoadHistory { .. }
+                            | UiCommand::LoadSeries { .. }
+                            | UiCommand::LoadDeviceHistory { .. }
+                    )
+                })
+                .map(describe_command)
+                .collect::<Vec<_>>()
+        };
+        h.run_steps(3);
+        let before_apps = history_commands();
+        assert_eq!(before_apps.len(), 2, "{before_apps:?}");
+        h.state_mut().state.tab = Tab::Performance;
+        h.run_steps(3);
+        h.get_by_role_and_label(Role::Button, "Disk 1 (D: E:) performance view")
+            .click();
+        h.run_steps(3);
+        let before_device = history_commands();
+        assert_eq!(before_device.len(), 1, "{before_device:?}");
+
+        h.state().backend.data().service_session = 2;
+        h.run_steps(3);
+        let after_device = history_commands();
+        h.state_mut().state.tab = Tab::History;
+        h.run_steps(3);
+        let after_apps = history_commands();
+        assert_eq!(
+            (after_device, after_apps),
+            (before_device, before_apps),
+            "the replacement service must receive fresh requests before the periodic timer expires"
+        );
+        h.run_steps(3);
+        assert!(
+            history_commands().is_empty(),
+            "one load per history, not every frame"
+        );
+    }
+
+    #[test]
     fn a_device_page_asks_the_service_for_its_recorded_history() {
         use egui::accesskit::Role;
         let (mut h, rx) = overview_app(crate::ui_tests::device_data());
@@ -8566,8 +8626,8 @@ mod tests {
             }
             UiCommand::Service { name, op } => format!("service {name} {op:?}"),
             UiCommand::SaveConfig { toml, .. } => format!("save config {}", toml.len()),
-            UiCommand::SaveTelegram(c) => format!("save telegram {}", c.enabled),
-            UiCommand::TestTelegram => "test telegram".into(),
+            UiCommand::SaveTelegram { config, .. } => format!("save telegram {}", config.enabled),
+            UiCommand::TestTelegram { .. } => "test telegram".into(),
             UiCommand::SetCooling { channel, .. } => format!("cooling {channel}"),
             UiCommand::SetFrequency(request) => {
                 format!("frequency {} {}", request.class, request.mhz)

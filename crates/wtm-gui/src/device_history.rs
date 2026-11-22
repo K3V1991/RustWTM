@@ -31,6 +31,10 @@ impl Default for View {
 }
 
 impl View {
+    pub fn reset_request(&mut self) {
+        self.requested = None;
+    }
+
     /// The device and range to ask the service for now, if any: a new one,
     /// or the shown one once a minute.
     pub fn due(&mut self, device: Option<&str>, now: Instant) -> Option<(String, u32)> {

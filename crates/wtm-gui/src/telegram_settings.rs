@@ -3,7 +3,7 @@
 use eframe::egui::{self, Ui};
 use wtm_policy::{TelegramConfig, parse_chats, token_looks_valid};
 
-use crate::backend::{Data, Mode, Panel, UiCommand};
+use crate::backend::{Data, Mode, NO_TELEGRAM, Panel, ServiceProblem, UiCommand, service_problem};
 use crate::theme::{BAD, GOOD, WARN, icon};
 
 /// The width of the token and chat ID fields.
@@ -18,6 +18,7 @@ pub struct TelegramView {
     original: Option<TelegramConfig>,
     show_token: bool,
     requested: bool,
+    session: u64,
 }
 
 impl TelegramView {
@@ -37,6 +38,14 @@ impl TelegramView {
 
 /// Returns the commands to send (load, save, test).
 pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiCommand> {
+    if view.session != data.service_session
+        || !matches!(data.mode, Mode::Service { admin: true, .. })
+    {
+        *view = TelegramView {
+            session: data.service_session,
+            ..TelegramView::default()
+        };
+    }
     let mut commands = Vec::new();
     crate::theme::option_group(ui, crate::i18n::tr("🔔 Telegram bot"));
     ui.scope(|ui| {
@@ -59,20 +68,16 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
                 return;
             }
             Mode::Starting | Mode::Local => {
-                let other_version = data
-                    .service_error
-                    .as_deref()
-                    .is_some_and(|e| e.contains("protocol"));
-                ui.colored_label(
-                    crate::theme::text_color(ui, WARN),
-                    if other_version {
-                        { let __wtm_i18n_0 = &(env!("CARGO_PKG_VERSION")); crate::i18n::format("The bot runs in the RustWTM service, and the installed one is a different version. Update it with the installer of version {0}.", &[__wtm_i18n_0.to_string()]) }
-                    } else {
-                        crate::i18n::tr("The bot runs in the RustWTM service, which is not running. Install \
-                         RustWTM with the MSI to use it.")
-                            .to_owned()
-                    },
-                );
+                let error = data.service_error.as_deref();
+                let warning = match service_problem(error) {
+                    ServiceProblem::NotRunning => crate::i18n::tr(
+                        "The bot runs in the RustWTM service, which is not running. Install \
+                         RustWTM with the MSI to use it.",
+                    )
+                    .to_owned(),
+                    problem => problem.describe(NO_TELEGRAM, error),
+                };
+                ui.colored_label(crate::theme::text_color(ui, WARN), warning);
                 return;
             }
         }
@@ -124,17 +129,26 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
                 .into_iter()
                 .map(|text| {
                     egui::WidgetText::from(text)
-                        .into_galley(ui, Some(egui::TextWrapMode::Extend), f32::INFINITY, egui::TextStyle::Button)
+                        .into_galley(
+                            ui,
+                            Some(egui::TextWrapMode::Extend),
+                            f32::INFINITY,
+                            egui::TextStyle::Button,
+                        )
                         .size()
                         .x
                 })
                 .fold(0.0, f32::max)
                 + 2.0 * ui.spacing().button_padding.x;
             let height = ui.spacing().interact_size.y;
-            ui.add_sized([FIELD_WIDTH - eye_width - ui.spacing().item_spacing.x, height],
+            ui.add_sized(
+                [
+                    FIELD_WIDTH - eye_width - ui.spacing().item_spacing.x,
+                    height,
+                ],
                 egui::TextEdit::singleline(&mut form.token)
                     .password(!*show_token)
-                    .hint_text(crate::i18n::tr("123456789:ABC… from @BotFather"))
+                    .hint_text(crate::i18n::tr("123456789:ABC… from @BotFather")),
             )
             .labelled_by(id);
             let eye = if *show_token {
@@ -156,9 +170,10 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
             crate::i18n::tr("Allowed chat IDs"),
             crate::i18n::tr("Only these chats may use the bot; separate several with commas"),
             |ui, id| {
-                ui.add_sized([FIELD_WIDTH, ui.spacing().interact_size.y],
+                ui.add_sized(
+                    [FIELD_WIDTH, ui.spacing().interact_size.y],
                     egui::TextEdit::singleline(&mut view.chats)
-                        .hint_text(crate::i18n::tr("e.g. 123456789, 987654321"))
+                        .hint_text(crate::i18n::tr("e.g. 123456789, 987654321")),
                 )
                 .labelled_by(id);
             },
@@ -208,7 +223,10 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
                 .clicked()
                 && let Some(Ok(cfg)) = edited.clone()
             {
-                commands.push(UiCommand::SaveTelegram(cfg));
+                commands.push(UiCommand::SaveTelegram {
+                    config: cfg,
+                    session: view.session,
+                });
             }
             let saved_token = view
                 .original
@@ -225,7 +243,9 @@ pub fn telegram(ui: &mut Ui, data: &Data, view: &mut TelegramView) -> Vec<UiComm
                 .on_disabled_hover_text(crate::i18n::tr("Save a bot token first"))
                 .clicked()
             {
-                commands.push(UiCommand::TestTelegram);
+                commands.push(UiCommand::TestTelegram {
+                    session: view.session,
+                });
             }
             match (&edited, &view.original) {
                 (Some(Err(e)), _) => {
@@ -341,6 +361,125 @@ mod tests {
     }
 
     #[test]
+    fn connection_warnings_send_users_to_the_right_recovery() {
+        let mut failures = Vec::new();
+        for (error, expected, misleading) in [
+            (None, "Install RustWTM with the MSI", "Restart RustWTM"),
+            (
+                Some("service speaks protocol 19, client 20"),
+                "Update it with the installer of version",
+                "Restart RustWTM",
+            ),
+            (
+                Some("service speaks protocol 21, client 20"),
+                "Restart RustWTM",
+                "Update it with the installer of version",
+            ),
+            (
+                Some("the pipe is not served by the RustWTM service"),
+                "another program answers",
+                "Install RustWTM with the MSI",
+            ),
+        ] {
+            let data = Data {
+                mode: Mode::Local,
+                service_error: error.map(str::to_owned),
+                ..Data::default()
+            };
+            let mut view = TelegramView::default();
+            let mut harness = Harness::builder().allow_missing_glyphs().build_ui(|ui| {
+                assert!(telegram(ui, &data, &mut view).is_empty());
+            });
+            harness.run();
+            if harness.query_by_label_contains(expected).is_none() {
+                failures.push(format!("expected {expected:?} for {error:?}"));
+            }
+            if harness.query_by_label_contains(misleading).is_some() {
+                failures.push(format!("misleading recovery {misleading:?} for {error:?}"));
+            }
+        }
+        assert!(failures.is_empty(), "{}", failures.join("\n"));
+    }
+
+    #[test]
+    fn reconnect_reloads_the_form_and_drops_the_previous_draft() {
+        let mut view = TelegramView::default();
+        assert!(matches!(
+            run(admin(), &mut view).as_slice(),
+            [UiCommand::Load(Panel::Telegram)]
+        ));
+        let loaded = Data {
+            telegram: Some(Ok(TelegramConfig::default())),
+            ..admin()
+        };
+        run(loaded, &mut view);
+        view.chats = "123".into();
+        view.show_token = true;
+
+        run(Data::default(), &mut view);
+        let commands = run(admin(), &mut view);
+        assert!(
+            view.form.is_none()
+                && view.chats.is_empty()
+                && !view.show_token
+                && matches!(commands.as_slice(), [UiCommand::Load(Panel::Telegram)]),
+            "old draft retained={}, reload requested={}",
+            view.form.is_some(),
+            !commands.is_empty(),
+        );
+        assert!(run(admin(), &mut view).is_empty(), "only one request");
+
+        // The page may not have been visible when the connection went away.
+        run(
+            Data {
+                service_session: 1,
+                telegram: Some(Ok(TelegramConfig::default())),
+                ..admin()
+            },
+            &mut view,
+        );
+        view.chats = "456".into();
+        let commands = run(
+            Data {
+                service_session: 2,
+                ..admin()
+            },
+            &mut view,
+        );
+        assert!(matches!(
+            commands.as_slice(),
+            [UiCommand::Load(Panel::Telegram)]
+        ));
+        assert!(view.form.is_none() && view.chats.is_empty());
+    }
+
+    #[test]
+    fn the_test_button_sends_the_forms_service_session() {
+        let data = Data {
+            telegram: Some(Ok(TelegramConfig {
+                token: TOKEN.into(),
+                ..TelegramConfig::default()
+            })),
+            service_session: 17,
+            ..admin()
+        };
+        let mut view = TelegramView::default();
+        let mut commands = Vec::new();
+        {
+            let mut harness = Harness::builder().allow_missing_glyphs().build_ui(|ui| {
+                commands.extend(telegram(ui, &data, &mut view));
+            });
+            harness.run();
+            harness.get_by_label("Send test message").click();
+            harness.run();
+        }
+        assert!(matches!(
+            commands.as_slice(),
+            [UiCommand::TestTelegram { session: 17 }]
+        ));
+    }
+
+    #[test]
     fn edits_are_checked_and_saved() {
         let mut data = admin();
         data.telegram = Some(Ok(TelegramConfig::default()));
@@ -370,8 +509,8 @@ mod tests {
         {
             let mut harness = Harness::builder().allow_missing_glyphs().build_ui(|ui| {
                 for c in telegram(ui, &data, &mut view) {
-                    if let UiCommand::SaveTelegram(c) = c {
-                        saved.push(c);
+                    if let UiCommand::SaveTelegram { config, .. } = c {
+                        saved.push(config);
                     }
                 }
             });

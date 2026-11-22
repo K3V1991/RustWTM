@@ -1891,6 +1891,7 @@
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{0} ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਰੁਕਦੇ ਹੀ {1} ਦਾ ਵਿਸ਼ਲੇਸ਼ਣ ਹੋਵੇਗਾ।",
   "No usage of this app was recorded in this period.": "ਇਸ ਸਮੇਂ ਦੌਰਾਨ ਇਸ ਐਪ ਦੀ ਕੋਈ ਵਰਤੋਂ ਦਰਜ ਨਹੀਂ ਹੋਈ।",
   "the configuration changed since this page read it; nothing was saved, try again": "ਇਸ ਪੰਨੇ ਦੇ ਪੜ੍ਹਨ ਤੋਂ ਬਾਅਦ ਸੰਰਚਨਾ ਬਦਲ ਗਈ; ਕੁਝ ਵੀ ਸੁਰੱਖਿਅਤ ਨਹੀਂ ਹੋਇਆ, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+  "The service connection changed. Run the test again.": "ਸੇਵਾ ਦਾ ਕਨੈਕਸ਼ਨ ਬਦਲ ਗਿਆ। ਟੈਸਟ ਦੁਬਾਰਾ ਚਲਾਓ।",
   "The settings changed while this was open; it cannot be applied now.": "ਇਹ ਖੁੱਲ੍ਹਾ ਹੋਣ ਦੌਰਾਨ ਸੈਟਿੰਗਾਂ ਬਦਲ ਗਈਆਂ; ਹੁਣ ਇਹ ਲਾਗੂ ਨਹੀਂ ਹੋ ਸਕਦਾ।",
   "Not running": "ਨਹੀਂ ਚੱਲ ਰਹੇ",
   "Blocked programs could not be read: {0}": "ਬਲੌਕ ਕੀਤੇ ਪ੍ਰੋਗਰਾਮ ਪੜ੍ਹੇ ਨਹੀਂ ਜਾ ਸਕੇ: {0}",

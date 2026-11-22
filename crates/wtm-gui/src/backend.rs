@@ -68,38 +68,14 @@ pub type AppHistory = (Vec<AppStats>, Vec<Finding>);
 
 const NO_SERVICE: &str = "Usage history is recorded by the RustWTM service";
 const NO_CONFIG: &str = "The configuration belongs to the RustWTM service";
-const NO_TELEGRAM: &str = "The Telegram bot runs in the RustWTM service";
+pub(crate) const NO_TELEGRAM: &str = "The Telegram bot runs in the RustWTM service";
 
 /// Why `what` (one of the constants above) is unavailable: the service is not
 /// running, or it is another version that this window cannot talk to.
 fn without_service(data: &Mutex<Data>, what: &str) -> String {
-    let what = crate::i18n::tr(what);
     let data = data.lock().unwrap_or_else(PoisonError::into_inner);
-    let error = data.service_error.as_deref().unwrap_or_default();
-    match service_problem(data.service_error.as_deref()) {
-        ServiceProblem::Older => {
-            let __wtm_i18n_0 = &(env!("CARGO_PKG_VERSION"));
-            crate::i18n::format(
-                "{0}, but the installed service is a different version ({1}). Update it with the installer of version {2}.",
-                &[
-                    what.to_string(),
-                    error.to_string(),
-                    __wtm_i18n_0.to_string(),
-                ],
-            )
-        }
-        ServiceProblem::Newer => crate::i18n::format(
-            "{0}, but the installed service is newer than this window ({1}). Restart RustWTM, or update it with the latest installer.",
-            &[what.to_string(), error.to_string()],
-        ),
-        ServiceProblem::Impostor => crate::i18n::format(
-            "{0}, but another program answers in its place, so RustWTM does not use it.",
-            &[what.to_string()],
-        ),
-        ServiceProblem::NotRunning => {
-            crate::i18n::format("{0}, which is not running.", &[what.to_string()])
-        }
-    }
+    let error = data.service_error.as_deref();
+    service_problem(error).describe(what, error)
 }
 
 /// Why the window works without the service, from the last connection error.
@@ -112,6 +88,37 @@ pub enum ServiceProblem {
     Newer,
     /// Another process serves the pipe in place of the installed service.
     Impostor,
+}
+
+impl ServiceProblem {
+    pub(crate) fn describe(self, what: &str, error: Option<&str>) -> String {
+        let what = crate::i18n::tr(what);
+        let error = error.unwrap_or_default();
+        match self {
+            Self::Older => {
+                let __wtm_i18n_0 = &(env!("CARGO_PKG_VERSION"));
+                crate::i18n::format(
+                    "{0}, but the installed service is a different version ({1}). Update it with the installer of version {2}.",
+                    &[
+                        what.to_string(),
+                        error.to_string(),
+                        __wtm_i18n_0.to_string(),
+                    ],
+                )
+            }
+            Self::Newer => crate::i18n::format(
+                "{0}, but the installed service is newer than this window ({1}). Restart RustWTM, or update it with the latest installer.",
+                &[what.to_string(), error.to_string()],
+            ),
+            Self::Impostor => crate::i18n::format(
+                "{0}, but another program answers in its place, so RustWTM does not use it.",
+                &[what.to_string()],
+            ),
+            Self::NotRunning => {
+                crate::i18n::format("{0}, which is not running.", &[what.to_string()])
+            }
+        }
+    }
 }
 
 /// Reads the error of `wtm_ipc::Client::connect`; its handshake reports
@@ -421,9 +428,25 @@ pub struct Data {
     pub installable: bool,
     /// Why the last attempt to reach the service failed.
     pub service_error: Option<String>,
+    /// Changes on each accepted main connection, even if no frame drew the gap.
+    pub service_session: u64,
 }
 
 impl Data {
+    fn has_service_session(&self, session: u64) -> bool {
+        self.service_session == session && matches!(self.mode, Mode::Service { .. })
+    }
+
+    fn clear_service_cache(&mut self) {
+        self.config = None;
+        self.kill_list.clear();
+        self.swarm = wtm_policy::SwarmConfig::default();
+        self.telegram = None;
+        self.app_history = None;
+        self.series = None;
+        self.device_history = None;
+    }
+
     /// Drops the inspector panels' results that belong to a process other
     /// than `target`.
     pub fn forget_panels_of_others(&mut self, target: &ProcessRef) {
@@ -552,9 +575,14 @@ pub enum UiCommand {
         base: Option<String>,
     },
     /// Replace the Telegram bot settings (admin only).
-    SaveTelegram(wtm_policy::TelegramConfig),
+    SaveTelegram {
+        config: wtm_policy::TelegramConfig,
+        session: u64,
+    },
     /// Have the service send a test message to the allowed chats.
-    TestTelegram,
+    TestTelegram {
+        session: u64,
+    },
     /// Write a full memory dump of the process to the Temp folder.
     CreateDump(ProcessRef),
     /// Notify when the process exits; again to stop watching.
@@ -965,6 +993,8 @@ impl Worker {
                     self.backlog_pending = true;
                     let mut data = self.data();
                     data.service_error = None;
+                    data.service_session = data.service_session.wrapping_add(1);
+                    data.clear_service_cache();
                     // Back again: "reconnecting…" no longer applies.
                     if data.message.as_ref().map(|(_, m)| m.as_str())
                         == Some(crate::i18n::tr(RECONNECTING))
@@ -1017,6 +1047,7 @@ impl Worker {
                     lookups.apply(&mut data);
                     data.hung = hung;
                     data.revision = data.revision.wrapping_add(1);
+                    let reload_config = fresh && data.mode == Mode::Local;
                     if let Some(points) = backfill
                         && data.history.cpu.len() < points.len()
                     {
@@ -1031,6 +1062,9 @@ impl Worker {
                         data.sample_error = Some("The service has not supplied a sample.".into());
                     }
                     drop(data);
+                    if reload_config {
+                        self.load(Panel::Config);
+                    }
                     refresh_icons(&self.data);
                     refresh_gui_objects(&self.data);
                     self.threads.refresh(&self.data);
@@ -1040,7 +1074,11 @@ impl Worker {
                 Err(e) => {
                     self.client = None;
                     self.next_connect = Instant::now() + RECONNECT;
-                    self.data().message = Some((EventLevel::Warn, lost_connection(&e)));
+                    let mut data = self.data();
+                    data.mode = Mode::Local;
+                    data.status = None;
+                    data.clear_service_cache();
+                    data.message = Some((EventLevel::Warn, lost_connection(&e)));
                 }
             }
         }
@@ -1737,14 +1775,22 @@ impl Worker {
                 });
                 self.load(Panel::Config);
             }
-            UiCommand::SaveTelegram(cfg) => {
-                let result = match self.client.as_mut() {
-                    None => Err(without_service(&self.data, NO_TELEGRAM)),
-                    Some(c) => match c.call(&Request::SetTelegram(cfg)) {
-                        Ok(Response::Done) => Ok(()),
-                        Ok(other) => Err(unexpected(other).to_string()),
-                        Err(e) => Err(e.to_string()),
-                    },
+            UiCommand::SaveTelegram { config, session } => {
+                let current_session = self.data().service_session;
+                let result = if session != current_session {
+                    Err(crate::i18n::tr(
+                        "the configuration changed since this page read it; nothing was saved, try again",
+                    )
+                    .to_owned())
+                } else {
+                    match self.client.as_mut() {
+                        None => Err(without_service(&self.data, NO_TELEGRAM)),
+                        Some(c) => match c.call(&Request::SetTelegram(config)) {
+                            Ok(Response::Done) => Ok(()),
+                            Ok(other) => Err(unexpected(other).to_string()),
+                            Err(e) => Err(e.to_string()),
+                        },
+                    }
                 };
                 self.data().message = Some(match result {
                     Ok(()) => (
@@ -1763,7 +1809,7 @@ impl Worker {
                 });
                 self.load(Panel::Telegram);
             }
-            UiCommand::TestTelegram => {
+            UiCommand::TestTelegram { session } => {
                 let tested = |result: Result<String, String>| match result {
                     Ok(t) => (EventLevel::Info, t),
                     Err(e) => (EventLevel::Error, {
@@ -1775,8 +1821,22 @@ impl Worker {
                         Some(tested(Err(without_service(&self.data, NO_TELEGRAM))));
                     return;
                 }
+                if !self.data().has_service_session(session) {
+                    self.data().message = Some(tested(Err(crate::i18n::tr(
+                        "The service connection changed. Run the test again.",
+                    )
+                    .to_owned())));
+                    return;
+                }
                 // Telegram may take half a minute to answer.
                 self.aside(move |client, data| {
+                    if !data
+                        .lock()
+                        .unwrap_or_else(PoisonError::into_inner)
+                        .has_service_session(session)
+                    {
+                        return;
+                    }
                     let result = client.map_err(|e| e.to_string()).and_then(|mut c| {
                         match c.call(&Request::TestTelegram) {
                             Ok(Response::Text(t)) => Ok(t),
@@ -1784,8 +1844,10 @@ impl Worker {
                             Err(e) => Err(e.to_string()),
                         }
                     });
-                    data.lock().unwrap_or_else(PoisonError::into_inner).message =
-                        Some(tested(result));
+                    let mut data = data.lock().unwrap_or_else(PoisonError::into_inner);
+                    if data.has_service_session(session) {
+                        data.message = Some(tested(result));
+                    }
                 });
             }
             UiCommand::WaitChain(target) => {
@@ -3793,6 +3855,11 @@ mod tests {
         }
     }
 
+    fn test_telegram(w: &mut Worker) {
+        let session = w.data().service_session;
+        w.handle(UiCommand::TestTelegram { session });
+    }
+
     #[test]
     fn explorer_restarts_and_the_real_task_manager_report_their_outcome() {
         use wtm_sys::explorer::Restarted;
@@ -3916,7 +3983,7 @@ mod tests {
             base: None,
         });
         assert!(message(&w).1.ends_with(&no_config));
-        w.handle(UiCommand::TestTelegram);
+        test_telegram(&mut w);
         assert!(message(&w).1.contains(NO_TELEGRAM));
         w.handle(UiCommand::Load(Panel::Telegram));
         assert!(matches!(&w.data().telegram, Some(Err(e)) if e.starts_with(NO_TELEGRAM)));
@@ -4325,12 +4392,14 @@ mod tests {
             hours: 24,
         });
         assert!(matches!(&w.data().series, Some((_, 24, Ok(_)))));
-        w.handle(UiCommand::SaveTelegram(
-            wtm_policy::TelegramConfig::default(),
-        ));
+        let session = w.data().service_session;
+        w.handle(UiCommand::SaveTelegram {
+            config: wtm_policy::TelegramConfig::default(),
+            session,
+        });
         assert_eq!(message(&w).0, EventLevel::Info);
         assert!(matches!(w.data().telegram, Some(Ok(_))));
-        w.handle(UiCommand::TestTelegram);
+        test_telegram(&mut w);
         assert_eq!(
             background_message(&w),
             (EventLevel::Info, "sent".to_owned())
@@ -4347,6 +4416,153 @@ mod tests {
         assert_eq!(w.data().mode, Mode::Local);
         assert!(w.client.is_none());
         assert_eq!(message(&w), (EventLevel::Warn, RECONNECTING.to_owned()));
+    }
+
+    #[test]
+    fn reconnect_scopes_cached_settings_and_saves_to_the_current_service() {
+        let pipe = test_pipe("settings-disconnected");
+        let server = serve(&pipe, 1, |request| match request {
+            Request::Hello { .. } => hello(),
+            Request::Snapshot => Response::Error("waiting for fixture sample".into()),
+            Request::Status => Response::Status(Status::default()),
+            Request::Events { .. } => Response::Events(Vec::new()),
+            Request::Recent => Response::Recent(Vec::new()),
+            Request::GetConfig => Response::Config {
+                toml: "[[kill]]\nname = \"fixture.exe\"\n".into(),
+                path: "fixture.toml".into(),
+            },
+            Request::GetTelegram => Response::Telegram(wtm_policy::TelegramConfig::default()),
+            other => panic!("unexpected fixture request: {other:?}"),
+        });
+        let mut w = worker();
+        w.pipe = pipe.clone();
+        w.next_connect = Instant::now();
+        w.tick();
+        w.handle(UiCommand::Load(Panel::Config));
+        w.handle(UiCommand::Load(Panel::Telegram));
+        let old_session = {
+            let d = w.data();
+            assert!(matches!(d.mode, Mode::Service { .. }));
+            assert!(matches!(d.config, Some(Ok(_))));
+            assert_eq!(d.kill_list.len(), 1);
+            assert!(matches!(d.telegram, Some(Ok(_))));
+            d.service_session
+        };
+        drop(w.client.take());
+        server.join().unwrap();
+
+        w.client = Some(hang_up_after_hello(&pipe, true));
+        w.tick();
+        {
+            let d = w.data();
+            assert_eq!(d.mode, Mode::Local);
+            assert!(
+                d.config.is_none() && d.kill_list.is_empty() && d.telegram.is_none(),
+                "old configuration retained={}, kill entries={}, Telegram settings retained={}",
+                d.config.is_some(),
+                d.kill_list.len(),
+                d.telegram.is_some(),
+            );
+        }
+
+        let saves = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let received = saves.clone();
+        let replacement = serve(&pipe, 1, move |request| match request {
+            Request::Hello { .. } => hello(),
+            Request::Snapshot => Response::Error("waiting for fixture sample".into()),
+            Request::Status => Response::Status(Status::default()),
+            Request::Events { .. } => Response::Events(Vec::new()),
+            Request::Recent => Response::Recent(Vec::new()),
+            Request::GetConfig => Response::Config {
+                toml: "dry_run = true\n".into(),
+                path: "replacement.toml".into(),
+            },
+            Request::GetTelegram => Response::Telegram(wtm_policy::TelegramConfig::default()),
+            Request::SetTelegram(_) => {
+                received.fetch_add(1, Ordering::Relaxed);
+                Response::Done
+            }
+            other => panic!("unexpected fixture request: {other:?}"),
+        });
+        w.next_connect = Instant::now();
+        w.tick();
+        let current_session = {
+            let d = w.data();
+            assert!(matches!(d.mode, Mode::Service { .. }));
+            assert!(matches!(&d.config, Some(Ok((path, _))) if path == "replacement.toml"));
+            assert!(d.kill_list.is_empty());
+            assert!(d.telegram.is_none());
+            assert_ne!(d.service_session, old_session);
+            d.service_session
+        };
+        w.handle(UiCommand::SaveTelegram {
+            config: Default::default(),
+            session: old_session,
+        });
+        assert_eq!(saves.load(Ordering::Relaxed), 0);
+        assert!(message(&w).1.contains("configuration changed"));
+        w.handle(UiCommand::SaveTelegram {
+            config: Default::default(),
+            session: current_session,
+        });
+        assert_eq!(saves.load(Ordering::Relaxed), 1);
+        assert_eq!(message(&w).0, EventLevel::Info);
+        drop(w.client.take());
+        replacement.join().unwrap();
+    }
+
+    #[test]
+    fn disconnect_drops_recorded_history_caches() {
+        let pipe = test_pipe("history-disconnected");
+        let server = serve(&pipe, 1, |request| match request {
+            Request::Hello { .. } => hello(),
+            Request::Snapshot => Response::Error("waiting for fixture sample".into()),
+            Request::Status => Response::Status(Status::default()),
+            Request::Events { .. } => Response::Events(Vec::new()),
+            Request::Recent => Response::Recent(Vec::new()),
+            Request::History { .. } => Response::History {
+                stats: Vec::new(),
+                findings: Vec::new(),
+            },
+            Request::AppSeries { .. } => Response::Series(Vec::new()),
+            Request::DeviceHistory { .. } => Response::DeviceHistory(None),
+            other => panic!("unexpected fixture request: {other:?}"),
+        });
+        let mut w = worker();
+        w.pipe = pipe.clone();
+        w.next_connect = Instant::now();
+        w.tick();
+        w.handle(UiCommand::LoadHistory { hours: 24 });
+        w.handle(UiCommand::LoadSeries {
+            app: "fixture.exe".into(),
+            hours: 24,
+        });
+        w.handle(UiCommand::LoadDeviceHistory {
+            device: "disk:1".into(),
+            hours: 24,
+        });
+        {
+            let d = w.data();
+            assert!(matches!(d.app_history, Some(Ok(_))));
+            assert!(matches!(d.series, Some((_, _, Ok(_)))));
+            assert!(matches!(
+                d.device_history,
+                Some(crate::device_history::Loaded { result: Ok(_), .. })
+            ));
+        }
+        drop(w.client.take());
+        server.join().unwrap();
+        w.client = Some(hang_up_after_hello(&pipe, true));
+        w.tick();
+        let d = w.data();
+        assert_eq!(d.mode, Mode::Local);
+        assert!(
+            d.app_history.is_none() && d.series.is_none() && d.device_history.is_none(),
+            "old summary retained={}, app series retained={}, device history retained={}",
+            d.app_history.is_some(),
+            d.series.is_some(),
+            d.device_history.is_some(),
+        );
     }
 
     static NOTIFIED: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
@@ -4545,7 +4761,7 @@ mod tests {
         assert_eq!(level, EventLevel::Error);
         assert!(text.ends_with("invalid configuration: x"), "{text}");
         assert!(matches!(&w.data().config, Some(Err(e)) if e.starts_with("unexpected response")));
-        w.handle(UiCommand::TestTelegram);
+        test_telegram(&mut w);
         assert!(background_message(&w).1.ends_with("chat not found"));
         w.handle(UiCommand::Load(Panel::Telegram));
         assert!(matches!(&w.data().telegram, Some(Err(e)) if e.starts_with("unexpected response")));
@@ -4708,27 +4924,167 @@ mod tests {
     fn slow_requests_do_not_hold_up_the_worker() {
         let pipe = test_pipe("slow");
         let snapshot = Sampler::new().sample().unwrap();
-        // The main connection answers at once; the Telegram test takes long.
+        let (started, entered) = mpsc::channel();
+        let (release, resume) = mpsc::channel();
+        let wait = Duration::from_secs(10);
+        // The Telegram reply stays blocked until the command handler returns.
         let server = serve(&pipe, 2, move |request| match request {
             Request::Hello { .. } => hello(),
             Request::Snapshot => Response::Snapshot(snapshot.clone()),
             Request::Status => Response::Status(Status::default()),
             Request::Events { .. } => Response::Events(Vec::new()),
             Request::TestTelegram => {
-                std::thread::sleep(Duration::from_millis(300));
+                started.send(()).unwrap();
+                resume.recv_timeout(wait).unwrap();
                 Response::Text("sent".into())
             }
             _ => Response::Done,
         });
         let mut w = worker();
         w.pipe = pipe.clone();
-        w.client = Some(Client::connect_to(&pipe).unwrap());
-        let started = Instant::now();
-        w.handle(UiCommand::TestTelegram);
-        assert!(started.elapsed() < Duration::from_millis(250));
+        w.next_connect = Instant::now();
+        w.tick();
+        test_telegram(&mut w);
+        entered.recv_timeout(wait).unwrap();
+        release.send(()).unwrap();
         assert_eq!(background_message(&w).1, "sent");
         drop(w.client.take());
         server.join().unwrap();
+    }
+
+    fn telegram_test_service_reply(request: Request) -> Response {
+        match request {
+            Request::Hello { .. } => hello(),
+            Request::Snapshot => Response::Error("waiting for fixture sample".into()),
+            Request::Status => Response::Status(Status::default()),
+            Request::Events { .. } => Response::Events(Vec::new()),
+            Request::Recent => Response::Recent(Vec::new()),
+            Request::GetConfig => Response::Config {
+                toml: "dry_run = true\n".into(),
+                path: "fixture.toml".into(),
+            },
+            other => panic!("unexpected fixture request: {other:?}"),
+        }
+    }
+
+    #[test]
+    fn a_late_telegram_reply_preserves_the_connection_message() {
+        let wait = Duration::from_secs(10);
+        let mut failures = Vec::new();
+        for reconnect in [false, true] {
+            let pipe = test_pipe(&format!("late-telegram-{reconnect}"));
+            let (started, entered) = mpsc::channel();
+            let (release, resume) = mpsc::channel();
+            let server = serve(&pipe, 2, move |request| match request {
+                Request::TestTelegram => {
+                    started.send(()).unwrap();
+                    resume.recv_timeout(wait).unwrap();
+                    Response::Text("old test result".into())
+                }
+                other => telegram_test_service_reply(other),
+            });
+            let mut w = worker();
+            w.pipe = pipe;
+            w.next_connect = Instant::now();
+            w.tick();
+            let original = w.data().service_session;
+            test_telegram(&mut w);
+            entered.recv_timeout(wait).unwrap();
+
+            drop(w.client.take());
+            let closed = test_pipe(&format!("closed-telegram-{reconnect}"));
+            w.client = Some(hang_up_after_hello(&closed, true));
+            w.tick();
+            assert_eq!(w.data().mode, Mode::Local);
+            let replacement = reconnect.then(|| {
+                w.pipe = test_pipe("replacement-telegram");
+                let server = serve(&w.pipe, 1, telegram_test_service_reply);
+                w.next_connect = Instant::now();
+                w.tick();
+                assert!(matches!(w.data().mode, Mode::Service { .. }));
+                assert_ne!(w.data().service_session, original);
+                server
+            });
+            let expected = (EventLevel::Warn, "current connection message".to_owned());
+            w.data().message = Some(expected.clone());
+            let (repaint, finished) = mpsc::channel();
+            w.ctx.set_repaint_observer(move |_| {
+                let _ = repaint.send(());
+            });
+            release.send(()).unwrap();
+            finished.recv_timeout(wait).unwrap();
+            let actual = message(&w);
+            if actual != expected {
+                failures.push(format!("reconnect={reconnect}: {actual:?}"));
+            }
+
+            drop(w.client.take());
+            server.join().unwrap();
+            if let Some(server) = replacement {
+                server.join().unwrap();
+            }
+        }
+        assert!(
+            failures.is_empty(),
+            "expected the current connection message, got {failures:?}"
+        );
+    }
+
+    #[test]
+    fn an_old_telegram_test_command_is_not_sent_to_a_replacement_service() {
+        let mut w = worker();
+        w.pipe = test_pipe("queued-telegram-old");
+        let original = serve(&w.pipe, 1, telegram_test_service_reply);
+        w.next_connect = Instant::now();
+        w.tick();
+        let original_session = w.data().service_session;
+        let old_click = UiCommand::TestTelegram {
+            session: original_session,
+        };
+        drop(w.client.take());
+        original.join().unwrap();
+
+        let closed = test_pipe("queued-telegram-closed");
+        w.client = Some(hang_up_after_hello(&closed, true));
+        w.tick();
+        assert_eq!(w.data().mode, Mode::Local);
+        w.pipe = test_pipe("queued-telegram-new");
+        let sends = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let seen = sends.clone();
+        let replacement = serve(&w.pipe, 2, move |request| match request {
+            Request::TestTelegram => {
+                seen.fetch_add(1, Ordering::Relaxed);
+                Response::Text("replacement handled the test".into())
+            }
+            other => telegram_test_service_reply(other),
+        });
+        w.next_connect = Instant::now();
+        w.tick();
+        assert!(matches!(w.data().mode, Mode::Service { .. }));
+        assert_ne!(w.data().service_session, original_session);
+        w.data().message = None;
+        w.handle(old_click);
+        let denial = background_message(&w);
+        let stale_sends = sends.load(Ordering::Relaxed);
+        if stale_sends == 0 {
+            test_telegram(&mut w);
+            assert_eq!(
+                background_message(&w),
+                (EventLevel::Info, "replacement handled the test".into())
+            );
+            assert_eq!(sends.load(Ordering::Relaxed), 1);
+        }
+        drop(w.client.take());
+        replacement.join().unwrap();
+        assert_eq!(
+            stale_sends, 0,
+            "the old click reached the replacement service: {denial:?}"
+        );
+        assert_eq!(denial.0, EventLevel::Error);
+        assert!(
+            denial.1.contains("service connection changed"),
+            "{denial:?}"
+        );
     }
 
     #[test]

@@ -1891,6 +1891,7 @@
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "Susuriin ang {1} sa sandaling huminto ang pagsusuri sa {0}.",
   "No usage of this app was recorded in this period.": "Walang naitalang paggamit ng app na ito sa panahong ito.",
   "the configuration changed since this page read it; nothing was saved, try again": "nagbago ang configuration mula nang basahin ito ng pahinang ito; walang na-save, subukang muli",
+  "The service connection changed. Run the test again.": "Nagbago ang koneksyon sa serbisyo. Patakbuhin muli ang pagsubok.",
   "The settings changed while this was open; it cannot be applied now.": "Nagbago ang mga setting habang bukas ito; hindi ito mailalapat ngayon.",
   "Not running": "Hindi tumatakbo",
   "Blocked programs could not be read: {0}": "Hindi mabasa ang mga naka-block na program: {0}",

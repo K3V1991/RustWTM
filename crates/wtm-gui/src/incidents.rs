@@ -5,8 +5,10 @@ use wtm_core::incidents::Replay;
 #[derive(Default)]
 pub struct View {
     task: crate::background::Task<Replay>,
+    /// Service generation and whether that connection is still active.
+    connection: (u64, bool),
     /// The range the running fetch asked for.
-    fetching: u32,
+    fetching: Option<u32>,
     frames: Option<Result<Replay, String>>,
     hours: u32,
     selected: usize,
@@ -18,9 +20,24 @@ impl View {
         if self.hours == 0 {
             self.hours = 24;
         }
+        let connection = (
+            data.service_session,
+            matches!(data.mode, crate::backend::Mode::Service { .. }),
+        );
+        if self.connection != connection {
+            self.connection = connection;
+            self.fetching = None;
+            self.frames = None;
+            self.selected = 0;
+            self.export = None;
+        }
         // A reply for a range no longer chosen is dropped; the chosen
         // range is then fetched.
-        if let Some(result) = self.task.poll().filter(|_| self.fetching == self.hours) {
+        if let Some(result) = self
+            .task
+            .poll()
+            .filter(|_| self.fetching == Some(self.hours))
+        {
             self.selected = result
                 .as_ref()
                 .map_or(0, |v| v.frames.len().saturating_sub(1));
@@ -49,7 +66,7 @@ impl View {
         });
         if self.frames.is_none() && !self.task.busy() {
             let hours = self.hours;
-            self.fetching = hours;
+            self.fetching = Some(hours);
             self.task.start(ui.ctx(), move || {
                 let mut client =
                     wtm_ipc::Client::connect_to(wtm_ipc::PIPE_NAME).map_err(|e| e.to_string())?;
@@ -360,6 +377,57 @@ impl View {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn frame(view: &mut View, ctx: &egui::Context, data: &crate::backend::Data) {
+        ctx.run_pass(egui::RawInput::default(), |ctx| {
+            ctx.root_ui(|ui| {
+                view.show(ui, data);
+            });
+        })
+        .drop_without_applying_deltas();
+    }
+
+    fn service(session: u64) -> crate::backend::Data {
+        crate::backend::Data {
+            mode: crate::backend::Mode::Service {
+                admin: true,
+                verified: true,
+            },
+            service_session: session,
+            ..Default::default()
+        }
+    }
+
+    fn hold_initial_fetch(
+        view: &mut View,
+        ctx: &egui::Context,
+        data: &crate::backend::Data,
+    ) -> std::sync::mpsc::SyncSender<Result<Replay, String>> {
+        frame(view, ctx, data);
+        assert!(
+            view.task.poll().is_some(),
+            "replace the synthetic worker result"
+        );
+        view.task.hold_reply()
+    }
+
+    #[test]
+    fn a_late_replay_cannot_replace_the_new_connections_history() {
+        let ctx = egui::Context::default();
+        let mut view = View::default();
+        let gate = hold_initial_fetch(&mut view, &ctx, &service(1));
+        let replacement = service(2);
+        gate.send(View::fixture().frames.unwrap()).unwrap();
+
+        frame(&mut view, &ctx, &replacement);
+        assert!(
+            view.frames.is_none(),
+            "the old frames belong to the first connection"
+        );
+        assert!(view.task.busy(), "request history from the replacement");
+        frame(&mut view, &ctx, &replacement);
+        assert!(matches!(&view.frames, Some(Err(e)) if e == "Synthetic view: use a fixture"));
+    }
 
     #[test]
     fn a_reply_for_another_range_is_not_shown_under_this_one() {

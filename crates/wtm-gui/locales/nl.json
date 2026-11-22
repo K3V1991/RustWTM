@@ -1891,6 +1891,7 @@
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} wordt geanalyseerd zodra de analyse van {0} is gestopt.",
   "No usage of this app was recorded in this period.": "In deze periode is geen gebruik van deze app vastgelegd.",
   "the configuration changed since this page read it; nothing was saved, try again": "de configuratie is gewijzigd sinds deze pagina haar las; er is niets opgeslagen, probeer het opnieuw",
+  "The service connection changed. Run the test again.": "De verbinding met de service is gewijzigd. Voer de test opnieuw uit.",
   "The settings changed while this was open; it cannot be applied now.": "De instellingen zijn gewijzigd terwijl dit open stond; het kan nu niet worden toegepast.",
   "Not running": "Niet actief",
   "Blocked programs could not be read: {0}": "Geblokkeerde programma's konden niet worden gelezen: {0}",

@@ -5,6 +5,9 @@ use wtm_core::control::ProcessRef;
 pub struct View {
     path: String,
     task: crate::background::Task<wtm_sys::file_locks::Report>,
+    fetching: String,
+    /// The latest explicitly requested path should be scanned as soon as the worker is free.
+    queued: bool,
     result: Option<Result<wtm_sys::file_locks::Report, String>>,
 }
 impl View {
@@ -13,16 +16,25 @@ impl View {
         self.start(ctx);
     }
     fn start(&mut self, ctx: &egui::Context) {
-        if !self.task.busy() {
-            self.result = None;
+        self.result = None;
+        self.queued = true;
+        self.start_queued(ctx);
+    }
+    fn start_queued(&mut self, ctx: &egui::Context) {
+        if self.queued && !self.task.busy() {
+            self.queued = false;
+            self.fetching.clone_from(&self.path);
             let path = std::path::PathBuf::from(&self.path);
             self.task
                 .start(ctx, move || wtm_sys::file_locks::scan(&path));
         }
     }
     pub fn show(&mut self, ui: &mut Ui) -> Option<ProcessRef> {
-        if let Some(result) = self.task.poll() {
-            self.result = Some(result)
+        if let Some(result) = self.task.poll()
+            && !self.queued
+            && self.fetching == self.path
+        {
+            self.result = Some(result);
         }
         ui.weak(crate::i18n::tr(
             "Drop a local file or folder, or enter its full path. This query never closes handles.",
@@ -35,6 +47,10 @@ impl View {
                     .char_limit(2048)
                     .hint_text(crate::i18n::tr("Full file or folder path")),
             );
+            if response.changed() {
+                self.result = None;
+                self.queued = false;
+            }
             start = response.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter));
             start |= ui
                 .add_enabled(
@@ -46,6 +62,7 @@ impl View {
         if start {
             self.start(ui.ctx());
         }
+        self.start_queued(ui.ctx());
         if self.task.busy() {
             ui.spinner();
         }
@@ -144,5 +161,49 @@ impl View {
             })),
             ..Default::default()
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn frame(view: &mut View, ctx: &egui::Context) {
+        ctx.run_pass(egui::RawInput::default(), |ctx| {
+            ctx.root_ui(|ui| {
+                view.show(ui);
+            });
+        })
+        .drop_without_applying_deltas();
+    }
+
+    fn hold_initial_scan(
+        view: &mut View,
+        ctx: &egui::Context,
+    ) -> std::sync::mpsc::SyncSender<Result<wtm_sys::file_locks::Report, String>> {
+        view.dropped(std::path::Path::new(r"C:\Example\first.txt"), ctx);
+        assert!(
+            view.task.poll().is_some(),
+            "replace the synthetic worker result"
+        );
+        view.task.hold_reply()
+    }
+
+    #[test]
+    fn a_late_scan_cannot_replace_the_latest_dropped_path() {
+        let ctx = egui::Context::default();
+        let mut view = View::default();
+        let gate = hold_initial_scan(&mut view, &ctx);
+        view.dropped(std::path::Path::new(r"C:\Example\second.txt"), &ctx);
+        gate.send(Err("first scan error".into())).unwrap();
+
+        frame(&mut view, &ctx);
+        assert!(
+            view.result.is_none(),
+            "the old error belongs to the first path"
+        );
+        assert!(view.task.busy(), "start the requested replacement");
+        frame(&mut view, &ctx);
+        assert!(matches!(&view.result, Some(Err(e)) if e == "Synthetic view: use a fixture"));
     }
 }

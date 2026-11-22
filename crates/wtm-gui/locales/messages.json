@@ -11351,6 +11351,12 @@
     "fr": "la configuration a changé depuis que cette page l'a lue ; rien n'a été enregistré, réessayez",
     "es": "la configuración cambió desde que esta página la leyó; no se guardó nada, inténtelo de nuevo"
   },
+  "The service connection changed. Run the test again.": {
+    "tr": "Servis bağlantısı değişti. Testi yeniden çalıştırın.",
+    "de": "Die Verbindung zum Dienst hat sich geändert. Führen Sie den Test erneut aus.",
+    "fr": "La connexion au service a changé. Relancez le test.",
+    "es": "La conexión con el servicio cambió. Vuelva a ejecutar la prueba."
+  },
   "The settings changed while this was open; it cannot be applied now.": {
     "tr": "Bu pencere açıkken ayarlar değişti; şimdi uygulanamaz.",
     "de": "Die Einstellungen haben sich geändert, während dies geöffnet war; es kann jetzt nicht angewendet werden.",

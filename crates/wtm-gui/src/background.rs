@@ -10,6 +10,14 @@ impl<T> Default for Task<T> {
     }
 }
 impl<T: Send + 'static> Task<T> {
+    #[cfg(test)]
+    pub(crate) fn hold_reply(&mut self) -> mpsc::SyncSender<Result<T, String>> {
+        assert!(!self.busy());
+        let (sender, receiver) = mpsc::sync_channel(1);
+        self.receiver = Some(receiver);
+        sender
+    }
+
     pub fn busy(&self) -> bool {
         self.receiver.is_some()
     }

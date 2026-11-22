@@ -1891,6 +1891,7 @@
   "{1} is analyzed as soon as the analysis of {0} has stopped.": "{1} буде проаналізовано, щойно зупиниться аналіз {0}.",
   "No usage of this app was recorded in this period.": "За цей період використання цього застосунку не записано.",
   "the configuration changed since this page read it; nothing was saved, try again": "конфігурація змінилася відтоді, як ця сторінка її прочитала; нічого не збережено, спробуйте ще раз",
+  "The service connection changed. Run the test again.": "Підключення до служби змінилося. Запустіть перевірку ще раз.",
   "The settings changed while this was open; it cannot be applied now.": "Налаштування змінилися, поки це вікно було відкрите; застосувати зараз не можна.",
   "Not running": "Не запущені",
   "Blocked programs could not be read: {0}": "Не вдалося прочитати заблоковані програми: {0}",
