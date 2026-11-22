@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- Closing RustWTM while it is minimized, for example from the taskbar,
+  keeps it running in the tray as the close button does. It quit
+  instead.
+
 ## [0.39.1] - 2026-11-22
 
 [Release scope and validation](docs/0.39.1-review.md)

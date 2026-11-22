@@ -490,6 +490,8 @@ struct UiState {
     /// Desktop notifications for notable service events (tray menu).
     notifications: bool,
     tray_on_close: bool,
+    #[cfg(test)]
+    tray_available_for_test: bool,
     /// Start in the tray at sign-in; read from the registry when needed.
     autostart: Option<bool>,
     prefer_administrator: Option<bool>,
@@ -878,6 +880,8 @@ impl Default for UiState {
             container_alerts: Default::default(),
             notifications: true,
             tray_on_close: true,
+            #[cfg(test)]
+            tray_available_for_test: false,
             autostart: None,
             prefer_administrator: None,
             startup_serial: 0,
@@ -923,6 +927,22 @@ impl eframe::App for App {
         // eframe calls logic while hidden, without drawing an egui pass. Tray
         // updates and temperature refreshes must not depend on App::ui running.
         let _language = crate::i18n::scope(self.state.language);
+        // The close button keeps RustWTM watching from the tray. A minimized
+        // window gets its close request in a pass that draws nothing, so the
+        // request is handled here: in App::ui RustWTM quit instead.
+        if ctx.input(|i| i.viewport().close_requested())
+            && self.state.tray_on_close
+            && self.tray_available()
+            && !crate::tray::exit_requested(ctx)
+        {
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            crate::tray::hide_window(
+                ctx,
+                self.backend
+                    .window
+                    .load(std::sync::atomic::Ordering::Relaxed),
+            );
+        }
         self.state
             .experience
             .apply(ctx, self.backend.window.clone());
@@ -1042,21 +1062,9 @@ impl eframe::App for App {
                 backend.window.load(std::sync::atomic::Ordering::Relaxed),
             );
         }
-        // The close button keeps RustWTM watching from the tray.
-        if ctx.input(|i| i.viewport().close_requested())
-            && state.tray_on_close
-            && tray.is_some()
-            && !crate::tray::exit_requested(&ctx)
-        {
-            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-            crate::tray::hide_window(
-                &ctx,
-                backend.window.load(std::sync::atomic::Ordering::Relaxed),
-            );
-        }
         // Native creation/minimization can briefly leave no client area.
-        // Keep visibility/close handling above, but defer page layout until
-        // there is room for grids to subtract their gutters safely.
+        // Keep visibility handling above, but defer page layout until there
+        // is room for grids to subtract their gutters safely.
         let available = ui.available_size();
         if available.x <= 0.0 || available.y <= 0.0 {
             ctx.request_repaint_after(Duration::from_millis(50));
@@ -2431,6 +2439,21 @@ impl eframe::App for App {
         if frames.record(frame_start, data_ready, &pages) {
             // Report mode is a benchmark run; nothing to save.
             std::process::exit(0);
+        }
+    }
+}
+
+impl App {
+    fn tray_available(&self) -> bool {
+        self.tray.is_some() || {
+            #[cfg(test)]
+            {
+                self.state.tray_available_for_test
+            }
+            #[cfg(not(test))]
+            {
+                false
+            }
         }
     }
 }
@@ -5989,6 +6012,46 @@ mod tests {
                 assert!(!commands.contains(&egui::ViewportCommand::Visible(false)));
             }
         }
+    }
+
+    /// Closes the window in a pass that draws nothing, as eframe does for a
+    /// minimized window, and returns the viewport commands RustWTM sent.
+    fn close_without_drawing(tray_available: bool) -> Vec<egui::ViewportCommand> {
+        let (backend, _rx) = Backend::offline(data());
+        let mut app = App {
+            backend,
+            state: UiState {
+                tray_available_for_test: tray_available,
+                check_updates: false,
+                ..Default::default()
+            },
+            tray: None,
+            frames: Default::default(),
+        };
+        let mut input = egui::RawInput::default();
+        let viewport = input.viewports.get_mut(&egui::ViewportId::ROOT).unwrap();
+        viewport.minimized = Some(true);
+        viewport.events.push(egui::ViewportEvent::Close);
+        let mut frame = eframe::Frame::_new_kittest();
+        egui::Context::default()
+            .run_logic(&input, |ctx| eframe::App::logic(&mut app, ctx, &mut frame))
+            .viewport_commands
+            .remove(&egui::ViewportId::ROOT)
+            .unwrap_or_default()
+    }
+
+    #[test]
+    fn closing_a_minimized_window_keeps_rustwtm_in_the_tray() {
+        let commands = close_without_drawing(true);
+        assert!(commands.contains(&egui::ViewportCommand::CancelClose));
+        assert!(commands.contains(&egui::ViewportCommand::Visible(false)));
+    }
+
+    #[test]
+    fn closing_without_a_tray_icon_still_quits() {
+        let commands = close_without_drawing(false);
+        assert!(!commands.contains(&egui::ViewportCommand::CancelClose));
+        assert!(!commands.contains(&egui::ViewportCommand::Visible(false)));
     }
 
     #[test]
