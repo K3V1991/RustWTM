@@ -3,6 +3,7 @@ use std::io::{Read, Write};
 use std::os::windows::process::CommandExt;
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::mpsc::RecvTimeoutError;
 use std::time::{Duration, Instant};
 
 const MAX_REPLY: usize = 1024 * 1024;
@@ -78,21 +79,7 @@ pub(crate) fn json(
         return Err(e.to_string());
     }
     let start = Instant::now();
-    let result = loop {
-        match rx.recv_timeout(Duration::from_millis(100)) {
-            Ok(Ok(bytes)) if bytes.len() < MAX_REPLY => {
-                break serde_json::from_slice(&bytes)
-                    .map_err(|e| format!("Invalid system query response: {e}"));
-            }
-            Ok(Ok(_)) => break Err("System query response exceeds its limit".into()),
-            Ok(Err(e)) => break Err(e.to_string()),
-            Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
-                break Err("System query stopped".into());
-            }
-            Err(_) if start.elapsed() >= timeout => break Err("System query timed out".into()),
-            Err(_) => {}
-        }
-    };
+    let result = read_reply(timeout, || start.elapsed(), |wait| rx.recv_timeout(wait));
     // A query may close stdout without exiting; never leave its process behind.
     for _ in 0..10 {
         if !matches!(child.try_wait(), Ok(None)) {
@@ -110,8 +97,59 @@ pub(crate) fn json(
     result
 }
 
+fn read_reply(
+    timeout: Duration,
+    elapsed: impl Fn() -> Duration,
+    receive: impl FnOnce(Duration) -> Result<std::io::Result<Vec<u8>>, RecvTimeoutError>,
+) -> Result<serde_json::Value, String> {
+    let remaining = timeout.saturating_sub(elapsed());
+    let reply = if remaining.is_zero() {
+        Err(RecvTimeoutError::Timeout)
+    } else {
+        let reply = receive(remaining);
+        if elapsed() >= timeout {
+            Err(RecvTimeoutError::Timeout)
+        } else {
+            reply
+        }
+    };
+    match reply {
+        Ok(Ok(bytes)) if bytes.len() < MAX_REPLY => serde_json::from_slice(&bytes)
+            .map_err(|e| format!("Invalid system query response: {e}")),
+        Ok(Ok(_)) => Err("System query response exceeds its limit".into()),
+        Ok(Err(e)) => Err(e.to_string()),
+        Err(RecvTimeoutError::Disconnected) => Err("System query stopped".into()),
+        Err(RecvTimeoutError::Timeout) => Err("System query timed out".into()),
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use super::*;
+    use std::cell::Cell;
+
+    #[test]
+    fn query_rejects_a_reply_after_the_remaining_budget() {
+        let timeout = Duration::from_secs(2);
+        let clock = Cell::new(Duration::from_millis(1_950));
+        let ready_at = Duration::from_millis(2_001);
+        let result = read_reply(
+            timeout,
+            || clock.get(),
+            |wait| {
+                let until_reply = ready_at - clock.get();
+                clock.set(clock.get() + wait.min(until_reply));
+                if until_reply <= wait {
+                    Ok(Ok(b"true".to_vec()))
+                } else {
+                    Err(RecvTimeoutError::Timeout)
+                }
+            },
+        );
+        assert_eq!(result, Err("System query timed out".to_owned()));
+        assert_eq!(clock.get(), timeout);
+    }
+
     #[test]
     fn query_input_roundtrips_unicode_without_using_the_console_code_page() {
         let value = serde_json::json!({"version":"1.0-β","label":"Türkçe 測試"});
