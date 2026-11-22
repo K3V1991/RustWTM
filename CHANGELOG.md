@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.39.1] - 2026-11-22
+
+[Release scope and validation](docs/0.39.1-review.md)
+
+The close button works again after a second start.
+
 ### Fixed
 
 - The close button hides RustWTM to the tray again after RustWTM was
@@ -2304,7 +2310,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.39.0...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.39.1...HEAD
+[0.39.1]: https://github.com/rustwtm/rustwtm/compare/v0.39.0...v0.39.1
 [0.39.0]: https://github.com/rustwtm/rustwtm/compare/v0.38.2...v0.39.0
 [0.38.2]: https://github.com/rustwtm/rustwtm/compare/v0.38.1...v0.38.2
 [0.38.1]: https://github.com/rustwtm/rustwtm/compare/v0.38.0...v0.38.1
