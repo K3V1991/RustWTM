@@ -69,7 +69,7 @@ pub trait CpuWriter: Send {
         ours: Option<&Written>,
     ) -> Result<Placed, String>;
     /// Gives `target` back what `written` took, unless it has changed
-    /// its processors itself since.
+    /// its processors itself since or is gone.
     fn release(&mut self, written: &Written) -> Result<(), String>;
 }
 
@@ -98,15 +98,21 @@ impl CpuWriter for System {
     }
 
     fn release(&mut self, written: &Written) -> Result<(), String> {
-        match (written.strict, written.affinity) {
+        let result = match (written.strict, written.affinity) {
             (true, Some((ours, original))) => {
                 control::release_affinity(&written.target, ours, original)
             }
             // Recorded before a write that never completed.
             (true, None) => Ok(()),
             (false, _) => control::release_cpu_sets(&written.target, &written.cpus),
+        };
+        match result {
+            Ok(())
+            | Err(control::ControlError::NotFound { .. } | control::ControlError::Stale { .. }) => {
+                Ok(())
+            }
+            Err(e) => Err(e.to_string()),
         }
-        .map_err(|e| e.to_string())
     }
 }
 
@@ -179,10 +185,15 @@ impl Rescue {
             .and_then(|bytes| serde_json::from_slice(&bytes).ok())
             .unwrap_or_default();
         let mut given_back = 0;
-        for w in &left {
+        for w in left {
             // The creation time in `target` makes a reused PID fail.
-            if self.writer.release(w).is_ok() {
-                given_back += 1;
+            match self.writer.release(&w) {
+                Ok(()) => given_back += 1,
+                Err(error) => {
+                    let key = (w.target.pid, w.target.create_time);
+                    tracing::warn!(pid = key.0, %error, "placement recovery deferred");
+                    self.written.insert(key, w);
+                }
             }
         }
         if given_back > 0 {
@@ -213,6 +224,16 @@ impl Rescue {
         }
     }
 
+    /// Keep ownership and the rollback record until the writer resolves it.
+    fn release_written(&mut self, key: Key) -> Option<Written> {
+        let written = self.written.get(&key)?;
+        if let Err(error) = self.writer.release(written) {
+            tracing::debug!(pid = key.0, %error, "placement release deferred");
+            return None;
+        }
+        self.written.remove(&key)
+    }
+
     pub fn configure(&mut self, cfg: ReserveConfig, dry_run: bool) {
         if dry_run != self.dry_run {
             if self.policy.engaged() {
@@ -237,9 +258,7 @@ impl Rescue {
             .map(|(k, _)| *k)
             .collect();
         for key in freed {
-            if let Some(w) = self.written.remove(&key) {
-                let _ = self.writer.release(&w);
-            }
+            self.release_written(key);
         }
         self.save();
     }
@@ -352,7 +371,6 @@ impl Rescue {
         let plan = self.placer.plan(&inputs, lookup);
         self.report(&topology, &plan.splits, &plan.reservations, &plan.notes);
         if self.dry_run {
-            changed |= !self.written.is_empty();
             self.release_all("dry run");
             if changed {
                 self.save();
@@ -369,9 +387,8 @@ impl Rescue {
             .copied()
             .collect();
         for key in gone {
-            if let Some(w) = self.written.remove(&key) {
+            if let Some(w) = self.release_written(key) {
                 handed_back += usize::from(w.rescue);
-                let _ = self.writer.release(&w);
                 changed = true;
             }
         }
@@ -403,20 +420,19 @@ impl Rescue {
                 }
                 continue;
             }
-            let ours = self.written.get(key);
             if writes >= PER_TICK {
                 break;
             }
             writes += 1;
-            changed = true;
             // Switching between CPU Sets and affinity: undo the other first.
-            let mut ours = ours.cloned();
+            let mut ours = self.written.get(key).cloned();
             if ours.as_ref().is_some_and(|w| w.strict != wanted.strict) {
-                if let Some(w) = self.written.remove(key) {
-                    let _ = self.writer.release(&w);
+                if self.release_written(*key).is_none() {
+                    continue;
                 }
                 ours = None;
             }
+            changed = true;
             // Recorded before it is written, so a crash in between still
             // gives it back.
             self.written.insert(
@@ -440,7 +456,15 @@ impl Rescue {
                     self.own.insert(*key, (wanted.target, why));
                 }
                 Err(e) => {
-                    self.written.remove(key);
+                    // A failed update can leave the previous placement in force.
+                    match ours {
+                        Some(previous) => {
+                            self.written.insert(*key, previous);
+                        }
+                        None => {
+                            self.written.remove(key);
+                        }
+                    }
                     self.own.insert(*key, (wanted.target, e));
                 }
             }
@@ -487,13 +511,8 @@ impl Rescue {
         }
         for s in &self.reported.splits {
             if !splits.iter().any(|n| n.entry == s.entry) {
-                self.events.info(
-                    None,
-                    format!(
-                        "keep apart '{}' ended: every app has every core back",
-                        s.entry
-                    ),
-                );
+                self.events
+                    .info(None, format!("keep apart '{}' ended", s.entry));
             }
         }
         for r in reservations {
@@ -529,14 +548,17 @@ impl Rescue {
     /// Gives every placed process every core back.
     pub fn release_all(&mut self, reason: &str) {
         self.own.clear();
-        if self.written.is_empty() {
-            return;
-        }
+        let keys: Vec<Key> = self.written.keys().copied().collect();
         let mut rescued = 0;
-        let count = self.written.len();
-        for (_, w) in self.written.drain() {
-            rescued += usize::from(w.rescue);
-            let _ = self.writer.release(&w);
+        let mut count = 0;
+        for key in keys {
+            if let Some(w) = self.release_written(key) {
+                rescued += usize::from(w.rescue);
+                count += 1;
+            }
+        }
+        if count == 0 {
+            return;
         }
         self.save();
         match &self.split {
@@ -750,6 +772,8 @@ mod placement_tests {
     struct Fake {
         log: Arc<Mutex<Vec<String>>>,
         own: Arc<Mutex<HashSet<u32>>>,
+        fail_place: Arc<Mutex<HashSet<u32>>>,
+        fail_release: Arc<Mutex<HashSet<u32>>>,
     }
 
     impl Fake {
@@ -774,6 +798,9 @@ mod placement_tests {
                 .lock()
                 .unwrap()
                 .push(format!("place {}{again} {cpus:?} {how:?}", target.pid));
+            if self.fail_place.lock().unwrap().contains(&target.pid) {
+                return Err("placement refused".into());
+            }
             Ok(Placed::Done {
                 affinity: match how {
                     How::Affinity { mask, .. } => Some((mask, 0xfff)),
@@ -787,7 +814,16 @@ mod placement_tests {
                 .lock()
                 .unwrap()
                 .push(format!("release {}", written.target.pid));
-            Ok(())
+            if self
+                .fail_release
+                .lock()
+                .unwrap()
+                .contains(&written.target.pid)
+            {
+                Err("release refused".into())
+            } else {
+                Ok(())
+            }
         }
     }
 
@@ -838,10 +874,16 @@ mod placement_tests {
     }
 
     fn snapshot(cpu: f32, procs: Vec<ProcessInfo>) -> Snapshot {
-        let mut s = wtm_core::Sampler::new().sample().unwrap();
-        s.system.cpu_percent = cpu;
-        s.processes = procs;
-        s
+        Snapshot {
+            interval: None,
+            system: wtm_core::SystemStats {
+                cpu_percent: cpu,
+                ..Default::default()
+            },
+            processes: procs,
+            net_traced: false,
+            taken_at_ms: 0,
+        }
     }
 
     fn tick(r: &mut Rescue, now: Instant, snap: &Snapshot) {
@@ -864,6 +906,13 @@ mod placement_tests {
         hold_secs = 0
     "#;
 
+    const PIN: &str = r#"
+        [[pin]]
+        name = "Pinned"
+        match = { name = "a.exe" }
+        cores = "0-1"
+    "#;
+
     fn rescue(fake: &Fake, events: &EventLog) -> Rescue {
         let cfg = ReserveConfig {
             rescue_core: false,
@@ -880,6 +929,97 @@ mod placement_tests {
 
     fn messages(events: &EventLog) -> Vec<String> {
         events.after(0).into_iter().map(|e| e.message).collect()
+    }
+
+    fn record_path(name: &str) -> PathBuf {
+        std::env::temp_dir().join(format!(
+            "rustwtm-placement-{}-{name}.json",
+            std::process::id()
+        ))
+    }
+
+    fn recorded(path: &Path) -> Vec<Written> {
+        serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+    }
+
+    #[test]
+    fn audit_placement_keeps_a_failed_restart_restore_for_the_next_tick() {
+        let fake = Fake::default();
+        let path = record_path("restart-retry");
+        let t = Instant::now();
+        let snap = snapshot(10.0, vec![proc(10, "a.exe")]);
+        let events = EventLog::default();
+        let mut first = rescue(&fake, &events);
+        first.recover(&path);
+        first.set_placement(placement(PIN));
+        tick(&mut first, t, &snap);
+        let original = recorded(&path);
+        assert_eq!(original.len(), 1);
+        drop(first);
+
+        fake.take();
+        fake.fail_release.lock().unwrap().insert(10);
+        let mut next = rescue(&fake, &events);
+        next.recover(&path);
+        assert_eq!(fake.take(), ["release 10"]);
+        assert_eq!(recorded(&path), original);
+        fake.fail_release.lock().unwrap().clear();
+        tick(&mut next, t + Duration::from_secs(1), &snap);
+        assert_eq!(fake.take(), ["release 10"]);
+        assert!(recorded(&path).is_empty());
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn audit_placement_waits_for_release_before_switching_methods() {
+        let fake = Fake::default();
+        let mut r = rescue(&fake, &EventLog::default());
+        let t = Instant::now();
+        let snap = snapshot(10.0, vec![proc(10, "a.exe")]);
+        r.set_placement(placement(PIN));
+        tick(&mut r, t, &snap);
+        fake.take();
+
+        fake.fail_release.lock().unwrap().insert(10);
+        r.set_placement(placement(&format!("{PIN}\nstrict = true")));
+        tick(&mut r, t + Duration::from_secs(1), &snap);
+        assert_eq!(fake.take(), ["release 10"]);
+        assert!(!r.placement_status().unwrap().placed[0].strict);
+
+        fake.fail_release.lock().unwrap().clear();
+        tick(&mut r, t + Duration::from_secs(2), &snap);
+        assert_eq!(
+            fake.take(),
+            [
+                "release 10",
+                "place 10 [256, 257] Affinity { group: 0, mask: 3 }"
+            ]
+        );
+        assert!(r.placement_status().unwrap().placed[0].strict);
+    }
+
+    #[test]
+    fn audit_placement_restores_the_last_successful_placement_after_a_failed_update() {
+        let fake = Fake::default();
+        let mut r = rescue(&fake, &EventLog::default());
+        let t = Instant::now();
+        let snap = snapshot(10.0, vec![proc(10, "a.exe")]);
+        r.set_placement(placement(PIN));
+        tick(&mut r, t, &snap);
+        let original = r.placement_status().unwrap().placed[0].cpus.clone();
+
+        fake.fail_place.lock().unwrap().insert(10);
+        r.set_placement(placement(&PIN.replace("0-1", "8-9")));
+        tick(&mut r, t + Duration::from_secs(1), &snap);
+        let status = r.placement_status().unwrap();
+        assert_eq!(
+            status.placed.first().map(|p| p.cpus.as_slice()),
+            Some(original.as_slice())
+        );
+        fake.take();
+        tick(&mut r, t + Duration::from_secs(2), &snap);
+        assert_eq!(fake.take(), ["release 10"]);
+        assert!(r.placement_status().unwrap().placed.is_empty());
     }
 
     #[test]

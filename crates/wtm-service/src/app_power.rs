@@ -91,6 +91,12 @@ pub struct Switched {
     pub entry: Option<String>,
 }
 
+struct AppliedPlan {
+    guid: String,
+    name: String,
+    request: PlanRequest,
+}
+
 pub struct PowerKeeper {
     system: Box<dyn PowerSystem>,
     /// Where the plan to go back to is kept while it is replaced.
@@ -99,9 +105,9 @@ pub struct PowerKeeper {
     events: EventLog,
     /// The plan before RustWTM switched, while it is switched.
     original: Option<String>,
-    /// The plan RustWTM switched to (GUID, name).
-    applied: Option<(String, String)>,
-    /// The request served now.
+    /// The plan in use and the request it serves.
+    applied: Option<AppliedPlan>,
+    /// The latest desired request, for detecting changes.
     request: Option<PlanRequest>,
     /// A request the user overrode by choosing another plan: left alone
     /// until another request comes.
@@ -173,10 +179,13 @@ impl PowerKeeper {
     /// The plan in force for the request served now; none once the user
     /// chose another.
     pub fn switched(&self) -> Option<Switched> {
-        let (_, name) = self.applied.as_ref()?;
+        if self.dry_run {
+            return None;
+        }
+        let applied = self.applied.as_ref()?;
         Some(Switched {
-            name: name.clone(),
-            entry: self.request.as_ref().and_then(|r| r.entry.clone()),
+            name: applied.name.clone(),
+            entry: applied.request.entry.clone(),
         })
     }
 
@@ -201,8 +210,11 @@ impl PowerKeeper {
             }
         }
         self.request.clone_from(&request);
+        // A rollback deferred by an error still needs retrying in monitoring only.
+        if self.dry_run || request.is_none() {
+            self.give_back(None);
+        }
         let Some(request) = request else {
-            self.give_back();
             return;
         };
         if self.overridden.as_ref() == Some(&request) {
@@ -228,7 +240,9 @@ impl PowerKeeper {
                 self.events.warn(None, note.clone());
                 self.note = Some(note);
             }
-            self.give_back();
+            if !self.dry_run {
+                self.give_back(None);
+            }
             return;
         };
         let name = plans
@@ -247,8 +261,8 @@ impl PowerKeeper {
         let Ok(active) = self.system.active_plan() else {
             return;
         };
-        if let Some((applied, _)) = &self.applied {
-            if !same(&active, applied) {
+        if let Some(applied) = &mut self.applied {
+            if !same(&active, &applied.guid) {
                 // Chosen by the user meanwhile: theirs to keep.
                 let kept = plans
                     .iter()
@@ -256,20 +270,28 @@ impl PowerKeeper {
                     .map_or_else(|| active.clone(), |(_, n)| n.clone());
                 self.events
                     .info(None, format!("power plan {kept} chosen meanwhile is kept"));
+                let same_request = applied.request == request;
                 self.forget_original();
                 // Nothing of RustWTM's is in force any more: the next
                 // request starts from the user's plan.
                 self.applied = None;
-                self.overridden = Some(request);
+                if same_request {
+                    self.overridden = Some(request);
+                    return;
+                }
+            } else if same(&applied.guid, &guid) {
+                applied.request = request;
                 return;
             }
-            if same(applied, &guid) {
-                return;
-            }
-        } else if same(&active, &guid) {
+        }
+        if self.applied.is_none() && same(&active, &guid) {
             // Already in use: nothing to switch or to give back, but a plan
             // the user chooses meanwhile is still theirs to keep.
-            self.applied = Some((guid, name));
+            self.applied = Some(AppliedPlan {
+                guid,
+                name,
+                request,
+            });
             return;
         }
         if self.original.is_none() {
@@ -289,7 +311,11 @@ impl PowerKeeper {
             Ok(()) => {
                 self.events
                     .info(None, format!("power plan {name} for {}", who(&request)));
-                self.applied = Some((guid, name));
+                self.applied = Some(AppliedPlan {
+                    guid,
+                    name,
+                    request,
+                });
             }
             Err(e) => {
                 if changed {
@@ -304,44 +330,52 @@ impl PowerKeeper {
     }
 
     /// Back to the plan before the switch, unless the user chose another.
-    fn give_back(&mut self) {
-        let Some((applied, applied_name)) = self.applied.take() else {
+    fn give_back(&mut self, reason: Option<&str>) {
+        let Some(applied) = self.applied.take() else {
             self.forget_original();
             return;
         };
         let Some(original) = self.original.clone() else {
             return;
         };
-        match self.system.active_plan() {
-            Ok(active) if !same(&active, &applied) => {
+        let restored = self.system.active_plan().and_then(|active| {
+            if same(&active, &applied.guid) {
+                self.system.set_plan(&original).map(|()| true)
+            } else {
+                Ok(false)
+            }
+        });
+        match restored {
+            Ok(false) => {
                 self.events
                     .info(None, "power plan chosen meanwhile is kept".to_owned());
                 self.forget_original();
             }
-            _ => match self.system.set_plan(&original) {
-                Ok(()) => {
-                    let name = self
-                        .system
-                        .plans()
-                        .ok()
-                        .and_then(|p| p.into_iter().find(|(g, _)| same(g, &original)))
-                        .map_or(original.clone(), |(_, n)| n);
-                    self.events.info(None, format!("power plan {name} again"));
-                    self.forget_original();
+            Ok(true) => {
+                if let Some(reason) = reason {
+                    self.events
+                        .info(None, format!("{reason}: power plan given back"));
                 }
-                // Tried again next time, and left on disk for the next
-                // start; reported once.
-                Err(e) => {
-                    if !self.restore_failed {
-                        self.events.warn(
-                            None,
-                            format!("could not restore the power plan {original}: {e}"),
-                        );
-                    }
-                    self.restore_failed = true;
-                    self.applied = Some((applied, applied_name));
+                let name = self
+                    .system
+                    .plans()
+                    .ok()
+                    .and_then(|p| p.into_iter().find(|(g, _)| same(g, &original)))
+                    .map_or(original, |(_, n)| n);
+                self.events.info(None, format!("power plan {name} again"));
+                self.forget_original();
+            }
+            // An unknown active plan or a failed write leaves the rollback pending.
+            Err(e) => {
+                if !self.restore_failed {
+                    self.events.warn(
+                        None,
+                        format!("could not restore the power plan {original}: {e}"),
+                    );
                 }
-            },
+                self.restore_failed = true;
+                self.applied = Some(applied);
+            }
         }
     }
 
@@ -392,12 +426,7 @@ impl PowerKeeper {
     /// Gives the plan back and lets the computer sleep (the service stops,
     /// or monitoring only).
     pub fn release(&mut self, reason: &str) {
-        // Only a plan RustWTM replaced has anything to give back.
-        if self.applied.is_some() && self.original.is_some() {
-            self.events
-                .info(None, format!("{reason}: power plan given back"));
-        }
-        self.give_back();
+        self.give_back(Some(reason));
         self.request = None;
         self.overridden = None;
         if self.awake.is_some() {
@@ -429,6 +458,7 @@ mod tests {
         active: String,
         awake: Option<String>,
         sets: Vec<String>,
+        fail_read: bool,
         fail_set: bool,
     }
 
@@ -460,7 +490,11 @@ mod tests {
             ])
         }
         fn active_plan(&mut self) -> Result<String, String> {
-            Ok(self.active())
+            let m = self.0.lock().unwrap();
+            if m.fail_read {
+                return Err("read failed".into());
+            }
+            Ok(m.active.clone())
         }
         fn set_plan(&mut self, guid: &str) -> Result<(), String> {
             let mut m = self.0.lock().unwrap();
@@ -662,6 +696,55 @@ mod tests {
         k.tick(None, None);
         assert_eq!(fake.active(), BALANCED);
         assert!(!path.exists());
+    }
+
+    #[test]
+    fn app_power_ownership_defers_restore_while_the_active_plan_is_unknown() {
+        let (fake, path) = (Fake::new(), file("restore-read"));
+        let (mut k, _) = keeper(&fake, &path, false);
+        k.tick(ask(Some("Render"), HIGH), None);
+        fake.user_chooses(SAVER);
+        fake.0.lock().unwrap().fail_read = true;
+
+        k.tick(None, None);
+        assert_eq!(fake.active(), SAVER);
+        assert_eq!(std::fs::read_to_string(&path).unwrap(), BALANCED);
+
+        fake.0.lock().unwrap().fail_read = false;
+        k.tick(None, None);
+        assert_eq!(fake.active(), SAVER);
+        assert!(!path.exists());
+        std::fs::remove_dir(path.parent().unwrap()).unwrap();
+    }
+
+    #[test]
+    fn app_power_ownership_serves_a_new_request_when_observing_an_override() {
+        let fake = Fake::new();
+        let mut k = PowerKeeper::new(Box::new(fake.clone()), None, false, EventLog::default());
+        k.tick(ask(Some("Render"), HIGH), None);
+        fake.user_chooses(SAVER);
+
+        k.tick(ask(None, BALANCED), None);
+        assert_eq!(fake.active(), BALANCED);
+        k.tick(None, None);
+        assert_eq!(fake.active(), SAVER);
+    }
+
+    #[test]
+    fn app_power_ownership_keeps_the_previous_request_until_a_switch_succeeds() {
+        let fake = Fake::new();
+        let mut k = PowerKeeper::new(Box::new(fake.clone()), None, false, EventLog::default());
+        k.tick(ask(Some("Render"), HIGH), None);
+        fake.0.lock().unwrap().fail_set = true;
+
+        k.tick(ask(Some("Encode"), SAVER), None);
+        assert_eq!(fake.active(), HIGH);
+        assert_eq!(k.switched().unwrap().entry.as_deref(), Some("Render"));
+
+        fake.0.lock().unwrap().fail_set = false;
+        k.tick(ask(Some("Encode"), SAVER), None);
+        assert_eq!(fake.active(), SAVER);
+        assert_eq!(k.switched().unwrap().entry.as_deref(), Some("Encode"));
     }
 
     #[test]
