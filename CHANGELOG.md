@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- The close button hides RustWTM to the tray again after RustWTM was
+  started a second time to bring back its window; it did nothing then
+  ([#5](https://github.com/RustWTM/RustWTM/issues/5)).
+
 ## [0.39.0] - 2026-11-22
 
 [Release scope and validation](docs/0.39.0-review.md)

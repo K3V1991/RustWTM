@@ -1037,11 +1037,10 @@ impl eframe::App for App {
             ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
         } else if state.hide_frames > 0 && data.alert_watch.active.is_none() {
             state.hide_frames -= 1;
-            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
-            let window = backend.window.load(std::sync::atomic::Ordering::Relaxed);
-            if window != 0 {
-                wtm_core::window::hide(window);
-            }
+            crate::tray::hide_window(
+                &ctx,
+                backend.window.load(std::sync::atomic::Ordering::Relaxed),
+            );
         }
         // The close button keeps RustWTM watching from the tray.
         if ctx.input(|i| i.viewport().close_requested())
@@ -1050,7 +1049,10 @@ impl eframe::App for App {
             && !crate::tray::exit_requested(&ctx)
         {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+            crate::tray::hide_window(
+                &ctx,
+                backend.window.load(std::sync::atomic::Ordering::Relaxed),
+            );
         }
         // Native creation/minimization can briefly leave no client area.
         // Keep visibility/close handling above, but defer page layout until

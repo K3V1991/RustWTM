@@ -87,6 +87,21 @@ pub fn exit_requested(ctx: &egui::Context) -> bool {
         .unwrap_or(false)
 }
 
+/// Hides the window to the tray. Another RustWTM start shows this window
+/// through Win32 alone, which winit does not notice: it still counts the
+/// window as hidden and skips `Visible(false)` as no change, so the close
+/// button did nothing after a second start. The native call hides it then.
+pub fn hide_window(ctx: &egui::Context, window: isize) {
+    hide_window_with(ctx, window, wtm_core::window::hide);
+}
+
+fn hide_window_with(ctx: &egui::Context, window: isize, hide: impl FnOnce(isize)) {
+    ctx.send_viewport_cmd(ViewportCommand::Visible(false));
+    if window != 0 {
+        hide(window);
+    }
+}
+
 /// Shows the window; the native handle also works while egui is hidden and
 /// paints nothing.
 fn show_window(ctx: &egui::Context, window: &AtomicIsize) {
@@ -413,6 +428,18 @@ mod tests {
         assert!(!exit_requested(&context()));
         assert_eq!(commands(&ctx), [ViewportCommand::Close]);
         assert!(exit_requested(&ctx), "a real exit, not hide-to-tray");
+    }
+
+    #[test]
+    fn hiding_also_hides_the_native_window_another_start_showed() {
+        let ctx = context();
+        let mut hidden = Vec::new();
+        hide_window_with(&ctx, 42, |window| hidden.push(window));
+        assert_eq!(hidden, [42]);
+        assert_eq!(commands(&ctx), [ViewportCommand::Visible(false)]);
+
+        hide_window_with(&ctx, 0, |_| panic!("no native window yet"));
+        assert_eq!(commands(&ctx), [ViewportCommand::Visible(false)]);
     }
 
     #[test]
