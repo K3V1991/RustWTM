@@ -6,6 +6,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.39.2] - 2026-11-23
+
+[Release scope and validation](docs/0.39.2-review.md)
+
+Closing a minimized window keeps RustWTM in the tray.
+
 ### Fixed
 
 - Closing RustWTM while it is minimized, for example from the taskbar,
@@ -2316,7 +2322,8 @@ First public release.
 - **Installer**: `scripts/install.ps1` / `scripts/uninstall.ps1`, release
   archives with SHA-256 checksums built by GitHub Actions.
 
-[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.39.1...HEAD
+[Unreleased]: https://github.com/rustwtm/rustwtm/compare/v0.39.2...HEAD
+[0.39.2]: https://github.com/rustwtm/rustwtm/compare/v0.39.1...v0.39.2
 [0.39.1]: https://github.com/rustwtm/rustwtm/compare/v0.39.0...v0.39.1
 [0.39.0]: https://github.com/rustwtm/rustwtm/compare/v0.38.2...v0.39.0
 [0.38.2]: https://github.com/rustwtm/rustwtm/compare/v0.38.1...v0.38.2
