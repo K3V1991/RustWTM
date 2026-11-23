@@ -18,6 +18,9 @@ All notable changes to this project are documented here. The format follows
   Always on top is on. A shortcut press while RustWTM closes is ignored.
 - Opening RustWTM right after it started in the tray, for example with
   a second start, keeps the window open. It could hide again at once.
+- Closing, snoozing or holding a CPU alert acts only on the alert that
+  was shown. A click that arrived just as the alert closed by itself could
+  close or hold the next alert instead.
 
 ## [0.39.2] - 2026-11-23
 

@@ -56,6 +56,8 @@ pub struct AlertWatch {
     above_since: Option<Instant>,
     quiet_until: Option<Instant>,
     pub active: Option<Alert>,
+    /// Start time of the most recently closed alert.
+    last_closed: Option<Instant>,
     /// Since when the CPU is back below the threshold, while an alert shows.
     normal_since: Option<Instant>,
     /// The user stopped the countdown: the alert stays until closed.
@@ -120,9 +122,30 @@ impl AlertWatch {
         Some(AUTO_CLOSE.saturating_sub(now.saturating_duration_since(since)))
     }
 
-    /// The user closed the alert: stay quiet for `quiet`.
-    pub fn close(&mut self, now: Instant, quiet: Duration) {
-        self.active = None;
+    /// Apply a dialog dismissal. Returns whether it closed the active alert.
+    pub fn dismiss(&mut self, started: Instant, now: Instant, quiet: Duration) -> bool {
+        if self.active.is_some_and(|alert| alert.started == started) {
+            self.close(now, quiet);
+            return true;
+        }
+        // An explicit snooze can race with auto-close. Honor it only while
+        // its alert is still the last one and no other alert is active.
+        if self.active.is_none() && self.last_closed == Some(started) && quiet == SNOOZE {
+            self.quiet_until = self.quiet_until.max(Some(now + quiet));
+        }
+        false
+    }
+
+    pub fn hold(&mut self, started: Instant) {
+        if self.active.is_some_and(|alert| alert.started == started) {
+            self.held = true;
+        }
+    }
+
+    fn close(&mut self, now: Instant, quiet: Duration) {
+        if let Some(alert) = self.active.take() {
+            self.last_closed = Some(alert.started);
+        }
         self.normal_since = None;
         self.held = false;
         self.above_since = None;
@@ -215,7 +238,7 @@ pub fn dialog(
                             ))
                             .clicked()
                         {
-                            commands.push(UiCommand::HoldAlert);
+                            commands.push(UiCommand::HoldAlert(alert.started));
                         }
                         ui.ctx().request_repaint_after(Duration::from_millis(500));
                     }
@@ -407,7 +430,7 @@ pub fn dialog(
         close.get_or_insert(QUIET_AFTER_CLOSE);
     }
     if let Some(quiet) = close {
-        commands.push(UiCommand::CloseAlert(quiet));
+        commands.push(UiCommand::CloseAlert(alert.started, quiet));
     }
 }
 #[cfg(test)]
@@ -568,7 +591,7 @@ mod tests {
             h.state()
                 .1
                 .iter()
-                .any(|c| matches!(c, UiCommand::HoldAlert)),
+                .any(|c| matches!(c, UiCommand::HoldAlert(started) if *started == now)),
             "the button asks to hold the alert"
         );
         // Held: the countdown is gone.

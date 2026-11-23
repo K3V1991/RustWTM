@@ -8769,8 +8769,8 @@ mod tests {
             UiCommand::RestartElevated => "restart elevated".into(),
             UiCommand::ConfigureGuiStartup(change) => format!("gui startup {change:?}"),
             UiCommand::TaskManager(enabled) => format!("task manager {enabled:?}"),
-            UiCommand::CloseAlert(quiet) => format!("close alert {}", quiet.as_secs()),
-            UiCommand::HoldAlert => "hold alert".into(),
+            UiCommand::CloseAlert(_, quiet) => format!("close alert {}", quiet.as_secs()),
+            UiCommand::HoldAlert(_) => "hold alert".into(),
             UiCommand::CheckUpdate => "check update".into(),
             UiCommand::InstallUpdate(r) => format!("install update {}", r.tag),
         }

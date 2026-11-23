@@ -622,10 +622,10 @@ pub enum UiCommand {
     ConfigureGuiStartup(wtm_core::gui_startup::Change),
     /// None refreshes status; Some changes the machine-wide replacement.
     TaskManager(Option<bool>),
-    /// The user closed the CPU alert; stay quiet for this long.
-    CloseAlert(Duration),
+    /// Dismiss the identified CPU alert and stay quiet for the given duration.
+    CloseAlert(Instant, Duration),
     /// Stop the alert's countdown: it stays until closed.
-    HoldAlert,
+    HoldAlert(Instant),
     /// Ask GitHub for the latest release.
     CheckUpdate,
     /// Download, verify and install this release, then restart.
@@ -1757,11 +1757,16 @@ impl Worker {
                     }
                 });
             }
-            UiCommand::CloseAlert(quiet) => {
-                self.data().alert_watch.close(Instant::now(), quiet);
-                (self.calm)(self.window.load(Ordering::Relaxed));
+            UiCommand::CloseAlert(started, quiet) => {
+                let closed = self
+                    .data()
+                    .alert_watch
+                    .dismiss(started, Instant::now(), quiet);
+                if closed {
+                    (self.calm)(self.window.load(Ordering::Relaxed));
+                }
             }
-            UiCommand::HoldAlert => self.data().alert_watch.held = true,
+            UiCommand::HoldAlert(started) => self.data().alert_watch.hold(started),
             UiCommand::SaveConfig { toml, base } => {
                 let result = match self.client.as_mut() {
                     None => Err(without_service(&self.data, NO_CONFIG)),
@@ -3767,6 +3772,60 @@ mod tests {
         assert_eq!(SHOWN.load(Ordering::SeqCst), 1);
     }
 
+    #[derive(Clone, Copy)]
+    enum AlertTestAction {
+        Close,
+        Snooze,
+        Hold,
+    }
+
+    fn alert_test_command(started: Instant, action: AlertTestAction) -> UiCommand {
+        match action {
+            AlertTestAction::Close => {
+                UiCommand::CloseAlert(started, crate::alert::QUIET_AFTER_CLOSE)
+            }
+            AlertTestAction::Snooze => UiCommand::CloseAlert(started, crate::alert::SNOOZE),
+            AlertTestAction::Hold => UiCommand::HoldAlert(started),
+        }
+    }
+
+    fn run_delayed_alert_action(
+        t: Instant,
+        action: AlertTestAction,
+        replace: bool,
+    ) -> (bool, bool) {
+        let mut w = worker();
+        let (send, receive) = mpsc::channel();
+        {
+            let mut d = w.data();
+            let watch = &mut d.alert_watch;
+            watch.settings.seconds = 0;
+            assert!(watch.update(t, 99.0));
+            send.send(alert_test_command(watch.active.unwrap().started, action))
+                .unwrap();
+            if replace {
+                let normal = t + Duration::from_secs(1);
+                watch.update(normal, 40.0);
+                let auto_close = normal + crate::alert::AUTO_CLOSE;
+                watch.update(auto_close, 40.0);
+                assert!(watch.active.is_none());
+                assert!(watch.update(auto_close + crate::alert::QUIET_AFTER_CLOSE, 99.0));
+            }
+        }
+        w.handle(receive.try_recv().unwrap());
+        let d = w.data();
+        (d.alert_watch.active.is_none(), d.alert_watch.held)
+    }
+
+    #[test]
+    fn cpu_alert_commands_do_not_mutate_a_replacement_alert() {
+        use AlertTestAction::{Close, Hold, Snooze};
+        let t = Instant::now();
+        for action in [Close, Snooze, Hold] {
+            assert_eq!(run_delayed_alert_action(t, action, true), (false, false));
+        }
+    }
+
     #[test]
     fn an_overload_raises_the_window_and_closing_calms_it() {
         static RAISED: AtomicIsize = AtomicIsize::new(0);
@@ -3793,7 +3852,8 @@ mod tests {
         assert_eq!(RAISED.load(Ordering::Relaxed), 42);
         assert_eq!(w.data().alert_watch.active.map(|a| a.cpu), Some(99.0));
 
-        w.handle(UiCommand::CloseAlert(Duration::from_secs(60)));
+        let started = w.data().alert_watch.active.unwrap().started;
+        w.handle(UiCommand::CloseAlert(started, Duration::from_secs(60)));
         assert!(w.data().alert_watch.active.is_none());
         assert_eq!(CALMED.load(Ordering::Relaxed), 42);
         // Quiet now, even though the load is still high.
