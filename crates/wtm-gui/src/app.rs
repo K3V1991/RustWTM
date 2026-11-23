@@ -497,8 +497,8 @@ struct UiState {
     prefer_administrator: Option<bool>,
     startup_serial: u64,
     startup_error: Option<String>,
-    /// Frames left in which the window is hidden (started in the tray).
-    hide_frames: u8,
+    /// A background launch has yet to handle its initial visibility.
+    background_start: bool,
     check_updates: bool,
     skip_version: Option<String>,
     /// "Later" on the update bar: hidden until the next start.
@@ -581,8 +581,7 @@ impl App {
         }
         state.startup_error = startup_error;
         state.language = crate::i18n::preference();
-        // eframe shows the window after its first frame; hide it again.
-        state.hide_frames = if background { 3 } else { 0 };
+        state.background_start = background;
         Self {
             backend,
             tray,
@@ -886,7 +885,7 @@ impl Default for UiState {
             prefer_administrator: None,
             startup_serial: 0,
             startup_error: None,
-            hide_frames: 0,
+            background_start: false,
             check_updates: true,
             skip_version: None,
             update_later: false,
@@ -927,12 +926,18 @@ impl eframe::App for App {
         // eframe calls logic while hidden, without drawing an egui pass. Tray
         // updates and temperature refreshes must not depend on App::ui running.
         let _language = crate::i18n::scope(self.state.language);
+        let tray_available = self.tray_available();
+        if self.state.background_start && !tray_available {
+            // Keep a background launch accessible if the tray icon failed.
+            self.state.background_start = false;
+            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
+        }
         // The close button keeps RustWTM watching from the tray. A minimized
         // window gets its close request in a pass that draws nothing, so the
         // request is handled here: in App::ui RustWTM quit instead.
         if ctx.input(|i| i.viewport().close_requested())
             && self.state.tray_on_close
-            && self.tray_available()
+            && tray_available
             && !crate::tray::exit_requested(ctx)
         {
             ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
@@ -1050,17 +1055,13 @@ impl eframe::App for App {
         }
         data.alert_watch.settings = state.alerts;
         data.container_alerts.settings = state.container_alerts;
-        if state.hide_frames > 0 && tray.is_none() {
-            // A failed tray icon must not leave a hidden window with no way
-            // to reopen it. The initial --background viewport is hidden too.
-            state.hide_frames = 0;
-            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(true));
-        } else if state.hide_frames > 0 && data.alert_watch.active.is_none() {
-            state.hide_frames -= 1;
-            crate::tray::hide_window(
-                &ctx,
-                backend.window.load(std::sync::atomic::Ordering::Relaxed),
-            );
+        if std::mem::take(&mut state.background_start) && data.alert_watch.active.is_none() {
+            let window = backend.window.load(std::sync::atomic::Ordering::Relaxed);
+            // Glow shows the window after the first paint, then applies this
+            // command. Preserve a window already raised by a native show.
+            if window == 0 || !wtm_core::window::is_visible(window) {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+            }
         }
         // Native creation/minimization can briefly leave no client area.
         // Keep visibility handling above, but defer page layout until there
@@ -2211,8 +2212,7 @@ impl eframe::App for App {
         if std::mem::take(&mut state.experience.quick_setup) {
             state.onboarding.request_manual(env!("CARGO_PKG_VERSION"));
         }
-        let foreground =
-            state.hide_frames == 0 && ctx.input(|i| i.viewport().focused.unwrap_or(true));
+        let foreground = ctx.input(|i| i.viewport().focused.unwrap_or(true));
         let other_modal = ctx
             .memory(|m| m.top_modal_layer())
             .is_some_and(|layer| layer.id != crate::onboarding::modal_id());
@@ -5977,8 +5977,68 @@ mod tests {
         ));
     }
 
+    fn startup_fixture(background: bool, tray_available: bool) -> (App, egui::Context) {
+        let (backend, _rx) = Backend::offline(data());
+        let state = UiState {
+            background_start: background,
+            tray_available_for_test: tray_available,
+            check_updates: false,
+            ..Default::default()
+        };
+        (
+            App {
+                backend,
+                state,
+                tray: None,
+                frames: Default::default(),
+            },
+            egui::Context::default(),
+        )
+    }
+
+    fn startup_paint(
+        app: &mut App,
+        ctx: &egui::Context,
+        focused: bool,
+    ) -> Vec<egui::ViewportCommand> {
+        let mut input = egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1240.0, 780.0),
+            )),
+            focused,
+            ..Default::default()
+        };
+        input
+            .viewports
+            .get_mut(&egui::ViewportId::ROOT)
+            .unwrap()
+            .focused = Some(focused);
+        let mut frame = eframe::Frame::_new_kittest();
+        let output = ctx.run_ui(input, |ui| {
+            eframe::App::logic(app, ui.ctx(), &mut frame);
+            eframe::App::ui(app, ui, &mut frame);
+        });
+        let commands = output.viewport_output[&egui::ViewportId::ROOT]
+            .commands
+            .clone();
+        output.drop_without_applying_deltas();
+        commands
+    }
+
     #[test]
-    fn background_without_a_tray_reveals_the_window_and_cancels_pending_hides() {
+    fn background_start_hides_only_once_and_preserves_the_first_reopen() {
+        use egui::ViewportCommand as Cmd;
+        let (mut app, ctx) = startup_fixture(true, true);
+        assert!(startup_paint(&mut app, &ctx, false).contains(&Cmd::Visible(false)));
+        ctx.send_viewport_cmd(Cmd::Visible(true));
+        let reopened = startup_paint(&mut app, &ctx, true);
+        assert!(reopened.contains(&Cmd::Visible(true)));
+        assert!(!reopened.contains(&Cmd::Visible(false)));
+    }
+
+    #[test]
+    fn background_without_a_tray_reveals_the_window() {
         for alert in [false, true] {
             let mut d = data();
             if alert {
@@ -6000,12 +6060,12 @@ mod tests {
                     tray: None,
                     frames: Default::default(),
                 });
-            h.state_mut().state.hide_frames = 3;
+            h.state_mut().state.background_start = true;
             h.run_steps(1);
             let commands = &h.output().viewport_output[&egui::ViewportId::ROOT].commands;
             assert!(commands.contains(&egui::ViewportCommand::Visible(true)));
             assert!(!commands.contains(&egui::ViewportCommand::Visible(false)));
-            assert_eq!(h.state().state.hide_frames, 0);
+            assert!(!h.state().state.background_start);
             for _ in 0..4 {
                 h.run_steps(1);
                 let commands = &h.output().viewport_output[&egui::ViewportId::ROOT].commands;

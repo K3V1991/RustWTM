@@ -16,6 +16,8 @@ All notable changes to this project are documented here. The format follows
 - The global show / hide shortcut brings back a minimized RustWTM window
   instead of hiding it, and leaves the window above others only while
   Always on top is on. A shortcut press while RustWTM closes is ignored.
+- Opening RustWTM right after it started in the tray, for example with
+  a second start, keeps the window open. It could hide again at once.
 
 ## [0.39.2] - 2026-11-23
 
