@@ -50,6 +50,8 @@ pub struct Alert {
 #[derive(Debug, Default)]
 pub struct AlertWatch {
     pub settings: AlertSettings,
+    /// Threshold used for the previous sample.
+    last_threshold: Option<f32>,
     /// Since when the CPU is continuously at or above the threshold.
     above_since: Option<Instant>,
     quiet_until: Option<Instant>,
@@ -61,18 +63,28 @@ pub struct AlertWatch {
 }
 
 impl AlertWatch {
-    /// Missing or stale monitoring breaks a continuous overload observation.
+    /// Missing or stale monitoring breaks a continuous load observation.
     pub fn interrupt(&mut self) {
         self.above_since = None;
+        self.normal_since = None;
     }
 
     /// Feeds one CPU sample; `true` when an alert has just been raised.
     /// An alert whose load stays back to normal for [`AUTO_CLOSE`] closes
     /// by itself, unless the user held it; a new overload restarts the wait.
     pub fn update(&mut self, now: Instant, cpu: f32) -> bool {
+        let threshold = self.settings.threshold;
+        if let Some(previous) = self.last_threshold.replace(threshold) {
+            // A stricter threshold can make earlier samples ineligible.
+            if threshold > previous {
+                self.above_since = None;
+            } else if threshold < previous {
+                self.normal_since = None;
+            }
+        }
         if let Some(a) = &mut self.active {
             a.cpu = cpu;
-            if cpu < self.settings.threshold {
+            if cpu < threshold {
                 let since = *self.normal_since.get_or_insert(now);
                 if !self.held && now.saturating_duration_since(since) >= AUTO_CLOSE {
                     self.close(now, QUIET_AFTER_CLOSE);
@@ -82,7 +94,7 @@ impl AlertWatch {
             }
             return false;
         }
-        if !self.settings.enabled || cpu < self.settings.threshold {
+        if !self.settings.enabled || cpu < threshold {
             self.above_since = None;
             return false;
         }
@@ -401,6 +413,46 @@ pub fn dialog(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn raised_alert(now: Instant) -> AlertWatch {
+        let mut watch = AlertWatch {
+            settings: AlertSettings {
+                seconds: 0,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        assert!(watch.update(now, 99.0));
+        watch
+    }
+
+    #[test]
+    fn observation_window_restarts_recovery_after_a_monitoring_gap() {
+        let t = Instant::now();
+        let mut watch = raised_alert(t);
+        let normal = t + Duration::from_secs(1);
+        watch.update(normal, 40.0);
+        watch.interrupt();
+        let resumed = normal + AUTO_CLOSE;
+        watch.update(resumed, 40.0);
+        assert!(watch.active.is_some());
+        assert_eq!(watch.closes_in(resumed), Some(AUTO_CLOSE));
+        watch.update(resumed + AUTO_CLOSE, 40.0);
+        assert!(watch.active.is_none());
+    }
+
+    #[test]
+    fn observation_window_restarts_overload_when_the_threshold_changes() {
+        let t = Instant::now();
+        let after = |s| t + Duration::from_secs(s);
+        let mut watch = AlertWatch::default();
+        assert!(!watch.update(after(0), 93.0));
+        assert!(!watch.update(after(4), 93.0));
+        watch.settings.threshold = 97.0;
+        assert!(!watch.update(after(5), 99.0));
+        assert!(!watch.update(after(9), 99.0));
+        assert!(watch.update(after(10), 99.0));
+    }
 
     #[test]
     fn fires_after_a_sustained_overload_and_respects_quiet_times() {

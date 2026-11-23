@@ -281,6 +281,8 @@ pub struct Data {
     /// When the shown sample was measured, on this GUI's clock. A sample
     /// received again from the service's cache keeps its old time.
     pub sample_measured_at: Option<Instant>,
+    /// The service session that published the shown sample, or none for local sampling.
+    pub(crate) sample_service_session: Option<u64>,
     /// Latest sampling failure; cleared only by a successful snapshot.
     pub sample_error: Option<String>,
     pub frequency: Option<Result<wtm_core::power::FrequencyReport, String>>,
@@ -473,7 +475,15 @@ pub enum SampleFreshness {
     Stale(Option<Duration>),
 }
 
+fn sample_freshness_allowance(interval: Duration) -> Duration {
+    interval.saturating_mul(3).max(Duration::from_secs(5))
+}
+
 impl Data {
+    fn sampling_service_session(&self) -> Option<u64> {
+        matches!(self.mode, Mode::Service { .. }).then_some(self.service_session)
+    }
+
     pub fn sample_freshness(&self, now: Instant) -> SampleFreshness {
         let age = self
             .sample_measured_at
@@ -485,14 +495,12 @@ impl Data {
         let Some(age) = age else {
             return SampleFreshness::Waiting;
         };
-        let allowance = self
+        let interval = self
             .snapshot
             .as_ref()
             .and_then(|s| s.interval)
-            .unwrap_or(Duration::from_secs(1))
-            .saturating_mul(3)
-            .max(Duration::from_secs(5));
-        if age >= allowance {
+            .unwrap_or(Duration::from_secs(1));
+        if age >= sample_freshness_allowance(interval) {
             SampleFreshness::Stale(Some(age))
         } else {
             SampleFreshness::Current(age)
@@ -765,6 +773,7 @@ impl Backend {
             window: window.clone(),
             raise: raise_window,
             calm: calm_window,
+            last_cpu_observation: None,
             updater: Updater::default(),
             client: None,
             pipe: wtm_ipc::PIPE_NAME.to_owned(),
@@ -833,6 +842,13 @@ impl Backend {
     }
 }
 
+struct CpuObservation {
+    measured_at: Instant,
+    interval: Duration,
+    service_session: Option<u64>,
+    taken_at_ms: u64,
+}
+
 struct Worker {
     local_hardware: Option<wtm_core::hardware::LocalHardware>,
     /// When startup impact was last read.
@@ -849,6 +865,7 @@ struct Worker {
     raise: fn(isize),
     /// Undoes `raise` once the alert is closed.
     calm: fn(isize),
+    last_cpu_observation: Option<CpuObservation>,
     updater: Updater,
     client: Option<Client>,
     /// Pipe of the service to connect to.
@@ -1187,30 +1204,45 @@ impl Worker {
 
     fn watch_cpu_at(&mut self, now: Instant) {
         let (fired, closed) = {
-            let mut data = self.data();
-            let was_shown = data.alert_watch.active.is_some();
-            if !matches!(data.sample_freshness(now), SampleFreshness::Current(_)) {
+            let mut data = self.data.lock().unwrap_or_else(PoisonError::into_inner);
+            let sample = data.snapshot.as_ref().and_then(|sample| {
+                sample
+                    .interval
+                    .map(|interval| (sample.system.cpu_percent, interval, sample.taken_at_ms))
+            });
+            let Some((cpu, interval, taken_at_ms)) = sample
+                .filter(|_| matches!(data.sample_freshness(now), SampleFreshness::Current(_)))
+            else {
                 data.alert_watch.interrupt();
                 return;
-            }
-            let shown = |data: &Data| data.alert_watch.active.is_some();
-            // Re-reading a service cache is not another CPU measurement.
+            };
             let measured = data
                 .sample_measured_at
                 .or(data.sample_received_at)
                 .unwrap_or(now);
-            match data.snapshot.as_ref() {
-                Some(s) if s.interval.is_some() => {
-                    let cpu = s.system.cpu_percent;
-                    let fired = data.alert_watch.update(measured, cpu);
-                    // Closed by itself: the load stayed back to normal.
-                    (fired, was_shown && !shown(&data))
+            let service_session = data.sampling_service_session();
+            if let Some(previous) = &self.last_cpu_observation {
+                let source_changed = previous.service_session != service_session;
+                // Keep the last identity across failures. A replay cannot restart a streak.
+                if !source_changed && taken_at_ms != 0 && previous.taken_at_ms == taken_at_ms {
+                    return;
                 }
-                _ => {
+                if source_changed
+                    || measured.saturating_duration_since(previous.measured_at)
+                        >= sample_freshness_allowance(previous.interval)
+                {
                     data.alert_watch.interrupt();
-                    (false, false)
                 }
             }
+            self.last_cpu_observation = Some(CpuObservation {
+                measured_at: measured,
+                interval,
+                service_session,
+                taken_at_ms,
+            });
+            let was_shown = data.alert_watch.active.is_some();
+            let fired = data.alert_watch.update(measured, cpu);
+            (fired, was_shown && data.alert_watch.active.is_none())
         };
         if fired {
             (self.raise)(self.window.load(Ordering::Relaxed));
@@ -2655,16 +2687,29 @@ fn fill_history(h: &mut History, points: &[wtm_ipc::SystemPoint]) {
 }
 
 fn publish(data: &mut Data, snapshot: Snapshot) {
-    let (now, unix_now) = (Instant::now(), wtm_core::hardware::unix_ms());
+    publish_at(
+        data,
+        snapshot,
+        Instant::now(),
+        wtm_core::hardware::unix_ms(),
+    );
+}
+
+fn publish_at(data: &mut Data, snapshot: Snapshot, now: Instant, unix_now: u64) {
     // The service answers from its latest sample; asked again before it
     // measures anew, it returns the same one, which adds nothing to graphs.
+    let service_session = data.sampling_service_session();
     let new = snapshot.taken_at_ms == 0
+        || data.sample_service_session != service_session
         || data
             .snapshot
             .as_ref()
             .is_none_or(|s| s.taken_at_ms != snapshot.taken_at_ms);
     data.sample_received_at = Some(now);
-    data.sample_measured_at = Some(measured_at(now, unix_now, snapshot.taken_at_ms));
+    if new || data.sample_measured_at.is_none() {
+        data.sample_measured_at = Some(measured_at(now, unix_now, snapshot.taken_at_ms));
+    }
+    data.sample_service_session = service_session;
     data.sample_error = None;
     let at_ms = match snapshot.taken_at_ms {
         0 => unix_now,
@@ -3314,6 +3359,7 @@ mod tests {
             window: Arc::new(AtomicIsize::new(0)),
             raise: |_| {},
             calm: |_| {},
+            last_cpu_observation: None,
             updater: Updater {
                 latest: || Err("offline".into()),
                 download: |_, _| Err("offline".into()),
@@ -3518,6 +3564,119 @@ mod tests {
             "a second request stops watching"
         );
         assert_eq!(message(&w).1, "No longer watching a.exe");
+    }
+
+    fn cached_cpu_watch(second_unix_secs: u64, session_change: u64) -> (Duration, bool) {
+        let mut w = worker();
+        let t = Instant::now();
+        let mut snap = crate::ui_tests::snapshot();
+        snap.taken_at_ms = 10_000_000;
+        snap.system.cpu_percent = 99.0;
+        {
+            let mut d = w.data();
+            d.mode = Mode::Service {
+                admin: false,
+                verified: true,
+            };
+            d.service_session = 1;
+            d.alert_watch.settings.seconds = 2;
+            publish_at(&mut d, snap.clone(), t, 10_000_000);
+        }
+        w.watch_cpu_at(t);
+        let later = t + Duration::from_secs(2);
+        {
+            let mut d = w.data();
+            d.service_session += session_change;
+            publish_at(&mut d, snap, later, second_unix_secs * 1000);
+        }
+        w.watch_cpu_at(later);
+        let data = w.data();
+        (
+            data.sample_measured_at
+                .unwrap()
+                .saturating_duration_since(t),
+            data.alert_watch.active.is_some(),
+        )
+    }
+
+    fn observe_test_cpu(w: &mut Worker, at: Instant, cpu: f32) {
+        let mut snap = crate::ui_tests::snapshot();
+        snap.system.cpu_percent = cpu;
+        let mut d = w.data();
+        d.snapshot = Some(Arc::new(snap));
+        d.sample_measured_at = Some(at);
+        drop(d);
+        w.watch_cpu_at(at);
+    }
+
+    fn discontinuous_cpu_watches(t: Instant) -> (bool, bool) {
+        let mut gap = worker();
+        gap.data().alert_watch.settings.seconds = 2;
+        observe_test_cpu(&mut gap, t, 99.0);
+        observe_test_cpu(&mut gap, t + Duration::from_secs(5), 99.0);
+
+        let mut switched = worker();
+        switched.data().alert_watch.settings.seconds = 2;
+        switched.data().mode = Mode::Local;
+        observe_test_cpu(&mut switched, t, 99.0);
+        {
+            let mut d = switched.data();
+            d.mode = Mode::Service {
+                admin: false,
+                verified: true,
+            };
+            d.service_session = 1;
+        }
+        observe_test_cpu(&mut switched, t + Duration::from_secs(2), 99.0);
+        let gap_fired = gap.data().alert_watch.active.is_some();
+        let switched_fired = switched.data().alert_watch.active.is_some();
+        (gap_fired, switched_fired)
+    }
+
+    #[test]
+    fn cpu_sample_continuity_preserves_cached_measurement_during_clock_adjustment() {
+        assert_eq!(cached_cpu_watch(10_000, 0), (Duration::ZERO, false));
+    }
+
+    #[test]
+    fn cpu_sample_continuity_restarts_after_gaps_and_source_changes() {
+        assert_eq!(discontinuous_cpu_watches(Instant::now()), (false, false));
+    }
+
+    fn publish_test_cpu(w: &mut Worker, snapshot: Snapshot, received: Instant, wall_ms: u64) {
+        publish_at(&mut w.data(), snapshot, received, wall_ms);
+        w.watch_cpu_at(received);
+    }
+
+    fn cpu_failure_replay(t: Instant, replay: bool) -> Worker {
+        let mut w = worker();
+        let mut snap = crate::ui_tests::snapshot();
+        snap.taken_at_ms = 10_000;
+        snap.system.cpu_percent = 99.0;
+        {
+            let mut d = w.data();
+            d.mode = Mode::Service {
+                admin: false,
+                verified: true,
+            };
+            d.service_session = 1;
+            d.alert_watch.settings.seconds = 3;
+        }
+        publish_test_cpu(&mut w, snap.clone(), t, 10_000);
+        w.data().sample_error = Some("injected sampling failure".into());
+        w.watch_cpu_at(t + Duration::from_secs(1));
+        if replay {
+            publish_test_cpu(&mut w, snap.clone(), t + Duration::from_secs(2), 12_000);
+        }
+        snap.taken_at_ms = 13_000;
+        publish_test_cpu(&mut w, snap, t + Duration::from_secs(3), 13_000);
+        w
+    }
+
+    #[test]
+    fn cpu_sample_replay_does_not_resume_the_overload_streak() {
+        let w = cpu_failure_replay(Instant::now(), true);
+        assert!(w.data().alert_watch.active.is_none());
     }
 
     #[test]
