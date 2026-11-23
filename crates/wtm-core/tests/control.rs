@@ -194,9 +194,23 @@ fn kill_tree_kills_descendants() {
 
     let results = control::kill_tree(&root_ref, &snapshot());
     assert!(results.iter().all(|(_, r)| r.is_ok()), "{results:?}");
-    sleep(Duration::from_millis(300));
-    assert!(!is_running(ping.pid, ping.create_time));
-    assert!(!is_running(root_ref.pid, root_ref.create_time));
+    // A killed process leaves the process list asynchronously; on a loaded
+    // machine that took longer than a fixed 300 ms.
+    let deadline = Instant::now() + Duration::from_secs(10);
+    loop {
+        let (ping_left, root_left) = (
+            is_running(ping.pid, ping.create_time),
+            is_running(root_ref.pid, root_ref.create_time),
+        );
+        if !ping_left && !root_left {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "still running: ping {ping_left}, root {root_left}"
+        );
+        sleep(Duration::from_millis(50));
+    }
 }
 
 #[test]

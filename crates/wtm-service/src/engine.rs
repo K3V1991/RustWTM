@@ -1108,9 +1108,10 @@ mod tests {
 
     /// Starts `command`. A copy of a program written a moment ago can be
     /// refused ("Access is denied") while antivirus still scans it, more
-    /// often on a busy machine; that one error is retried for a few seconds.
+    /// often on a busy machine; that one error is retried for up to 30
+    /// seconds (10 were not enough while other builds loaded the host).
     pub(super) fn start(command: &mut Proc) -> Child {
-        let deadline = std::time::Instant::now() + Duration::from_secs(10);
+        let deadline = std::time::Instant::now() + Duration::from_secs(30);
         loop {
             match command.spawn() {
                 Err(e)
