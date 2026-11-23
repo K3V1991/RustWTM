@@ -80,6 +80,35 @@ fn needs_on_top(applied: Option<bool>, on: bool, is_topmost: impl FnOnce() -> bo
     applied != Some(on) || (on && !is_topmost())
 }
 
+fn toggle_shortcut_window(
+    context: &egui::Context,
+    raw: isize,
+    is_visible: impl FnOnce(isize) -> bool,
+    is_minimized: impl FnOnce(isize) -> bool,
+    hide: impl FnOnce(isize),
+    bring_to_front: impl FnOnce(isize) -> bool,
+    release_topmost: impl FnOnce(isize),
+) {
+    if raw == 0 {
+        return;
+    }
+    if is_visible(raw) && !is_minimized(raw) {
+        hide(raw);
+        context.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+    } else {
+        bring_to_front(raw);
+        let always_on_top = context
+            .data(|data| data.get_temp::<Preferences>(egui::Id::unique("experience-preferences")))
+            .is_some_and(|prefs| prefs.always_on_top);
+        if !always_on_top {
+            release_topmost(raw);
+        }
+        context.send_viewport_cmd(egui::ViewportCommand::Visible(true));
+        context.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
+        context.request_repaint();
+    }
+}
+
 pub fn network_bits(ctx: &egui::Context) -> bool {
     ctx.data(|d| d.get_temp::<Preferences>(egui::Id::unique("experience-preferences")))
         .unwrap_or_default()
@@ -122,19 +151,15 @@ impl View {
                 {
                     let context = ctx.clone();
                     match wtm_sys::hotkey::Hotkey::new(requested.1, move || {
-                        let raw = window.load(Ordering::Relaxed);
-                        if raw == 0 {
-                            return;
-                        }
-                        if wtm_core::window::is_visible(raw) {
-                            wtm_core::window::hide(raw);
-                            context.send_viewport_cmd(egui::ViewportCommand::Visible(false));
-                        } else {
-                            wtm_core::window::bring_to_front(raw);
-                            context.send_viewport_cmd(egui::ViewportCommand::Visible(true));
-                            context.send_viewport_cmd(egui::ViewportCommand::Minimized(false));
-                            context.request_repaint();
-                        }
+                        toggle_shortcut_window(
+                            &context,
+                            window.load(Ordering::Relaxed),
+                            wtm_core::window::is_visible,
+                            wtm_sys::window::is_minimized,
+                            wtm_core::window::hide,
+                            wtm_core::window::bring_to_front,
+                            wtm_core::window::release_topmost,
+                        );
                     }) {
                         Ok(h) => self.hotkey = Some(h),
                         Err(e) => self.error = Some(e),
@@ -313,6 +338,62 @@ impl View {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::Cell;
+
+    struct TestWindow {
+        visible: Cell<bool>,
+        minimized: Cell<bool>,
+        topmost: Cell<bool>,
+    }
+
+    impl TestWindow {
+        fn new(visible: bool, minimized: bool, topmost: bool) -> Self {
+            Self {
+                visible: Cell::new(visible),
+                minimized: Cell::new(minimized),
+                topmost: Cell::new(topmost),
+            }
+        }
+
+        fn press(&self, ctx: &egui::Context, raw: isize) -> Vec<egui::ViewportCommand> {
+            ctx.run_logic(&egui::RawInput::default(), |ctx| {
+                toggle_shortcut_window(
+                    ctx,
+                    raw,
+                    |_| self.visible.get(),
+                    |_| self.minimized.get(),
+                    |_| self.visible.set(false),
+                    |_| {
+                        self.visible.set(true);
+                        self.minimized.set(false);
+                        self.topmost.set(true);
+                        true
+                    },
+                    |_| self.topmost.set(false),
+                );
+            })
+            .viewport_commands
+            .remove(&egui::ViewportId::ROOT)
+            .unwrap_or_default()
+        }
+    }
+
+    #[test]
+    fn shortcut_restores_a_minimized_window() {
+        use egui::ViewportCommand as Cmd;
+        let window = TestWindow::new(true, true, false);
+        let commands = window.press(&egui::Context::default(), 42);
+        assert_eq!(commands, [Cmd::Visible(true), Cmd::Minimized(false)]);
+        assert!(window.visible.get() && !window.minimized.get());
+    }
+
+    #[test]
+    fn shortcut_restores_without_pinning_when_always_on_top_is_off() {
+        let window = TestWindow::new(false, false, false);
+        window.press(&egui::Context::default(), 42);
+        assert!(window.visible.get());
+        assert!(!window.topmost.get());
+    }
 
     #[test]
     fn always_on_top_is_set_on_change_and_kept_while_on() {

@@ -13,6 +13,9 @@ All notable changes to this project are documented here. The format follows
   between local and service sampling; a stricter threshold restarts the
   count too. A repeated reading of the same sample no longer counts toward
   the alert.
+- The global show / hide shortcut brings back a minimized RustWTM window
+  instead of hiding it, and leaves the window above others only while
+  Always on top is on. A shortcut press while RustWTM closes is ignored.
 
 ## [0.39.2] - 2026-11-23
 

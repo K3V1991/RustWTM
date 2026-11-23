@@ -12,6 +12,8 @@ use windows::Win32::UI::WindowsAndMessaging::{
     GetMessageW, MSG, PM_NOREMOVE, PeekMessageW, PostThreadMessageW, WM_HOTKEY, WM_QUIT,
 };
 const ID: i32 = 0x5254;
+// The worker must hand off its thread ID before it can wait for messages.
+const REGISTRATION_REPLY_CAPACITY: usize = 0;
 static LIVE: AtomicBool = AtomicBool::new(false);
 struct Slot;
 impl Drop for Slot {
@@ -23,11 +25,29 @@ pub struct Hotkey {
     thread: u32,
     stop: Arc<AtomicBool>,
 }
+
+fn run_registered(
+    stopped: &AtomicBool,
+    acknowledge: impl FnOnce() -> bool,
+    mut read_message: impl FnMut(&mut MSG) -> bool,
+    mut pressed: impl FnMut(),
+) {
+    if !acknowledge() {
+        return;
+    }
+    let mut message = MSG::default();
+    while !stopped.load(Ordering::Acquire) {
+        if !read_message(&mut message) || stopped.load(Ordering::Acquire) {
+            break;
+        }
+        if message.message == WM_HOTKEY && message.wParam.0 == ID as usize {
+            pressed();
+        }
+    }
+}
+
 impl Hotkey {
-    pub fn new(
-        function_key: u8,
-        mut pressed: impl FnMut() + Send + 'static,
-    ) -> Result<Self, String> {
+    pub fn new(function_key: u8, pressed: impl FnMut() + Send + 'static) -> Result<Self, String> {
         if !(2..=12).contains(&function_key) {
             return Err("Choose a function key from F2 to F12".into());
         }
@@ -46,7 +66,7 @@ impl Hotkey {
         let slot = Slot;
         let stop = Arc::new(AtomicBool::new(false));
         let stopped = stop.clone();
-        let (tx, rx) = mpsc::sync_channel(1);
+        let (tx, rx) = mpsc::sync_channel(REGISTRATION_REPLY_CAPACITY);
         std::thread::Builder::new()
             .name("global-shortcut".into())
             .spawn(move || {
@@ -78,17 +98,15 @@ impl Hotkey {
                 let _registration = Registration;
                 // SAFETY: takes no pointers and identifies this live message thread.
                 let id = unsafe { windows::Win32::System::Threading::GetCurrentThreadId() };
-                let _ = tx.send(Ok(id));
-                while !stopped.load(Ordering::Acquire) {
-                    // SAFETY: message points to writable initialized storage for this thread.
-                    let result = unsafe { GetMessageW(&mut message, None, 0, 0) };
-                    if result.0 <= 0 {
-                        break;
-                    }
-                    if message.message == WM_HOTKEY && message.wParam.0 == ID as usize {
-                        pressed();
-                    }
-                }
+                run_registered(
+                    &stopped,
+                    || tx.send(Ok(id)).is_ok(),
+                    |message| {
+                        // SAFETY: message points to writable initialized storage for this thread.
+                        unsafe { GetMessageW(message, None, 0, 0).0 > 0 }
+                    },
+                    pressed,
+                );
             })
             .map_err(|e| e.to_string())?;
         match rx.recv_timeout(std::time::Duration::from_secs(2)) {
@@ -110,6 +128,64 @@ impl Drop for Hotkey {
 }
 #[cfg(test)]
 mod tests {
+    use super::*;
+
+    fn deliver_one_key(cancel_before_delivery: bool, id: i32) -> usize {
+        let stopped = AtomicBool::new(false);
+        let mut callbacks = 0;
+        let mut pending = true;
+        run_registered(
+            &stopped,
+            || true,
+            |message| {
+                if !std::mem::take(&mut pending) {
+                    return false;
+                }
+                // This read is entered only after the worker's first stop check.
+                if cancel_before_delivery {
+                    stopped.store(true, Ordering::Release);
+                }
+                message.message = WM_HOTKEY;
+                message.wParam = WPARAM(id as usize);
+                true
+            },
+            || callbacks += 1,
+        );
+        callbacks
+    }
+
+    fn message_reads_after_registration_timeout() -> usize {
+        let (tx, rx) = mpsc::sync_channel(REGISTRATION_REPLY_CAPACITY);
+        assert_eq!(
+            rx.recv_timeout(std::time::Duration::ZERO),
+            Err(mpsc::RecvTimeoutError::Timeout)
+        );
+        let mut reads = 0;
+        run_registered(
+            &AtomicBool::new(false),
+            // The receiver is alive but has finished waiting. `try_send` tests
+            // whether the real registration send can complete in this interval.
+            || tx.try_send(42_u32).is_ok(),
+            |_| {
+                reads += 1;
+                false
+            },
+            || unreachable!("no key event was delivered"),
+        );
+        drop(rx);
+        reads
+    }
+
+    #[test]
+    fn registration_lifecycle_discards_a_key_delivered_after_shutdown() {
+        assert_eq!(deliver_one_key(true, ID), 0);
+    }
+
+    #[test]
+    fn registration_lifecycle_does_not_read_messages_after_timeout() {
+        assert_eq!(message_reads_after_registration_timeout(), 0);
+    }
+
     #[test]
     fn invalid_keys_do_not_register_or_spawn_threads() {
         for k in [0, 1, 13, 255] {
